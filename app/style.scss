@@ -1,13 +1,15 @@
+body {
+  font-family: 'helvetica neue';
+}
+
 path.roads {
   fill: none;
-  stroke-width: 1px;
-  stroke: #888;
+  stroke-width: 1.5px;
+  stroke: #fff;
 }
 
 path.boundary {
-  fill: #eee;
-  stroke-width: 1px;
-  stroke: #ddd;
+  fill: #00DCC2;
 }
 
 path.boundary-mask {
