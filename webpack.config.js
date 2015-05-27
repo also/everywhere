@@ -1,6 +1,9 @@
 module.exports = {
   context: __dirname + "/app",
   entry: './entry',
+  output: {
+    filename: "bundle.js"
+  },
   module: {
     loaders: [
       {
