@@ -43,6 +43,8 @@ const svg = body.append("svg")
     .attr("width", width)
     .attr("height", height);
 
+body.append('p').text('Map data © OpenStreetMap contributors');
+
 const projection = d3.geo.mercator()
     .center([center(bounds[0][0], bounds[1][0]), center(bounds[0][1], bounds[1][1])])
     .scale(900000)
