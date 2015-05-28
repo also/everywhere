@@ -65,9 +65,13 @@ svg.append("path")
       .datum(cityBoundary)
       .attr("d", cityBoundaryPath);
 
-svg.append("path")
-  .attr('class', 'roads')
-      .datum(highways)
+svg.append("g")
+    .attr('class', 'roads')
+  .selectAll("path")
+  .data(highways.features)
+  .enter()
+    .append("path")
+      .attr('data-highway', d => d.properties.highway)
       .attr("d", path);
 
 trips.forEach(trip => {
@@ -76,5 +80,3 @@ trips.forEach(trip => {
         .datum(trip)
         .attr("d", path);
 });
-
-console.log('hello, world');

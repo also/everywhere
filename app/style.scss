@@ -1,11 +1,18 @@
 body {
   font-family: 'helvetica neue';
+  font-size: 13px;
 }
 
-path.roads {
-  fill: none;
-  stroke-width: 1.5px;
-  stroke: #fff;
+.roads {
+  path {
+    fill: none;
+    stroke-width: 1px;
+    stroke: #fff;
+  }
+
+  [data-highway="secondary"], [data-highway="trunk"] {
+    stroke-width: 2px;
+  }
 }
 
 path.boundary {
