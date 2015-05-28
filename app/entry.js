@@ -10,10 +10,20 @@ document.title = 'not quite everywhere';
 const data = require("json!../highways-clipped-topo.geojson");
 const somervilleTopojson = require("json!../somerville-topo.geojson");
 
+const tripContext = require.context('json!../trips');
+const trips = tripContext.keys().map(name => {
+  const trip = tripContext(name);
+  return topojson.feature(trip, trip.objects[Object.keys(trip.objects)[0]]);
+});
+
 const bounds = [[-71.1345882, 42.3727247], [-71.0727282, 42.4181407]];
 
 function center(a, b) {
   return (a + b) / 2;
+}
+
+function geoLines(geoJson) {
+  return geoJson.features.map(({geometry}) => geometry).filter(({type}) => type === 'LineString' || type === 'MultiLineString');
 }
 
 const width = 1000,
@@ -24,11 +34,10 @@ const body = d3.select("body");
 const highways = topojson.feature(data, data.objects['highways-clipped']);
 const cityBoundary = topojson.feature(somervilleTopojson, somervilleTopojson.objects.somerville);
 
-const highwayLines = highways.features.map(({geometry}) => geometry).filter(({type}) => type === 'LineString' || type === 'MultiLineString'); 
+const highwayLength = d3.sum(geoLines(highways), geojsonLength);
+const tripsLength = d3.sum(trips.map(geoLines).reduce((a, b) => a.concat(b)), geojsonLength);
 
-const length = d3.sum(highwayLines, geojsonLength);
-
-body.append('p').text(`${Math.round(length / 1000)} km`);
+body.append('p').text(`${Math.round(tripsLength / 1000)} / ${Math.round(highwayLength / 1000)} km`);
 
 const svg = body.append("svg")
     .attr("width", width)
@@ -60,5 +69,12 @@ svg.append("path")
   .attr('class', 'roads')
       .datum(highways)
       .attr("d", path);
+
+trips.forEach(trip => {
+  svg.append("path")
+    .attr('class', 'trip')
+        .datum(trip)
+        .attr("d", path);
+});
 
 console.log('hello, world');

@@ -17,6 +17,9 @@
     "sass-loader": "^1.0.2",
     "style-loader": "^0.12.3",
     "css-loader": "^0.14.3",
-    "geojson-length": "^0.1.1"
+    "geojson-length": "^0.1.1",
+    "minimist": "^1.1.1",
+    "request": "^2.55.0",
+    "bluebird": "^2.9.26"
   }
 }
