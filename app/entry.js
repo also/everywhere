@@ -79,6 +79,7 @@ svg.append("g")
 trips.forEach(trip => {
   svg.append("path")
     .attr('class', 'trip')
-        .datum(trip)
-        .attr("d", path);
+    .datum(trip)
+    .attr("d", path)
+    .attr('mask', 'url(#boundary-mask)');
 });
