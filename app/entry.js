@@ -7,16 +7,14 @@ import '!style!css!sass!./style.scss';
 
 document.title = 'not quite everywhere';
 
-const data = require("json!../highways-clipped-topo.geojson");
-const somervilleTopojson = require("json!../somerville-topo.geojson");
+const data = require('json!../highways-clipped-topo.geojson');
+const somervilleTopojson = require('json!../somerville-topo.geojson');
 
 const tripContext = require.context('json!../trips');
 const trips = tripContext.keys().map(name => {
   const trip = tripContext(name);
   return topojson.feature(trip, trip.objects[Object.keys(trip.objects)[0]]);
 });
-
-const bounds = [[-71.1345882, 42.3727247], [-71.0727282, 42.4181407]];
 
 function center(a, b) {
   return (a + b) / 2;
@@ -29,19 +27,21 @@ function geoLines(geoJson) {
 const width = 1000,
     height = 1000;
 
-const body = d3.select("body");
+const body = d3.select('body');
 
 const highways = topojson.feature(data, data.objects['highways-clipped']);
 const cityBoundary = topojson.feature(somervilleTopojson, somervilleTopojson.objects.somerville);
+
+const bounds = d3.geo.bounds(cityBoundary);
 
 const highwayLength = d3.sum(geoLines(highways), geojsonLength);
 const tripsLength = d3.sum(trips.map(geoLines).reduce((a, b) => a.concat(b)), geojsonLength);
 
 body.append('p').text(`${Math.round(tripsLength / 1000)} / ${Math.round(highwayLength / 1000)} km`);
 
-const svg = body.append("svg")
-    .attr("width", width)
-    .attr("height", height);
+const svg = body.append('svg')
+    .attr('width', width)
+    .attr('height', height);
 
 body.append('p').text('Map data © OpenStreetMap contributors');
 
@@ -51,35 +51,35 @@ const projection = d3.geo.mercator()
     .translate([width / 2, height / 2]);
 
 const path = d3.geo.path()
-    .projection(projection)
+    .projection(projection);
 
 const cityBoundaryPath = path(cityBoundary);
 
 svg.append('defs')
   .append('mask')
     .attr('id', 'boundary-mask')
-    .append("path")
+    .append('path')
   .attr('class', 'boundary-mask')
-      .attr("d", cityBoundaryPath)
+      .attr('d', cityBoundaryPath);
 
-svg.append("path")
+svg.append('path')
   .attr('class', 'boundary')
       .datum(cityBoundary)
-      .attr("d", cityBoundaryPath);
+      .attr('d', cityBoundaryPath);
 
-svg.append("g")
+svg.append('g')
     .attr('class', 'roads')
-  .selectAll("path")
+  .selectAll('path')
   .data(highways.features)
   .enter()
-    .append("path")
+    .append('path')
       .attr('data-highway', d => d.properties.highway)
-      .attr("d", path);
+      .attr('d', path);
 
 trips.forEach(trip => {
-  svg.append("path")
+  svg.append('path')
     .attr('class', 'trip')
     .datum(trip)
-    .attr("d", path)
+    .attr('d', path)
     .attr('mask', 'url(#boundary-mask)');
 });
