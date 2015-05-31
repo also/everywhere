@@ -16,4 +16,4 @@ highways-clipped.geojson: map.geojson somerville.geojson
 	rm highways-clipped.geojson && ogr2ogr -f GeoJSON -clipsrc somerville.geojson highways-clipped.geojson highways.geojson
 
 highways-clipped-topo.geojson: highways-clipped.geojson
-	./node_modules/.bin/topojson highways-clipped.geojson -o highways-clipped-topo.geojson
+	./node_modules/.bin/topojson highways-clipped.geojson -p highway,name,oneway,user,id -o highways-clipped-topo.geojson
