@@ -21,8 +21,14 @@ highways-clipped-topo.geojson: highways-clipped.geojson
 somerville-topo.geojson: somerville.geojson
 	 ./node_modules/.bin/topojson somerville.geojson -o somerville-topo.geojson
 
-bundle.js: somerville-topo.geojson highways-clipped-topo.geojson
+bundle.js: somerville-topo.geojson highways-clipped-topo.geojson trips/*
 	webpack
+
+strava-raw/%.geojson: strava-raw/%.gpx
+	./node_modules/.bin/togeojson $< > $@
+
+trips/strava-%.geojson: strava-raw/%.geojson
+	./node_modules/.bin/topojson $< -o $@
 
 clean:
 	rm -f *.geojson
