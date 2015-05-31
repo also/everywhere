@@ -1,10 +1,13 @@
 import d3 from 'd3';
 import topojson from 'topojson';
+
 import * as React from 'react';
+import Select from 'react-select';
 
 import geojsonLength from 'geojson-length';
 
 import '!style!css!sass!./style.scss';
+import '!style!css!react-select/dist/default.css';
 
 import data from 'json!../highways-clipped-topo.geojson';
 import somervilleTopojson from 'json!../somerville-topo.geojson';
@@ -84,12 +87,24 @@ const Trips = React.createClass({
   }
 });
 
+const StreetList = React.createClass({
+  render() {
+    const {features} = this.props;
+
+    const options = features.map(({properties: {id, name}}) => ({value: id, label: name || '(no name)'}));
+    options.sort(({label: a}, {label: b}) => a === b ? 0 : a > b ? 1 : -1);
+
+    return <Select options={options}/>;
+  }
+});
+
 const div = document.createElement('div');
 document.body.appendChild(div);
 
 React.render(
   <div>
     <p>{Math.round(tripsLength / 1000)} / {Math.round(highwayLength / 1000)} km</p>
+    <StreetList features={highways.features}/>
     <svg width={width} height={height}>
       <defs>
         <mask id="boundary-mask">
@@ -100,7 +115,7 @@ React.render(
       <path className="boundary" d={cityBoundaryPath}/>
       <Roads features={highways.features} path={path}/>
       <Trips trips={trips} path={path}/>
-      <p>Map data © OpenStreetMap contributors</p>
     </svg>
+    <p>Map data © OpenStreetMap contributors</p>
   </div>
 , div);
