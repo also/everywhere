@@ -1,5 +1,6 @@
 import d3 from 'd3';
 import topojson from 'topojson';
+import * as React from 'react';
 
 import geojsonLength from 'geojson-length';
 
@@ -10,12 +11,6 @@ import somervilleTopojson from 'json!../somerville-topo.geojson';
 
 document.title = 'not quite everywhere';
 
-const tripContext = require.context('json!../trips');
-const trips = tripContext.keys().map(name => {
-  const trip = tripContext(name);
-  return topojson.feature(trip, trip.objects[Object.keys(trip.objects)[0]]);
-});
-
 function center(a, b) {
   return (a + b) / 2;
 }
@@ -24,26 +19,23 @@ function geoLines(geoJson) {
   return geoJson.features.map(({geometry}) => geometry).filter(({type}) => type === 'LineString' || type === 'MultiLineString');
 }
 
+function feature(geojson) {
+  return topojson.feature(geojson, geojson.objects[Object.keys(geojson.objects)[0]]);
+}
+
+const tripContext = require.context('json!../trips');
+const trips = tripContext.keys().map(name => feature(tripContext(name)));
+
 const width = 1000,
     height = 1000;
 
-const body = d3.select('body');
-
-const highways = topojson.feature(data, data.objects['highways-clipped']);
-const cityBoundary = topojson.feature(somervilleTopojson, somervilleTopojson.objects.somerville);
+const highways = feature(data);
+const cityBoundary = feature(somervilleTopojson);
 
 const bounds = d3.geo.bounds(cityBoundary);
 
 const highwayLength = d3.sum(geoLines(highways), geojsonLength);
 const tripsLength = d3.sum(trips.map(geoLines).reduce((a, b) => a.concat(b)), geojsonLength);
-
-body.append('p').text(`${Math.round(tripsLength / 1000)} / ${Math.round(highwayLength / 1000)} km`);
-
-const svg = body.append('svg')
-    .attr('width', width)
-    .attr('height', height);
-
-body.append('p').text('Map data © OpenStreetMap contributors');
 
 const projection = d3.geo.mercator()
     .center([center(bounds[0][0], bounds[1][0]), center(bounds[0][1], bounds[1][1])])
@@ -55,31 +47,60 @@ const path = d3.geo.path()
 
 const cityBoundaryPath = path(cityBoundary);
 
-svg.append('defs')
-  .append('mask')
-    .attr('id', 'boundary-mask')
-    .append('path')
-  .attr('class', 'boundary-mask')
-      .attr('d', cityBoundaryPath);
-
-svg.append('path')
-  .attr('class', 'boundary')
-      .datum(cityBoundary)
-      .attr('d', cityBoundaryPath);
-
-svg.append('g')
-    .attr('class', 'roads')
-  .selectAll('path')
-  .data(highways.features)
-  .enter()
-    .append('path')
-      .attr('data-highway', d => d.properties.highway)
-      .attr('d', path);
-
-trips.forEach(trip => {
-  svg.append('path')
-    .attr('class', 'trip')
-    .datum(trip)
-    .attr('d', path)
-    .attr('mask', 'url(#boundary-mask)');
+const Roads = React.createClass({
+  render() {
+    const {features, path} = this.props;
+    return (
+      <g className="roads">
+        {features.map(feature => (
+          <path d={path(feature)} data-highway={feature.properties.highway} key={feature.properties.id}/>
+        ))}
+      </g>
+    );
+  }
 });
+
+const Trip = React.createClass({
+  render() {
+    const {trip, path} = this.props;
+    return <path className="trip" d={path(trip)}/>;
+  },
+
+  componentDidMount() {
+    // react doesn't support mask
+    // https://github.com/facebook/react/issues/1657#issuecomment-63209488
+    React.findDOMNode(this).mask = 'url(#boundary-mask)';
+  }
+});
+
+const Trips = React.createClass({
+  render() {
+    const {trips, path} = this.props;
+    return (
+      <g>
+        {trips.map(trip => <Trip trip={trip} path={path}/>)}
+      </g>
+    );
+  }
+});
+
+const div = document.createElement('div');
+document.body.appendChild(div);
+
+React.render(
+  <div>
+    <p>{Math.round(tripsLength / 1000)} / {Math.round(highwayLength / 1000)} km</p>
+    <svg width={width} height={height}>
+      <defs>
+        <mask id="boundary-mask">
+          <path d={cityBoundaryPath}/>
+        </mask>
+      </defs>
+
+      <path className="boundary" d={cityBoundaryPath}/>
+      <Roads features={highways.features} path={path}/>
+      <Trips trips={trips} path={path}/>
+      <p>Map data © OpenStreetMap contributors</p>
+    </svg>
+  </div>
+, div);

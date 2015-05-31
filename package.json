@@ -20,6 +20,7 @@
     "geojson-length": "^0.1.1",
     "minimist": "^1.1.1",
     "request": "^2.55.0",
-    "bluebird": "^2.9.26"
+    "bluebird": "^2.9.26",
+    "react": "^0.13.3"
   }
 }
