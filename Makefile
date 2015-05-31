@@ -12,8 +12,19 @@ highways.geojson: map.geojson
 somerville.geojson: map.geojson
 	jq '{type, features: (.features | map(select(.properties | (.name == "Somerville" and .type == "boundary"))))}' map.geojson > somerville.geojson
 
-highways-clipped.geojson: map.geojson somerville.geojson
-	rm highways-clipped.geojson && ogr2ogr -f GeoJSON -clipsrc somerville.geojson highways-clipped.geojson highways.geojson
+highways-clipped.geojson: highways.geojson somerville.geojson
+	rm -f highways-clipped.geojson && ogr2ogr -f GeoJSON -clipsrc somerville.geojson highways-clipped.geojson highways.geojson
 
 highways-clipped-topo.geojson: highways-clipped.geojson
 	./node_modules/.bin/topojson highways-clipped.geojson -p highway,name,oneway,user,id -o highways-clipped-topo.geojson
+
+somerville-topo.geojson: somerville.geojson
+	 ./node_modules/.bin/topojson somerville.geojson -o somerville-topo.geojson
+
+bundle.js: somerville-topo.geojson highways-clipped-topo.geojson
+	webpack
+
+clean:
+	rm -f *.geojson
+
+all: bundle.js
