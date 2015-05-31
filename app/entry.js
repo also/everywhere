@@ -87,24 +87,70 @@ const Trips = React.createClass({
   }
 });
 
-const StreetList = React.createClass({
+const StreetInfo = React.createClass({
+  getInitialState() {
+    return {selected: null, selectedOption: null};
+  },
+
+  onChange(selected, [selectedOption]) {
+    this.setState({selected, selectedOption});
+  },
+
   render() {
     const {features} = this.props;
+    const {selected, selectedOption} = this.state;
 
-    const options = features.map(({properties: {id, name}}) => ({value: id, label: name || '(no name)'}));
+    let info = null;
+
+    if (selected !== null) {
+      const {features} = selectedOption;
+      info = <p>{selected}: {features.length} features</p>;
+    }
+
+    return (
+      <div>
+        <StreetList features={features} onChange={this.onChange} selected={selected}/>
+        {info}
+      </div>
+    );
+  }
+});
+
+const StreetList = React.createClass({
+  render() {
+    const {features, selected} = this.props;
+
+    const streets = new Map();
+
+    const options = [];
+
+    features.forEach(feature => {
+      const {properties: {id, name}} = feature;
+      let features = streets.get(name);
+      if (!features) {
+        features = [];
+        streets.set(name, features);
+        const label = name || '(no name)';
+        options.push({value: label, label, features});
+      }
+      features.push(id);
+    });
+
     options.sort(({label: a}, {label: b}) => a === b ? 0 : a > b ? 1 : -1);
 
-    return <Select options={options}/>;
+    return <Select options={options} onChange={this.props.onChange} value={selected}/>;
   }
 });
 
 const div = document.createElement('div');
 document.body.appendChild(div);
 
+
 React.render(
   <div>
     <p>{Math.round(tripsLength / 1000)} / {Math.round(highwayLength / 1000)} km</p>
-    <StreetList features={highways.features}/>
+    <StreetInfo features={highways.features}/>
+
     <svg width={width} height={height}>
       <defs>
         <mask id="boundary-mask">
