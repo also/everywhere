@@ -5,10 +5,10 @@ import geojsonLength from 'geojson-length';
 
 import '!style!css!sass!./style.scss';
 
-document.title = 'not quite everywhere';
+import data from 'json!../highways-clipped-topo.geojson';
+import somervilleTopojson from 'json!../somerville-topo.geojson';
 
-const data = require('json!../highways-clipped-topo.geojson');
-const somervilleTopojson = require('json!../somerville-topo.geojson');
+document.title = 'not quite everywhere';
 
 const tripContext = require.context('json!../trips');
 const trips = tripContext.keys().map(name => {
