@@ -149,7 +149,6 @@ document.body.appendChild(div);
 React.render(
   <div>
     <p>{Math.round(tripsLength / 1000)} / {Math.round(highwayLength / 1000)} km</p>
-    <StreetInfo features={highways.features}/>
 
     <svg width={width} height={height}>
       <defs>
