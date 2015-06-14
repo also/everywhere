@@ -19,7 +19,13 @@ highways-clipped-topo.geojson: highways-clipped.geojson
 	./node_modules/.bin/topojson highways-clipped.geojson -p highway,name,oneway,user,id -o highways-clipped-topo.geojson
 
 somerville-topo.geojson: somerville.geojson
-	 ./node_modules/.bin/topojson somerville.geojson -o somerville-topo.geojson
+	./node_modules/.bin/topojson somerville.geojson -o somerville-topo.geojson
+
+elevation-4326.tiff: gis-data/elevation_2005_FP/img_elev2005_fp.img
+	gdalwarp -t_srs EPSG:4326 -r bilinear -crop_to_cutline -cutline somerville.geojson gis-data/elevation_2005_FP/img_elev2005_fp.img elevation-4326.tiff
+
+contour.geojson: elevation-4326.tiff
+	gdal_contour -a height -f geojson elevation-4326.tiff contour.geojson -i 5
 
 bundle.js: somerville-topo.geojson highways-clipped-topo.geojson trips/* app/* webpack.config.js
 	webpack

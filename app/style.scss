@@ -32,3 +32,9 @@ path.trip {
   stroke-linecap: round;
   stroke-linejoin: round;
 }
+
+path.contour {
+  fill: none;
+  stroke-width: 1px;
+  stroke: lighten(#00DCC2, 3%);
+}

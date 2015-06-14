@@ -12,6 +12,8 @@ import '!style!css!react-select/dist/default.css';
 import data from 'json!../highways-clipped-topo.geojson';
 import somervilleTopojson from 'json!../somerville-topo.geojson';
 
+import contours from 'json!../contour.geojson';
+
 document.title = 'not quite everywhere';
 
 function center(a, b) {
@@ -87,6 +89,19 @@ const Trips = React.createClass({
   }
 });
 
+const Contours = React.createClass({
+  render() {
+    const {features, path} = this.props;
+    return (
+      <g>
+        {features.map(contour => <path className="contour" d={path(contour)}/>)}
+      </g>
+      );
+  }
+});
+
+let onSelectionChange = null;
+
 const StreetInfo = React.createClass({
   getInitialState() {
     return {selected: null, selectedOption: null};
@@ -158,6 +173,7 @@ React.render(
       </defs>
 
       <path className="boundary" d={cityBoundaryPath}/>
+      <Contours features={contours.features} path={path}/>
       <Roads features={highways.features} path={path}/>
       <Trips trips={trips} path={path}/>
     </svg>
