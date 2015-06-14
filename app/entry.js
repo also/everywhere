@@ -157,6 +157,34 @@ const StreetList = React.createClass({
   }
 });
 
+const Position = React.createClass({
+  getInitialState() {
+    return {position: null};
+  },
+  componentWillMount() {
+    if ('geolocation' in navigator) {
+      this.watchId = navigator.geolocation.watchPosition(position => this.setState({position}));
+    } else {
+      /* geolocation IS NOT available */
+    }
+  },
+  componentWillUnmount() {
+    if (this.watchId) {
+      navigator.geolocation.clearWatch(this.watchId);
+    }
+  },
+  render() {
+    const {position} = this.state;
+    if (position) {
+      const {coords: {latitude, longitude}} = position;
+      const [x, y] = projection([longitude, latitude]);
+      return <circle cx={x} cy={y} r={4} className='position'/>
+    } else {
+      return null;
+    }
+  }
+});
+
 const div = document.createElement('div');
 document.body.appendChild(div);
 
@@ -176,6 +204,7 @@ React.render(
       <Contours features={contours.features} path={path}/>
       <Roads features={highways.features} path={path}/>
       <Trips trips={trips} path={path}/>
+      <Position/>
     </svg>
     <p>Map data © OpenStreetMap contributors</p>
   </div>
