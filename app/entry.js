@@ -98,9 +98,7 @@ const Contours = React.createClass({
       </g>
       );
   }
-});
-
-let onSelectionChange = null;
+}); 
 
 const StreetInfo = React.createClass({
   getInitialState() {
@@ -178,7 +176,7 @@ const Position = React.createClass({
     if (position) {
       const {coords: {latitude, longitude}} = position;
       const [x, y] = projection([longitude, latitude]);
-      return <circle cx={x} cy={y} r={4} className='position'/>
+      return <circle cx={x} cy={y} r={4} className='position'/>;
     } else {
       return null;
     }
