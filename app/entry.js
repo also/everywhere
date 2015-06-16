@@ -52,14 +52,23 @@ const path = d3.geo.path()
 
 const cityBoundaryPath = path(cityBoundary);
 
+let selectedStreetName = null;
+
+const Road = React.createClass({
+  render() {
+    const {feature, path} = this.props;
+    const {highway, name, id} = feature.properties;
+    const className = name && name === selectedStreetName ? 'selected' : '';
+    return <path d={path(feature)} data-highway={highway} className={className} key={id}/>;
+  }
+});
+
 const Roads = React.createClass({
   render() {
     const {features, path} = this.props;
     return (
       <g className="roads">
-        {features.map(feature => (
-          <path d={path(feature)} data-highway={feature.properties.highway} key={feature.properties.id}/>
-        ))}
+        {features.map(feature => <Road feature={feature} path={path}/>)}
       </g>
     );
   }
@@ -107,6 +116,10 @@ const StreetInfo = React.createClass({
 
   onChange(selected, [selectedOption]) {
     this.setState({selected, selectedOption});
+    const {onSelectionChange} = this.props;
+    if (onSelectionChange) {
+      onSelectionChange(selectedOption);
+    }
   },
 
   render() {
@@ -186,24 +199,34 @@ const Position = React.createClass({
 const div = document.createElement('div');
 document.body.appendChild(div);
 
+function onSelectionChange(selection) {
+  console.log(selection);
+  selectedStreetName = selection.label;
+  render();
+}
 
-React.render(
-  <div>
-    <p>{Math.round(tripsLength / 1000)} / {Math.round(highwayLength / 1000)} km</p>
+function render() {
+  React.render(
+    <div>
+      <p>{Math.round(tripsLength / 1000)} / {Math.round(highwayLength / 1000)} km</p>
 
-    <svg width={width} height={height}>
-      <defs>
-        <mask id="boundary-mask">
-          <path d={cityBoundaryPath}/>
-        </mask>
-      </defs>
+      <StreetInfo features={highways.features} onSelectionChange={onSelectionChange}/>
+      <svg width={width} height={height}>
+        <defs>
+          <mask id="boundary-mask">
+            <path d={cityBoundaryPath}/>
+          </mask>
+        </defs>
 
-      <path className="boundary" d={cityBoundaryPath}/>
-      <Contours features={contours.features} path={path}/>
-      <Roads features={highways.features} path={path}/>
-      <Trips trips={trips} path={path}/>
-      <Position/>
-    </svg>
-    <p>Map data © OpenStreetMap contributors</p>
-  </div>
-, div);
+        <path className="boundary" d={cityBoundaryPath}/>
+        <Contours features={contours.features} path={path}/>
+        <Roads features={highways.features} path={path}/>
+        <Trips trips={trips} path={path}/>
+        <Position/>
+      </svg>
+      <p>Map data © OpenStreetMap contributors</p>
+    </div>
+  , div);
+}
+
+render();

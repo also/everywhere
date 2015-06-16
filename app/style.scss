@@ -8,6 +8,11 @@ body {
     fill: none;
     stroke-width: 1px;
     stroke: #fff;
+
+    &.selected {
+      stroke-width: 5px;
+      stroke: #F433FF;
+    }
   }
 
   [data-highway="secondary"], [data-highway="trunk"] {
