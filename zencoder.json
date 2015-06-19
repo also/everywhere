@@ -1,0 +1,46 @@
+// HTML5 video. Outputs include a high quality mp4, WebM, OGG and a lower quality 
+// mp4.
+{
+  "input": "s3://static.ryanberdeen.com/everywhere/video/raw/GOPR0006.MP4",
+  "outputs": [
+    {
+      "label": "mp4 high",
+      "url": "s3://static.ryanberdeen.com/everywhere/video/mp4-high/GOPR0006.MP4",
+      "h264_profile": "high",
+      "width": "1024",
+      "skip_audio": true,
+      "headers": {
+        "Content-Type": "video/mp4"
+      },
+      "public": true,
+      "thumbnails": [
+        {
+          "label": "thumbnail large",
+          "base_url": "s3://static.ryanberdeen.com/everywhere/video/thumbnails/GOPR0006/",
+          "interval": 30,
+          "filename": "large-{{number}}",
+          "public": true,
+          "format": "jpg"
+        }, {
+          "label": "thumbnail small",
+          "base_url": "s3://static.ryanberdeen.com/everywhere/video/thumbnails/GOPR0006/",
+          "width": "640",
+          "interval": 30,
+          "filename": "small-{{number}}",
+          "public": true,
+          "format": "jpg"
+        }
+      ]
+    },
+    {
+      "url": "s3://static.ryanberdeen.com/everywhere/video/mp4-low/GOPR0006.MP4",
+      "label": "mp4 low",
+      "width": "640",
+      "skip_audio": true,
+      "headers": {
+        "Content-Type": "video/mp4"
+      },
+      "public": true
+    }
+  ]
+}
