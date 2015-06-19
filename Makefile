@@ -30,11 +30,16 @@ contour.geojson: elevation-4326.tiff
 bundle.js: somerville-topo.geojson highways-clipped-topo.geojson trips/* app/* webpack.config.js
 	webpack
 
+STRAVA_RAW_TRIPS = $(wildcard strava-raw/*.gpx)
+STRAVA_GEOJSON_TRIPS = $(patsubst strava-raw/%.gpx,trips/strava-%.geojson,$(STRAVA_RAW_TRIPS))
+
 strava-raw/%.geojson: strava-raw/%.gpx
 	./node_modules/.bin/togeojson $< > $@
 
 trips/strava-%.geojson: strava-raw/%.geojson
 	./node_modules/.bin/topojson $< -o $@
+
+all-strava-trips: $(STRAVA_GEOJSON_TRIPS)
 
 clean:
 	rm -f *.geojson
