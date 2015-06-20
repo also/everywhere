@@ -12,14 +12,14 @@ export default React.createClass({
 
     features.forEach(feature => {
       const {properties: {id, name}} = feature;
-      let features = streets.get(name);
-      if (!features) {
-        features = [];
-        streets.set(name, features);
+      let streetFeatures = streets.get(name);
+      if (!streetFeatures) {
+        streetFeatures = [];
+        streets.set(name, streetFeatures);
         const label = name || '(no name)';
-        options.push({value: label, label, features});
+        options.push({value: label, label, features: streetFeatures});
       }
-      features.push(id);
+      streetFeatures.push(id);
     });
 
     options.sort(({label: a}, {label: b}) => a === b ? 0 : a > b ? 1 : -1);
