@@ -1,11 +1,9 @@
-// HTML5 video. Outputs include a high quality mp4, WebM, OGG and a lower quality 
-// mp4.
 {
-  "input": "s3://static.ryanberdeen.com/everywhere/video/raw/GOPR0006.MP4",
+  "input": "s3://static.ryanberdeen.com/everywhere/video/raw/VIDEO_NAME.MP4",
   "outputs": [
     {
       "label": "mp4 high",
-      "url": "s3://static.ryanberdeen.com/everywhere/video/mp4-high/GOPR0006.MP4",
+      "url": "s3://static.ryanberdeen.com/everywhere/video/mp4-high/VIDEO_NAME.MP4",
       "h264_profile": "high",
       "width": "1024",
       "skip_audio": true,
@@ -16,14 +14,14 @@
       "thumbnails": [
         {
           "label": "thumbnail large",
-          "base_url": "s3://static.ryanberdeen.com/everywhere/video/thumbnails/GOPR0006/",
+          "base_url": "s3://static.ryanberdeen.com/everywhere/video/thumbnails/VIDEO_NAME/",
           "interval": 30,
           "filename": "large-{{number}}",
           "public": true,
           "format": "jpg"
         }, {
           "label": "thumbnail small",
-          "base_url": "s3://static.ryanberdeen.com/everywhere/video/thumbnails/GOPR0006/",
+          "base_url": "s3://static.ryanberdeen.com/everywhere/video/thumbnails/VIDEO_NAME/",
           "width": "640",
           "interval": 30,
           "filename": "small-{{number}}",
@@ -33,7 +31,7 @@
       ]
     },
     {
-      "url": "s3://static.ryanberdeen.com/everywhere/video/mp4-low/GOPR0006.MP4",
+      "url": "s3://static.ryanberdeen.com/everywhere/video/mp4-low/VIDEO_NAME.MP4",
       "label": "mp4 low",
       "width": "640",
       "skip_audio": true,

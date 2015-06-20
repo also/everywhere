@@ -128,7 +128,7 @@ const StreetInfo = React.createClass({
 
     let info = null;
 
-    if (selected !== null) {
+    if (selectedOption != null) {
       const {features} = selectedOption;
       info = <p>{selected}: {features.length} features</p>;
     }
@@ -201,7 +201,7 @@ document.body.appendChild(div);
 
 function onSelectionChange(selection) {
   console.log(selection);
-  selectedStreetName = selection.label;
+  selectedStreetName = selection && selection.label;
   render();
 }
 

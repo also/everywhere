@@ -1,4 +1,4 @@
-.PHONY: download
+.PHONY: download all-strava-trips
 
 download:
 	curl -o map.xml http://overpass-api.de/api/map?bbox=-71.1631,42.3589,-71.0417,42.4270	
@@ -9,11 +9,17 @@ map.geojson: map.xml
 highways.geojson: map.geojson
 	jq '{type, features: (.features | map(select((.properties | objects | (has("highway") and .highway != "steps" and .highway != "service" and .highway != "proposed" and .highway != "motorway" and .highway != "motorway_link" and .highway != "footway" and .highway != "pedestrian" and .type != "multipolygon")) and .geometry.type != "Point")))}' map.geojson > highways.geojson
 
+intersections.geojson: map.geojson
+	jq '{type, features: (.features | map(select(.geometry.type == "Point" and .refCount > 0) | {type, geometry: {type: "Point", coordinates: [(.geometry.coordinates[0] | tonumber), (.geometry.coordinates[1] | tonumber)]}, properties: {refs: .refs}}))}' map.geojson > intersections.geojson
+
 somerville.geojson: map.geojson
 	jq '{type, features: (.features | map(select(.properties | (.name == "Somerville" and .type == "boundary"))))}' map.geojson > somerville.geojson
 
 highways-clipped.geojson: highways.geojson somerville.geojson
 	rm -f highways-clipped.geojson && ogr2ogr -f GeoJSON -clipsrc somerville.geojson highways-clipped.geojson highways.geojson
+
+intersections-clipped.geojson: intersections.geojson somerville.geojson
+	rm -f intersections-clipped.geojson && ogr2ogr -f GeoJSON -clipsrc somerville.geojson intersections-clipped.geojson intersections.geojson
 
 highways-clipped-topo.geojson: highways-clipped.geojson
 	./node_modules/.bin/topojson highways-clipped.geojson -p highway,name,oneway,user,id -o highways-clipped-topo.geojson
@@ -40,6 +46,14 @@ trips/strava-%.geojson: strava-raw/%.geojson
 	./node_modules/.bin/topojson $< -o $@
 
 all-strava-trips: $(STRAVA_GEOJSON_TRIPS)
+
+video-metadata/%.json: video/%.MP4
+	avprobe -show_streams -of json $< | jq '.streams[0] | {duration, "start": .tags.creation_time}' > $@
+
+ALL_VIDEOS = $(wildcard video/*.MP4)
+ALL_VIDEO_METADATA = $(patsubst video/%.MP4,video-metadata/%.json,$(ALL_VIDEOS))
+
+all-video-metadata: $(ALL_VIDEO_METADATA)
 
 clean:
 	rm -f *.geojson
