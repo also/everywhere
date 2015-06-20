@@ -23,6 +23,8 @@
     "bluebird": "^2.9.26",
     "react": "^0.13.3",
     "react-select": "^0.4.9",
-    "gdal": "^0.4.4"
+    "gdal": "^0.4.4",
+    "react-router": "^1.0.0-beta2",
+    "lodash": "^3.9.3"
   }
 }

@@ -1,16 +1,23 @@
 import d3 from 'd3';
 import geojsonLength from 'geojson-length';
 import * as React from 'react';
+import find from 'lodash/collection/find';
+
+import {Router, Route} from 'react-router';
+import HashHistory from 'react-router/lib/HashHistory';
 
 import StreetInfo from './street-info';
 import Position from './position';
 import Trips from './trips';
 import Contours from './contours';
+import Ways from './ways';
+import WayList from './way-list';
+import WayDetails from './way-details';
 
 import '!style!css!sass!./style.scss';
 import '!style!css!react-select/dist/default.css';
 
-import {ways, boundary, contours, trips} from './data';
+import {ways, groupedWays, boundary, contours, trips} from './data';
 
 
 document.title = 'not quite everywhere';
@@ -22,7 +29,6 @@ function center(a, b) {
 function geoLines(geoJson) {
   return geoJson.features.map(({geometry}) => geometry).filter(({type}) => type === 'LineString' || type === 'MultiLineString');
 }
-
 
 const width = 1000,
     height = 1000;
@@ -44,23 +50,56 @@ const cityBoundaryPath = path(boundary);
 
 let selectedStreetName = null;
 
-const Road = React.createClass({
+const CityMap = React.createClass({
   render() {
-    const {feature, path} = this.props;
-    const {highway, name, id} = feature.properties;
-    const className = name && name === selectedStreetName ? 'selected' : '';
-    return <path d={path(feature)} data-highway={highway} className={className} key={id}/>;
+    return (
+      <div>
+        <p>{Math.round(tripsLength / 1000)} / {Math.round(highwayLength / 1000)} km</p>
+        <StreetInfo ways={groupedWays} onSelectionChange={onSelectionChange}/>
+
+        <svg width={width} height={height}>
+          <defs>
+            <mask id="boundary-mask">
+              <path d={cityBoundaryPath}/>
+            </mask>
+          </defs>
+
+          <path className="boundary" d={cityBoundaryPath}/>
+          <Contours features={contours.features} path={path}/>
+          <Ways features={ways.features} path={path} selectedStreetName={selectedStreetName}/>
+          <Trips trips={trips} path={path}/>
+          <Position projection={projection}/>
+        </svg>
+      </div>
+    );
   }
 });
 
-const Roads = React.createClass({
+const App = React.createClass({
   render() {
-    const {features, path} = this.props;
     return (
-      <g className="roads">
-        {features.map(feature => <Road feature={feature} path={path}/>)}
-      </g>
+      <div>
+        {this.props.children}
+
+        <p>Map data © OpenStreetMap contributors</p>
+      </div>
     );
+  }
+});
+
+const WayListRoute = React.createClass({
+  render() {
+    return (
+      <WayList ways={groupedWays}/>
+    );
+  }
+});
+
+const WayDetailsRoute = React.createClass({
+  render() {
+    const {params} = this.props;
+    const way = find(groupedWays, ({name}) => name === params.name);
+    return way ? <WayDetails way={way}/> : null;
   }
 });
 
@@ -74,28 +113,18 @@ function onSelectionChange(selection) {
   render();
 }
 
+const history = new HashHistory();
+
 function render() {
-  React.render(
-    <div>
-      <p>{Math.round(tripsLength / 1000)} / {Math.round(highwayLength / 1000)} km</p>
-
-      <StreetInfo features={ways.features} onSelectionChange={onSelectionChange}/>
-      <svg width={width} height={height}>
-        <defs>
-          <mask id="boundary-mask">
-            <path d={cityBoundaryPath}/>
-          </mask>
-        </defs>
-
-        <path className="boundary" d={cityBoundaryPath}/>
-        <Contours features={contours.features} path={path}/>
-        <Roads features={ways.features} path={path}/>
-        <Trips trips={trips} path={path}/>
-        <Position projection={projection}/>
-      </svg>
-      <p>Map data © OpenStreetMap contributors</p>
-    </div>
-  , div);
+  React.render((
+    <Router history={history}>
+      <Route component={App}>
+        <Route path="/" component={CityMap}/>
+        <Route path="/ways" component={WayListRoute}/>
+        <Route path="/ways/:name" component={WayDetailsRoute}/>
+      </Route>
+    </Router>
+  ), div);
 }
 
 render();

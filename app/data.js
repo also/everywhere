@@ -1,4 +1,5 @@
 import topojson from 'topojson';
+import sortBy from 'lodash/collection/sortBy';
 
 
 import waysGeojson from 'json!../highways-clipped-topo.geojson';
@@ -15,4 +16,21 @@ const boundary = feature(boundaryGeojson);
 const tripContext = require.context('json!../trips');
 const trips = tripContext.keys().map(name => feature(tripContext(name)));
 
-export {ways, boundary, contours, trips};
+
+const waysByName = new Map();
+const unsortedGroupedWays = [];
+
+ways.features.forEach(way => {
+  const {properties: {name}} = way;
+  let wayFeatures = waysByName.get(name);
+  if (!wayFeatures) {
+    wayFeatures = [];
+    waysByName.set(name, wayFeatures);
+    unsortedGroupedWays.push({name, features: wayFeatures});
+  }
+  wayFeatures.push(way);
+});
+
+const groupedWays = sortBy(unsortedGroupedWays, ({name}) => name);
+
+export {ways, boundary, contours, trips, groupedWays};

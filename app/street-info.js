@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import StreetList from './street-list';
+import StreetSelect from './street-select';
 
 
 export default React.createClass({
@@ -17,7 +17,7 @@ export default React.createClass({
   },
 
   render() {
-    const {features} = this.props;
+    const {ways} = this.props;
     const {selected, selectedOption} = this.state;
 
     let info = null;
@@ -29,7 +29,7 @@ export default React.createClass({
 
     return (
       <div>
-        <StreetList features={features} onChange={this.onChange} selected={selected}/>
+        <StreetSelect ways={ways} onChange={this.onChange} selected={selected}/>
         {info}
       </div>
     );
