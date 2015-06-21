@@ -6,11 +6,8 @@ import find from 'lodash/collection/find';
 import {Router, Route} from 'react-router';
 import HashHistory from 'react-router/lib/HashHistory';
 
-import StreetInfo from './components/StreetInfo';
-import Position from './components/Position';
-import Trips from './components/Trips';
-import Contours from './components/Contours';
-import Ways from './components/Ways';
+import CityMap from './components/CityMap';
+
 import WayList from './components/WayList';
 import WayDetails from './components/WayDetails';
 
@@ -49,44 +46,6 @@ const projection = d3.geo.mercator()
 const path = d3.geo.path()
     .projection(projection);
 
-const cityBoundaryPath = path(boundary);
-
-let selectedStreetName = null;
-
-const CityMap = React.createClass({
-  childContextTypes: {
-    projection: React.PropTypes.any,
-    path: React.PropTypes.any
-  },
-
-  getChildContext() {
-    return {projection, path};
-  },
-
-  render() {
-    return (
-      <div>
-        <p>{Math.round(tripsLength / 1000)} / {Math.round(highwayLength / 1000)} km</p>
-        <StreetInfo ways={groupedWays} onSelectionChange={onSelectionChange}/>
-
-        <svg width={width} height={height}>
-          <defs>
-            <mask id="boundary-mask">
-              <path d={cityBoundaryPath}/>
-            </mask>
-          </defs>
-
-          <path className="boundary" d={cityBoundaryPath}/>
-          <Contours features={contours.features}/>
-          <Ways features={ways.features} selectedStreetName={selectedStreetName}/>
-          <Trips trips={trips}/>
-          <Position/>
-        </svg>
-      </div>
-    );
-  }
-});
-
 const App = React.createClass({
   render() {
     return (
@@ -96,6 +55,16 @@ const App = React.createClass({
         <p>Map data © OpenStreetMap contributors</p>
       </div>
     );
+  }
+});
+
+const CityMapRoute = React.createClass({
+  render() {
+    return <CityMap width={width} height={height}
+      ways={ways} groupedWays={groupedWays} contours={contours} trips={trips} boundary={boundary}
+      path={path} projection={projection}
+      tripsLength={tripsLength} highwayLength={highwayLength}
+      />;
   }
 });
 
@@ -131,19 +100,13 @@ const VideoDetailsRoute = React.createClass({
 const div = document.createElement('div');
 document.body.appendChild(div);
 
-function onSelectionChange(selection) {
-  console.log(selection);
-  selectedStreetName = selection && selection.label;
-  render();
-}
-
 const history = new HashHistory();
 
 function render() {
   React.render((
     <Router history={history}>
       <Route component={App}>
-        <Route path="/" component={CityMap}/>
+        <Route path="/" component={CityMapRoute}/>
         <Route path="/ways" component={WayListRoute}/>
         <Route path="/ways/:name" component={WayDetailsRoute}/>
         <Route path="/videos" component={VideoListRoute}/>
