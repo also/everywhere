@@ -2,8 +2,13 @@ import * as React from 'react';
 
 
 const Way = React.createClass({
+  contextTypes: {
+    path: React.PropTypes.any
+  },
+
   render() {
-    const {feature, path, selectedStreetName} = this.props;
+    const {path} = this.context;
+    const {feature, selectedStreetName} = this.props;
     const {highway, name, id} = feature.properties;
     const className = name && name === selectedStreetName ? 'selected' : '';
     return <path d={path(feature)} data-highway={highway} className={className} key={id}/>;
@@ -15,7 +20,7 @@ export default React.createClass({
     const {features, path, selectedStreetName} = this.props;
     return (
       <g className="roads">
-        {features.map(feature => <Way feature={feature} path={path} selectedStreetName={selectedStreetName}/>)}
+        {features.map((feature, i) => <Way key={i} feature={feature} path={path} selectedStreetName={selectedStreetName}/>)}
       </g>
     );
   }

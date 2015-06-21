@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import StreetSelect from './street-select';
+import StreetSelect from './StreetSelect';
 
 
 export default React.createClass({

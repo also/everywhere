@@ -2,8 +2,13 @@ import * as React from 'react';
 
 
 const Trip = React.createClass({
+  contextTypes: {
+    path: React.PropTypes.any
+  },
+
   render() {
-    const {trip, path} = this.props;
+    const {path} = this.context;
+    const {trip} = this.props;
     return <path className="trip" d={path(trip)}/>;
   },
 
@@ -16,10 +21,10 @@ const Trip = React.createClass({
 
 export default React.createClass({
   render() {
-    const {trips, path} = this.props;
+    const {trips} = this.props;
     return (
       <g>
-        {trips.map(trip => <Trip trip={trip} path={path}/>)}
+        {trips.map(trip => <Trip trip={trip}/>)}
       </g>
     );
   }

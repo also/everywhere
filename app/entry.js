@@ -6,16 +6,16 @@ import find from 'lodash/collection/find';
 import {Router, Route} from 'react-router';
 import HashHistory from 'react-router/lib/HashHistory';
 
-import StreetInfo from './street-info';
-import Position from './position';
-import Trips from './trips';
-import Contours from './contours';
-import Ways from './ways';
-import WayList from './way-list';
-import WayDetails from './way-details';
+import StreetInfo from './components/StreetInfo';
+import Position from './components/Position';
+import Trips from './components/Trips';
+import Contours from './components/Contours';
+import Ways from './components/Ways';
+import WayList from './components/WayList';
+import WayDetails from './components/WayDetails';
 
-import VideoList from './VideoList';
-import VideoDetails from './VideoDetails';
+import VideoList from './components/VideoList';
+import VideoDetails from './components/VideoDetails';
 
 import '!style!css!sass!./style.scss';
 import '!style!css!react-select/dist/default.css';
@@ -54,6 +54,15 @@ const cityBoundaryPath = path(boundary);
 let selectedStreetName = null;
 
 const CityMap = React.createClass({
+  childContextTypes: {
+    projection: React.PropTypes.any,
+    path: React.PropTypes.any
+  },
+
+  getChildContext() {
+    return {projection, path};
+  },
+
   render() {
     return (
       <div>
@@ -68,10 +77,10 @@ const CityMap = React.createClass({
           </defs>
 
           <path className="boundary" d={cityBoundaryPath}/>
-          <Contours features={contours.features} path={path}/>
-          <Ways features={ways.features} path={path} selectedStreetName={selectedStreetName}/>
-          <Trips trips={trips} path={path}/>
-          <Position projection={projection}/>
+          <Contours features={contours.features}/>
+          <Ways features={ways.features} selectedStreetName={selectedStreetName}/>
+          <Trips trips={trips}/>
+          <Position/>
         </svg>
       </div>
     );

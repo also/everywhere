@@ -2,9 +2,14 @@ import * as React from 'react';
 
 
 export default React.createClass({
+  contextTypes: {
+    projection: React.PropTypes.any
+  },
+
   getInitialState() {
     return {position: null};
   },
+
   componentWillMount() {
     if ('geolocation' in navigator) {
       this.watchId = navigator.geolocation.watchPosition(position => this.setState({position}));
@@ -12,13 +17,15 @@ export default React.createClass({
       /* geolocation IS NOT available */
     }
   },
+
   componentWillUnmount() {
     if (this.watchId) {
       navigator.geolocation.clearWatch(this.watchId);
     }
   },
+
   render() {
-    const {projection} = this.props;
+    const {projection} = this.context;
     const {position} = this.state;
 
     if (position) {
