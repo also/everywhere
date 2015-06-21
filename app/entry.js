@@ -14,10 +14,13 @@ import Ways from './ways';
 import WayList from './way-list';
 import WayDetails from './way-details';
 
+import VideoList from './VideoList';
+import VideoDetails from './VideoDetails';
+
 import '!style!css!sass!./style.scss';
 import '!style!css!react-select/dist/default.css';
 
-import {ways, groupedWays, boundary, contours, trips} from './data';
+import {ways, groupedWays, boundary, contours, trips, videos} from './data';
 
 
 document.title = 'not quite everywhere';
@@ -103,6 +106,18 @@ const WayDetailsRoute = React.createClass({
   }
 });
 
+const VideoListRoute = React.createClass({
+  render() {
+    return <VideoList videos={videos}/>;
+  }
+});
+
+const VideoDetailsRoute = React.createClass({
+  render() {
+    const {params} = this.props;
+    return <VideoDetails video={videos.get(params.name)}/>;
+  }
+});
 
 const div = document.createElement('div');
 document.body.appendChild(div);
@@ -122,6 +137,8 @@ function render() {
         <Route path="/" component={CityMap}/>
         <Route path="/ways" component={WayListRoute}/>
         <Route path="/ways/:name" component={WayDetailsRoute}/>
+        <Route path="/videos" component={VideoListRoute}/>
+        <Route path="/videos/:name" component={VideoDetailsRoute}/>
       </Route>
     </Router>
   ), div);

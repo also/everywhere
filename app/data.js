@@ -13,8 +13,18 @@ function feature(geojson) {
 const ways = feature(waysGeojson);
 const boundary = feature(boundaryGeojson);
 
-const tripContext = require.context('json!../trips');
+const tripContext = require.context('json!../trips', false, /\.geojson$/);
 const trips = tripContext.keys().map(name => feature(tripContext(name)));
+
+const videoContext = require.context('json!../video-metadata', false, /\.json$/);
+const videos = new Map(
+  sortBy(
+    videoContext.keys()
+      .map(filename => {
+        const name = filename.replace(/^\.\/(.+)\.json$/, '$1');
+        return [name, Object.assign({name}, videoContext(filename))];
+      }),
+    (([name]) => name)));
 
 
 const waysByName = new Map();
@@ -33,4 +43,4 @@ ways.features.forEach(way => {
 
 const groupedWays = sortBy(unsortedGroupedWays, ({name}) => name);
 
-export {ways, boundary, contours, trips, groupedWays};
+export {ways, boundary, contours, trips, groupedWays, videos};
