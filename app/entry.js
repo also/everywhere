@@ -35,7 +35,7 @@ const width = 1000,
 
 const bounds = d3.geo.bounds(boundary);
 
-const highwayLength = d3.sum(geoLines(ways), geojsonLength);
+const waysLength = d3.sum(geoLines(ways), geojsonLength);
 const tripsLength = d3.sum(trips.map(geoLines).reduce((a, b) => a.concat(b)), geojsonLength);
 
 const projection = d3.geo.mercator()
@@ -63,7 +63,7 @@ const CityMapRoute = React.createClass({
     return <CityMap width={width} height={height}
       ways={ways} groupedWays={groupedWays} contours={contours} trips={trips} boundary={boundary}
       path={path} projection={projection}
-      tripsLength={tripsLength} highwayLength={highwayLength}
+      tripsLength={tripsLength} waysLength={waysLength}
       />;
   }
 });

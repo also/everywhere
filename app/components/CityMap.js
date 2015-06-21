@@ -28,13 +28,13 @@ export default React.createClass({
   },
 
   render() {
-    const {boundary, path, ways, groupedWays, width, height, contours, trips, tripsLength, highwayLength} = this.props;
+    const {boundary, path, ways, groupedWays, width, height, contours, trips, tripsLength, waysLength} = this.props;
     const {selectedStreetName} = this.state;
     const cityBoundaryPath = path(boundary);
 
     return (
       <div>
-        <p>{Math.round(tripsLength / 1000)} / {Math.round(highwayLength / 1000)} km</p>
+        <p>{Math.round(tripsLength / 1000)} / {Math.round(waysLength / 1000)} km</p>
         <StreetInfo ways={groupedWays} onSelectionChange={this.selectStreet}/>
 
         <svg width={width} height={height}>
