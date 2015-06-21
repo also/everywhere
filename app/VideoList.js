@@ -16,11 +16,16 @@ export default React.createClass({
     const {videos} = this.props;
 
     return (
-      <ul>
-        {Array.from(iteratorMap(videos.values(), ({name}) => (
-          <li key={name}><Link to={`/videos/${name}`}>{name}</Link></li>
+      <table>
+        {Array.from(iteratorMap(videos.values(), ({name, duration, start, thumbnail}) => (
+          <tr key={name}>
+            <td><Link to={`/videos/${name}`}><img src={thumbnail.small} width="160" height="90"/></Link></td>
+            <td>{start}</td>
+            <td>{Math.round(duration / 60)}</td>
+            <td>{name}</td>
+          </tr>
         )))}
-      </ul>
+      </table>
     );
   }
 });

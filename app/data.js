@@ -21,10 +21,23 @@ const videos = new Map(
   sortBy(
     videoContext.keys()
       .map(filename => {
+        const data = videoContext(filename);
         const name = filename.replace(/^\.\/(.+)\.json$/, '$1');
-        return [name, Object.assign({name}, videoContext(filename))];
+        const video = Object.assign({
+          name,
+          low: `http://static.ryanberdeen.com/everywhere/video/mp4-low/${name}.MP4`,
+          high: `http://static.ryanberdeen.com/everywhere/video/mp4-high/${name}.MP4`,
+          stills: Array(...Array(Math.ceil(data.duration / 30))).map((_, i) => (
+            {
+              small: `http://static.ryanberdeen.com/everywhere/video/thumbnails/${name}/small-${i}.jpg`,
+              large: `http://static.ryanberdeen.com/everywhere/video/thumbnails/${name}/large-${i}.jpg`
+            }
+          ))
+        }, data);
+        video.thumbnail = video.stills[Math.floor(video.stills.length / 2)];
+        return [name, video];
       }),
-    (([name]) => name)));
+    (([name, {start}]) => start)));
 
 
 const waysByName = new Map();
