@@ -1,3 +1,7 @@
 node_modules
 bundle.js
 creds/
+video
+app-data/trips/
+app-data/video-metadata/
+data
