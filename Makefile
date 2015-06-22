@@ -1,4 +1,4 @@
-.PHONY: download all-strava-trips
+.PHONY: download
 
 download:
 	curl -o data/raw/map.xml http://overpass-api.de/api/map?bbox=-71.1631,42.3589,-71.0417,42.4270	
@@ -38,17 +38,6 @@ app-data/contour.geojson: data/build/contour.geojson
 
 bundle.js: app-data/somerville-topo.geojson app-data/highways-clipped-topo.geojson app-data/trips/* app/* webpack.config.js
 	webpack
-
-STRAVA_RAW_TRIPS = $(wildcard data/raw/strava/*.gpx)
-STRAVA_GEOJSON_TRIPS = $(patsubst data/raw/strava/%.gpx,app-data/trips/strava-%.geojson,$(STRAVA_RAW_TRIPS))
-
-data/raw/strava/%.geojson: data/raw/strava/%.gpx
-	./node_modules/.bin/togeojson $< > $@
-
-app-data/trips/strava-%.geojson: data/raw/strava/%.geojson
-	./node_modules/.bin/topojson $< -o $@
-
-all-strava-trips: $(STRAVA_GEOJSON_TRIPS)
 
 app-data/video-metadata/%.json: video/%.MP4
 	avprobe -show_streams -of json $< | jq '.streams[0] | {duration, "start": .tags.creation_time}' > $@
