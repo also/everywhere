@@ -2,7 +2,7 @@ import d3 from 'd3';
 import * as React from 'react';
 import find from 'lodash/collection/find';
 
-import {Router, Route} from 'react-router';
+import {Router, Route, Link} from 'react-router';
 import HashHistory from 'react-router/lib/HashHistory';
 
 import {geometryLength} from './distance';
@@ -49,6 +49,8 @@ const App = React.createClass({
       <div>
         {this.props.children}
 
+        <hr/>
+        <div><Link to="/trips">trips</Link> <Link to="/videos">videos</Link> <Link to="/ways">streets</Link></div>
         <p>Map data © OpenStreetMap contributors</p>
       </div>
     );
