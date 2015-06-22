@@ -30,8 +30,11 @@ app-data/somerville-topo.geojson: data/build/somerville.geojson
 data/build/elevation-4326.tiff: data/raw/elevation_2005_FP/img_elev2005_fp.img data/build/somerville.geojson
 	gdalwarp -t_srs EPSG:4326 -r bilinear -crop_to_cutline -cutline data/build/somerville.geojson data/raw/elevation_2005_FP/img_elev2005_fp.img data/build/elevation-4326.tiff
 
-app-data/contour.geojson: data/build/elevation-4326.tiff
-	rm -rf app-data/contour.geojson && gdal_contour -a height -f geojson data/build/elevation-4326.tiff app-data/contour.geojson -i 5
+data/build/contour.geojson: data/build/elevation-4326.tiff
+	rm -rf $@ && gdal_contour -a height -f geojson $< $@ -i 5
+
+app-data/contour.geojson: data/build/contour.geojson
+	./node_modules/.bin/topojson $< -o $@
 
 bundle.js: app-data/somerville-topo.geojson app-data/highways-clipped-topo.geojson app-data/trips/* app/* webpack.config.js
 	webpack

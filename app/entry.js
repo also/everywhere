@@ -17,7 +17,7 @@ import VideoDetails from './components/VideoDetails';
 import '!style!css!sass!./style.scss';
 import '!style!css!react-select/dist/default.css';
 
-import {ways, groupedWays, boundary, contours, trips, videos} from './data';
+import {ways, groupedWays, boundary, contours, tripsPromise, videos} from './data';
 
 
 document.title = 'not quite everywhere';
@@ -36,7 +36,6 @@ const width = 1000,
 const bounds = d3.geo.bounds(boundary);
 
 const waysLength = d3.sum(geoLines(ways), geojsonLength);
-const tripsLength = d3.sum(trips.map(geoLines).reduce((a, b) => a.concat(b)), geojsonLength);
 
 const projection = d3.geo.mercator()
     .center([center(bounds[0][0], bounds[1][0]), center(bounds[0][1], bounds[1][1])])
@@ -60,6 +59,9 @@ const App = React.createClass({
 
 const CityMapRoute = React.createClass({
   render() {
+    // TODO what's the right way to pass this in?
+    const {trips} = this.props.route;
+    const tripsLength = d3.sum(trips.map(geoLines).reduce((a, b) => a.concat(b)), geojsonLength);
     return <CityMap width={width} height={height}
       ways={ways} groupedWays={groupedWays} contours={contours} trips={trips} boundary={boundary}
       path={path} projection={projection}
@@ -102,11 +104,11 @@ document.body.appendChild(div);
 
 const history = new HashHistory();
 
-function render() {
+tripsPromise.then((trips) => {
   React.render((
     <Router history={history}>
       <Route component={App}>
-        <Route path="/" component={CityMapRoute}/>
+        <Route path="/" component={CityMapRoute} trips={trips}/>
         <Route path="/ways" component={WayListRoute}/>
         <Route path="/ways/:name" component={WayDetailsRoute}/>
         <Route path="/videos" component={VideoListRoute}/>
@@ -114,6 +116,4 @@ function render() {
       </Route>
     </Router>
   ), div);
-}
-
-render();
+});
