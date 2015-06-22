@@ -88,7 +88,8 @@ const WayDetailsRoute = React.createClass({
 
 const VideoListRoute = React.createClass({
   render() {
-    return <VideoList videos={videos}/>;
+
+    return <VideoList videos={Array.from(videos.values())}/>;
   }
 });
 
@@ -103,7 +104,7 @@ const TripListRoute = React.createClass({
   render() {
     // TODO what's the right way to pass this in?
     const {trips} = this.props.route;
-    return <TripList trips={trips}/>;
+    return <TripList trips={trips} videoThumbnail={true}/>;
   }
 });
 

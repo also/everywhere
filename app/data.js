@@ -43,7 +43,8 @@ const videos = new Map(
               small: `http://static.ryanberdeen.com/everywhere/video/thumbnails/${name}/small-${i}.jpg`,
               large: `http://static.ryanberdeen.com/everywhere/video/thumbnails/${name}/large-${i}.jpg`
             }
-          ))
+          )),
+          trips: []
         };
         video.thumbnail = video.stills[Math.floor(video.stills.length / 2)];
         return [name, video];
@@ -67,17 +68,35 @@ ways.features.forEach(way => {
 
 const groupedWays = sortBy(unsortedGroupedWays, ({name}) => name);
 
-const tripsPromise = tripData.then(trips => trips.map(trip => {
-  const result = feature(trip);
-  const {features: [{properties}]} = result;
-  const {activity: {id, start_date, total_elevation_gain, max_speed, distance, elapsed_time, moving_time}} = properties;
+const tripsPromise = tripData.then(tripTopojson => {
+  const trips = tripTopojson.map(trip => {
+    const result = feature(trip);
+    const {features: [{properties, coordinates}]} = result;
+    properties.videos = [];
+    const {activity: {id, start_date, total_elevation_gain, max_speed, distance, elapsed_time, moving_time}} = properties;
 
-  Object.assign(properties, {
-    id,
-    start: new Date(Date.parse(start_date)),
-    movingTime: moving_time
+    const start = new Date(Date.parse(start_date));
+
+    Object.assign(properties, {
+      id,
+      start,
+      end: new Date(start.getTime() + (elapsed_time * 1000)),
+      movingTime: moving_time
+    });
+    return result;
   });
-  return result;
-}));
+
+  for (const trip of trips) {
+    const {features: [{properties}]} = trip;
+    for (const video of videos.values()) {
+      if (properties.start <= video.end && properties.end >= video.start) {
+        video.trips.push(trip);
+        properties.videos.push(video);
+      }
+    }
+  }
+
+  return trips;
+});
 
 export {ways, boundary, contours, tripsPromise, groupedWays, videos};
