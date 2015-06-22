@@ -67,9 +67,10 @@ function streamsToGeoJson(streams) {
   const coordinates = [];
   let currentCoordinates = null;
 
-  let currentPosition = [0, 0];
+  let currentPosition = null;
+
   streams.latlng.forEach(([lat, lng], i) => {
-    if (distance(lng, lat, ...currentPosition) > 100) {
+    if (!currentPosition || distance(lng, lat, ...currentPosition) > 100) {
       currentCoordinates = [];
       coordinates.push(currentCoordinates);
     }

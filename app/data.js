@@ -67,6 +67,17 @@ ways.features.forEach(way => {
 
 const groupedWays = sortBy(unsortedGroupedWays, ({name}) => name);
 
-const tripsPromise = tripData.then(trips => trips.map(feature));
+const tripsPromise = tripData.then(trips => trips.map(trip => {
+  const result = feature(trip);
+  const {features: [{properties}]} = result;
+  const {activity: {id, start_date, total_elevation_gain, max_speed, distance, elapsed_time, moving_time}} = properties;
+
+  Object.assign(properties, {
+    id,
+    start: new Date(Date.parse(start_date)),
+    movingTime: moving_time
+  });
+  return result;
+}));
 
 export {ways, boundary, contours, tripsPromise, groupedWays, videos};

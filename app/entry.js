@@ -1,18 +1,23 @@
 import d3 from 'd3';
-import geojsonLength from 'geojson-length';
 import * as React from 'react';
 import find from 'lodash/collection/find';
 
 import {Router, Route} from 'react-router';
 import HashHistory from 'react-router/lib/HashHistory';
 
+import {geometryLength} from './distance';
+
 import CityMap from './components/CityMap';
+import MapData from './components/MapData';
 
 import WayList from './components/WayList';
 import WayDetails from './components/WayDetails';
 
 import VideoList from './components/VideoList';
 import VideoDetails from './components/VideoDetails';
+
+import TripList from './components/TripList';
+import TripDetails from './components/TripDetails';
 
 import '!style!css!sass!./style.scss';
 import '!style!css!react-select/dist/default.css';
@@ -22,30 +27,23 @@ import {ways, groupedWays, boundary, contours, tripsPromise, videos} from './dat
 
 document.title = 'not quite everywhere';
 
-function center(a, b) {
-  return (a + b) / 2;
-}
-
 function geoLines(geoJson) {
   return geoJson.features.map(({geometry}) => geometry).filter(({type}) => type === 'LineString' || type === 'MultiLineString');
 }
 
-const width = 1000,
-    height = 1000;
-
-const bounds = d3.geo.bounds(boundary);
-
-const waysLength = d3.sum(geoLines(ways), geojsonLength);
-
-const projection = d3.geo.mercator()
-    .center([center(bounds[0][0], bounds[1][0]), center(bounds[0][1], bounds[1][1])])
-    .scale(900000)
-    .translate([width / 2, height / 2]);
-
-const path = d3.geo.path()
-    .projection(projection);
+const waysLength = d3.sum(geoLines(ways), geometryLength);
 
 const App = React.createClass({
+  childContextTypes: {
+    boundary: React.PropTypes.any,
+    ways: React.PropTypes.any,
+    contours: React.PropTypes.any
+  },
+
+  getChildContext() {
+    return {boundary, ways, contours};
+  },
+
   render() {
     return (
       <div>
@@ -61,12 +59,12 @@ const CityMapRoute = React.createClass({
   render() {
     // TODO what's the right way to pass this in?
     const {trips} = this.props.route;
-    const tripsLength = d3.sum(trips.map(geoLines).reduce((a, b) => a.concat(b)), geojsonLength);
-    return <CityMap width={width} height={height}
-      ways={ways} groupedWays={groupedWays} contours={contours} trips={trips} boundary={boundary}
-      path={path} projection={projection}
-      tripsLength={tripsLength} waysLength={waysLength}
-      />;
+    const tripsLength = d3.sum(trips.map(geoLines).reduce((a, b) => a.concat(b)), geometryLength);
+    return (
+      <CityMap
+        trips={trips} groupedWays={groupedWays}
+        tripsLength={tripsLength} waysLength={waysLength}/>
+    );
   }
 });
 
@@ -99,21 +97,41 @@ const VideoDetailsRoute = React.createClass({
   }
 });
 
+const TripListRoute = React.createClass({
+  render() {
+    // TODO what's the right way to pass this in?
+    const {trips} = this.props.route;
+    return <TripList trips={trips}/>;
+  }
+});
+
+const TripDetailsRoute = React.createClass({
+  render() {
+    // TODO what's the right way to pass this in?
+    const {trips} = this.props.route;
+    return <TripDetails trip={trips.filter(({features: [{id}]}) => `${id}` === this.props.params.id)[0]}/>;
+  }
+});
+
 const div = document.createElement('div');
 document.body.appendChild(div);
 
 const history = new HashHistory();
 
 tripsPromise.then((trips) => {
-  React.render((
-    <Router history={history}>
-      <Route component={App}>
-        <Route path="/" component={CityMapRoute} trips={trips}/>
-        <Route path="/ways" component={WayListRoute}/>
-        <Route path="/ways/:name" component={WayDetailsRoute}/>
-        <Route path="/videos" component={VideoListRoute}/>
-        <Route path="/videos/:name" component={VideoDetailsRoute}/>
-      </Route>
-    </Router>
-  ), div);
+  React.render(
+    <MapData {...{boundary, contours, ways}}>{() => (
+      <Router history={history}>
+        <Route component={App}>
+          <Route path="/" component={CityMapRoute} trips={trips}/>
+          <Route path="/ways" component={WayListRoute}/>
+          <Route path="/ways/:name" component={WayDetailsRoute}/>
+          <Route path="/videos" component={VideoListRoute}/>
+          <Route path="/videos/:name" component={VideoDetailsRoute}/>
+          <Route path="/trips" component={TripListRoute} trips={trips}/>
+          <Route path="/trips/:id" component={TripDetailsRoute} trips={trips}/>
+        </Route>
+      </Router>
+    )}</MapData>
+  , div);
 });
