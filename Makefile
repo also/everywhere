@@ -3,14 +3,17 @@
 download:
 	curl -o data/raw/map.xml http://overpass-api.de/api/map?bbox=-71.1631,42.3589,-71.0417,42.4270	
 	
+# data/build/map.geojson: data/raw/map.xml
+# 	node --max_old_space_size=8192 ./node_modules/.bin/osmtogeojson data/raw/map.xml > data/build/map.geojson
+
 data/build/map.geojson: data/raw/map.xml
-	node --max_old_space_size=8192 ./node_modules/.bin/osmtogeojson data/raw/map.xml > data/build/map.geojson
+	node --max_old_space_size=8192 tools osm-to-geojson data/raw/map.xml > data/build/map.geojson
 
 data/build/highways.geojson: data/build/map.geojson
-	jq '{type, features: (.features | map(select((.properties | objects | (has("highway") and .highway != "steps" and .highway != "service" and .highway != "proposed" and .highway != "motorway" and .highway != "motorway_link" and .highway != "footway" and .highway != "pedestrian" and .type != "multipolygon")) and .geometry.type != "Point")))}' data/build/map.geojson > data/build/highways.geojson
+	jq '{type, features: (.features | map(select((.properties | objects | .bikeable))))}' data/build/map.geojson > data/build/highways.geojson
 
-# intersections.geojson: data/build/map.geojson
-# 	jq '{type, features: (.features | map(select(.geometry.type == "Point" and .refCount > 0) | {type, geometry: {type: "Point", coordinates: [(.geometry.coordinates[0] | tonumber), (.geometry.coordinates[1] | tonumber)]}, properties: {refs: .refs}}))}' data/build/map.geojson > intersections.geojson
+data/build/intersections.geojson: data/build/map.geojson
+	jq '{type, features: (.features | map(select(.geometry.type == "Point" and .refCount > 0) | {type, geometry: {type: "Point", coordinates: [(.geometry.coordinates[0] | tonumber), (.geometry.coordinates[1] | tonumber)]}, properties: {refs: .refs}}))}' data/build/map.geojson > data/build/intersections.geojson
 
 data/build/somerville.geojson: data/build/map.geojson
 	jq '{type, features: (.features | map(select(.properties | (.name == "Somerville" and .type == "boundary"))))}' data/build/map.geojson > data/build/somerville.geojson
@@ -18,8 +21,8 @@ data/build/somerville.geojson: data/build/map.geojson
 data/build/highways-clipped.geojson: data/build/highways.geojson data/build/somerville.geojson
 	rm -f data/build/highways-clipped.geojson && ogr2ogr -f GeoJSON -clipsrc data/build/somerville.geojson data/build/highways-clipped.geojson data/build/highways.geojson
 
-# intersections-clipped.geojson: intersections.geojson data/build/somerville.geojson
-# 	rm -f intersections-clipped.geojson && ogr2ogr -f GeoJSON -clipsrc data/build/somerville.geojson intersections-clipped.geojson intersections.geojson
+data/build/intersections-clipped.geojson: data/build/intersections.geojson data/build/somerville.geojson
+	rm -f intersections-clipped.geojson && ogr2ogr -f GeoJSON -clipsrc data/build/somerville.geojson data/build/intersections-clipped.geojson data/build/intersections.geojson
 
 app-data/highways-clipped-topo.geojson: data/build/highways-clipped.geojson
 	./node_modules/.bin/topojson data/build/highways-clipped.geojson -p highway,name,oneway,user,id -o app-data/highways-clipped-topo.geojson
