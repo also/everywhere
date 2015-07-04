@@ -10,6 +10,16 @@ function center(a, b) {
   return (a + b) / 2;
 }
 
+function mouse(e, node) {
+  const previousEvent = d3.event;
+
+  try {
+    d3.event = e.nativeEvent;
+    return d3.mouse(node);
+  } finally {
+    d3.event = previousEvent;
+  }
+}
 
 export default React.createClass({
   contextTypes: {
@@ -49,18 +59,17 @@ export default React.createClass({
 
   onMouseMove(e) {
     const {onMouseMove} = this.props;
+    const {projection} = this.state;
     if (onMouseMove) {
-      const {projection} = this.state;
+      onMouseMove({mouse, geo: projection.invert(mouse(e, this.svgNode))});
+    }
+  },
 
-      const previousEvent = d3.event;
-
-      try {
-        d3.event = e.nativeEvent;
-        const mouse = d3.mouse(this.svgNode);
-        onMouseMove({mouse, geo: projection.invert(mouse)});
-      } finally {
-        d3.event = previousEvent;
-      }
+  onClick(e) {
+    const {onClick} = this.props;
+    const {projection} = this.state;
+    if (onClick) {
+      onClick({mouse, geo: projection.invert(mouse(e, this.svgNode))});
     }
   },
 
@@ -71,7 +80,7 @@ export default React.createClass({
     const cityBoundaryPath = path(boundary);
 
     return (
-      <svg width={width} height={height} onMouseMove={this.onMouseMove} ref={component => this.svgNode = React.findDOMNode(component)}>
+      <svg width={width} height={height} onMouseMove={this.onMouseMove} onClick={this.onClick} ref={component => this.svgNode = React.findDOMNode(component)}>
         <defs>
           <mask id="boundary-mask">
             <path d={cityBoundaryPath}/>
