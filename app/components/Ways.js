@@ -15,23 +15,12 @@ const Way = React.createClass({
   }
 });
 
-const BaseWays = React.createClass({
-  mixins: [React.addons.PureRenderMixin],
-
-  render() {
-    const {features} = this.props;
-    return <g>{features.map((feature, i) => <Way key={i} feature={feature}/>)}</g>;
-  }
-});
-
 export default React.createClass({
   render() {
-    const {features, selectedStreetName} = this.props;
-    const selectedWays = features.filter(({properties: {name}}) => name && name === selectedStreetName);
+    const {features, selected} = this.props;
     return (
       <g className="roads">
-        <BaseWays features={features} />
-        {selectedWays.map(feature => <Way feature={feature} selected={true}/>)}
+        {features.map((feature, i) => <Way key={i} feature={feature} selected={selected}/>)}
       </g>
     );
   }

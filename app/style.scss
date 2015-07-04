@@ -3,6 +3,10 @@ body {
   font-size: 13px;
 }
 
+a {
+  color: #116AA9;
+}
+
 .roads {
   path {
     fill: none;
@@ -11,7 +15,7 @@ body {
 
     &.selected {
       stroke-width: 5px;
-      stroke: #F433FF;
+      stroke: #116AA9;
     }
   }
 

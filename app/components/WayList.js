@@ -1,44 +1,63 @@
 import * as React from 'react/addons';
-import {Link} from 'react-router';
+import {Link, Navigation} from 'react-router';
 
 import MapComponent from './Map';
+import Ways from './Ways';
 
+
+const WayList = React.createClass({
+  mixins: [React.addons.PureRenderMixin],
+
+  render() {
+    const {groupedWays} = this.props;
+
+    return (
+      <ul style={{WebkitColumnWidth: '200px'}}>
+        {groupedWays.map(way => (
+          <li key={way.name}><Link to={`/ways/${way.name}`}>{way.name || '(no name)'}</Link></li>
+        ))}
+      </ul>
+    );
+  }
+});
 
 export default React.createClass({
+  mixins: [React.addons.PureRenderMixin, Navigation],
+
   getInitialState() {
-    return {hoveredStreetName: null};
+    return {hoveredStreet: null};
   },
 
   onMouseMove({geo}) {
     const {wayTree} = this.props;
     const leaf = wayTree.nearest(geo);
-    this.setState({hoveredStreetName: leaf.data.feature.properties.name});
+    this.setState({hoveredStreet: leaf.data.feature});
   },
 
-  shouldComponentUpdate(nextProps, nextState) {
-    return nextProps.groupedWays !== this.props.groupedWays || nextState.hoveredStreetName !== this.state.hoveredStreetName;
+  onClick({geo}) {
+    const {wayTree} = this.props;
+    const leaf = wayTree.nearest(geo);
+    const way = leaf.data.feature;
+    this.transitionTo(`/ways/${way.properties.name}`);
   },
 
   render() {
     const {groupedWays} = this.props;
-    const {hoveredStreetName} = this.state;
+    const {hoveredStreet} = this.state;
 
     return (
       <div>
-        <p>{hoveredStreetName || '(no name)'}</p>
-        <MapComponent width="1000" height="1000" onMouseMove={this.onMouseMove} selectedStreetName={hoveredStreetName}>
+        <p>{hoveredStreet ? (hoveredStreet.properties.name || '(no name)') : '(hover over a stree)'}</p>
+        <MapComponent width="1000" height="1000" onMouseMove={this.onMouseMove} onClick={this.onClick}>
           {this.mapLayers}
         </MapComponent>
-        <ul style={{WebkitColumnWidth: '200px'}}>
-          {groupedWays.map(way => (
-            <li key={way.name}><Link to={`/ways/${way.name}`}>{way.name || '(no name)'}</Link></li>
-          ))}
-        </ul>
+        <WayList groupedWays={groupedWays}/>
       </div>
     );
   },
 
   mapLayers() {
-    return null;
+    const {hoveredStreet} = this.state;
+    return hoveredStreet ? <Ways features={[hoveredStreet]} selected={true}/> : null;
   }
 });
