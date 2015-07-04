@@ -19,6 +19,8 @@ import VideoDetails from './components/VideoDetails';
 import TripList from './components/TripList';
 import TripDetails from './components/TripDetails';
 
+import {geoLines} from './geo';
+
 import '!style!css!sass!./style.scss';
 import '!style!css!react-select/dist/default.css';
 
@@ -26,10 +28,6 @@ import {ways, groupedWays, boundary, contours, tripsPromise, videos, wayTree} fr
 
 
 document.title = 'not quite everywhere';
-
-function geoLines(geoJson) {
-  return geoJson.features.map(({geometry}) => geometry).filter(({type}) => type === 'LineString' || type === 'MultiLineString');
-}
 
 const waysLength = d3.sum(geoLines(ways), geometryLength);
 
