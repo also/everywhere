@@ -4,6 +4,19 @@
  * © Chris Veness, MIT-licensed,
  * http://www.movable-type.co.uk/scripts/latlong.html#equirectangular
  */
+
+ function calculateLength(lineString) {
+     if (lineString.length < 2) {
+         return 0;
+     }
+     let result = 0;
+     for (let i = 1; i < lineString.length; i++) {
+         result += distance(lineString[i - 1][0], lineString[i - 1][1],
+                            lineString[i][0], lineString[i][1]);
+     }
+     return result;
+}
+
 export function distance(λ1, φ1, λ2, φ2) {
     const R = 6371000;
     const Δλ = (λ2 - λ1) * Math.PI / 180;
@@ -26,16 +39,4 @@ export function geometryLength(geometry) {
     } else {
         return null;
     }
-}
-
-function calculateLength(lineString) {
-    if (lineString.length < 2) {
-        return 0;
-    }
-    let result = 0;
-    for (let i = 1; i < lineString.length; i++) {
-        result += distance(lineString[i - 1][0], lineString[i - 1][1],
-                           lineString[i][0], lineString[i][1]);
-    }
-    return result;
 }

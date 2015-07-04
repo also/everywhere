@@ -1,8 +1,8 @@
 .PHONY: download
 
 download:
-	curl -o data/raw/map.xml http://overpass-api.de/api/map?bbox=-71.1631,42.3589,-71.0417,42.4270	
-	
+	curl -o data/raw/map.xml http://overpass-api.de/api/map?bbox=-71.1631,42.3589,-71.0417,42.4270
+
 # data/build/map.geojson: data/raw/map.xml
 # 	node --max_old_space_size=8192 ./node_modules/.bin/osmtogeojson data/raw/map.xml > data/build/map.geojson
 
@@ -22,10 +22,13 @@ data/build/highways-clipped.geojson: data/build/highways.geojson data/build/some
 	rm -f data/build/highways-clipped.geojson && ogr2ogr -f GeoJSON -clipsrc data/build/somerville.geojson data/build/highways-clipped.geojson data/build/highways.geojson
 
 data/build/intersections-clipped.geojson: data/build/intersections.geojson data/build/somerville.geojson
-	rm -f intersections-clipped.geojson && ogr2ogr -f GeoJSON -clipsrc data/build/somerville.geojson data/build/intersections-clipped.geojson data/build/intersections.geojson
+	rm -f data/build/intersections-clipped.geojson && ogr2ogr -f GeoJSON -clipsrc data/build/somerville.geojson data/build/intersections-clipped.geojson data/build/intersections.geojson
 
 app-data/highways-clipped-topo.geojson: data/build/highways-clipped.geojson
 	./node_modules/.bin/topojson data/build/highways-clipped.geojson -p highway,name,oneway,user,id -o app-data/highways-clipped-topo.geojson
+
+app-data/intersections-clipped-topo.geojson: data/build/intersections-clipped.geojson
+	./node_modules/.bin/topojson data/build/intersections-clipped.geojson -p refs -o app-data/intersections-clipped-topo.geojson
 
 app-data/somerville-topo.geojson: data/build/somerville.geojson
 	./node_modules/.bin/topojson data/build/somerville.geojson -o app-data/somerville-topo.geojson

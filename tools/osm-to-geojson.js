@@ -90,7 +90,7 @@ function toGeoJson(data) {
       const last = elt.nodes.length - 1;
       elt.nodes.forEach((id, i) => {
         const node = getNode(id);
-        node.refs.push(elt.id);
+        node.refs.push(`way/${elt.id}`);
         node.refCount += (i === 0 || i === last) ? 2 : 1;
         intersections.push(id);
       });
@@ -121,4 +121,3 @@ function toGeoJson(data) {
 export default function ({_: [file]}) {
   parseXml(file).then(toGeoJson);
 }
-
