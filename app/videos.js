@@ -25,9 +25,10 @@ export default new Map(
               large: `http://static.ryanberdeen.com/everywhere/video/thumbnails/${name}/large-${i}.jpg`
             }
           )),
-          trips: []
+          trips: [],
+          coverage: []
         };
         video.thumbnail = video.stills[Math.floor(video.stills.length / 2)];
         return [name, video];
       }),
-    (([{start}]) => start)));
+    (([, {start}]) => start)));

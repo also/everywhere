@@ -13,7 +13,7 @@ import MapData from './components/MapData';
 import WayList from './components/WayList';
 import WayDetails from './components/WayDetails';
 
-import VideoList from './components/VideoList';
+import VideoListPage from './components/VideoListPage';
 import VideoDetails from './components/VideoDetails';
 
 import TripList from './components/TripList';
@@ -88,8 +88,8 @@ const WayDetailsRoute = React.createClass({
 
 const VideoListRoute = React.createClass({
   render() {
-
-    return <VideoList videos={Array.from(videos.values())}/>;
+    const {videoCoverage} = this.props.route;
+    return <VideoListPage videos={Array.from(videos.values())} videoCoverage={videoCoverage}/>;
   }
 });
 
@@ -121,7 +121,7 @@ document.body.appendChild(div);
 
 const history = new HashHistory();
 
-tripsPromise.then((trips) => {
+tripsPromise.then(({trips, videoCoverage}) => {
   React.render(
     <MapData {...{boundary, contours, ways}}>{() => (
       <Router history={history}>
@@ -129,7 +129,7 @@ tripsPromise.then((trips) => {
           <Route path="/" component={CityMapRoute} trips={trips}/>
           <Route path="/ways" component={WayListRoute}/>
           <Route path="/ways/:name" component={WayDetailsRoute}/>
-          <Route path="/videos" component={VideoListRoute}/>
+          <Route path="/videos" component={VideoListRoute} videoCoverage={videoCoverage}/>
           <Route path="/videos/:name" component={VideoDetailsRoute}/>
           <Route path="/trips" component={TripListRoute} trips={trips}/>
           <Route path="/trips/:id" component={TripDetailsRoute} trips={trips}/>
