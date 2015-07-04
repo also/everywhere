@@ -8,23 +8,23 @@ export default React.createClass({
     return {selected: null, selectedOption: null};
   },
 
-  onChange(selected, [selectedOption]) {
-    this.setState({selected, selectedOption});
+  onChange(selected) {
+    this.setState({selected});
     const {onSelectionChange} = this.props;
     if (onSelectionChange) {
-      onSelectionChange(selectedOption);
+      onSelectionChange(selected);
     }
   },
 
   render() {
     const {ways} = this.props;
-    const {selected, selectedOption} = this.state;
+    const {selected} = this.state;
 
     let info = null;
 
-    if (selectedOption != null) {
-      const {features: selectedFeatures} = selectedOption;
-      info = <p>{selected}: {selectedFeatures.length} features</p>;
+    if (selected != null) {
+      const {features: selectedFeatures} = selected;
+      info = <p>{selected.name}: {selectedFeatures.length} features</p>;
     }
 
     return (

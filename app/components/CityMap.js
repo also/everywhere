@@ -13,7 +13,7 @@ export default React.createClass({
 
   selectStreet(selection) {
     console.log(selection);
-    this.setState({selectedStreetName: selection && selection.label});
+    this.setState({selectedStreetName: selection && selection.name});
   },
 
   render() {
