@@ -54,3 +54,8 @@ path.extent {
   stroke: #333;
   shape-rendering: crispEdges;
 }
+
+path.selected {
+  stroke-width: 5px;
+  stroke: green;
+}

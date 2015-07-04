@@ -37,8 +37,8 @@ export default React.createClass({
     const bounds = d3.geo.bounds(boundary);
 
     const projection = d3.geo.mercator()
-        .center([center(bounds[0][0], bounds[1][0]), center(bounds[0][1], bounds[1][1])])
-        .scale(900000)
+        .center([-71.11726545524994, 42.39685987297373])
+        .scale(9000000)
         .translate([width / 2, height / 2]);
 
     const path = d3.geo.path()
