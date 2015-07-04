@@ -47,6 +47,23 @@ export default React.createClass({
     return {path, projection};
   },
 
+  onMouseMove(e) {
+    const {onMouseMove} = this.props;
+    if (onMouseMove) {
+      const {projection} = this.state;
+
+      const previousEvent = d3.event;
+
+      try {
+        d3.event = e.nativeEvent;
+        const mouse = d3.mouse(this.svgNode);
+        onMouseMove({mouse, geo: projection.invert(mouse)});
+      } finally {
+        d3.event = previousEvent;
+      }
+    }
+  },
+
   render() {
     const {boundary, ways, contours} = this.context;
     const {width, height, selectedStreetName} = this.props;
@@ -54,7 +71,7 @@ export default React.createClass({
     const cityBoundaryPath = path(boundary);
 
     return (
-      <svg width={width} height={height}>
+      <svg width={width} height={height} onMouseMove={this.onMouseMove} ref={component => this.svgNode = React.findDOMNode(component)}>
         <defs>
           <mask id="boundary-mask">
             <path d={cityBoundaryPath}/>

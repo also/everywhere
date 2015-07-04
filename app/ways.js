@@ -1,4 +1,5 @@
 import sortBy from 'lodash/collection/sortBy';
+import tree from './tree';
 
 import {feature} from './geo';
 
@@ -12,9 +13,17 @@ const waysByName = new Map();
 const waysById = new Map();
 const unsortedGroupedWays = [];
 
+const arcs = [];
+
 ways.features.forEach(way => {
   waysById.set(way.properties.id, way);
   way.intersections = [];
+
+
+  (way.geometry.type === 'MultiLineString' ? way.geometry.coordinates : [way.geometry.coordinates]).forEach(arc => {
+    arc.feature = way;
+    arcs.push(arc);
+  });
 
   const {properties: {name}} = way;
   let wayFeatures = waysByName.get(name);
@@ -41,4 +50,6 @@ intersections.features.forEach(intersection => {
   });
 });
 
-export {ways, groupedWays, intersections};
+const wayTree = tree({arcs});
+
+export {ways, groupedWays, intersections, wayTree};

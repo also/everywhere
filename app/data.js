@@ -1,7 +1,7 @@
 import {feature} from './geo';
 
 import videos from './videos';
-import {ways, groupedWays, intersections} from './ways';
+import {ways, groupedWays, intersections, wayTree} from './ways';
 
 import tripsPromise from './trips';
 
@@ -11,4 +11,4 @@ import contoursTopojson from 'compact-json!../app-data/contour.geojson';
 const boundary = feature(boundaryGeojson);
 const contours = feature(contoursTopojson);
 
-export {ways, boundary, contours, tripsPromise, groupedWays, videos, intersections};
+export {ways, boundary, contours, tripsPromise, groupedWays, videos, intersections, wayTree};

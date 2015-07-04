@@ -22,7 +22,7 @@ import TripDetails from './components/TripDetails';
 import '!style!css!sass!./style.scss';
 import '!style!css!react-select/dist/default.css';
 
-import {ways, groupedWays, boundary, contours, tripsPromise, videos} from './data';
+import {ways, groupedWays, boundary, contours, tripsPromise, videos, wayTree} from './data';
 
 
 document.title = 'not quite everywhere';
@@ -73,7 +73,7 @@ const CityMapRoute = React.createClass({
 const WayListRoute = React.createClass({
   render() {
     return (
-      <WayList ways={groupedWays}/>
+      <WayList groupedWays={groupedWays} ways={ways} wayTree={wayTree}/>
     );
   }
 });
