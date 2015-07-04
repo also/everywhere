@@ -48,3 +48,9 @@ circle.position {
   fill: #fff;
   stroke: none;
 }
+
+path.extent {
+  fill: none;
+  stroke: #333;
+  shape-rendering: crispEdges;
+}
