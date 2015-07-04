@@ -3,7 +3,7 @@ import {Link} from 'react-router';
 import d3 from 'd3';
 import MapComponent from './Map';
 
-const badPoint = [-71.11659063829123, 42.39655898342246];
+const badPoint = [-71.11664793407073, 42.39703382408742];
 
 const Tree = React.createClass({
   mixins: [React.addons.PureRenderMixin],
@@ -79,6 +79,8 @@ const SelectedLineSegment = React.createClass({
 });
 
 export default React.createClass({
+  mixins: [React.addons.PureRenderMixin],
+
   getInitialState() {
     return {selectedStreetName: null, selectedLineSegment: null};
   },
@@ -91,14 +93,10 @@ export default React.createClass({
     this.selectGeo(badPoint);
   },
 
-  shouldComponentUpdate(nextProps, nextState) {
-    return nextProps.groupedWays !== this.props.groupedWays || nextState.selectedStreetName !== this.state.selectedStreetName;
-  },
-
   selectGeo(coords) {
     const {wayTree} = this.props;
     const leaf = wayTree.nearest(coords);
-    this.setState({selectedStreetName: leaf.data.feature.properties.name, selectedLineSegment: leaf.coordinates});
+    this.setState({/*selectedStreetName: leaf.data.feature.properties.name, */selectedLineSegment: leaf.coordinates});
   },
 
   render() {
@@ -107,7 +105,7 @@ export default React.createClass({
 
     return (
       <div>
-      <p>{selectedStreetName}</p>
+      <p>{selectedStreetName || `(no name)`}</p>
         <MapComponent width="1000" height="1000" onMouseMove={this.onMouseMove} selectedStreetName={selectedStreetName}>
           {this.mapLayers}
         </MapComponent>
@@ -124,7 +122,7 @@ export default React.createClass({
     const {wayTree} = this.props;
     const {selectedLineSegment} = this.state;
     return [
-      <Tree tree={wayTree}/>,
+      //<Tree tree={wayTree}/>,
       <BadPoint />,
       <SelectedLineSegment coords={selectedLineSegment}/>
     ];

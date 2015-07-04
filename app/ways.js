@@ -16,7 +16,7 @@ const unsortedGroupedWays = [];
 const arcs = [];
 
 // for debugging tree issues
-ways.features = ways.features.filter(({properties: {name}}) => name === 'Bay State Avenue' || name === 'Foskett Street');
+ways.features = ways.features.filter(({properties: {name}}) => name === 'Bay State Avenue' || name === 'Foskett Street' || name === 'Appleton Street');
 
 ways.features.forEach(way => {
   waysById.set(way.properties.id, way);
