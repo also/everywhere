@@ -62,8 +62,8 @@ class Node {
 
     return x < x0 ? pointLineSegmentDistance(point, [x0, y0], [x0, y1])
          : x > x1 ? pointLineSegmentDistance(point, [x1, y0], [x1, y1])
-         : y < y0 ? y0 - y
-         : y > y1 ? y - y1
+         : y < y0 ? pointLineSegmentDistance(point, [x0, y0], [x1, y0])
+         : y > y1 ? pointLineSegmentDistance(point, [x0, y1], [x1, y1])
          : 0;
   }
 
