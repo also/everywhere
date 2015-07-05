@@ -25,7 +25,9 @@ export default React.createClass({
           {this.mapLayers}
         </MapComponent>
         <h2>Intersections</h2>
-        {Array.from(intersections).sort().map(int => <p><Link key={int} to={`/ways/${int}`}>{int}</Link></p>)}
+        <ul style={{WebkitColumnWidth: '200px'}}>
+        {Array.from(intersections).sort().map(int => <li><Link key={int} to={`/ways/${int}`}>{int}</Link></li>)}
+        </ul>
       </div>
     );
   },
