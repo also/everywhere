@@ -36,7 +36,7 @@ export default React.createClass({
 
   getInitialState() {
     // FIXME props in getInitialState
-    const {width, height} = this.props;
+    const {width, height, zoomFeature} = this.props;
     const {boundary} = this.context;
 
     const projection = d3.geo.mercator()
@@ -46,7 +46,7 @@ export default React.createClass({
     const path = d3.geo.path()
       .projection(projection);
 
-    const [[left, top], [right, bottom]] = path.bounds(boundary);
+    const [[left, top], [right, bottom]] = path.bounds(zoomFeature || boundary);
 
     const s = .98 / Math.max((right - left) / width, (bottom - top) / height);
     const t = [(width - s * (right + left)) / 2, (height - s * (bottom + top)) / 2];
