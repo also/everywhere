@@ -58,7 +58,6 @@ export default React.createClass({
     const [[left, top], [right, bottom]] = path.bounds(boundsFeature);
 
     const s = Math.min(1 << 20, (zoom != null ? zoom : .98) / Math.max((right - left) / width, (bottom - top) / height));
-    console.log('scale', s);
     const t = [(width - s * (right + left)) / 2, (height - s * (bottom + top)) / 2];
 
     projection

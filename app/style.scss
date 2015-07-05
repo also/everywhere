@@ -55,6 +55,27 @@ ul {
   }
 }
 
+.video-list {
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-wrap: wrap;
+  flex-wrap: wrap;
+
+  & > div {
+    flex-shrink: 0;
+    padding: 0.4em;
+    margin: 0.8em;
+    background: #eee;
+    -moz-box-shadow:    3px 3px 0 0 #dfdfdf;
+    -webkit-box-shadow: 3px 3px 0 0 #dfdfdf;
+    box-shadow:         3px 3px 0 0 #dfdfdf;
+
+    .video-name {
+      color: #ccc;
+    }
+  }
+}
+
 .roads {
   path {
     fill: none;

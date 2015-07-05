@@ -1,5 +1,7 @@
 import * as React from 'react';
 
+import * as format from '../format';
+
 import TripList from './TripList';
 import VideoPlayer from './VideoPlayer';
 import MapComponent from './Map';
@@ -17,7 +19,7 @@ export default React.createClass({
     return (
       <div>
         <h1>{video.name}</h1>
-        <p>Taken {video.start.toString()}, {Math.round(video.duration / 60000)} minutes long</p>
+        <p>Taken <strong>{video.start.format('LLL')}</strong>, {format.duration(video.duration)} long</p>
         <span style={{display: 'inline-block'}}><VideoPlayer video={video}/></span>
         <span style={{display: 'inline-block', verticalAlign: 'top'}}>
           <MapComponent width={360} height={360} zoomFeature={featColl}>{this.mapLayers}</MapComponent>

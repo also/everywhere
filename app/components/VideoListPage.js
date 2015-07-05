@@ -11,7 +11,8 @@ export default React.createClass({
 
     return (
       <div>
-        <MapComponent width="1000" height="1000">
+        <h1>Videos</h1>
+        <MapComponent width="500" height="500">
           {this.mapLayers}
         </MapComponent>
         <VideoList videos={videos}/>

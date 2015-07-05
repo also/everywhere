@@ -1,4 +1,5 @@
 import sortBy from 'lodash/collection/sortBy';
+import moment from 'moment';
 
 const videoContext = require.context('compact-json!../app-data/video-metadata', false, /\.json$/);
 
@@ -16,10 +17,10 @@ videoContext.keys()
 
     const chapter = chapterString === 'PR' ? 0 : parseInt(chapterString, 10);
 
-    // FIXME just assuming EDT
-    const start = new Date(Date.parse(data.start.replace(' ', 'T') + '-0400'));
-    const duration = data.duration * 1000;
-    const end = new Date(start.getTime() + duration);
+    // FIXME just assuming EDT?
+    const start = moment(data.start);
+    const duration = moment.duration(parseFloat(data.duration), 's');
+    const end = start.clone().add(duration);
     const video = {
       name,
       start,
@@ -57,7 +58,7 @@ export default new Map(sortBy([...vidChapters].map(([name, chapters]) => {
     name,
     start: first.start,
     end: last.end,
-    duration: last.end - first.start,
+    duration: moment.duration(last.end - first.start),
     chapters,
     stills,
     thumbnail: stills[Math.floor(stills.length / 2)],
