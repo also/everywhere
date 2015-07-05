@@ -57,6 +57,24 @@ ul {
   }
 }
 
+.way-map {
+  position: relative;
+  display: inline-block;
+
+  .way-hover-info {
+    position: absolute;
+    // just kinda inside somerville
+    top: 350px;
+    left: 400px;
+
+    padding: 0.4em;
+    margin: 0.8em;
+    background: #eee;
+    box-shadow: 3px 3px 0 0 #dfdfdf;
+    font-weight: bold;
+  }
+}
+
 .video-list {
   @include display(flex);
   @include flex-wrap(wrap);

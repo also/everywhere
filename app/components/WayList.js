@@ -48,10 +48,12 @@ export default React.createClass({
     return (
       <div>
         <h1>Streets</h1>
-        <p>{hoveredStreet ? (hoveredStreet.properties.name || '(no name)') : '(hover over a street)'}</p>
-        <MapComponent width="1000" height="1000" onMouseMove={this.onMouseMove} onClick={this.onClick}>
-          {this.mapLayers}
-        </MapComponent>
+        <div className='way-map'>
+          <div className='way-hover-info'>{hoveredStreet ? (hoveredStreet.properties.name || '(no name)') : '(hover over a street)'}</div>
+          <MapComponent width="1000" height="1000" onMouseMove={this.onMouseMove} onClick={this.onClick}>
+            {this.mapLayers}
+          </MapComponent>
+        </div>
         <WayList groupedWays={groupedWays}/>
       </div>
     );
