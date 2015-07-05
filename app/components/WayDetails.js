@@ -1,6 +1,9 @@
 import * as React from 'react';
 import {Link} from 'react-router';
 
+import MapComponent from './Map';
+import Ways from './Ways';
+
 
 export default React.createClass({
   render() {
@@ -18,10 +21,17 @@ export default React.createClass({
     return (
       <div>
         <h1>{way.name}</h1>
-        <p>{way.features.length} features</p>
+        <MapComponent width="400" height="400">
+          {this.mapLayers}
+        </MapComponent>
         <h2>Intersections</h2>
         {Array.from(intersections).sort().map(int => <p><Link key={int} to={`/ways/${int}`}>{int}</Link></p>)}
       </div>
     );
+  },
+
+  mapLayers() {
+    const {way} = this.props;
+    return <Ways features={way.features} selected={true}/>;
   }
 });
