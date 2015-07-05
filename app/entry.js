@@ -19,6 +19,8 @@ import VideoDetails from './components/VideoDetails';
 import TripList from './components/TripList';
 import TripDetails from './components/TripDetails';
 
+import LocactionDetails from './components/LocationDetails';
+
 import {geoLines} from './geo';
 
 import '!style!css!sass!./style.scss';
@@ -119,6 +121,13 @@ const TripDetailsRoute = React.createClass({
   }
 });
 
+const LocationDetailsRoute = React.createClass({
+  render() {
+    const {params: {coords}} = this.props;
+    return <LocactionDetails location={coords.split(',').map(parseFloat)}/>;
+  }
+});
+
 const div = document.createElement('div');
 document.body.appendChild(div);
 
@@ -136,6 +145,7 @@ tripsPromise.then(({trips, videoCoverage}) => {
           <Route path="/videos/:name" component={VideoDetailsRoute}/>
           <Route path="/trips" component={TripListRoute} trips={trips}/>
           <Route path="/trips/:id" component={TripDetailsRoute} trips={trips}/>
+          <Route path="/locations/:coords" component={LocationDetailsRoute}/>
         </Route>
       </Router>
     )}</MapData>
