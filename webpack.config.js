@@ -15,6 +15,13 @@ module.exports = {
         query: {
           optional: ['runtime', 'es7.objectRestSpread']
         }
+      },
+      {
+        test: /\.s[ac]ss$/,
+        loader: 'sass',
+        query: {
+          includePaths: require('node-bourbon').includePaths
+        }
       }
     ]
   }

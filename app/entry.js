@@ -23,7 +23,7 @@ import LocactionDetails from './components/LocationDetails';
 
 import {geoLines} from './geo';
 
-import '!style!css!sass!./style.scss';
+import 'style!css!./style.scss';
 import '!style!css!react-select/dist/default.css';
 
 import {ways, groupedWays, boundary, contours, tripsPromise, videos, wayTree} from './data';
