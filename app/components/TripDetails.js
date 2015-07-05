@@ -1,7 +1,8 @@
 import * as React from 'react';
 
-import TripMap from './TripMap';
 import VideoList from './VideoList';
+import Trips from './Trips';
+import MapComponent from './Map';
 
 export default React.createClass({
   render() {
@@ -11,9 +12,18 @@ export default React.createClass({
       <div>
         <h1>{id}</h1>
         <p>Started {start.toString()}, {Math.round(movingTime / 60)} minutes moving</p>
-        <TripMap trip={trip}/>
+        <MapComponent width="1000" height="1000">
+          {this.mapLayers}
+        </MapComponent>
         <VideoList videos={videos}/>
       </div>
     );
+  },
+
+  mapLayers() {
+    const {trip} = this.props;
+    return [
+      <Trips trips={[trip]}/>
+    ];
   }
 });
