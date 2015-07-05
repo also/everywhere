@@ -1,5 +1,7 @@
 import * as React from 'react';
 
+import Dot from './Dot';
+
 
 export default React.createClass({
   contextTypes: {
@@ -30,8 +32,7 @@ export default React.createClass({
 
     if (position) {
       const {coords: {latitude, longitude}} = position;
-      const [x, y] = projection([longitude, latitude]);
-      return <circle cx={x} cy={y} r={4} className='position'/>;
+      return <Dot position={[longitude, latitude]} r={4} className='position'/>;
     } else {
       return null;
     }

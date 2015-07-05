@@ -1,5 +1,5 @@
 /* eslint-disable camelcase */
-import {feature} from './geo';
+import {feature, tree} from './geo';
 
 import videos from './videos';
 
@@ -21,7 +21,8 @@ export default tripData.then(tripTopojson => {
       id,
       start,
       end: new Date(start.getTime() + (elapsed_time * 1000)),
-      movingTime: moving_time
+      movingTime: moving_time,
+      tree: tree(result)
     });
     return result;
   });
