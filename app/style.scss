@@ -1,6 +1,8 @@
 body {
   font-family: 'helvetica neue';
   font-size: 13px;
+  margin: 0;
+  padding: 0;
 }
 
 a {
@@ -10,6 +12,22 @@ a {
 ul a {
   // https://crbug.com/439820
   outline: none;
+}
+
+header {
+  background-color: #eee;
+  border-bottom: 1px solid #ccc;
+
+  padding: 1em 2em;
+
+  font-size: 1.2em;
+
+  a {
+    color: #444;
+    text-decoration: none;
+    font-weight: bold;
+    margin-right: 2em;
+  }
 }
 
 .roads {

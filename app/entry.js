@@ -45,10 +45,11 @@ const App = React.createClass({
   render() {
     return (
       <div>
+        <header>
+          <div><Link to="/trips">Trips</Link> <Link to="/videos">Videos</Link> <Link to="/ways">Streets</Link></div>
+        </header>
         {this.props.children}
 
-        <hr/>
-        <div><Link to="/trips">trips</Link> <Link to="/videos">videos</Link> <Link to="/ways">streets</Link></div>
         <p>Map data © OpenStreetMap contributors</p>
       </div>
     );
