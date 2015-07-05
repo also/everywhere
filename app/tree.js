@@ -72,8 +72,7 @@ class Node {
     let minDistance = Infinity;
     const heap = minHeap(compareDistance);
     let node = this;
-    let distance = node.distance(point);
-    let candidate = {distance: distance, node: node};
+    let candidate = {distance: node.distance(point), node};
 
     do {
       node = candidate.node;
@@ -81,14 +80,14 @@ class Node {
         heap.push({distance: node.children[0].distance(point), node: node.children[0]});
         heap.push({distance: node.children[1].distance(point), node: node.children[1]});
       } else {
-        distance = node.distance(point);
+        const distance = node.distance(point);
         if (distance < minDistance) {
           minDistance = distance;
           minNode = node;
         }
       }
 
-    } while ((candidate = heap.pop()) && (distance = candidate.distance) <= minDistance);
+    } while ((candidate = heap.pop()) && (candidate.distance <= minDistance));
 
     return minNode;
   }
