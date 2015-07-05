@@ -1,6 +1,8 @@
 /* eslint-disable camelcase */
 import {feature, tree} from './geo';
 
+import {wayTree} from './ways';
+
 import videos from './videos';
 
 const tripData = new Promise(resolve => {

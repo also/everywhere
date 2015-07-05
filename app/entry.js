@@ -46,11 +46,15 @@ const App = React.createClass({
     return (
       <div>
         <header>
-          <div><Link to="/trips">Trips</Link> <Link to="/videos">Videos</Link> <Link to="/ways">Streets</Link></div>
+          <div><Link to="/" style={{color: '#E05338'}}>Everywhere</Link> <Link to="/trips">Trips</Link> <Link to="/videos">Videos</Link> <Link to="/ways">Streets</Link></div>
         </header>
-        {this.props.children}
+        <div id="content">
+          {this.props.children}
+        </div>
 
-        <p>Map data © OpenStreetMap contributors</p>
+        <footer>
+          <p>Map data © OpenStreetMap contributors</p>
+        </footer>
       </div>
     );
   }

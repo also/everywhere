@@ -24,7 +24,7 @@ export default React.createClass({
       <div>
         <h1>{id}</h1>
         <p>Started {start.toString()}, {Math.round(movingTime / 60)} minutes moving</p>
-        <MapComponent width="1000" height="1000" onMouseMove={this.onMouseMove}>
+        <MapComponent width="500" height="500" onMouseMove={this.onMouseMove}>
           {this.mapLayers}
         </MapComponent>
         <VideoList videos={videos}/>

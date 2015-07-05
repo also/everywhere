@@ -15,8 +15,6 @@ export default React.createClass({
   componentWillMount() {
     if ('geolocation' in navigator) {
       this.watchId = navigator.geolocation.watchPosition(position => this.setState({position}));
-    } else {
-      /* geolocation IS NOT available */
     }
   },
 
