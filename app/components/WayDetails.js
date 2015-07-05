@@ -26,7 +26,7 @@ export default React.createClass({
     return (
       <div>
         <h1>{way.name}</h1>
-        <MapComponent width={400} height={400} zoomFeature={featColl}>
+        <MapComponent width={400} height={400} zoomFeature={featColl} zoom={0.7}>
           {this.mapLayers}
         </MapComponent>
         <h2>Intersections</h2>

@@ -35,8 +35,15 @@ export default React.createClass({
   },
 
   getInitialState() {
-    // FIXME props in getInitialState
-    const {width, height, zoomFeature} = this.props;
+    return this.recompute(this.props);
+  },
+
+  componentWillReceiveProps(nextProps) {
+    this.setState(this.recompute(nextProps));
+  },
+
+  recompute(props) {
+    const {width, height, zoomFeature, zoom} = props;
     const {boundary} = this.context;
 
     const projection = d3.geo.mercator()
@@ -50,7 +57,8 @@ export default React.createClass({
 
     const [[left, top], [right, bottom]] = path.bounds(boundsFeature);
 
-    const s = .98 / Math.max((right - left) / width, (bottom - top) / height);
+    const s = Math.min(1 << 20, (zoom != null ? zoom : .98) / Math.max((right - left) / width, (bottom - top) / height));
+    console.log('scale', s);
     const t = [(width - s * (right + left)) / 2, (height - s * (bottom + top)) / 2];
 
     projection
