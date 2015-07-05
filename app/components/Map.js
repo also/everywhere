@@ -5,11 +5,6 @@ import Contours from './Contours';
 import Ways from './Ways';
 
 
-
-function center(a, b) {
-  return (a + b) / 2;
-}
-
 function mouse(e, node) {
   const previousEvent = d3.event;
 
@@ -44,17 +39,21 @@ export default React.createClass({
     const {width, height} = this.props;
     const {boundary} = this.context;
 
-    const ratio = Math.min(width, height) / 1000;
-
-    const bounds = d3.geo.bounds(boundary);
-
     const projection = d3.geo.mercator()
-        .center([center(bounds[0][0], bounds[1][0]), center(bounds[0][1], bounds[1][1])])
-        .scale(900000 * ratio)
-        .translate([width / 2, height / 2]);
+      .scale(1)
+      .translate([0, 0]);
 
     const path = d3.geo.path()
-        .projection(projection);
+      .projection(projection);
+
+    const [[left, top], [right, bottom]] = path.bounds(boundary);
+
+    const s = .98 / Math.max((right - left) / width, (bottom - top) / height);
+    const t = [(width - s * (right + left)) / 2, (height - s * (bottom + top)) / 2];
+
+    projection
+      .scale(s)
+      .translate(t);
 
     return {path, projection};
   },
