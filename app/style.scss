@@ -83,7 +83,8 @@ ul {
     @include flex-shrink(0);
     padding: 0.4em;
     margin: 0.8em;
-    background: #eee;
+    border: 1px solid #ccc;
+    background: #fff;
     box-shadow: 3px 3px 0 0 #dfdfdf;
 
     .video-name {
