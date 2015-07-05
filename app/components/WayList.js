@@ -47,7 +47,7 @@ export default React.createClass({
 
     return (
       <div>
-        <p>{hoveredStreet ? (hoveredStreet.properties.name || '(no name)') : '(hover over a stree)'}</p>
+        <p>{hoveredStreet ? (hoveredStreet.properties.name || '(no name)') : '(hover over a street)'}</p>
         <MapComponent width="1000" height="1000" onMouseMove={this.onMouseMove} onClick={this.onClick}>
           {this.mapLayers}
         </MapComponent>
