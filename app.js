@@ -186,33 +186,50 @@
 	    return React.createElement(
 	      'div',
 	      null,
-	      this.props.children,
-	      React.createElement('hr', null),
 	      React.createElement(
-	        'div',
+	        'header',
 	        null,
 	        React.createElement(
-	          _reactRouter.Link,
-	          { to: '/trips' },
-	          'trips'
-	        ),
-	        ' ',
-	        React.createElement(
-	          _reactRouter.Link,
-	          { to: '/videos' },
-	          'videos'
-	        ),
-	        ' ',
-	        React.createElement(
-	          _reactRouter.Link,
-	          { to: '/ways' },
-	          'streets'
+	          'div',
+	          null,
+	          React.createElement(
+	            _reactRouter.Link,
+	            { to: '/', style: { color: '#E05338' } },
+	            'Everywhere'
+	          ),
+	          ' ',
+	          React.createElement(
+	            _reactRouter.Link,
+	            { to: '/trips' },
+	            'Trips'
+	          ),
+	          ' ',
+	          React.createElement(
+	            _reactRouter.Link,
+	            { to: '/videos' },
+	            'Videos'
+	          ),
+	          ' ',
+	          React.createElement(
+	            _reactRouter.Link,
+	            { to: '/ways' },
+	            'Streets'
+	          )
 	        )
 	      ),
 	      React.createElement(
-	        'p',
+	        'div',
+	        { id: 'content' },
+	        this.props.children
+	      ),
+	      React.createElement(
+	        'footer',
 	        null,
-	        'Map data © OpenStreetMap contributors'
+	        React.createElement(
+	          'p',
+	          null,
+	          'Map data © OpenStreetMap contributors'
+	        )
 	      )
 	    );
 	  }
@@ -35988,7 +36005,7 @@
 	      this.watchId = navigator.geolocation.watchPosition(function (position) {
 	        return _this.setState({ position: position });
 	      });
-	    } else {}
+	    }
 	  },
 
 	  componentWillUnmount: function componentWillUnmount() {
@@ -36013,8 +36030,6 @@
 	  }
 	});
 	module.exports = exports['default'];
-
-	/* geolocation IS NOT available */
 
 /***/ },
 /* 273 */
@@ -38729,7 +38744,7 @@
 	      React.createElement(
 	        'p',
 	        null,
-	        hoveredStreet ? hoveredStreet.properties.name || '(no name)' : '(hover over a stree)'
+	        hoveredStreet ? hoveredStreet.properties.name || '(no name)' : '(hover over a street)'
 	      ),
 	      React.createElement(
 	        _Map2['default'],
@@ -39641,7 +39656,7 @@
 	      ),
 	      React.createElement(
 	        _Map2['default'],
-	        { width: '1000', height: '1000', onMouseMove: this.onMouseMove },
+	        { width: '500', height: '500', onMouseMove: this.onMouseMove },
 	        this.mapLayers
 	      ),
 	      React.createElement(_VideoList2['default'], { videos: videos })
@@ -40571,28 +40586,30 @@
 	});
 
 	exports["default"] = function (compare) {
-	  var heap = {},
-	      array = [],
-	      size = 0;
+	  var heap = {};
+	  var array = [];
+	  var size = 0;
 
 	  function up(object, i) {
 	    while (i > 0) {
-	      var j = (i + 1 >> 1) - 1,
-	          parent = array[j];
-	      if (compare(object, parent) >= 0) {
+	      var j = (i + 1 >> 1) - 1;
+	      var _parent = array[j];
+
+	      if (compare(object, _parent) >= 0) {
 	        break;
 	      }
-	      array[parent._ = i] = parent;
+	      array[_parent._ = i] = _parent;
 	      array[object._ = i = j] = object;
 	    }
 	  }
 
 	  function down(object, i) {
 	    while (true) {
-	      var r = i + 1 << 1,
-	          l = r - 1,
-	          j = i,
-	          child = array[j];
+	      var r = i + 1 << 1;
+	      var l = r - 1;
+	      var j = i;
+	      var child = array[j];
+
 	      if (l < size && compare(array[l], child) < 0) {
 	        child = array[j = l];
 	      }
@@ -40618,25 +40635,26 @@
 
 	  heap.pop = function () {
 	    if (size <= 0) {
-	      return;
+	      return null;
 	    }
-	    var removed = array[0],
-	        object;
+
+	    var removed = array[0];
 	    if (--size > 0) {
-	      object = array[size];
+	      var object = array[size];
 	      down(array[object._ = 0] = object, 0);
 	    }
 	    return removed;
 	  };
 
 	  heap.remove = function (removed) {
-	    var i = removed._,
-	        object;
+	    var i = removed._;
+
 	    if (array[i] !== removed) {
-	      return; // invalid request
+	      return null; // invalid request
 	    }
+
 	    if (i !== --size) {
-	      object = array[size];
+	      var object = array[size];
 	      (compare(object, removed) < 0 ? up : down)(array[object._ = i] = object, i);
 	    }
 	    return i;
@@ -40678,7 +40696,7 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	exports = module.exports = __webpack_require__(334)();
-	exports.push([module.id, "body {\n  font-family: 'helvetica neue';\n  font-size: 13px; }\n\na {\n  color: #116AA9; }\n\nul a {\n  outline: none; }\n\n.roads path {\n  fill: none;\n  stroke-width: 1px;\n  stroke: #fff; }\n  .roads path.selected {\n    stroke-width: 5px;\n    stroke: #116AA9; }\n\n.roads [data-highway=\"secondary\"], .roads [data-highway=\"trunk\"] {\n  stroke-width: 2px; }\n\npath.boundary {\n  fill: #00DCC2; }\n\n#boundary-mask {\n  fill: #fff;\n  stroke-width: 10px;\n  stroke: #fff; }\n\npath.trip {\n  fill: none;\n  stroke-width: 1.5px;\n  stroke: #888;\n  stroke-linecap: round;\n  stroke-linejoin: round; }\n\npath.contour {\n  fill: none;\n  stroke-width: 1px;\n  stroke: #00ebcf; }\n\ncircle.position {\n  fill: #fff;\n  stroke: none; }\n\npath.extent {\n  fill: none;\n  stroke: #333;\n  shape-rendering: crispEdges; }\n", ""]);
+	exports.push([module.id, "body {\n  font-family: 'helvetica neue';\n  font-size: 13px;\n  margin: 0;\n  padding: 0;\n  color: #444; }\n\na {\n  color: #116AA9; }\n\nul a {\n  outline: none; }\n\nheader {\n  background-color: #eee;\n  border-bottom: 1px solid #ccc;\n  padding: 1em 2em;\n  font-size: 1.2em; }\n  header a {\n    color: #444;\n    text-decoration: none;\n    font-weight: bold;\n    margin-right: 2em; }\n\n#content {\n  padding: 3em; }\n\nh1 {\n  margin-top: 0; }\n\nfooter {\n  margin: 1em;\n  text-align: center;\n  font-size: 0.8em;\n  color: #cecece; }\n\nul {\n  margin: 0;\n  padding: 0;\n  list-style-type: none; }\n  ul li {\n    margin-bottom: 0.3em; }\n\n.roads path {\n  fill: none;\n  stroke-width: 1px;\n  stroke: #fff; }\n  .roads path.selected {\n    stroke-width: 5px;\n    stroke: #116AA9; }\n\n.roads [data-highway=\"secondary\"], .roads [data-highway=\"trunk\"] {\n  stroke-width: 2px; }\n\npath.boundary {\n  fill: #00DCC2; }\n\n#boundary-mask {\n  fill: #fff;\n  stroke-width: 10px;\n  stroke: #fff; }\n\npath.trip {\n  fill: none;\n  stroke-width: 1.5px;\n  stroke: #888;\n  stroke-linecap: round;\n  stroke-linejoin: round; }\n\npath.contour {\n  fill: none;\n  stroke-width: 1px;\n  stroke: #00ebcf; }\n\ncircle.position {\n  fill: #fff;\n  stroke: none; }\n\npath.extent {\n  fill: none;\n  stroke: #333;\n  shape-rendering: crispEdges; }\n", ""]);
 
 /***/ },
 /* 334 */
@@ -42147,6 +42165,8 @@
 	});
 
 	var _geo = __webpack_require__(322);
+
+	var _ways = __webpack_require__(339);
 
 	var _videos = __webpack_require__(352);
 
