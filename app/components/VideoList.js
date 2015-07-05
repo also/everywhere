@@ -12,7 +12,7 @@ export default React.createClass({
           <tr key={name}>
             <td><Link to={`/videos/${name}`}><img src={thumbnail.small} width="160" height="90"/></Link></td>
             <td>{start.toString()}</td>
-            <td>{Math.round(duration / 60)}</td>
+            <td>{Math.round(duration / 60000)}</td>
             <td>{name}</td>
           </tr>
         ))}
