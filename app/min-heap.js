@@ -2,14 +2,15 @@
 // FIXME license?
 
 export default function(compare) {
-  var heap = {},
-      array = [],
-      size = 0;
+  const heap = {};
+  const array = [];
+  let size = 0;
 
   function up(object, i) {
     while (i > 0) {
-      var j = ((i + 1) >> 1) - 1,
-          parent = array[j];
+      const j = ((i + 1) >> 1) - 1;
+      const parent = array[j];
+
       if (compare(object, parent) >= 0) {
         break;
       }
@@ -20,10 +21,11 @@ export default function(compare) {
 
   function down(object, i) {
     while (true) {
-      var r = (i + 1) << 1,
-          l = r - 1,
-          j = i,
-          child = array[j];
+      const r = (i + 1) << 1;
+      const l = r - 1;
+      let j = i;
+      let child = array[j];
+
       if (l < size && compare(array[l], child) < 0) {
         child = array[j = l];
       }
@@ -47,23 +49,26 @@ export default function(compare) {
 
   heap.pop = function() {
     if (size <= 0) {
-      return;
+      return null;
     }
-    var removed = array[0], object;
+
+    const removed = array[0];
     if (--size > 0) {
-      object = array[size];
+      const object = array[size];
       down(array[object._ = 0] = object, 0);
     }
     return removed;
   };
 
   heap.remove = function(removed) {
-    var i = removed._, object;
+    const i = removed._;
+
     if (array[i] !== removed) {
-      return; // invalid request
+      return null; // invalid request
     }
+
     if (i !== --size) {
-      object = array[size];
+      const object = array[size];
       (compare(object, removed) < 0 ? up : down)(array[object._ = i] = object, i);
     }
     return i;
