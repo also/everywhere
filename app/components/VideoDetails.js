@@ -21,7 +21,7 @@ export default React.createClass({
         <h1>{video.name}</h1>
         <p>Taken <strong>{video.start.format('LLL')}</strong>, {format.duration(video.duration)} long</p>
         <span style={{display: 'inline-block'}}><VideoPlayer video={video}/></span>
-        <span style={{display: 'inline-block', verticalAlign: 'top'}}>
+        <span style={{display: 'inline-block', verticalAlign: 'top', marginLeft: '1em'}} className='map-box'>
           <MapComponent width={360} height={360} zoomFeature={featColl}>{this.mapLayers}</MapComponent>
         </span>
         <TripList trips={video.trips}/>

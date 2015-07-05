@@ -26,9 +26,11 @@ export default React.createClass({
     return (
       <div>
         <h1>{way.name}</h1>
-        <MapComponent width={400} height={400} zoomFeature={featColl} zoom={0.7}>
-          {this.mapLayers}
-        </MapComponent>
+        <div className='map-box'>
+          <MapComponent width={400} height={400} zoomFeature={featColl} zoom={0.7}>
+            {this.mapLayers}
+          </MapComponent>
+        </div>
         <h2>Intersections</h2>
         <ul style={{WebkitColumnWidth: '200px'}}>
         {Array.from(intersections).sort().map(int => <li><Link key={int} to={`/ways/${int}`}>{int}</Link></li>)}
