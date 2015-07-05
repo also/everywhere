@@ -7,7 +7,7 @@ import MapComponent from './Map';
 export default React.createClass({
   render() {
     return (
-      <MapComponent width="1000" height="1000" {...this.props}>
+      <MapComponent width="1000" height="1000">
         {this.layers}
       </MapComponent>
     );

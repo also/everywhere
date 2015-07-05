@@ -21,7 +21,7 @@ export default React.createClass({
     return (
       <div>
         <h1>{way.name}</h1>
-        <MapComponent width="400" height="400">
+        <MapComponent width={400} height={400}>
           {this.mapLayers}
         </MapComponent>
         <h2>Intersections</h2>

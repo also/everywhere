@@ -77,7 +77,7 @@ export default React.createClass({
 
   render() {
     const {boundary, ways, contours} = this.context;
-    const {width, height, selectedStreetName} = this.props;
+    const {width, height} = this.props;
     const {path} = this.state;
     const cityBoundaryPath = path(boundary);
 
@@ -91,7 +91,7 @@ export default React.createClass({
 
         <path className="boundary" d={cityBoundaryPath}/>
         <Contours features={contours.features}/>
-        <Ways features={ways.features} selectedStreetName={selectedStreetName}/>
+        <Ways features={ways.features}/>
         {this.props.children()}
       </svg>
     );
