@@ -16,12 +16,17 @@ export default React.createClass({
       });
     });
 
+    const featColl = {
+      type: 'FeatureCollection',
+      features: way.features
+    };
+
     intersections.delete(way.name);
 
     return (
       <div>
         <h1>{way.name}</h1>
-        <MapComponent width={400} height={400}>
+        <MapComponent width={400} height={400} zoomFeature={featColl}>
           {this.mapLayers}
         </MapComponent>
         <h2>Intersections</h2>

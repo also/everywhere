@@ -46,7 +46,9 @@ export default React.createClass({
     const path = d3.geo.path()
       .projection(projection);
 
-    const [[left, top], [right, bottom]] = path.bounds(zoomFeature || boundary);
+    const boundsFeature = zoomFeature || boundary;
+
+    const [[left, top], [right, bottom]] = path.bounds(boundsFeature);
 
     const s = .98 / Math.max((right - left) / width, (bottom - top) / height);
     const t = [(width - s * (right + left)) / 2, (height - s * (bottom + top)) / 2];
