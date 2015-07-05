@@ -1,7 +1,6 @@
 import sortBy from 'lodash/collection/sortBy';
-import tree from './tree';
 
-import {feature} from './geo';
+import {feature, tree} from './geo';
 
 import waysGeojson from 'compact-json!../app-data/highways-clipped-topo.geojson';
 import intersectionsTopojson from 'compact-json!../app-data/intersections-clipped-topo.geojson';
@@ -13,17 +12,9 @@ const waysByName = new Map();
 const waysById = new Map();
 const unsortedGroupedWays = [];
 
-const arcs = [];
-
 ways.features.forEach(way => {
   waysById.set(way.properties.id, way);
   way.intersections = [];
-
-
-  (way.geometry.type === 'MultiLineString' ? way.geometry.coordinates : [way.geometry.coordinates]).forEach(arc => {
-    arc.feature = way;
-    arcs.push(arc);
-  });
 
   const {properties: {name}} = way;
   let wayFeatures = waysByName.get(name);
@@ -50,6 +41,6 @@ intersections.features.forEach(intersection => {
   });
 });
 
-const wayTree = tree({arcs});
+const wayTree = tree(ways);
 
 export {ways, groupedWays, intersections, wayTree};

@@ -95,12 +95,13 @@ class Node {
 }
 
 class Leaf {
-  constructor(point0, point1, data) {
+  constructor(point0, point1, index, data) {
     this.coordinates = [point0, point1];
     this.extent = [
       [Math.min(point0[0], point1[0]), Math.min(point0[1], point1[1])],
       [Math.max(point0[0], point1[0]), Math.max(point0[1], point1[1])]
     ];
+    this.index = index;
     this.data = data;
   }
 
@@ -120,7 +121,7 @@ export default function(topology) {
     while (++i < n) {
       p0 = p1;
       p1 = arc[i];
-      children[i - 1] = new Leaf(p0, p1, arc);
+      children[i - 1] = new Leaf(p0, p1, i, arc);
     }
 
     return group(children);
