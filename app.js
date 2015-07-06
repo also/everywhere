@@ -36352,7 +36352,6 @@
 	        )
 	      ),
 	      React.createElement('path', { className: 'boundary', d: cityBoundaryPath }),
-	      React.createElement(_Contours2['default'], { features: contours.features }),
 	      showWays ? React.createElement(_Ways2['default'], { features: ways.features }) : null
 	    );
 	  }
@@ -36480,6 +36479,7 @@
 	  }
 	});
 	module.exports = exports['default'];
+	/*<Contours features={contours.features}/>*/
 
 /***/ },
 /* 282 */
