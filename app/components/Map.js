@@ -1,6 +1,7 @@
 import * as React from 'react';
 import d3 from 'd3';
 import shallowEqual from 'react/lib/shallowEqual';
+import omit from 'lodash/object/omit';
 
 import Contours from './Contours';
 import Ways from './Ways';
@@ -77,7 +78,9 @@ export default React.createClass({
   },
 
   componentWillReceiveProps(nextProps) {
-    this.setState(this.recompute(nextProps));
+    if (!shallowEqual(omit(nextProps, 'children'), omit(this.props, 'children'))) {
+      this.setState(this.recompute(nextProps));
+    }
   },
 
   recompute(props) {
