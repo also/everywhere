@@ -1,18 +1,24 @@
-import * as React from 'react/addons';
+import * as React from 'react';
 import d3 from 'd3';
+import shallowEqual from 'react/lib/shallowEqual';
 
 import Contours from './Contours';
 import Ways from './Ways';
 
 
 const BaseMap = React.createClass({
-  mixins: [React.addons.PureRenderMixin],
-
   contextTypes: {
     path: React.PropTypes.any,
     boundary: React.PropTypes.any.isRequired,
     ways: React.PropTypes.any,
     contours: React.PropTypes.any
+  },
+
+  // can't use PureRenderMixin because context :(
+  shouldComponentUpdate(nextProps, nextState, nextContext) {
+    return !shallowEqual(this.props, nextProps) ||
+           !shallowEqual(this.state, nextState) ||
+           !shallowEqual(this.context, nextContext);
   },
 
   render() {
