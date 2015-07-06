@@ -129,45 +129,45 @@
 
 	var _componentsCityMap2 = _interopRequireDefault(_componentsCityMap);
 
-	var _componentsMapData = __webpack_require__(302);
+	var _componentsMapData = __webpack_require__(317);
 
 	var _componentsMapData2 = _interopRequireDefault(_componentsMapData);
 
-	var _componentsWayList = __webpack_require__(303);
+	var _componentsWayList = __webpack_require__(318);
 
 	var _componentsWayList2 = _interopRequireDefault(_componentsWayList);
 
-	var _componentsWayDetails = __webpack_require__(304);
+	var _componentsWayDetails = __webpack_require__(319);
 
 	var _componentsWayDetails2 = _interopRequireDefault(_componentsWayDetails);
 
-	var _componentsVideoListPage = __webpack_require__(316);
+	var _componentsVideoListPage = __webpack_require__(331);
 
 	var _componentsVideoListPage2 = _interopRequireDefault(_componentsVideoListPage);
 
-	var _componentsVideoDetails = __webpack_require__(405);
+	var _componentsVideoDetails = __webpack_require__(420);
 
 	var _componentsVideoDetails2 = _interopRequireDefault(_componentsVideoDetails);
 
-	var _componentsTripList = __webpack_require__(406);
+	var _componentsTripList = __webpack_require__(421);
 
 	var _componentsTripList2 = _interopRequireDefault(_componentsTripList);
 
-	var _componentsTripDetails = __webpack_require__(408);
+	var _componentsTripDetails = __webpack_require__(423);
 
 	var _componentsTripDetails2 = _interopRequireDefault(_componentsTripDetails);
 
-	var _componentsLocationDetails = __webpack_require__(409);
+	var _componentsLocationDetails = __webpack_require__(424);
 
 	var _componentsLocationDetails2 = _interopRequireDefault(_componentsLocationDetails);
 
-	var _geo = __webpack_require__(410);
+	var _geo = __webpack_require__(425);
 
-	__webpack_require__(420);
+	__webpack_require__(435);
 
-	__webpack_require__(424);
+	__webpack_require__(439);
 
-	var _data = __webpack_require__(426);
+	var _data = __webpack_require__(441);
 
 	document.title = 'not quite everywhere';
 
@@ -36298,13 +36298,64 @@
 
 	var _d32 = _interopRequireDefault(_d3);
 
-	var _Contours = __webpack_require__(282);
+	var _reactLibShallowEqual = __webpack_require__(168);
+
+	var _reactLibShallowEqual2 = _interopRequireDefault(_reactLibShallowEqual);
+
+	var _lodashObjectOmit = __webpack_require__(282);
+
+	var _lodashObjectOmit2 = _interopRequireDefault(_lodashObjectOmit);
+
+	var _Contours = __webpack_require__(297);
 
 	var _Contours2 = _interopRequireDefault(_Contours);
 
-	var _Ways = __webpack_require__(283);
+	var _Ways = __webpack_require__(298);
 
 	var _Ways2 = _interopRequireDefault(_Ways);
+
+	var BaseMap = React.createClass({
+	  displayName: 'BaseMap',
+
+	  contextTypes: {
+	    path: React.PropTypes.any,
+	    boundary: React.PropTypes.any.isRequired,
+	    ways: React.PropTypes.any,
+	    contours: React.PropTypes.any
+	  },
+
+	  // can't use PureRenderMixin because context :(
+	  shouldComponentUpdate: function shouldComponentUpdate(nextProps, nextState, nextContext) {
+	    return !(0, _reactLibShallowEqual2['default'])(this.props, nextProps) || !(0, _reactLibShallowEqual2['default'])(this.state, nextState) || !(0, _reactLibShallowEqual2['default'])(this.context, nextContext);
+	  },
+
+	  render: function render() {
+	    var _context = this.context;
+	    var boundary = _context.boundary;
+	    var path = _context.path;
+	    var contours = _context.contours;
+	    var ways = _context.ways;
+
+	    var cityBoundaryPath = path(boundary);
+
+	    return React.createElement(
+	      'g',
+	      null,
+	      React.createElement(
+	        'defs',
+	        null,
+	        React.createElement(
+	          'mask',
+	          { id: 'boundary-mask' },
+	          React.createElement('path', { d: cityBoundaryPath })
+	        )
+	      ),
+	      React.createElement('path', { className: 'boundary', d: cityBoundaryPath }),
+	      React.createElement(_Contours2['default'], { features: contours.features }),
+	      React.createElement(_Ways2['default'], { features: ways.features })
+	    );
+	  }
+	});
 
 	function mouse(e, node) {
 	  var previousEvent = _d32['default'].event;
@@ -36345,7 +36396,9 @@
 	  },
 
 	  componentWillReceiveProps: function componentWillReceiveProps(nextProps) {
-	    this.setState(this.recompute(nextProps));
+	    if (!(0, _reactLibShallowEqual2['default'])((0, _lodashObjectOmit2['default'])(nextProps, 'children'), (0, _lodashObjectOmit2['default'])(this.props, 'children'))) {
+	      this.setState(this.recompute(nextProps));
+	    }
 	  },
 
 	  recompute: function recompute(props) {
@@ -36404,34 +36457,21 @@
 	  render: function render() {
 	    var _this = this;
 
-	    var _context = this.context;
-	    var boundary = _context.boundary;
-	    var ways = _context.ways;
-	    var contours = _context.contours;
+	    var _context2 = this.context;
+	    var boundary = _context2.boundary;
+	    var ways = _context2.ways;
+	    var contours = _context2.contours;
 	    var _props = this.props;
 	    var width = _props.width;
 	    var height = _props.height;
 	    var path = this.state.path;
-
-	    var cityBoundaryPath = path(boundary);
 
 	    return React.createElement(
 	      'svg',
 	      { width: width, height: height, onMouseMove: this.onMouseMove, onClick: this.onClick, ref: function (component) {
 	          return _this.svgNode = React.findDOMNode(component);
 	        } },
-	      React.createElement(
-	        'defs',
-	        null,
-	        React.createElement(
-	          'mask',
-	          { id: 'boundary-mask' },
-	          React.createElement('path', { d: cityBoundaryPath })
-	        )
-	      ),
-	      React.createElement('path', { className: 'boundary', d: cityBoundaryPath }),
-	      React.createElement(_Contours2['default'], { features: contours.features }),
-	      React.createElement(_Ways2['default'], { features: ways.features }),
+	      React.createElement(BaseMap, null),
 	      this.props.children()
 	    );
 	  }
@@ -36440,6 +36480,549 @@
 
 /***/ },
 /* 282 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var arrayMap = __webpack_require__(283),
+	    baseDifference = __webpack_require__(284),
+	    baseFlatten = __webpack_require__(292),
+	    bindCallback = __webpack_require__(231),
+	    keysIn = __webpack_require__(209),
+	    pickByArray = __webpack_require__(293),
+	    pickByCallback = __webpack_require__(294),
+	    restParam = __webpack_require__(296);
+
+	/**
+	 * The opposite of `_.pick`; this method creates an object composed of the
+	 * own and inherited enumerable properties of `object` that are not omitted.
+	 *
+	 * @static
+	 * @memberOf _
+	 * @category Object
+	 * @param {Object} object The source object.
+	 * @param {Function|...(string|string[])} [predicate] The function invoked per
+	 *  iteration or property names to omit, specified as individual property
+	 *  names or arrays of property names.
+	 * @param {*} [thisArg] The `this` binding of `predicate`.
+	 * @returns {Object} Returns the new object.
+	 * @example
+	 *
+	 * var object = { 'user': 'fred', 'age': 40 };
+	 *
+	 * _.omit(object, 'age');
+	 * // => { 'user': 'fred' }
+	 *
+	 * _.omit(object, _.isNumber);
+	 * // => { 'user': 'fred' }
+	 */
+	var omit = restParam(function(object, props) {
+	  if (object == null) {
+	    return {};
+	  }
+	  if (typeof props[0] != 'function') {
+	    var props = arrayMap(baseFlatten(props), String);
+	    return pickByArray(object, baseDifference(keysIn(object), props));
+	  }
+	  var predicate = bindCallback(props[0], props[1], 3);
+	  return pickByCallback(object, function(value, key, object) {
+	    return !predicate(value, key, object);
+	  });
+	});
+
+	module.exports = omit;
+
+
+/***/ },
+/* 283 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * A specialized version of `_.map` for arrays without support for callback
+	 * shorthands and `this` binding.
+	 *
+	 * @private
+	 * @param {Array} array The array to iterate over.
+	 * @param {Function} iteratee The function invoked per iteration.
+	 * @returns {Array} Returns the new mapped array.
+	 */
+	function arrayMap(array, iteratee) {
+	  var index = -1,
+	      length = array.length,
+	      result = Array(length);
+
+	  while (++index < length) {
+	    result[index] = iteratee(array[index], index, array);
+	  }
+	  return result;
+	}
+
+	module.exports = arrayMap;
+
+
+/***/ },
+/* 284 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var baseIndexOf = __webpack_require__(285),
+	    cacheIndexOf = __webpack_require__(287),
+	    createCache = __webpack_require__(288);
+
+	/**
+	 * The base implementation of `_.difference` which accepts a single array
+	 * of values to exclude.
+	 *
+	 * @private
+	 * @param {Array} array The array to inspect.
+	 * @param {Array} values The values to exclude.
+	 * @returns {Array} Returns the new array of filtered values.
+	 */
+	function baseDifference(array, values) {
+	  var length = array ? array.length : 0,
+	      result = [];
+
+	  if (!length) {
+	    return result;
+	  }
+	  var index = -1,
+	      indexOf = baseIndexOf,
+	      isCommon = true,
+	      cache = (isCommon && values.length >= 200) ? createCache(values) : null,
+	      valuesLength = values.length;
+
+	  if (cache) {
+	    indexOf = cacheIndexOf;
+	    isCommon = false;
+	    values = cache;
+	  }
+	  outer:
+	  while (++index < length) {
+	    var value = array[index];
+
+	    if (isCommon && value === value) {
+	      var valuesIndex = valuesLength;
+	      while (valuesIndex--) {
+	        if (values[valuesIndex] === value) {
+	          continue outer;
+	        }
+	      }
+	      result.push(value);
+	    }
+	    else if (indexOf(values, value, 0) < 0) {
+	      result.push(value);
+	    }
+	  }
+	  return result;
+	}
+
+	module.exports = baseDifference;
+
+
+/***/ },
+/* 285 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var indexOfNaN = __webpack_require__(286);
+
+	/**
+	 * The base implementation of `_.indexOf` without support for binary searches.
+	 *
+	 * @private
+	 * @param {Array} array The array to search.
+	 * @param {*} value The value to search for.
+	 * @param {number} fromIndex The index to search from.
+	 * @returns {number} Returns the index of the matched value, else `-1`.
+	 */
+	function baseIndexOf(array, value, fromIndex) {
+	  if (value !== value) {
+	    return indexOfNaN(array, fromIndex);
+	  }
+	  var index = fromIndex - 1,
+	      length = array.length;
+
+	  while (++index < length) {
+	    if (array[index] === value) {
+	      return index;
+	    }
+	  }
+	  return -1;
+	}
+
+	module.exports = baseIndexOf;
+
+
+/***/ },
+/* 286 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * Gets the index at which the first occurrence of `NaN` is found in `array`.
+	 *
+	 * @private
+	 * @param {Array} array The array to search.
+	 * @param {number} fromIndex The index to search from.
+	 * @param {boolean} [fromRight] Specify iterating from right to left.
+	 * @returns {number} Returns the index of the matched `NaN`, else `-1`.
+	 */
+	function indexOfNaN(array, fromIndex, fromRight) {
+	  var length = array.length,
+	      index = fromIndex + (fromRight ? 0 : -1);
+
+	  while ((fromRight ? index-- : ++index < length)) {
+	    var other = array[index];
+	    if (other !== other) {
+	      return index;
+	    }
+	  }
+	  return -1;
+	}
+
+	module.exports = indexOfNaN;
+
+
+/***/ },
+/* 287 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var isObject = __webpack_require__(194);
+
+	/**
+	 * Checks if `value` is in `cache` mimicking the return signature of
+	 * `_.indexOf` by returning `0` if the value is found, else `-1`.
+	 *
+	 * @private
+	 * @param {Object} cache The cache to search.
+	 * @param {*} value The value to search for.
+	 * @returns {number} Returns `0` if `value` is found, else `-1`.
+	 */
+	function cacheIndexOf(cache, value) {
+	  var data = cache.data,
+	      result = (typeof value == 'string' || isObject(value)) ? data.set.has(value) : data.hash[value];
+
+	  return result ? 0 : -1;
+	}
+
+	module.exports = cacheIndexOf;
+
+
+/***/ },
+/* 288 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(global) {var SetCache = __webpack_require__(289),
+	    constant = __webpack_require__(291),
+	    getNative = __webpack_require__(196);
+
+	/** Native method references. */
+	var Set = getNative(global, 'Set');
+
+	/* Native method references for those with the same name as other `lodash` methods. */
+	var nativeCreate = getNative(Object, 'create');
+
+	/**
+	 * Creates a `Set` cache object to optimize linear searches of large arrays.
+	 *
+	 * @private
+	 * @param {Array} [values] The values to cache.
+	 * @returns {null|Object} Returns the new cache object if `Set` is supported, else `null`.
+	 */
+	var createCache = !(nativeCreate && Set) ? constant(null) : function(values) {
+	  return new SetCache(values);
+	};
+
+	module.exports = createCache;
+
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
+
+/***/ },
+/* 289 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(global) {var cachePush = __webpack_require__(290),
+	    getNative = __webpack_require__(196);
+
+	/** Native method references. */
+	var Set = getNative(global, 'Set');
+
+	/* Native method references for those with the same name as other `lodash` methods. */
+	var nativeCreate = getNative(Object, 'create');
+
+	/**
+	 *
+	 * Creates a cache object to store unique values.
+	 *
+	 * @private
+	 * @param {Array} [values] The values to cache.
+	 */
+	function SetCache(values) {
+	  var length = values ? values.length : 0;
+
+	  this.data = { 'hash': nativeCreate(null), 'set': new Set };
+	  while (length--) {
+	    this.push(values[length]);
+	  }
+	}
+
+	// Add functions to the `Set` cache.
+	SetCache.prototype.push = cachePush;
+
+	module.exports = SetCache;
+
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
+
+/***/ },
+/* 290 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var isObject = __webpack_require__(194);
+
+	/**
+	 * Adds `value` to the cache.
+	 *
+	 * @private
+	 * @name push
+	 * @memberOf SetCache
+	 * @param {*} value The value to cache.
+	 */
+	function cachePush(value) {
+	  var data = this.data;
+	  if (typeof value == 'string' || isObject(value)) {
+	    data.set.add(value);
+	  } else {
+	    data.hash[value] = true;
+	  }
+	}
+
+	module.exports = cachePush;
+
+
+/***/ },
+/* 291 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * Creates a function that returns `value`.
+	 *
+	 * @static
+	 * @memberOf _
+	 * @category Utility
+	 * @param {*} value The value to return from the new function.
+	 * @returns {Function} Returns the new function.
+	 * @example
+	 *
+	 * var object = { 'user': 'fred' };
+	 * var getter = _.constant(object);
+	 *
+	 * getter() === object;
+	 * // => true
+	 */
+	function constant(value) {
+	  return function() {
+	    return value;
+	  };
+	}
+
+	module.exports = constant;
+
+
+/***/ },
+/* 292 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var isArguments = __webpack_require__(206),
+	    isArray = __webpack_require__(207),
+	    isArrayLike = __webpack_require__(201),
+	    isObjectLike = __webpack_require__(200);
+
+	/**
+	 * The base implementation of `_.flatten` with added support for restricting
+	 * flattening and specifying the start index.
+	 *
+	 * @private
+	 * @param {Array} array The array to flatten.
+	 * @param {boolean} [isDeep] Specify a deep flatten.
+	 * @param {boolean} [isStrict] Restrict flattening to arrays-like objects.
+	 * @returns {Array} Returns the new flattened array.
+	 */
+	function baseFlatten(array, isDeep, isStrict) {
+	  var index = -1,
+	      length = array.length,
+	      resIndex = -1,
+	      result = [];
+
+	  while (++index < length) {
+	    var value = array[index];
+	    if (isObjectLike(value) && isArrayLike(value) &&
+	        (isStrict || isArray(value) || isArguments(value))) {
+	      if (isDeep) {
+	        // Recursively flatten arrays (susceptible to call stack limits).
+	        value = baseFlatten(value, isDeep, isStrict);
+	      }
+	      var valIndex = -1,
+	          valLength = value.length;
+
+	      while (++valIndex < valLength) {
+	        result[++resIndex] = value[valIndex];
+	      }
+	    } else if (!isStrict) {
+	      result[++resIndex] = value;
+	    }
+	  }
+	  return result;
+	}
+
+	module.exports = baseFlatten;
+
+
+/***/ },
+/* 293 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var toObject = __webpack_require__(193);
+
+	/**
+	 * A specialized version of `_.pick` which picks `object` properties specified
+	 * by `props`.
+	 *
+	 * @private
+	 * @param {Object} object The source object.
+	 * @param {string[]} props The property names to pick.
+	 * @returns {Object} Returns the new object.
+	 */
+	function pickByArray(object, props) {
+	  object = toObject(object);
+
+	  var index = -1,
+	      length = props.length,
+	      result = {};
+
+	  while (++index < length) {
+	    var key = props[index];
+	    if (key in object) {
+	      result[key] = object[key];
+	    }
+	  }
+	  return result;
+	}
+
+	module.exports = pickByArray;
+
+
+/***/ },
+/* 294 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var baseForIn = __webpack_require__(295);
+
+	/**
+	 * A specialized version of `_.pick` which picks `object` properties `predicate`
+	 * returns truthy for.
+	 *
+	 * @private
+	 * @param {Object} object The source object.
+	 * @param {Function} predicate The function invoked per iteration.
+	 * @returns {Object} Returns the new object.
+	 */
+	function pickByCallback(object, predicate) {
+	  var result = {};
+	  baseForIn(object, function(value, key, object) {
+	    if (predicate(value, key, object)) {
+	      result[key] = value;
+	    }
+	  });
+	  return result;
+	}
+
+	module.exports = pickByCallback;
+
+
+/***/ },
+/* 295 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var baseFor = __webpack_require__(191),
+	    keysIn = __webpack_require__(209);
+
+	/**
+	 * The base implementation of `_.forIn` without support for callback
+	 * shorthands and `this` binding.
+	 *
+	 * @private
+	 * @param {Object} object The object to iterate over.
+	 * @param {Function} iteratee The function invoked per iteration.
+	 * @returns {Object} Returns `object`.
+	 */
+	function baseForIn(object, iteratee) {
+	  return baseFor(object, iteratee, keysIn);
+	}
+
+	module.exports = baseForIn;
+
+
+/***/ },
+/* 296 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/** Used as the `TypeError` message for "Functions" methods. */
+	var FUNC_ERROR_TEXT = 'Expected a function';
+
+	/* Native method references for those with the same name as other `lodash` methods. */
+	var nativeMax = Math.max;
+
+	/**
+	 * Creates a function that invokes `func` with the `this` binding of the
+	 * created function and arguments from `start` and beyond provided as an array.
+	 *
+	 * **Note:** This method is based on the [rest parameter](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/rest_parameters).
+	 *
+	 * @static
+	 * @memberOf _
+	 * @category Function
+	 * @param {Function} func The function to apply a rest parameter to.
+	 * @param {number} [start=func.length-1] The start position of the rest parameter.
+	 * @returns {Function} Returns the new function.
+	 * @example
+	 *
+	 * var say = _.restParam(function(what, names) {
+	 *   return what + ' ' + _.initial(names).join(', ') +
+	 *     (_.size(names) > 1 ? ', & ' : '') + _.last(names);
+	 * });
+	 *
+	 * say('hello', 'fred', 'barney', 'pebbles');
+	 * // => 'hello fred, barney, & pebbles'
+	 */
+	function restParam(func, start) {
+	  if (typeof func != 'function') {
+	    throw new TypeError(FUNC_ERROR_TEXT);
+	  }
+	  start = nativeMax(start === undefined ? (func.length - 1) : (+start || 0), 0);
+	  return function() {
+	    var args = arguments,
+	        index = -1,
+	        length = nativeMax(args.length - start, 0),
+	        rest = Array(length);
+
+	    while (++index < length) {
+	      rest[index] = args[start + index];
+	    }
+	    switch (start) {
+	      case 0: return func.call(this, rest);
+	      case 1: return func.call(this, args[0], rest);
+	      case 2: return func.call(this, args[0], args[1], rest);
+	    }
+	    var otherArgs = Array(start + 1);
+	    index = -1;
+	    while (++index < start) {
+	      otherArgs[index] = args[index];
+	    }
+	    otherArgs[start] = rest;
+	    return func.apply(this, otherArgs);
+	  };
+	}
+
+	module.exports = restParam;
+
+
+/***/ },
+/* 297 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -36479,7 +37062,7 @@
 	module.exports = exports["default"];
 
 /***/ },
-/* 283 */
+/* 298 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -36492,7 +37075,7 @@
 	  value: true
 	});
 
-	var _reactAddons = __webpack_require__(284);
+	var _reactAddons = __webpack_require__(299);
 
 	var React = _interopRequireWildcard(_reactAddons);
 
@@ -36538,14 +37121,14 @@
 	module.exports = exports['default'];
 
 /***/ },
-/* 284 */
+/* 299 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = __webpack_require__(285);
+	module.exports = __webpack_require__(300);
 
 
 /***/ },
-/* 285 */
+/* 300 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -36568,18 +37151,18 @@
 
 	'use strict';
 
-	var LinkedStateMixin = __webpack_require__(286);
+	var LinkedStateMixin = __webpack_require__(301);
 	var React = __webpack_require__(33);
 	var ReactComponentWithPureRenderMixin =
-	  __webpack_require__(289);
-	var ReactCSSTransitionGroup = __webpack_require__(290);
+	  __webpack_require__(304);
+	var ReactCSSTransitionGroup = __webpack_require__(305);
 	var ReactFragment = __webpack_require__(41);
-	var ReactTransitionGroup = __webpack_require__(291);
+	var ReactTransitionGroup = __webpack_require__(306);
 	var ReactUpdates = __webpack_require__(55);
 
-	var cx = __webpack_require__(299);
-	var cloneWithProps = __webpack_require__(293);
-	var update = __webpack_require__(300);
+	var cx = __webpack_require__(314);
+	var cloneWithProps = __webpack_require__(308);
+	var update = __webpack_require__(315);
 
 	React.addons = {
 	  CSSTransitionGroup: ReactCSSTransitionGroup,
@@ -36596,7 +37179,7 @@
 
 	if ("production" !== process.env.NODE_ENV) {
 	  React.addons.Perf = __webpack_require__(181);
-	  React.addons.TestUtils = __webpack_require__(301);
+	  React.addons.TestUtils = __webpack_require__(316);
 	}
 
 	module.exports = React;
@@ -36604,7 +37187,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(34)))
 
 /***/ },
-/* 286 */
+/* 301 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -36621,8 +37204,8 @@
 
 	'use strict';
 
-	var ReactLink = __webpack_require__(287);
-	var ReactStateSetters = __webpack_require__(288);
+	var ReactLink = __webpack_require__(302);
+	var ReactStateSetters = __webpack_require__(303);
 
 	/**
 	 * A simple mixin around ReactLink.forState().
@@ -36649,7 +37232,7 @@
 
 
 /***/ },
-/* 287 */
+/* 302 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -36726,7 +37309,7 @@
 
 
 /***/ },
-/* 288 */
+/* 303 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -36836,7 +37419,7 @@
 
 
 /***/ },
-/* 289 */
+/* 304 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -36889,7 +37472,7 @@
 
 
 /***/ },
-/* 290 */
+/* 305 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -36911,10 +37494,10 @@
 	var assign = __webpack_require__(44);
 
 	var ReactTransitionGroup = React.createFactory(
-	  __webpack_require__(291)
+	  __webpack_require__(306)
 	);
 	var ReactCSSTransitionGroupChild = React.createFactory(
-	  __webpack_require__(296)
+	  __webpack_require__(311)
 	);
 
 	var ReactCSSTransitionGroup = React.createClass({
@@ -36963,7 +37546,7 @@
 
 
 /***/ },
-/* 291 */
+/* 306 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -36980,10 +37563,10 @@
 	'use strict';
 
 	var React = __webpack_require__(33);
-	var ReactTransitionChildMapping = __webpack_require__(292);
+	var ReactTransitionChildMapping = __webpack_require__(307);
 
 	var assign = __webpack_require__(44);
-	var cloneWithProps = __webpack_require__(293);
+	var cloneWithProps = __webpack_require__(308);
 	var emptyFunction = __webpack_require__(47);
 
 	var ReactTransitionGroup = React.createClass({
@@ -37197,7 +37780,7 @@
 
 
 /***/ },
-/* 292 */
+/* 307 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -37306,7 +37889,7 @@
 
 
 /***/ },
-/* 293 */
+/* 308 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -37324,7 +37907,7 @@
 	'use strict';
 
 	var ReactElement = __webpack_require__(42);
-	var ReactPropTransferer = __webpack_require__(294);
+	var ReactPropTransferer = __webpack_require__(309);
 
 	var keyOf = __webpack_require__(70);
 	var warning = __webpack_require__(46);
@@ -37368,7 +37951,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(34)))
 
 /***/ },
-/* 294 */
+/* 309 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -37386,7 +37969,7 @@
 
 	var assign = __webpack_require__(44);
 	var emptyFunction = __webpack_require__(47);
-	var joinClasses = __webpack_require__(295);
+	var joinClasses = __webpack_require__(310);
 
 	/**
 	 * Creates a transfer strategy that will merge prop values using the supplied
@@ -37482,7 +38065,7 @@
 
 
 /***/ },
-/* 295 */
+/* 310 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -37527,7 +38110,7 @@
 
 
 /***/ },
-/* 296 */
+/* 311 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -37546,8 +38129,8 @@
 
 	var React = __webpack_require__(33);
 
-	var CSSCore = __webpack_require__(297);
-	var ReactTransitionEvents = __webpack_require__(298);
+	var CSSCore = __webpack_require__(312);
+	var ReactTransitionEvents = __webpack_require__(313);
 
 	var onlyChild = __webpack_require__(187);
 	var warning = __webpack_require__(46);
@@ -37678,7 +38261,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(34)))
 
 /***/ },
-/* 297 */
+/* 312 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -37793,7 +38376,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(34)))
 
 /***/ },
-/* 298 */
+/* 313 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -37908,7 +38491,7 @@
 
 
 /***/ },
-/* 299 */
+/* 314 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -37967,7 +38550,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(34)))
 
 /***/ },
-/* 300 */
+/* 315 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -38141,7 +38724,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(34)))
 
 /***/ },
-/* 301 */
+/* 316 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -38659,7 +39242,7 @@
 
 
 /***/ },
-/* 302 */
+/* 317 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -38701,7 +39284,7 @@
 	module.exports = exports['default'];
 
 /***/ },
-/* 303 */
+/* 318 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -38716,7 +39299,7 @@
 	  value: true
 	});
 
-	var _reactAddons = __webpack_require__(284);
+	var _reactAddons = __webpack_require__(299);
 
 	var React = _interopRequireWildcard(_reactAddons);
 
@@ -38726,7 +39309,7 @@
 
 	var _Map2 = _interopRequireDefault(_Map);
 
-	var _Ways = __webpack_require__(283);
+	var _Ways = __webpack_require__(298);
 
 	var _Ways2 = _interopRequireDefault(_Ways);
 
@@ -38795,14 +39378,18 @@
 	        'Streets'
 	      ),
 	      React.createElement(
-	        'p',
-	        null,
-	        hoveredStreet ? hoveredStreet.properties.name || '(no name)' : '(hover over a street)'
-	      ),
-	      React.createElement(
-	        _Map2['default'],
-	        { width: '1000', height: '1000', onMouseMove: this.onMouseMove, onClick: this.onClick },
-	        this.mapLayers
+	        'div',
+	        { className: 'way-map' },
+	        React.createElement(
+	          'div',
+	          { className: 'way-hover-info' },
+	          hoveredStreet ? hoveredStreet.properties.name || '(no name)' : '(hover over a street)'
+	        ),
+	        React.createElement(
+	          _Map2['default'],
+	          { width: '1000', height: '1000', onMouseMove: this.onMouseMove, onClick: this.onClick },
+	          this.mapLayers
+	        )
 	      ),
 	      React.createElement(WayList, { groupedWays: groupedWays })
 	    );
@@ -38817,14 +39404,14 @@
 	module.exports = exports['default'];
 
 /***/ },
-/* 304 */
+/* 319 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	var _Object$defineProperty = __webpack_require__(268)['default'];
 
-	var _Set = __webpack_require__(305)['default'];
+	var _Set = __webpack_require__(320)['default'];
 
 	var _Array$from = __webpack_require__(23)['default'];
 
@@ -38846,7 +39433,7 @@
 
 	var _Map2 = _interopRequireDefault(_Map);
 
-	var _Ways = __webpack_require__(283);
+	var _Ways = __webpack_require__(298);
 
 	var _Ways2 = _interopRequireDefault(_Ways);
 
@@ -38882,9 +39469,13 @@
 	        way.name
 	      ),
 	      React.createElement(
-	        _Map2['default'],
-	        { width: 400, height: 400, zoomFeature: featColl, zoom: 0.7 },
-	        this.mapLayers
+	        'div',
+	        { className: 'map-box' },
+	        React.createElement(
+	          _Map2['default'],
+	          { width: 400, height: 400, zoomFeature: featColl, zoom: 0.7 },
+	          this.mapLayers
+	        )
 	      ),
 	      React.createElement(
 	        'h2',
@@ -38918,31 +39509,31 @@
 	module.exports = exports['default'];
 
 /***/ },
-/* 305 */
+/* 320 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = { "default": __webpack_require__(306), __esModule: true };
+	module.exports = { "default": __webpack_require__(321), __esModule: true };
 
 /***/ },
-/* 306 */
+/* 321 */
 /***/ function(module, exports, __webpack_require__) {
 
-	__webpack_require__(313);
+	__webpack_require__(328);
 	__webpack_require__(18);
 	__webpack_require__(4);
-	__webpack_require__(307);
-	__webpack_require__(314);
+	__webpack_require__(322);
+	__webpack_require__(329);
 	module.exports = __webpack_require__(6).core.Set;
 
 /***/ },
-/* 307 */
+/* 322 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
-	var strong = __webpack_require__(308);
+	var strong = __webpack_require__(323);
 
 	// 23.2 Set Objects
-	__webpack_require__(311)('Set', function(get){
+	__webpack_require__(326)('Set', function(get){
 	  return function Set(){ return get(this, arguments[0]); };
 	}, {
 	  // 23.2.3.1 Set.prototype.add(value)
@@ -38952,7 +39543,7 @@
 	}, strong);
 
 /***/ },
-/* 308 */
+/* 323 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -38960,7 +39551,7 @@
 	  , ctx      = __webpack_require__(26)
 	  , safe     = __webpack_require__(9).safe
 	  , assert   = __webpack_require__(14)
-	  , forOf    = __webpack_require__(309)
+	  , forOf    = __webpack_require__(324)
 	  , step     = __webpack_require__(10).step
 	  , $has     = $.has
 	  , set      = $.set
@@ -39009,7 +39600,7 @@
 	      set(that, FIRST, undefined);
 	      if(iterable != undefined)forOf(iterable, IS_MAP, that[ADDER], that);
 	    });
-	    __webpack_require__(310)(C.prototype, {
+	    __webpack_require__(325)(C.prototype, {
 	      // 23.1.3.1 Map.prototype.clear()
 	      // 23.2.3.2 Set.prototype.clear()
 	      clear: function clear(){
@@ -39112,7 +39703,7 @@
 	};
 
 /***/ },
-/* 309 */
+/* 324 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var ctx  = __webpack_require__(26)
@@ -39130,7 +39721,7 @@
 	};
 
 /***/ },
-/* 310 */
+/* 325 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var $redef = __webpack_require__(17);
@@ -39140,7 +39731,7 @@
 	};
 
 /***/ },
-/* 311 */
+/* 326 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -39148,7 +39739,7 @@
 	  , $def  = __webpack_require__(16)
 	  , $iter = __webpack_require__(10)
 	  , BUGGY = $iter.BUGGY
-	  , forOf = __webpack_require__(309)
+	  , forOf = __webpack_require__(324)
 	  , assertInstance = __webpack_require__(14).inst
 	  , INTERNAL = __webpack_require__(9).safe('internal');
 
@@ -39161,7 +39752,7 @@
 	  if(!$.DESC || !$.isFunction(C) || !(IS_WEAK || !BUGGY && proto.forEach && proto.entries)){
 	    // create collection constructor
 	    C = common.getConstructor(wrapper, NAME, IS_MAP, ADDER);
-	    __webpack_require__(310)(C.prototype, methods);
+	    __webpack_require__(325)(C.prototype, methods);
 	  } else {
 	    C = wrapper(function(target, iterable){
 	      assertInstance(target, C, NAME);
@@ -39186,7 +39777,7 @@
 
 	  O[NAME] = C;
 	  $def($def.G + $def.W + $def.F, O);
-	  __webpack_require__(312)(C);
+	  __webpack_require__(327)(C);
 
 	  if(!IS_WEAK)common.setIter(C, NAME, IS_MAP);
 
@@ -39194,7 +39785,7 @@
 	};
 
 /***/ },
-/* 312 */
+/* 327 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var $       = __webpack_require__(6)
@@ -39207,7 +39798,7 @@
 	};
 
 /***/ },
-/* 313 */
+/* 328 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -39222,19 +39813,19 @@
 	}
 
 /***/ },
-/* 314 */
+/* 329 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// https://github.com/DavidBruant/Map-Set.prototype.toJSON
-	__webpack_require__(315)('Set');
+	__webpack_require__(330)('Set');
 
 /***/ },
-/* 315 */
+/* 330 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// https://github.com/DavidBruant/Map-Set.prototype.toJSON
 	var $def  = __webpack_require__(16)
-	  , forOf = __webpack_require__(309);
+	  , forOf = __webpack_require__(324);
 	module.exports = function(NAME){
 	  $def($def.P, NAME, {
 	    toJSON: function toJSON(){
@@ -39246,7 +39837,7 @@
 	};
 
 /***/ },
-/* 316 */
+/* 331 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -39265,7 +39856,7 @@
 
 	var React = _interopRequireWildcard(_react);
 
-	var _VideoList = __webpack_require__(317);
+	var _VideoList = __webpack_require__(332);
 
 	var _VideoList2 = _interopRequireDefault(_VideoList);
 
@@ -39309,7 +39900,7 @@
 	module.exports = exports['default'];
 
 /***/ },
-/* 317 */
+/* 332 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -39328,7 +39919,7 @@
 
 	var _reactRouter = __webpack_require__(237);
 
-	var _format = __webpack_require__(318);
+	var _format = __webpack_require__(333);
 
 	var format = _interopRequireWildcard(_format);
 
@@ -39386,7 +39977,7 @@
 	module.exports = exports['default'];
 
 /***/ },
-/* 318 */
+/* 333 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -39401,7 +39992,7 @@
 
 	exports.duration = duration;
 
-	var _moment = __webpack_require__(319);
+	var _moment = __webpack_require__(334);
 
 	var _moment2 = _interopRequireDefault(_moment);
 
@@ -39410,7 +40001,7 @@
 	}
 
 /***/ },
-/* 319 */
+/* 334 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {//! moment.js
@@ -39676,7 +40267,7 @@
 	                module && module.exports) {
 	            try {
 	                oldLocale = globalLocale._abbr;
-	                __webpack_require__(321)("./" + name);
+	                __webpack_require__(336)("./" + name);
 	                // because defineLocale currently also sets the global locale, we
 	                // want to undo that for lazy loaded locales
 	                locale_locales__getSetGlobalLocale(oldLocale);
@@ -42524,10 +43115,10 @@
 	    return _moment;
 
 	}));
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(320)(module)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(335)(module)))
 
 /***/ },
-/* 320 */
+/* 335 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = function(module) {
@@ -42543,176 +43134,176 @@
 
 
 /***/ },
-/* 321 */
+/* 336 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var map = {
-		"./af": 322,
-		"./af.js": 322,
-		"./ar": 323,
-		"./ar-ma": 324,
-		"./ar-ma.js": 324,
-		"./ar-sa": 325,
-		"./ar-sa.js": 325,
-		"./ar-tn": 326,
-		"./ar-tn.js": 326,
-		"./ar.js": 323,
-		"./az": 327,
-		"./az.js": 327,
-		"./be": 328,
-		"./be.js": 328,
-		"./bg": 329,
-		"./bg.js": 329,
-		"./bn": 330,
-		"./bn.js": 330,
-		"./bo": 331,
-		"./bo.js": 331,
-		"./br": 332,
-		"./br.js": 332,
-		"./bs": 333,
-		"./bs.js": 333,
-		"./ca": 334,
-		"./ca.js": 334,
-		"./cs": 335,
-		"./cs.js": 335,
-		"./cv": 336,
-		"./cv.js": 336,
-		"./cy": 337,
-		"./cy.js": 337,
-		"./da": 338,
-		"./da.js": 338,
-		"./de": 339,
-		"./de-at": 340,
-		"./de-at.js": 340,
-		"./de.js": 339,
-		"./el": 341,
-		"./el.js": 341,
-		"./en-au": 342,
-		"./en-au.js": 342,
-		"./en-ca": 343,
-		"./en-ca.js": 343,
-		"./en-gb": 344,
-		"./en-gb.js": 344,
-		"./eo": 345,
-		"./eo.js": 345,
-		"./es": 346,
-		"./es.js": 346,
-		"./et": 347,
-		"./et.js": 347,
-		"./eu": 348,
-		"./eu.js": 348,
-		"./fa": 349,
-		"./fa.js": 349,
-		"./fi": 350,
-		"./fi.js": 350,
-		"./fo": 351,
-		"./fo.js": 351,
-		"./fr": 352,
-		"./fr-ca": 353,
-		"./fr-ca.js": 353,
-		"./fr.js": 352,
-		"./fy": 354,
-		"./fy.js": 354,
-		"./gl": 355,
-		"./gl.js": 355,
-		"./he": 356,
-		"./he.js": 356,
-		"./hi": 357,
-		"./hi.js": 357,
-		"./hr": 358,
-		"./hr.js": 358,
-		"./hu": 359,
-		"./hu.js": 359,
-		"./hy-am": 360,
-		"./hy-am.js": 360,
-		"./id": 361,
-		"./id.js": 361,
-		"./is": 362,
-		"./is.js": 362,
-		"./it": 363,
-		"./it.js": 363,
-		"./ja": 364,
-		"./ja.js": 364,
-		"./jv": 365,
-		"./jv.js": 365,
-		"./ka": 366,
-		"./ka.js": 366,
-		"./km": 367,
-		"./km.js": 367,
-		"./ko": 368,
-		"./ko.js": 368,
-		"./lb": 369,
-		"./lb.js": 369,
-		"./lt": 370,
-		"./lt.js": 370,
-		"./lv": 371,
-		"./lv.js": 371,
-		"./me": 372,
-		"./me.js": 372,
-		"./mk": 373,
-		"./mk.js": 373,
-		"./ml": 374,
-		"./ml.js": 374,
-		"./mr": 375,
-		"./mr.js": 375,
-		"./ms-my": 376,
-		"./ms-my.js": 376,
-		"./my": 377,
-		"./my.js": 377,
-		"./nb": 378,
-		"./nb.js": 378,
-		"./ne": 379,
-		"./ne.js": 379,
-		"./nl": 380,
-		"./nl.js": 380,
-		"./nn": 381,
-		"./nn.js": 381,
-		"./pl": 382,
-		"./pl.js": 382,
-		"./pt": 383,
-		"./pt-br": 384,
-		"./pt-br.js": 384,
-		"./pt.js": 383,
-		"./ro": 385,
-		"./ro.js": 385,
-		"./ru": 386,
-		"./ru.js": 386,
-		"./si": 387,
-		"./si.js": 387,
-		"./sk": 388,
-		"./sk.js": 388,
-		"./sl": 389,
-		"./sl.js": 389,
-		"./sq": 390,
-		"./sq.js": 390,
-		"./sr": 391,
-		"./sr-cyrl": 392,
-		"./sr-cyrl.js": 392,
-		"./sr.js": 391,
-		"./sv": 393,
-		"./sv.js": 393,
-		"./ta": 394,
-		"./ta.js": 394,
-		"./th": 395,
-		"./th.js": 395,
-		"./tl-ph": 396,
-		"./tl-ph.js": 396,
-		"./tr": 397,
-		"./tr.js": 397,
-		"./tzm": 398,
-		"./tzm-latn": 399,
-		"./tzm-latn.js": 399,
-		"./tzm.js": 398,
-		"./uk": 400,
-		"./uk.js": 400,
-		"./uz": 401,
-		"./uz.js": 401,
-		"./vi": 402,
-		"./vi.js": 402,
-		"./zh-cn": 403,
-		"./zh-cn.js": 403,
-		"./zh-tw": 404,
-		"./zh-tw.js": 404
+		"./af": 337,
+		"./af.js": 337,
+		"./ar": 338,
+		"./ar-ma": 339,
+		"./ar-ma.js": 339,
+		"./ar-sa": 340,
+		"./ar-sa.js": 340,
+		"./ar-tn": 341,
+		"./ar-tn.js": 341,
+		"./ar.js": 338,
+		"./az": 342,
+		"./az.js": 342,
+		"./be": 343,
+		"./be.js": 343,
+		"./bg": 344,
+		"./bg.js": 344,
+		"./bn": 345,
+		"./bn.js": 345,
+		"./bo": 346,
+		"./bo.js": 346,
+		"./br": 347,
+		"./br.js": 347,
+		"./bs": 348,
+		"./bs.js": 348,
+		"./ca": 349,
+		"./ca.js": 349,
+		"./cs": 350,
+		"./cs.js": 350,
+		"./cv": 351,
+		"./cv.js": 351,
+		"./cy": 352,
+		"./cy.js": 352,
+		"./da": 353,
+		"./da.js": 353,
+		"./de": 354,
+		"./de-at": 355,
+		"./de-at.js": 355,
+		"./de.js": 354,
+		"./el": 356,
+		"./el.js": 356,
+		"./en-au": 357,
+		"./en-au.js": 357,
+		"./en-ca": 358,
+		"./en-ca.js": 358,
+		"./en-gb": 359,
+		"./en-gb.js": 359,
+		"./eo": 360,
+		"./eo.js": 360,
+		"./es": 361,
+		"./es.js": 361,
+		"./et": 362,
+		"./et.js": 362,
+		"./eu": 363,
+		"./eu.js": 363,
+		"./fa": 364,
+		"./fa.js": 364,
+		"./fi": 365,
+		"./fi.js": 365,
+		"./fo": 366,
+		"./fo.js": 366,
+		"./fr": 367,
+		"./fr-ca": 368,
+		"./fr-ca.js": 368,
+		"./fr.js": 367,
+		"./fy": 369,
+		"./fy.js": 369,
+		"./gl": 370,
+		"./gl.js": 370,
+		"./he": 371,
+		"./he.js": 371,
+		"./hi": 372,
+		"./hi.js": 372,
+		"./hr": 373,
+		"./hr.js": 373,
+		"./hu": 374,
+		"./hu.js": 374,
+		"./hy-am": 375,
+		"./hy-am.js": 375,
+		"./id": 376,
+		"./id.js": 376,
+		"./is": 377,
+		"./is.js": 377,
+		"./it": 378,
+		"./it.js": 378,
+		"./ja": 379,
+		"./ja.js": 379,
+		"./jv": 380,
+		"./jv.js": 380,
+		"./ka": 381,
+		"./ka.js": 381,
+		"./km": 382,
+		"./km.js": 382,
+		"./ko": 383,
+		"./ko.js": 383,
+		"./lb": 384,
+		"./lb.js": 384,
+		"./lt": 385,
+		"./lt.js": 385,
+		"./lv": 386,
+		"./lv.js": 386,
+		"./me": 387,
+		"./me.js": 387,
+		"./mk": 388,
+		"./mk.js": 388,
+		"./ml": 389,
+		"./ml.js": 389,
+		"./mr": 390,
+		"./mr.js": 390,
+		"./ms-my": 391,
+		"./ms-my.js": 391,
+		"./my": 392,
+		"./my.js": 392,
+		"./nb": 393,
+		"./nb.js": 393,
+		"./ne": 394,
+		"./ne.js": 394,
+		"./nl": 395,
+		"./nl.js": 395,
+		"./nn": 396,
+		"./nn.js": 396,
+		"./pl": 397,
+		"./pl.js": 397,
+		"./pt": 398,
+		"./pt-br": 399,
+		"./pt-br.js": 399,
+		"./pt.js": 398,
+		"./ro": 400,
+		"./ro.js": 400,
+		"./ru": 401,
+		"./ru.js": 401,
+		"./si": 402,
+		"./si.js": 402,
+		"./sk": 403,
+		"./sk.js": 403,
+		"./sl": 404,
+		"./sl.js": 404,
+		"./sq": 405,
+		"./sq.js": 405,
+		"./sr": 406,
+		"./sr-cyrl": 407,
+		"./sr-cyrl.js": 407,
+		"./sr.js": 406,
+		"./sv": 408,
+		"./sv.js": 408,
+		"./ta": 409,
+		"./ta.js": 409,
+		"./th": 410,
+		"./th.js": 410,
+		"./tl-ph": 411,
+		"./tl-ph.js": 411,
+		"./tr": 412,
+		"./tr.js": 412,
+		"./tzm": 413,
+		"./tzm-latn": 414,
+		"./tzm-latn.js": 414,
+		"./tzm.js": 413,
+		"./uk": 415,
+		"./uk.js": 415,
+		"./uz": 416,
+		"./uz.js": 416,
+		"./vi": 417,
+		"./vi.js": 417,
+		"./zh-cn": 418,
+		"./zh-cn.js": 418,
+		"./zh-tw": 419,
+		"./zh-tw.js": 419
 	};
 	function webpackContext(req) {
 		return __webpack_require__(webpackContextResolve(req));
@@ -42725,11 +43316,11 @@
 	};
 	webpackContext.resolve = webpackContextResolve;
 	module.exports = webpackContext;
-	webpackContext.id = 321;
+	webpackContext.id = 336;
 
 
 /***/ },
-/* 322 */
+/* 337 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -42737,7 +43328,7 @@
 	//! author : Werner Mollentze : https://github.com/wernerm
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -42806,7 +43397,7 @@
 	}));
 
 /***/ },
-/* 323 */
+/* 338 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -42816,7 +43407,7 @@
 	//! Native plural forms: forabi https://github.com/forabi
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -42946,7 +43537,7 @@
 	}));
 
 /***/ },
-/* 324 */
+/* 339 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -42955,7 +43546,7 @@
 	//! author : Abdel Said : https://github.com/abdelsaid
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -43009,7 +43600,7 @@
 	}));
 
 /***/ },
-/* 325 */
+/* 340 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -43017,7 +43608,7 @@
 	//! author : Suhail Alkowaileet : https://github.com/xsoh
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -43116,14 +43707,14 @@
 	}));
 
 /***/ },
-/* 326 */
+/* 341 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
 	//! locale  : Tunisian Arabic (ar-tn)
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -43177,7 +43768,7 @@
 	}));
 
 /***/ },
-/* 327 */
+/* 342 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -43185,7 +43776,7 @@
 	//! author : topchiyev : https://github.com/topchiyev
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -43285,7 +43876,7 @@
 	}));
 
 /***/ },
-/* 328 */
+/* 343 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -43295,7 +43886,7 @@
 	//! Author : Menelion Elensúle : https://github.com/Oire
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -43436,7 +44027,7 @@
 	}));
 
 /***/ },
-/* 329 */
+/* 344 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -43444,7 +44035,7 @@
 	//! author : Krasen Borisov : https://github.com/kraz
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -43530,7 +44121,7 @@
 	}));
 
 /***/ },
-/* 330 */
+/* 345 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -43538,7 +44129,7 @@
 	//! author : Kaushik Gandhi : https://github.com/kaushikgandhi
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -43647,7 +44238,7 @@
 	}));
 
 /***/ },
-/* 331 */
+/* 346 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -43655,7 +44246,7 @@
 	//! author : Thupten N. Chakrishar : https://github.com/vajradog
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -43761,7 +44352,7 @@
 	}));
 
 /***/ },
-/* 332 */
+/* 347 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -43769,7 +44360,7 @@
 	//! author : Jean-Baptiste Le Duigou : https://github.com/jbleduigou
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -43872,7 +44463,7 @@
 	}));
 
 /***/ },
-/* 333 */
+/* 348 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -43881,7 +44472,7 @@
 	//! based on (hr) translation by Bojan Marković
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -44017,7 +44608,7 @@
 	}));
 
 /***/ },
-/* 334 */
+/* 349 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -44025,7 +44616,7 @@
 	//! author : Juan G. Hurtado : https://github.com/juanghurtado
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -44100,7 +44691,7 @@
 	}));
 
 /***/ },
-/* 335 */
+/* 350 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -44108,7 +44699,7 @@
 	//! author : petrbela : https://github.com/petrbela
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -44261,7 +44852,7 @@
 	}));
 
 /***/ },
-/* 336 */
+/* 351 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -44269,7 +44860,7 @@
 	//! author : Anatoly Mironov : https://github.com/mirontoli
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -44328,7 +44919,7 @@
 	}));
 
 /***/ },
-/* 337 */
+/* 352 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -44336,7 +44927,7 @@
 	//! author : Robert Allen
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -44411,7 +45002,7 @@
 	}));
 
 /***/ },
-/* 338 */
+/* 353 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -44419,7 +45010,7 @@
 	//! author : Ulrik Nielsen : https://github.com/mrbase
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -44475,7 +45066,7 @@
 	}));
 
 /***/ },
-/* 339 */
+/* 354 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -44484,7 +45075,7 @@
 	//! author: Menelion Elensúle: https://github.com/Oire
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -44554,7 +45145,7 @@
 	}));
 
 /***/ },
-/* 340 */
+/* 355 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -44564,7 +45155,7 @@
 	//! author : Martin Groller : https://github.com/MadMG
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -44634,7 +45225,7 @@
 	}));
 
 /***/ },
-/* 341 */
+/* 356 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -44642,7 +45233,7 @@
 	//! author : Aggelos Karalias : https://github.com/mehiel
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -44732,14 +45323,14 @@
 	}));
 
 /***/ },
-/* 342 */
+/* 357 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
 	//! locale : australian english (en-au)
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -44802,7 +45393,7 @@
 	}));
 
 /***/ },
-/* 343 */
+/* 358 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -44810,7 +45401,7 @@
 	//! author : Jonathan Abourbih : https://github.com/jonbca
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -44869,7 +45460,7 @@
 	}));
 
 /***/ },
-/* 344 */
+/* 359 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -44877,7 +45468,7 @@
 	//! author : Chris Gedrim : https://github.com/chrisgedrim
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -44940,7 +45531,7 @@
 	}));
 
 /***/ },
-/* 345 */
+/* 360 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -44950,7 +45541,7 @@
 	//!          Se ne, bonvolu korekti kaj avizi min por ke mi povas lerni!
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -45017,7 +45608,7 @@
 	}));
 
 /***/ },
-/* 346 */
+/* 361 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -45025,7 +45616,7 @@
 	//! author : Julio Napurí : https://github.com/julionc
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -45100,7 +45691,7 @@
 	}));
 
 /***/ },
-/* 347 */
+/* 362 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -45109,7 +45700,7 @@
 	//! improvements : Illimar Tambek : https://github.com/ragulka
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -45184,7 +45775,7 @@
 	}));
 
 /***/ },
-/* 348 */
+/* 363 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -45192,7 +45783,7 @@
 	//! author : Eneko Illarramendi : https://github.com/eillarra
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -45252,7 +45843,7 @@
 	}));
 
 /***/ },
-/* 349 */
+/* 364 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -45260,7 +45851,7 @@
 	//! author : Ebrahim Byagowi : https://github.com/ebraminio
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -45361,7 +45952,7 @@
 	}));
 
 /***/ },
-/* 350 */
+/* 365 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -45369,7 +45960,7 @@
 	//! author : Tarmo Aidantausta : https://github.com/bleadof
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -45472,7 +46063,7 @@
 	}));
 
 /***/ },
-/* 351 */
+/* 366 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -45480,7 +46071,7 @@
 	//! author : Ragnar Johannesen : https://github.com/ragnar123
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -45536,7 +46127,7 @@
 	}));
 
 /***/ },
-/* 352 */
+/* 367 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -45544,7 +46135,7 @@
 	//! author : John Fischer : https://github.com/jfroffice
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -45602,7 +46193,7 @@
 	}));
 
 /***/ },
-/* 353 */
+/* 368 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -45610,7 +46201,7 @@
 	//! author : Jonathan Abourbih : https://github.com/jonbca
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -45664,7 +46255,7 @@
 	}));
 
 /***/ },
-/* 354 */
+/* 369 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -45672,7 +46263,7 @@
 	//! author : Robin van der Vliet : https://github.com/robin0van0der0v
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -45739,7 +46330,7 @@
 	}));
 
 /***/ },
-/* 355 */
+/* 370 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -45747,7 +46338,7 @@
 	//! author : Juan G. Hurtado : https://github.com/juanghurtado
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -45818,7 +46409,7 @@
 	}));
 
 /***/ },
-/* 356 */
+/* 371 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -45828,7 +46419,7 @@
 	//! author : Tal Ater : https://github.com/TalAter
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -45904,7 +46495,7 @@
 	}));
 
 /***/ },
-/* 357 */
+/* 372 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -45912,7 +46503,7 @@
 	//! author : Mayank Singhal : https://github.com/mayanksinghal
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -46031,7 +46622,7 @@
 	}));
 
 /***/ },
-/* 358 */
+/* 373 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -46039,7 +46630,7 @@
 	//! author : Bojan Marković : https://github.com/bmarkovic
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -46175,7 +46766,7 @@
 	}));
 
 /***/ },
-/* 359 */
+/* 374 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -46183,7 +46774,7 @@
 	//! author : Adam Brunner : https://github.com/adambrunner
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -46288,7 +46879,7 @@
 	}));
 
 /***/ },
-/* 360 */
+/* 375 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -46296,7 +46887,7 @@
 	//! author : Armendarabyan : https://github.com/armendarabyan
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -46403,7 +46994,7 @@
 	}));
 
 /***/ },
-/* 361 */
+/* 376 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -46412,7 +47003,7 @@
 	//! reference: http://id.wikisource.org/wiki/Pedoman_Umum_Ejaan_Bahasa_Indonesia_yang_Disempurnakan
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -46490,7 +47081,7 @@
 	}));
 
 /***/ },
-/* 362 */
+/* 377 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -46498,7 +47089,7 @@
 	//! author : Hinrik Örn Sigurðsson : https://github.com/hinrik
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -46621,7 +47212,7 @@
 	}));
 
 /***/ },
-/* 363 */
+/* 378 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -46630,7 +47221,7 @@
 	//! author: Mattia Larentis: https://github.com/nostalgiaz
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -46695,7 +47286,7 @@
 	}));
 
 /***/ },
-/* 364 */
+/* 379 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -46703,7 +47294,7 @@
 	//! author : LI Long : https://github.com/baryon
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -46764,7 +47355,7 @@
 	}));
 
 /***/ },
-/* 365 */
+/* 380 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -46773,7 +47364,7 @@
 	//! reference: http://jv.wikipedia.org/wiki/Basa_Jawa
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -46851,7 +47442,7 @@
 	}));
 
 /***/ },
-/* 366 */
+/* 381 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -46859,7 +47450,7 @@
 	//! author : Irakli Janiashvili : https://github.com/irakli-janiashvili
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -46958,7 +47549,7 @@
 	}));
 
 /***/ },
-/* 367 */
+/* 382 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -46966,7 +47557,7 @@
 	//! author : Kruy Vanna : https://github.com/kruyvanna
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -47020,7 +47611,7 @@
 	}));
 
 /***/ },
-/* 368 */
+/* 383 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -47032,7 +47623,7 @@
 	//! - Jeeeyul Lee <jeeeyul@gmail.com>
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -47092,7 +47683,7 @@
 	}));
 
 /***/ },
-/* 369 */
+/* 384 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -47100,7 +47691,7 @@
 	//! author : mweimerskirch : https://github.com/mweimerskirch, David Raison : https://github.com/kwisatz
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -47230,7 +47821,7 @@
 	}));
 
 /***/ },
-/* 370 */
+/* 385 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -47238,7 +47829,7 @@
 	//! author : Mindaugas Mozūras : https://github.com/mmozuras
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -47349,7 +47940,7 @@
 	}));
 
 /***/ },
-/* 371 */
+/* 386 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -47358,7 +47949,7 @@
 	//! author : Jānis Elmeris : https://github.com/JanisE
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -47449,7 +48040,7 @@
 	}));
 
 /***/ },
-/* 372 */
+/* 387 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -47457,7 +48048,7 @@
 	//! author : Miodrag Nikač <miodrag@restartit.me> : https://github.com/miodragnikac
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -47562,7 +48153,7 @@
 	}));
 
 /***/ },
-/* 373 */
+/* 388 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -47570,7 +48161,7 @@
 	//! author : Borislav Mickov : https://github.com/B0k0
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -47656,7 +48247,7 @@
 	}));
 
 /***/ },
-/* 374 */
+/* 389 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -47664,7 +48255,7 @@
 	//! author : Floyd Pink : https://github.com/floydpink
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -47731,7 +48322,7 @@
 	}));
 
 /***/ },
-/* 375 */
+/* 390 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -47739,7 +48330,7 @@
 	//! author : Harshad Kale : https://github.com/kalehv
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -47856,7 +48447,7 @@
 	}));
 
 /***/ },
-/* 376 */
+/* 391 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -47864,7 +48455,7 @@
 	//! author : Weldan Jamili : https://github.com/weldan
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -47942,7 +48533,7 @@
 	}));
 
 /***/ },
-/* 377 */
+/* 392 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -47950,7 +48541,7 @@
 	//! author : Squar team, mysquar.com
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -48039,7 +48630,7 @@
 	}));
 
 /***/ },
-/* 378 */
+/* 393 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -48048,7 +48639,7 @@
 	//!           Sigurd Gartmann : https://github.com/sigurdga
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -48104,7 +48695,7 @@
 	}));
 
 /***/ },
-/* 379 */
+/* 394 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -48112,7 +48703,7 @@
 	//! author : suvash : https://github.com/suvash
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -48231,7 +48822,7 @@
 	}));
 
 /***/ },
-/* 380 */
+/* 395 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -48239,7 +48830,7 @@
 	//! author : Joris Röling : https://github.com/jjupiter
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -48306,7 +48897,7 @@
 	}));
 
 /***/ },
-/* 381 */
+/* 396 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -48314,7 +48905,7 @@
 	//! author : https://github.com/mechuwind
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -48370,7 +48961,7 @@
 	}));
 
 /***/ },
-/* 382 */
+/* 397 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -48378,7 +48969,7 @@
 	//! author : Rafal Hirsz : https://github.com/evoL
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -48479,7 +49070,7 @@
 	}));
 
 /***/ },
-/* 383 */
+/* 398 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -48487,7 +49078,7 @@
 	//! author : Jefferson : https://github.com/jalex79
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -48547,7 +49138,7 @@
 	}));
 
 /***/ },
-/* 384 */
+/* 399 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -48555,7 +49146,7 @@
 	//! author : Caio Ribeiro Pereira : https://github.com/caio-ribeiro-pereira
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -48611,7 +49202,7 @@
 	}));
 
 /***/ },
-/* 385 */
+/* 400 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -48620,7 +49211,7 @@
 	//! author : Valentin Agachi : https://github.com/avaly
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -48689,7 +49280,7 @@
 	}));
 
 /***/ },
-/* 386 */
+/* 401 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -48698,7 +49289,7 @@
 	//! Author : Menelion Elensúle : https://github.com/Oire
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -48857,7 +49448,7 @@
 	}));
 
 /***/ },
-/* 387 */
+/* 402 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -48865,7 +49456,7 @@
 	//! author : Sampath Sitinamaluwa : https://github.com/sampathsris
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -48926,7 +49517,7 @@
 	}));
 
 /***/ },
-/* 388 */
+/* 403 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -48935,7 +49526,7 @@
 	//! based on work of petrbela : https://github.com/petrbela
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -49088,7 +49679,7 @@
 	}));
 
 /***/ },
-/* 389 */
+/* 404 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -49096,7 +49687,7 @@
 	//! author : Robert Sedovšek : https://github.com/sedovsek
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -49252,7 +49843,7 @@
 	}));
 
 /***/ },
-/* 390 */
+/* 405 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -49262,7 +49853,7 @@
 	//! author : Oerd Cukalla : https://github.com/oerd (fixes)
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -49325,7 +49916,7 @@
 	}));
 
 /***/ },
-/* 391 */
+/* 406 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -49333,7 +49924,7 @@
 	//! author : Milan Janačković<milanjanackovic@gmail.com> : https://github.com/milan-j
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -49437,7 +50028,7 @@
 	}));
 
 /***/ },
-/* 392 */
+/* 407 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -49445,7 +50036,7 @@
 	//! author : Milan Janačković<milanjanackovic@gmail.com> : https://github.com/milan-j
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -49549,7 +50140,7 @@
 	}));
 
 /***/ },
-/* 393 */
+/* 408 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -49557,7 +50148,7 @@
 	//! author : Jens Alm : https://github.com/ulmus
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -49620,7 +50211,7 @@
 	}));
 
 /***/ },
-/* 394 */
+/* 409 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -49628,7 +50219,7 @@
 	//! author : Arjunkumar Krishnamoorthy : https://github.com/tk120404
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -49719,7 +50310,7 @@
 	}));
 
 /***/ },
-/* 395 */
+/* 410 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -49727,7 +50318,7 @@
 	//! author : Kridsada Thanabulpong : https://github.com/sirn
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -49788,7 +50379,7 @@
 	}));
 
 /***/ },
-/* 396 */
+/* 411 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -49796,7 +50387,7 @@
 	//! author : Dan Hagman
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -49854,7 +50445,7 @@
 	}));
 
 /***/ },
-/* 397 */
+/* 412 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -49863,7 +50454,7 @@
 	//!           Burak Yiğit Kaya: https://github.com/BYK
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -49948,7 +50539,7 @@
 	}));
 
 /***/ },
-/* 398 */
+/* 413 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -49956,7 +50547,7 @@
 	//! author : Abdel Said : https://github.com/abdelsaid
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -50010,7 +50601,7 @@
 	}));
 
 /***/ },
-/* 399 */
+/* 414 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -50018,7 +50609,7 @@
 	//! author : Abdel Said : https://github.com/abdelsaid
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -50072,7 +50663,7 @@
 	}));
 
 /***/ },
-/* 400 */
+/* 415 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -50081,7 +50672,7 @@
 	//! Author : Menelion Elensúle : https://github.com/Oire
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -50229,7 +50820,7 @@
 	}));
 
 /***/ },
-/* 401 */
+/* 416 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -50237,7 +50828,7 @@
 	//! author : Sardor Muminov : https://github.com/muminoff
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -50291,7 +50882,7 @@
 	}));
 
 /***/ },
-/* 402 */
+/* 417 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -50299,7 +50890,7 @@
 	//! author : Bang Nguyen : https://github.com/bangnk
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -50361,7 +50952,7 @@
 	}));
 
 /***/ },
-/* 403 */
+/* 418 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -50370,7 +50961,7 @@
 	//! author : Zeno Zeng : https://github.com/zenozeng
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -50492,7 +51083,7 @@
 	}));
 
 /***/ },
-/* 404 */
+/* 419 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//! moment.js locale configuration
@@ -50500,7 +51091,7 @@
 	//! author : Ben : https://github.com/ben-lin
 
 	(function (global, factory) {
-	   true ? factory(__webpack_require__(319)) :
+	   true ? factory(__webpack_require__(334)) :
 	   typeof define === 'function' && define.amd ? define(['moment'], factory) :
 	   factory(global.moment)
 	}(this, function (moment) { 'use strict';
@@ -50597,7 +51188,7 @@
 	}));
 
 /***/ },
-/* 405 */
+/* 420 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -50618,15 +51209,15 @@
 
 	var React = _interopRequireWildcard(_react);
 
-	var _format = __webpack_require__(318);
+	var _format = __webpack_require__(333);
 
 	var format = _interopRequireWildcard(_format);
 
-	var _TripList = __webpack_require__(406);
+	var _TripList = __webpack_require__(421);
 
 	var _TripList2 = _interopRequireDefault(_TripList);
 
-	var _VideoPlayer = __webpack_require__(407);
+	var _VideoPlayer = __webpack_require__(422);
 
 	var _VideoPlayer2 = _interopRequireDefault(_VideoPlayer);
 
@@ -50682,7 +51273,7 @@
 	      ),
 	      React.createElement(
 	        'span',
-	        { style: { display: 'inline-block', verticalAlign: 'top' } },
+	        { style: { display: 'inline-block', verticalAlign: 'top', marginLeft: '1em' }, className: 'map-box' },
 	        React.createElement(
 	          _Map2['default'],
 	          { width: 360, height: 360, zoomFeature: featColl },
@@ -50715,7 +51306,7 @@
 	module.exports = exports['default'];
 
 /***/ },
-/* 406 */
+/* 421 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -50793,7 +51384,7 @@
 	module.exports = exports['default'];
 
 /***/ },
-/* 407 */
+/* 422 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -50882,7 +51473,7 @@
 	module.exports = exports["default"];
 
 /***/ },
-/* 408 */
+/* 423 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -50903,7 +51494,7 @@
 
 	var React = _interopRequireWildcard(_react);
 
-	var _VideoList = __webpack_require__(317);
+	var _VideoList = __webpack_require__(332);
 
 	var _VideoList2 = _interopRequireDefault(_VideoList);
 
@@ -50993,7 +51584,7 @@
 	module.exports = exports['default'];
 
 /***/ },
-/* 409 */
+/* 424 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -51006,7 +51597,7 @@
 	  value: true
 	});
 
-	var _reactAddons = __webpack_require__(284);
+	var _reactAddons = __webpack_require__(299);
 
 	var _reactAddons2 = _interopRequireDefault(_reactAddons);
 
@@ -51047,14 +51638,14 @@
 	module.exports = exports['default'];
 
 /***/ },
-/* 410 */
+/* 425 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	var _Object$defineProperty = __webpack_require__(268)['default'];
 
-	var _Object$keys = __webpack_require__(411)['default'];
+	var _Object$keys = __webpack_require__(426)['default'];
 
 	var _interopRequireDefault = __webpack_require__(29)['default'];
 
@@ -51066,11 +51657,11 @@
 	exports.geoLines = geoLines;
 	exports.tree = tree;
 
-	var _topojson = __webpack_require__(415);
+	var _topojson = __webpack_require__(430);
 
 	var _topojson2 = _interopRequireDefault(_topojson);
 
-	var _tree = __webpack_require__(416);
+	var _tree = __webpack_require__(431);
 
 	var _tree2 = _interopRequireDefault(_tree);
 
@@ -51102,20 +51693,20 @@
 	}
 
 /***/ },
-/* 411 */
+/* 426 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = { "default": __webpack_require__(412), __esModule: true };
+	module.exports = { "default": __webpack_require__(427), __esModule: true };
 
 /***/ },
-/* 412 */
+/* 427 */
 /***/ function(module, exports, __webpack_require__) {
 
-	__webpack_require__(413);
+	__webpack_require__(428);
 	module.exports = __webpack_require__(6).core.Object.keys;
 
 /***/ },
-/* 413 */
+/* 428 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var $        = __webpack_require__(6)
@@ -51146,7 +51737,7 @@
 	    return fn(Object($.assertDefined(it)));
 	  } : ID == 8 ? function keys(it){
 	    return fn(toObject(it));
-	  } : __webpack_require__(414).get;
+	  } : __webpack_require__(429).get;
 	  try {
 	    fn('z');
 	  } catch(e){
@@ -51156,7 +51747,7 @@
 	});
 
 /***/ },
-/* 414 */
+/* 429 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// fallback for IE11 buggy Object.getOwnPropertyNames with iframe and window
@@ -51181,7 +51772,7 @@
 	};
 
 /***/ },
-/* 415 */
+/* 430 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;!function() {
@@ -51721,7 +52312,7 @@
 
 
 /***/ },
-/* 416 */
+/* 431 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// TODO support quantized, delta-encoded arcs
@@ -51731,9 +52322,9 @@
 
 	'use strict';
 
-	var _createClass = __webpack_require__(417)['default'];
+	var _createClass = __webpack_require__(432)['default'];
 
-	var _classCallCheck = __webpack_require__(418)['default'];
+	var _classCallCheck = __webpack_require__(433)['default'];
 
 	var _slicedToArray = __webpack_require__(1)['default'];
 
@@ -51745,7 +52336,7 @@
 	  value: true
 	});
 
-	var _minHeap = __webpack_require__(419);
+	var _minHeap = __webpack_require__(434);
 
 	var _minHeap2 = _interopRequireDefault(_minHeap);
 
@@ -51893,7 +52484,7 @@
 	module.exports = exports['default'];
 
 /***/ },
-/* 417 */
+/* 432 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -51922,7 +52513,7 @@
 	exports.__esModule = true;
 
 /***/ },
-/* 418 */
+/* 433 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -51936,7 +52527,7 @@
 	exports.__esModule = true;
 
 /***/ },
-/* 419 */
+/* 434 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// from http://bl.ocks.org/mbostock/a76006c5bc2a95695c6f
@@ -52031,23 +52622,23 @@
 	module.exports = exports["default"];
 
 /***/ },
-/* 420 */
+/* 435 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 
 	// load the styles
-	var content = __webpack_require__(421);
+	var content = __webpack_require__(436);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
-	var update = __webpack_require__(423)(content, {});
+	var update = __webpack_require__(438)(content, {});
 	if(content.locals) module.exports = content.locals;
 	// Hot Module Replacement
 	if(false) {
 		// When the styles change, update the <style> tags
 		if(!content.locals) {
-			module.hot.accept("!!./../node_modules/css-loader/index.js!./../node_modules/sass-loader/index.js!./style.scss", function() {
-				var newContent = require("!!./../node_modules/css-loader/index.js!./../node_modules/sass-loader/index.js!./style.scss");
+			module.hot.accept("!!./../node_modules/css-loader/index.js!./../node_modules/sass-loader/index.js?{\"includePaths\":[\"/Users/ryan/work/everywhere/node_modules/node-bourbon/node_modules/bourbon/app/assets/stylesheets\"]}!./style.scss", function() {
+				var newContent = require("!!./../node_modules/css-loader/index.js!./../node_modules/sass-loader/index.js?{\"includePaths\":[\"/Users/ryan/work/everywhere/node_modules/node-bourbon/node_modules/bourbon/app/assets/stylesheets\"]}!./style.scss");
 				if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
 				update(newContent);
 			});
@@ -52057,14 +52648,14 @@
 	}
 
 /***/ },
-/* 421 */
+/* 436 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports = module.exports = __webpack_require__(422)();
-	exports.push([module.id, "body {\n  font-family: 'helvetica neue';\n  font-size: 13px;\n  margin: 0;\n  padding: 0;\n  color: #444; }\n\na {\n  color: #116AA9; }\n\nul a {\n  outline: none; }\n\nheader {\n  background-color: #eee;\n  border-bottom: 1px solid #ccc;\n  padding: 1em 2em;\n  font-size: 1.2em; }\n  header a {\n    color: #444;\n    text-decoration: none;\n    font-weight: bold;\n    margin-right: 2em; }\n\n#content {\n  padding: 3em; }\n\nh1 {\n  margin-top: 0; }\n\nfooter {\n  margin: 1em;\n  text-align: center;\n  font-size: 0.8em;\n  color: #cecece; }\n\nul {\n  margin: 0;\n  padding: 0;\n  list-style-type: none; }\n  ul li {\n    margin-bottom: 0.3em; }\n\n.video-list {\n  display: -webkit-flex;\n  display: flex;\n  -webkit-flex-wrap: wrap;\n  flex-wrap: wrap; }\n  .video-list > div {\n    flex-shrink: 0;\n    padding: 0.4em;\n    margin: 0.8em;\n    background: #eee;\n    -moz-box-shadow: 3px 3px 0 0 #dfdfdf;\n    -webkit-box-shadow: 3px 3px 0 0 #dfdfdf;\n    box-shadow: 3px 3px 0 0 #dfdfdf; }\n    .video-list > div .video-name {\n      color: #ccc; }\n\n.roads path {\n  fill: none;\n  stroke-width: 1px;\n  stroke: #fff; }\n  .roads path.selected {\n    stroke-width: 5px;\n    stroke: #116AA9; }\n\n.roads [data-highway=\"secondary\"], .roads [data-highway=\"trunk\"] {\n  stroke-width: 2px; }\n\npath.boundary {\n  fill: #00DCC2; }\n\n#boundary-mask {\n  fill: #fff;\n  stroke-width: 10px;\n  stroke: #fff; }\n\npath.trip {\n  fill: none;\n  stroke-width: 1.5px;\n  stroke: #888;\n  stroke-linecap: round;\n  stroke-linejoin: round; }\n\npath.contour {\n  fill: none;\n  stroke-width: 1px;\n  stroke: #00ebcf; }\n\ncircle.position {\n  fill: #fff;\n  stroke: none; }\n\npath.extent {\n  fill: none;\n  stroke: #333;\n  shape-rendering: crispEdges; }\n", ""]);
+	exports = module.exports = __webpack_require__(437)();
+	exports.push([module.id, "body {\n  font-family: 'helvetica neue';\n  font-size: 13px;\n  margin: 0;\n  padding: 0;\n  color: #444; }\n\na {\n  color: #116AA9; }\n\nul a {\n  outline: none; }\n\nheader {\n  background-color: #eee;\n  border-bottom: 1px solid #ccc;\n  padding: 1em 2em;\n  font-size: 1.2em; }\n  header a {\n    color: #444;\n    text-decoration: none;\n    font-weight: bold;\n    margin-right: 2em; }\n\n#content {\n  padding: 3em; }\n\nh1 {\n  margin-top: 0; }\n\nfooter {\n  margin: 1em;\n  text-align: center;\n  font-size: 0.8em;\n  color: #cecece; }\n\nul {\n  margin: 0;\n  padding: 0;\n  list-style-type: none; }\n  ul li {\n    margin-bottom: 0.3em; }\n\n.way-map {\n  position: relative;\n  display: inline-block; }\n  .way-map .way-hover-info {\n    position: absolute;\n    top: 350px;\n    left: 400px;\n    padding: 0.4em;\n    margin: 0.8em;\n    background: #eee;\n    box-shadow: 3px 3px 0 0 #dfdfdf;\n    font-weight: bold; }\n\n.video-list {\n  display: -webkit-box;\n  display: -moz-box;\n  display: box;\n  display: -webkit-flex;\n  display: -moz-flex;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-lines: multiple;\n  -moz-box-lines: multiple;\n  box-lines: multiple;\n  -webkit-flex-wrap: wrap;\n  -moz-flex-wrap: wrap;\n  -ms-flex-wrap: wrap;\n  flex-wrap: wrap; }\n  .video-list > div {\n    -webkit-flex-shrink: 0;\n    -moz-flex-shrink: 0;\n    flex-shrink: 0;\n    -ms-flex-negative: 0;\n    padding: 0.4em;\n    margin: 0.8em;\n    border: 1px solid #ccc;\n    background: #fff;\n    box-shadow: 3px 3px 0 0 #dfdfdf; }\n    .video-list > div .video-name {\n      color: #ccc; }\n\n.map-box svg {\n  border: 1px solid #ccc;\n  box-shadow: 3px 3px 0 0 #dfdfdf; }\n\n.roads path {\n  fill: none;\n  stroke-width: 1px;\n  stroke: #fff; }\n  .roads path.selected {\n    stroke-width: 5px;\n    stroke: #116AA9; }\n\n.roads [data-highway=\"secondary\"], .roads [data-highway=\"trunk\"] {\n  stroke-width: 2px; }\n\npath.boundary {\n  fill: #00DCC2; }\n\n#boundary-mask {\n  fill: #fff;\n  stroke-width: 10px;\n  stroke: #fff; }\n\npath.trip {\n  fill: none;\n  stroke-width: 1.5px;\n  stroke: #888;\n  stroke-linecap: round;\n  stroke-linejoin: round; }\n\npath.contour {\n  fill: none;\n  stroke-width: 1px;\n  stroke: #00ebcf; }\n\ncircle.position {\n  fill: #fff;\n  stroke: none; }\n\npath.extent {\n  fill: none;\n  stroke: #333;\n  shape-rendering: crispEdges; }\n", ""]);
 
 /***/ },
-/* 422 */
+/* 437 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*
@@ -52120,7 +52711,7 @@
 
 
 /***/ },
-/* 423 */
+/* 438 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*
@@ -52345,16 +52936,16 @@
 
 
 /***/ },
-/* 424 */
+/* 439 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 
 	// load the styles
-	var content = __webpack_require__(425);
+	var content = __webpack_require__(440);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
-	var update = __webpack_require__(423)(content, {});
+	var update = __webpack_require__(438)(content, {});
 	if(content.locals) module.exports = content.locals;
 	// Hot Module Replacement
 	if(false) {
@@ -52371,14 +52962,14 @@
 	}
 
 /***/ },
-/* 425 */
+/* 440 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports = module.exports = __webpack_require__(422)();
+	exports = module.exports = __webpack_require__(437)();
 	exports.push([module.id, "/**\n * React Select\n * ============\n * Created by Jed Watson and Joss Mackison for KeystoneJS, http://www.keystonejs.com/\n * https://twitter.com/jedwatson https://twitter.com/jossmackison https://twitter.com/keystonejs\n * MIT License: https://github.com/keystonejs/react-select\n*/\n.Select {\n  position: relative;\n}\n.Select-control {\n  position: relative;\n  overflow: hidden;\n  background-color: white;\n  border: 1px solid #cccccc;\n  border-color: #d9d9d9 #cccccc #b3b3b3;\n  border-radius: 4px;\n  box-sizing: border-box;\n  color: #333333;\n  cursor: default;\n  outline: none;\n  padding: 8px 52px 8px 10px;\n  transition: all 200ms ease;\n}\n.Select-control:hover {\n  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06);\n}\n.is-searchable.is-open > .Select-control {\n  cursor: text;\n}\n.is-open > .Select-control {\n  border-bottom-right-radius: 0;\n  border-bottom-left-radius: 0;\n  background: white;\n  border-color: #b3b3b3 #cccccc #d9d9d9;\n}\n.is-open > .Select-control > .Select-arrow {\n  border-color: transparent transparent #999999;\n  border-width: 0 5px 5px;\n}\n.is-searchable.is-focused:not(.is-open) > .Select-control {\n  cursor: text;\n}\n.is-focused:not(.is-open) > .Select-control {\n  border-color: #0088cc #0099e6 #0099e6;\n  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1), 0 0 5px -1px rgba(0, 136, 204, 0.5);\n}\n.Select-placeholder {\n  color: #aaaaaa;\n  padding: 8px 52px 8px 10px;\n  position: absolute;\n  top: 0;\n  left: 0;\n  right: -15px;\n  max-width: 100%;\n  overflow: hidden;\n  text-overflow: ellipsis;\n  white-space: nowrap;\n}\n.has-value > .Select-control > .Select-placeholder {\n  color: #333333;\n}\n.Select-input > input {\n  cursor: default;\n  background: none transparent;\n  border: 0 none;\n  font-family: inherit;\n  font-size: inherit;\n  margin: 0;\n  padding: 0;\n  outline: none;\n  display: inline-block;\n  -webkit-appearance: none;\n}\n.is-focused .Select-input > input {\n  cursor: text;\n}\n.Select-control:not(.is-searchable) > .Select-input {\n  outline: none;\n}\n.Select-loading {\n  -webkit-animation: Select-animation-spin 400ms infinite linear;\n  -o-animation: Select-animation-spin 400ms infinite linear;\n  animation: Select-animation-spin 400ms infinite linear;\n  width: 16px;\n  height: 16px;\n  box-sizing: border-box;\n  border-radius: 50%;\n  border: 2px solid #cccccc;\n  border-right-color: #333333;\n  display: inline-block;\n  position: relative;\n  margin-top: -8px;\n  position: absolute;\n  right: 30px;\n  top: 50%;\n}\n.has-value > .Select-control > .Select-loading {\n  right: 46px;\n}\n.Select-clear {\n  color: #999999;\n  cursor: pointer;\n  display: inline-block;\n  font-size: 16px;\n  padding: 6px 10px;\n  position: absolute;\n  right: 17px;\n  top: 0;\n}\n.Select-clear:hover {\n  color: #c0392b;\n}\n.Select-clear > span {\n  font-size: 1.1em;\n}\n.Select-arrow {\n  border-color: #999999 transparent transparent;\n  border-style: solid;\n  border-width: 5px 5px 0;\n  content: \" \";\n  display: block;\n  height: 0;\n  margin-top: -ceil(2.5px);\n  position: absolute;\n  right: 10px;\n  top: 14px;\n  width: 0;\n}\n.Select-menu-outer {\n  border-bottom-right-radius: 4px;\n  border-bottom-left-radius: 4px;\n  background-color: white;\n  border: 1px solid #cccccc;\n  border-top-color: #e6e6e6;\n  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06);\n  box-sizing: border-box;\n  margin-top: -1px;\n  max-height: 200px;\n  position: absolute;\n  top: 100%;\n  width: 100%;\n  z-index: 1000;\n  -webkit-overflow-scrolling: touch;\n}\n.Select-menu {\n  max-height: 198px;\n  overflow-y: auto;\n}\n.Select-option {\n  box-sizing: border-box;\n  color: #666666;\n  cursor: pointer;\n  display: block;\n  padding: 8px 10px;\n}\n.Select-option:last-child {\n  border-bottom-right-radius: 4px;\n  border-bottom-left-radius: 4px;\n}\n.Select-option.is-focused {\n  background-color: #f2f9fc;\n  color: #333333;\n}\n.Select-option.is-disabled {\n  color: #cccccc;\n  cursor: not-allowed;\n}\n.Select-noresults {\n  box-sizing: border-box;\n  color: #999999;\n  cursor: default;\n  display: block;\n  padding: 8px 10px;\n}\n.Select.is-multi .Select-control {\n  padding: 2px 52px 2px 3px;\n}\n.Select.is-multi .Select-input {\n  vertical-align: middle;\n  border: 1px solid transparent;\n  margin: 2px;\n  padding: 3px 0;\n}\n.Select-item {\n  background-color: #f2f9fc;\n  border-radius: 2px;\n  border: 1px solid #c9e6f2;\n  color: #0088cc;\n  display: inline-block;\n  font-size: 1em;\n  margin: 2px;\n}\n.Select-item-icon,\n.Select-item-label {\n  display: inline-block;\n  vertical-align: middle;\n}\n.Select-item-label {\n  cursor: default;\n  border-bottom-right-radius: 2px;\n  border-top-right-radius: 2px;\n  padding: 3px 5px;\n}\n.Select-item-label .Select-item-label__a {\n  color: #0088cc;\n  cursor: pointer;\n}\n.Select-item-icon {\n  cursor: pointer;\n  border-bottom-left-radius: 2px;\n  border-top-left-radius: 2px;\n  border-right: 1px solid #c9e6f2;\n  padding: 2px 5px 4px;\n}\n.Select-item-icon:hover,\n.Select-item-icon:focus {\n  background-color: #ddeff7;\n  color: #0077b3;\n}\n.Select-item-icon:active {\n  background-color: #c9e6f2;\n}\n@keyframes Select-animation-spin {\n  to {\n    transform: rotate(1turn);\n  }\n}\n@-webkit-keyframes Select-animation-spin {\n  to {\n    -webkit-transform: rotate(1turn);\n  }\n}\n", ""]);
 
 /***/ },
-/* 426 */
+/* 441 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -52391,23 +52982,23 @@
 	  value: true
 	});
 
-	var _geo = __webpack_require__(410);
+	var _geo = __webpack_require__(425);
 
-	var _videos = __webpack_require__(440);
+	var _videos = __webpack_require__(455);
 
 	var _videos2 = _interopRequireDefault(_videos);
 
-	var _ways = __webpack_require__(427);
+	var _ways = __webpack_require__(442);
 
-	var _trips = __webpack_require__(523);
+	var _trips = __webpack_require__(538);
 
 	var _trips2 = _interopRequireDefault(_trips);
 
-	var _compactJsonAppDataSomervilleTopoGeojson = __webpack_require__(557);
+	var _compactJsonAppDataSomervilleTopoGeojson = __webpack_require__(572);
 
 	var _compactJsonAppDataSomervilleTopoGeojson2 = _interopRequireDefault(_compactJsonAppDataSomervilleTopoGeojson);
 
-	var _compactJsonAppDataContourGeojson = __webpack_require__(558);
+	var _compactJsonAppDataContourGeojson = __webpack_require__(573);
 
 	var _compactJsonAppDataContourGeojson2 = _interopRequireDefault(_compactJsonAppDataContourGeojson);
 
@@ -52424,14 +53015,14 @@
 	exports.wayTree = _ways.wayTree;
 
 /***/ },
-/* 427 */
+/* 442 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	var _Object$defineProperty = __webpack_require__(268)['default'];
 
-	var _Map = __webpack_require__(428)['default'];
+	var _Map = __webpack_require__(443)['default'];
 
 	var _interopRequireDefault = __webpack_require__(29)['default'];
 
@@ -52439,17 +53030,17 @@
 	  value: true
 	});
 
-	var _lodashCollectionSortBy = __webpack_require__(432);
+	var _lodashCollectionSortBy = __webpack_require__(447);
 
 	var _lodashCollectionSortBy2 = _interopRequireDefault(_lodashCollectionSortBy);
 
-	var _geo = __webpack_require__(410);
+	var _geo = __webpack_require__(425);
 
-	var _compactJsonAppDataHighwaysClippedTopoGeojson = __webpack_require__(438);
+	var _compactJsonAppDataHighwaysClippedTopoGeojson = __webpack_require__(453);
 
 	var _compactJsonAppDataHighwaysClippedTopoGeojson2 = _interopRequireDefault(_compactJsonAppDataHighwaysClippedTopoGeojson);
 
-	var _compactJsonAppDataIntersectionsClippedTopoGeojson = __webpack_require__(439);
+	var _compactJsonAppDataIntersectionsClippedTopoGeojson = __webpack_require__(454);
 
 	var _compactJsonAppDataIntersectionsClippedTopoGeojson2 = _interopRequireDefault(_compactJsonAppDataIntersectionsClippedTopoGeojson);
 
@@ -52501,31 +53092,31 @@
 	exports.wayTree = wayTree;
 
 /***/ },
-/* 428 */
+/* 443 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = { "default": __webpack_require__(429), __esModule: true };
+	module.exports = { "default": __webpack_require__(444), __esModule: true };
 
 /***/ },
-/* 429 */
+/* 444 */
 /***/ function(module, exports, __webpack_require__) {
 
-	__webpack_require__(313);
+	__webpack_require__(328);
 	__webpack_require__(18);
 	__webpack_require__(4);
-	__webpack_require__(430);
-	__webpack_require__(431);
+	__webpack_require__(445);
+	__webpack_require__(446);
 	module.exports = __webpack_require__(6).core.Map;
 
 /***/ },
-/* 430 */
+/* 445 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
-	var strong = __webpack_require__(308);
+	var strong = __webpack_require__(323);
 
 	// 23.1 Map Objects
-	__webpack_require__(311)('Map', function(get){
+	__webpack_require__(326)('Map', function(get){
 	  return function Map(){ return get(this, arguments[0]); };
 	}, {
 	  // 23.1.3.6 Map.prototype.get(key)
@@ -52540,21 +53131,21 @@
 	}, strong, true);
 
 /***/ },
-/* 431 */
+/* 446 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// https://github.com/DavidBruant/Map-Set.prototype.toJSON
-	__webpack_require__(315)('Map');
+	__webpack_require__(330)('Map');
 
 /***/ },
-/* 432 */
+/* 447 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var baseCallback = __webpack_require__(212),
-	    baseMap = __webpack_require__(433),
-	    baseSortBy = __webpack_require__(434),
-	    compareAscending = __webpack_require__(435),
-	    isIterateeCall = __webpack_require__(437);
+	    baseMap = __webpack_require__(448),
+	    baseSortBy = __webpack_require__(449),
+	    compareAscending = __webpack_require__(450),
+	    isIterateeCall = __webpack_require__(452);
 
 	/**
 	 * Creates an array of elements, sorted in ascending order by the results of
@@ -52624,7 +53215,7 @@
 
 
 /***/ },
-/* 433 */
+/* 448 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var baseEach = __webpack_require__(189),
@@ -52653,7 +53244,7 @@
 
 
 /***/ },
-/* 434 */
+/* 449 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -52680,10 +53271,10 @@
 
 
 /***/ },
-/* 435 */
+/* 450 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var baseCompareAscending = __webpack_require__(436);
+	var baseCompareAscending = __webpack_require__(451);
 
 	/**
 	 * Used by `_.sortBy` to compare transformed elements of a collection and stable
@@ -52702,7 +53293,7 @@
 
 
 /***/ },
-/* 436 */
+/* 451 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -52742,7 +53333,7 @@
 
 
 /***/ },
-/* 437 */
+/* 452 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var isArrayLike = __webpack_require__(201),
@@ -52776,30 +53367,30 @@
 
 
 /***/ },
-/* 438 */
+/* 453 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = {"type":"Topology","objects":{"highways-clipped":{"type":"GeometryCollection","crs":{"type":"name","properties":{"name":"urn:ogc:def:crs:OGC:1.3:CRS84"}},"geometries":[{"type":"LineString","properties":{"highway":"residential","name":"Rogers Avenue","oneway":"yes","user":"JasonWoof","id":"way/8603122"},"arcs":[0]},{"type":"LineString","properties":{"highway":"residential","name":"Wheatland Street","oneway":"yes","user":"wambag","id":"way/8603359"},"arcs":[1,2]},{"type":"LineString","properties":{"highway":"residential","name":"Munroe Street","oneway":null,"user":"morganwahl","id":"way/8603503"},"arcs":[3,4,5,6]},{"type":"LineString","properties":{"highway":"secondary","name":"Somerville Avenue","oneway":"yes","user":"onurozgun","id":"way/8604709"},"arcs":[7]},{"type":"LineString","properties":{"highway":"secondary","name":"Broadway","oneway":null,"user":"onurozgun","id":"way/8604726"},"arcs":[8]},{"type":"LineString","properties":{"highway":"residential","name":"Laurel Terrace","oneway":null,"user":"wfox","id":"way/8604730"},"arcs":[9]},{"type":"LineString","properties":{"highway":"residential","name":"Columbia Street","oneway":null,"user":"MassGIS Import","id":"way/8604746"},"arcs":[10,11]},{"type":"LineString","properties":{"highway":"primary_link","name":null,"oneway":"yes","user":"wambag","id":"way/8604752"},"arcs":[12]},{"type":"LineString","properties":{"highway":"secondary","name":"Washington Street","oneway":"yes","user":"SophoM","id":"way/8604756"},"arcs":[13,14,15,16]},{"type":"LineString","properties":{"highway":"tertiary","name":"Cedar Street","oneway":null,"user":"onurozgun","id":"way/8604762"},"arcs":[17,18,19,20,21,22,23,24]},{"type":"LineString","properties":{"highway":"tertiary","name":"Pearl Street","oneway":null,"user":"Ron Newman","id":"way/8604767"},"arcs":[25,26,27,28,29,30,31,32,33,34,35,36,37,38]},{"type":"LineString","properties":{"highway":"residential","name":"Professors Row","oneway":null,"user":"JasonWoof","id":"way/8604779"},"arcs":[39]},{"type":"LineString","properties":{"highway":"secondary","name":"Mystic Valley Parkway","oneway":"yes","user":"jwass","id":"way/8604781"},"arcs":[40]},{"type":"LineString","properties":{"highway":"residential","name":"Central Road","oneway":"yes","user":"synack","id":"way/8604785"},"arcs":[41]},{"type":"LineString","properties":{"highway":"secondary","name":"Mystic Valley Parkway","oneway":null,"user":"morganwahl","id":"way/8604791"},"arcs":[42]},{"type":"LineString","properties":{"highway":"trunk","name":"Monsignor O'Brien Highway","oneway":"yes","user":"hopet","id":"way/8604813"},"arcs":[43]},{"type":"LineString","properties":{"highway":"secondary","name":"Highland Avenue","oneway":"yes","user":"onurozgun","id":"way/8604814"},"arcs":[44,45,46]},{"type":"LineString","properties":{"highway":"secondary","name":"Broadway","oneway":null,"user":"onurozgun","id":"way/8604822"},"arcs":[47,48,49]},{"type":"LineString","properties":{"highway":"secondary","name":"Elm Street","oneway":null,"user":"onurozgun","id":"way/8604828"},"arcs":[50,51,52,53]},{"type":"LineString","properties":{"highway":"residential","name":"Tennyson Street","oneway":null,"user":"wfox","id":"way/8604840"},"arcs":[54]},{"type":"LineString","properties":{"highway":"residential","name":"Charles E Ryan Road","oneway":null,"user":"OceanVortex","id":"way/8604845"},"arcs":[55,56]},{"type":"LineString","properties":{"highway":"residential","name":"Porter Street","oneway":null,"user":"OceanVortex","id":"way/8604852"},"arcs":[57,58,59,60,61,62,63,64,65,66,67,68]},{"type":"LineString","properties":{"highway":"secondary","name":"Webster Avenue","oneway":"yes","user":"onurozgun","id":"way/8604858"},"arcs":[69,70]},{"type":"LineString","properties":{"highway":"residential","name":"Central Road","oneway":"yes","user":"synack","id":"way/8604870"},"arcs":[71]},{"type":"LineString","properties":{"highway":"secondary","name":"Medford Street","oneway":"yes","user":"onurozgun","id":"way/8604879"},"arcs":[72]},{"type":"LineString","properties":{"highway":"secondary","name":"Prospect Street","oneway":null,"user":"onurozgun","id":"way/8604881"},"arcs":[73]},{"type":"LineString","properties":{"highway":"residential","name":"Merriam Street","oneway":"yes","user":"morganwahl","id":"way/8604884"},"arcs":[74]},{"type":"LineString","properties":{"highway":"secondary","name":"Broadway","oneway":null,"user":"wambag","id":"way/8604920"},"arcs":[75]},{"type":"LineString","properties":{"highway":"tertiary","name":"Curtis Street","oneway":null,"user":"techlady","id":"way/8604950"},"arcs":[76,77,78,79,80,81,82,83,84,85,86]},{"type":"LineString","properties":{"highway":"secondary","name":"Beacon Street","oneway":null,"user":"onurozgun","id":"way/8604962"},"arcs":[87,88,89]},{"type":"LineString","properties":{"highway":"residential","name":"Buena Vista Road","oneway":null,"user":"JessAk71","id":"way/8604965"},"arcs":[90,91]},{"type":"LineString","properties":{"highway":"residential","name":"Newberne Street","oneway":"yes","user":"JasonWoof","id":"way/8604974"},"arcs":[92]},{"type":"LineString","properties":{"highway":"residential","name":"Bromfield Road","oneway":"yes","user":"crschmidt","id":"way/8605003"},"arcs":[93]},{"type":"LineString","properties":{"highway":"residential","name":"Arlington Street","oneway":"yes","user":"morganwahl","id":"way/8605023"},"arcs":[94]},{"type":"LineString","properties":{"highway":"residential","name":"Sycamore Street","oneway":"yes","user":"wfox","id":"way/8605024"},"arcs":[95,96,97,98,99]},{"type":"LineString","properties":{"highway":"residential","name":"Evergreen Avenue","oneway":"yes","user":"nkhall","id":"way/8605053"},"arcs":[100]},{"type":"LineString","properties":{"highway":"residential","name":"Saint James Avenue","oneway":null,"user":"Ian McIntosh","id":"way/8605056"},"arcs":[101]},{"type":"LineString","properties":{"highway":"secondary","name":"Washington Street","oneway":null,"user":"onurozgun","id":"way/8605061"},"arcs":[102,103,104,105,106,107]},{"type":"LineString","properties":{"highway":"residential","name":"Gibbens Street","oneway":null,"user":"MassGIS Import","id":"way/8605077"},"arcs":[108]},{"type":"LineString","properties":{"highway":"secondary","name":"Washington Street","oneway":null,"user":"morganwahl","id":"way/8605079"},"arcs":[109]},{"type":"LineString","properties":{"highway":"residential","name":"Adelaide Road","oneway":null,"user":"OceanVortex","id":"way/8605084"},"arcs":[110]},{"type":"LineString","properties":{"highway":"primary","name":"Middlesex Avenue","oneway":"yes","user":"wambag","id":"way/8605089"},"arcs":[111]},{"type":"LineString","properties":{"highway":"unclassified","name":"Packard Avenue","oneway":null,"user":"RMap1","id":"way/8605090"},"arcs":[112,113,114,115,116,117,118,119,120]},{"type":"LineString","properties":{"highway":"residential","name":"Latin Way","oneway":null,"user":"TuftsReady","id":"way/8605091"},"arcs":[121]},{"type":"LineString","properties":{"highway":"primary","name":"Middlesex Avenue","oneway":"yes","user":"wambag","id":"way/8605095"},"arcs":[122,123]},{"type":"LineString","properties":{"highway":"residential","name":"Church Street","oneway":"yes","user":"morganwahl","id":"way/8605096"},"arcs":[124]},{"type":"LineString","properties":{"highway":"secondary","name":"Medford Street","oneway":null,"user":"onurozgun","id":"way/8605101"},"arcs":[125,126]},{"type":"LineString","properties":{"highway":"residential","name":"Charles E Ryan Road","oneway":null,"user":"OceanVortex","id":"way/8605107"},"arcs":[127]},{"type":"LineString","properties":{"highway":"tertiary","name":"Summer Street","oneway":"yes","user":"phyzome","id":"way/8605127"},"arcs":[128,129,130,131,132]},{"type":"LineString","properties":{"highway":"residential","name":"Monmouth Street","oneway":null,"user":"wfox","id":"way/8605142"},"arcs":[133]},{"type":"LineString","properties":{"highway":"residential","name":"Professors Row","oneway":null,"user":"EricSJ","id":"way/8605164"},"arcs":[134,135]},{"type":"LineString","properties":{"highway":"tertiary","name":"Dane Street","oneway":null,"user":"onurozgun","id":"way/8605168"},"arcs":[136,137]},{"type":"LineString","properties":{"highway":"tertiary","name":"Dane Street","oneway":null,"user":"onurozgun","id":"way/8605169"},"arcs":[138,139,140]},{"type":"LineString","properties":{"highway":"residential","name":"Bristol Road","oneway":null,"user":"wfox","id":"way/8605176"},"arcs":[141]},{"type":"LineString","properties":{"highway":"residential","name":"Dearborn Road","oneway":null,"user":"EricSJ","id":"way/8605178"},"arcs":[142,143,144]},{"type":"LineString","properties":{"highway":"residential","name":"Meacham Road","oneway":"yes","user":"crschmidt","id":"way/8605187"},"arcs":[145,146,147,148,149]},{"type":"LineString","properties":{"highway":"residential","name":"Linwood Street","oneway":null,"user":"morganwahl","id":"way/8605193"},"arcs":[150,151,152]},{"type":"LineString","properties":{"highway":"secondary","name":"Washington Street","oneway":null,"user":"jwass","id":"way/8605205"},"arcs":[153,154,155,156,157,158,159,160,161,162,163]},{"type":"LineString","properties":{"highway":"secondary","name":"Washington Street","oneway":null,"user":"onurozgun","id":"way/8605207"},"arcs":[164]},{"type":"LineString","properties":{"highway":"secondary","name":"Washington Street","oneway":null,"user":"onurozgun","id":"way/8605208"},"arcs":[165]},{"type":"LineString","properties":{"highway":"residential","name":"Wilson Avenue","oneway":null,"user":"synack","id":"way/8605214"},"arcs":[166]},{"type":"LineString","properties":{"highway":"secondary","name":"Prospect Street","oneway":null,"user":"onurozgun","id":"way/8605216"},"arcs":[167,168]},{"type":"LineString","properties":{"highway":"secondary","name":"Medford Street","oneway":"yes","user":"OceanVortex","id":"way/8605218"},"arcs":[169,170,171]},{"type":"LineString","properties":{"highway":"secondary","name":"Medford Street","oneway":"yes","user":"OceanVortex","id":"way/8605225"},"arcs":[172,173,174]},{"type":"LineString","properties":{"highway":"tertiary","name":"Curtis Street","oneway":"yes","user":"MassGIS Import","id":"way/8605228"},"arcs":[175,176,177,178]},{"type":"LineString","properties":{"highway":"secondary","name":"Prospect Street","oneway":"yes","user":"NE2","id":"way/8605229"},"arcs":[179]},{"type":"LineString","properties":{"highway":"residential","name":"Saint James Avenue","oneway":null,"user":"Ian McIntosh","id":"way/8605260"},"arcs":[180]},{"type":"LineString","properties":{"highway":"residential","name":"Church Street","oneway":null,"user":"morganwahl","id":"way/8605266"},"arcs":[181]},{"type":"LineString","properties":{"highway":"residential","name":"Whipple Street","oneway":null,"user":"MassGIS Import","id":"way/8605281"},"arcs":[182]},{"type":"LineString","properties":{"highway":"residential","name":"Osgood Street","oneway":null,"user":"wfox","id":"way/8605291"},"arcs":[183,184,185]},{"type":"LineString","properties":{"highway":"secondary","name":"Warren Street","oneway":"yes","user":"crschmidt","id":"way/8605306"},"arcs":[186]},{"type":"LineString","properties":{"highway":"tertiary","name":"Concord Avenue","oneway":null,"user":"morganwahl","id":"way/8605310"},"arcs":[187]},{"type":"LineString","properties":{"highway":"secondary","name":"Broadway","oneway":"yes","user":"wambag","id":"way/8605311"},"arcs":[188,189,190,191,192,193,194,195,196,197,198,199,200,201,202,203,204,205,206,207,208]},{"type":"LineString","properties":{"highway":"residential","name":"Grove Street","oneway":null,"user":"onurozgun","id":"way/8605312"},"arcs":[209]},{"type":"LineString","properties":{"highway":"residential","name":"Oliver Street","oneway":"yes","user":"wambag","id":"way/8605323"},"arcs":[210]},{"type":"LineString","properties":{"highway":"residential","name":"Packard Avenue","oneway":null,"user":"crschmidt","id":"way/8605330"},"arcs":[211]},{"type":"LineString","properties":{"highway":"residential","name":"Hancock Street","oneway":"yes","user":"onurozgun","id":"way/8605331"},"arcs":[212]},{"type":"LineString","properties":{"highway":"residential","name":"Chester Street","oneway":null,"user":"nkhall","id":"way/8605340"},"arcs":[213]},{"type":"LineString","properties":{"highway":"residential","name":"Florence Street","oneway":null,"user":"probiscus","id":"way/8605342"},"arcs":[214]},{"type":"LineString","properties":{"highway":"residential","name":"Franklin Street","oneway":"yes","user":"probiscus","id":"way/8605345"},"arcs":[215,216,217,218,219,220,221]},{"type":"LineString","properties":{"highway":"secondary","name":"Broadway","oneway":"yes","user":"KristenK","id":"way/8605348"},"arcs":[222]},{"type":"LineString","properties":{"highway":"secondary_link","name":null,"oneway":"yes","user":"onurozgun","id":"way/8605351"},"arcs":[223]},{"type":"LineString","properties":{"highway":"tertiary","name":"Summer Street","oneway":"yes","user":"jumbanho","id":"way/8605356"},"arcs":[224]},{"type":"LineString","properties":{"highway":"residential","name":"Hancock Street","oneway":null,"user":"onurozgun","id":"way/8605370"},"arcs":[225,226,227,228]},{"type":"LineString","properties":{"highway":"residential","name":"Tennyson Street","oneway":"yes","user":"wfox","id":"way/8605377"},"arcs":[229]},{"type":"LineString","properties":{"highway":"secondary","name":"Highland Avenue","oneway":null,"user":"paolodepetrillo","id":"way/8605381"},"arcs":[230,231,232,233,234,235,236,237,238,239,240,241,242,243,244,245,246,247,248,249,250,251,252,253,254,255,256,257,258]},{"type":"LineString","properties":{"highway":"residential","name":"Thurston Street","oneway":"yes","user":"wambag","id":"way/8605394"},"arcs":[259,260]},{"type":"LineString","properties":{"highway":"residential","name":"Talbot Avenue","oneway":"no","user":"EricSJ","id":"way/8605416"},"arcs":[261]},{"type":"LineString","properties":{"highway":"tertiary","name":"Willow Avenue","oneway":null,"user":"onurozgun","id":"way/8605417"},"arcs":[262,263,264,265,266,267,268,269,270]},{"type":"LineString","properties":{"highway":"tertiary","name":"Dane Street","oneway":null,"user":"onurozgun","id":"way/8605423"},"arcs":[271]},{"type":"LineString","properties":{"highway":"unclassified","name":"Mason Street","oneway":null,"user":"probiscus","id":"way/8605424"},"arcs":[272,273,274,275]},{"type":"LineString","properties":{"highway":"residential","name":"Heath Street","oneway":"yes","user":"wambag","id":"way/8605436"},"arcs":[276,277]},{"type":"LineString","properties":{"highway":"secondary","name":"Broadway","oneway":null,"user":"Aredhel","id":"way/8605442"},"arcs":[278,279,280,281,282,283,284]},{"type":"LineString","properties":{"highway":"residential","name":"Pearson Road","oneway":"yes","user":"crschmidt","id":"way/8605456"},"arcs":[285,286]},{"type":"LineString","properties":{"highway":"residential","name":"Monmouth Street","oneway":null,"user":"wfox","id":"way/8605463"},"arcs":[287]},{"type":"LineString","properties":{"highway":"secondary","name":"Broadway","oneway":"yes","user":"wambag","id":"way/8605471"},"arcs":[288,289,290,291]},{"type":"LineString","properties":{"highway":"residential","name":"Clyde Street","oneway":"yes","user":"synack","id":"way/8605474"},"arcs":[292,293]},{"type":"LineString","properties":{"highway":"residential","name":"Prichard Avenue","oneway":"yes","user":"wfox","id":"way/8605480"},"arcs":[294]},{"type":"LineString","properties":{"highway":"tertiary","name":"Willow Avenue","oneway":"yes","user":"onurozgun","id":"way/8605490"},"arcs":[295,296,297,298,299]},{"type":"LineString","properties":{"highway":"residential","name":"Sycamore Street","oneway":"yes","user":"morganwahl","id":"way/8605500"},"arcs":[300,301,302,303,304,305]},{"type":"LineString","properties":{"highway":"trunk","name":"Fellsway","oneway":"yes","user":"wambag","id":"way/8605502"},"arcs":[306]},{"type":"LineString","properties":{"highway":"residential","name":"Benton Road","oneway":null,"user":"probiscus","id":"way/8605524"},"arcs":[307,308,309,310]},{"type":"LineString","properties":{"highway":"residential","name":"Winslow Avenue","oneway":null,"user":"wfox","id":"way/8605532"},"arcs":[311]},{"type":"LineString","properties":{"highway":"secondary","name":"Beacon Street","oneway":null,"user":"morganwahl","id":"way/8605545"},"arcs":[312,313,314,315,316,317,318,319,320,321,322]},{"type":"LineString","properties":{"highway":"secondary","name":"Prospect Street","oneway":"yes","user":"morganwahl","id":"way/8605549"},"arcs":[323]},{"type":"LineString","properties":{"highway":"tertiary","name":"Concord Avenue","oneway":null,"user":"Tom Walsh","id":"way/8605568"},"arcs":[324,325,326,327,328]},{"type":"LineString","properties":{"highway":"residential","name":"Newberne Street","oneway":null,"user":"KindredCoda","id":"way/8605579"},"arcs":[329]},{"type":"LineString","properties":{"highway":"trunk","name":"Fellsway","oneway":"yes","user":"pokey","id":"way/8605592"},"arcs":[330]},{"type":"LineString","properties":{"highway":"residential","name":"Talbot Avenue","oneway":"yes","user":"EricSJ","id":"way/8605613"},"arcs":[331]},{"type":"LineString","properties":{"highway":"residential","name":"Central Road","oneway":"yes","user":"synack","id":"way/8605662"},"arcs":[332]},{"type":"LineString","properties":{"highway":"unclassified","name":null,"oneway":null,"user":"probiscus","id":"way/8605671"},"arcs":[333,334]},{"type":"LineString","properties":{"highway":"unclassified","name":null,"oneway":"yes","user":"probiscus","id":"way/8605673"},"arcs":[335]},{"type":"LineString","properties":{"highway":"secondary_link","name":null,"oneway":"yes","user":"ChrisZontine","id":"way/8605693"},"arcs":[336]},{"type":"LineString","properties":{"highway":"secondary","name":"Washington Street","oneway":"yes","user":"wambag","id":"way/8605696"},"arcs":[337,338,339]},{"type":"LineString","properties":{"highway":"residential","name":"Evergreen Avenue","oneway":null,"user":"wfox","id":"way/8605698"},"arcs":[340,341,342]},{"type":"LineString","properties":{"highway":"residential","name":null,"oneway":"yes","user":"morganwahl","id":"way/8605712"},"arcs":[343]},{"type":"LineString","properties":{"highway":"residential","name":"Concord Avenue","oneway":"yes","user":"morganwahl","id":"way/8605740"},"arcs":[344]},{"type":"LineString","properties":{"highway":"secondary_link","name":null,"oneway":"yes","user":"ChrisZontine","id":"way/8605757"},"arcs":[345]},{"type":"LineString","properties":{"highway":"residential","name":"Highland Road","oneway":null,"user":"wfox","id":"way/8605777"},"arcs":[346,347,348]},{"type":"LineString","properties":{"highway":"residential","name":null,"oneway":null,"user":"nkhall","id":"way/8605786"},"arcs":[349]},{"type":"LineString","properties":{"highway":"residential","name":"Spring Street","oneway":"yes","user":"OceanVortex","id":"way/8605789"},"arcs":[350,351,352,353]},{"type":"LineString","properties":{"highway":"residential","name":null,"oneway":"yes","user":"MassGIS Import","id":"way/8605790"},"arcs":[354]},{"type":"LineString","properties":{"highway":"residential","name":"Arlington Street","oneway":"yes","user":"wfox","id":"way/8605797"},"arcs":[355]},{"type":"LineString","properties":{"highway":"residential","name":null,"oneway":null,"user":"wfox","id":"way/8605806"},"arcs":[356]},{"type":"LineString","properties":{"highway":"residential","name":"Fitchburg Street","oneway":null,"user":"xybot","id":"way/8605821"},"arcs":[357,358]},{"type":"LineString","properties":{"highway":"tertiary","name":"Concord Avenue","oneway":null,"user":"Tom Walsh","id":"way/8605831"},"arcs":[359,360]},{"type":"LineString","properties":{"highway":"residential","name":"Eastman Road","oneway":null,"user":"Ian McIntosh","id":"way/8605842"},"arcs":[361]},{"type":"LineString","properties":{"highway":"primary_link","name":null,"oneway":"yes","user":"wambag","id":"way/8605847"},"arcs":[362]},{"type":"LineString","properties":{"highway":"tertiary","name":"Pearl Street","oneway":null,"user":"David Posey","id":"way/8605850"},"arcs":[363,364,365,366]},{"type":"LineString","properties":{"highway":"residential","name":"Albion Street","oneway":null,"user":"crschmidt","id":"way/8605854"},"arcs":[367]},{"type":"LineString","properties":{"highway":"residential","name":"Clifton Street","oneway":"yes","user":"wfox","id":"way/8605856"},"arcs":[368]},{"type":"LineString","properties":{"highway":"secondary","name":"A. Alfred Lombardi Street","oneway":"yes","user":"wambag","id":"way/8605879"},"arcs":[369,370,371]},{"type":"LineString","properties":{"highway":"residential","name":"Meacham Road","oneway":null,"user":"MassGIS Import","id":"way/8606961"},"arcs":[372]},{"type":"LineString","properties":{"highway":"residential","name":"Winslow Avenue","oneway":"yes","user":"wfox","id":"way/8607498"},"arcs":[373,374]},{"type":"LineString","properties":{"highway":"residential","name":"Grove Street","oneway":"yes","user":"JasonWoof","id":"way/8607499"},"arcs":[375]},{"type":"LineString","properties":{"highway":"residential","name":"Prichard Avenue","oneway":"yes","user":"ettob","id":"way/8607503"},"arcs":[376]},{"type":"LineString","properties":{"highway":"residential","name":"Whipple Street","oneway":"yes","user":"MassGIS Import","id":"way/8607508"},"arcs":[377]},{"type":"LineString","properties":{"highway":"tertiary","name":"Summer Street","oneway":"no","user":"onurozgun","id":"way/8607510"},"arcs":[378,379,380,381,382,383]},{"type":"LineString","properties":{"highway":"secondary","name":"Elm Street","oneway":"yes","user":"onurozgun","id":"way/8608834"},"arcs":[384,385,386,387,388]},{"type":"LineString","properties":{"highway":"residential","name":"Chester Street","oneway":"yes","user":"synack","id":"way/8608836"},"arcs":[389,390,391]},{"type":"LineString","properties":{"highway":"residential","name":"Hancock Street","oneway":"yes","user":"onurozgun","id":"way/8608837"},"arcs":[392]},{"type":"LineString","properties":{"highway":"residential","name":"Benton Road","oneway":"yes","user":"nkhall","id":"way/8609185"},"arcs":[393]},{"type":"LineString","properties":{"highway":"residential","name":"Gibbens Street","oneway":"yes","user":"nkhall","id":"way/8609186"},"arcs":[394]},{"type":"LineString","properties":{"highway":"residential","name":"Spring Street","oneway":null,"user":"OceanVortex","id":"way/8609187"},"arcs":[395,396]},{"type":"LineString","properties":{"highway":"residential","name":"Temple Road","oneway":null,"user":"wambag","id":"way/8609435"},"arcs":[397]},{"type":"LineString","properties":{"highway":"residential","name":"Kensington Avenue","oneway":"yes","user":"wambag","id":"way/8610033"},"arcs":[398]},{"type":"LineString","properties":{"highway":"residential","name":"Michigan Avenue","oneway":"yes","user":"mregan","id":"way/8610034"},"arcs":[399,400]},{"type":"LineString","properties":{"highway":"residential","name":"Oliver Street","oneway":null,"user":"wambag","id":"way/8610037"},"arcs":[401]},{"type":"LineString","properties":{"highway":"residential","name":"Franklin Street","oneway":"yes","user":"probiscus","id":"way/8610038"},"arcs":[402,403,404,405,406]},{"type":"LineString","properties":{"highway":"residential","name":"Florence Street","oneway":"yes","user":"probiscus","id":"way/8610040"},"arcs":[407]},{"type":"LineString","properties":{"highway":"primary_link","name":null,"oneway":"yes","user":"wambag","id":"way/8610042"},"arcs":[408,409,410]},{"type":"LineString","properties":{"highway":"tertiary","name":"Summer Street","oneway":"yes","user":"jumbanho","id":"way/8610043"},"arcs":[411]},{"type":"LineString","properties":{"highway":"residential","name":"Norfolk Street","oneway":"yes","user":"OceanVortex","id":"way/8614590"},"arcs":[412]},{"type":"LineString","properties":{"highway":"tertiary","name":"Cameron Avenue","oneway":null,"user":"JasonWoof","id":"way/8614596"},"arcs":[413]},{"type":"LineString","properties":{"highway":"residential","name":"Davenport Street","oneway":null,"user":"onurozgun","id":"way/8614626"},"arcs":[414]},{"type":"LineString","properties":{"highway":"tertiary","name":"Dover Street","oneway":"yes","user":"probiscus","id":"way/8614784"},"arcs":[415,416,417]},{"type":"LineString","properties":{"highway":"secondary","name":"Beech Street","oneway":"yes","user":"jwass","id":"way/8614797"},"arcs":[418]},{"type":"LineString","properties":{"highway":"residential","name":"Seven Pines Avenue","oneway":null,"user":"wfox","id":"way/8614799"},"arcs":[419]},{"type":"LineString","properties":{"highway":"residential","name":"Scott Street","oneway":"yes","user":"morganwahl","id":"way/8614834"},"arcs":[420]},{"type":"LineString","properties":{"highway":"residential","name":"Eustis Street","oneway":"yes","user":"wfox","id":"way/8614935"},"arcs":[421]},{"type":"LineString","properties":{"highway":"residential","name":"Museum Street","oneway":null,"user":"Tom Walsh","id":"way/8614958"},"arcs":[422]},{"type":"LineString","properties":{"highway":"residential","name":"Windsor Street","oneway":null,"user":"OceanVortex","id":"way/8615007"},"arcs":[423]},{"type":"LineString","properties":{"highway":"residential","name":"Line Street","oneway":"yes","user":"715371","id":"way/8615076"},"arcs":[424]},{"type":"LineString","properties":{"highway":"residential","name":"Miller Avenue","oneway":null,"user":"synack","id":"way/8615085"},"arcs":[425]},{"type":"LineString","properties":{"highway":"residential","name":"Houghton Street","oneway":null,"user":"MassGIS Import","id":"way/8615088"},"arcs":[426]},{"type":"MultiLineString","properties":{"highway":"residential","name":"Holden Green","oneway":null,"user":"morganwahl","id":"way/8615275"},"arcs":[[427],[428]]},{"type":"LineString","properties":{"highway":"residential","name":"Gold Star Road","oneway":"yes","user":"wfox","id":"way/8615292"},"arcs":[429]},{"type":"LineString","properties":{"highway":"residential","name":"Oakland Street","oneway":null,"user":"MassGIS Import","id":"way/8615369"},"arcs":[430]},{"type":"LineString","properties":{"highway":"tertiary","name":"Day Street","oneway":"yes","user":"probiscus","id":"way/8615448"},"arcs":[431,432,433]},{"type":"MultiLineString","properties":{"highway":"unclassified","name":null,"oneway":null,"user":"probiscus","id":"way/8615485"},"arcs":[[434],[435]]},{"type":"LineString","properties":{"highway":"residential","name":"Hunting Street","oneway":"yes","user":"crschmidt","id":"way/8615529"},"arcs":[436]},{"type":"LineString","properties":{"highway":"tertiary","name":"Springfield Street","oneway":null,"user":"morganwahl","id":"way/8615585"},"arcs":[437]},{"type":"LineString","properties":{"highway":"residential","name":"Tenney Street","oneway":null,"user":"Ian McIntosh","id":"way/8615737"},"arcs":[438]},{"type":"LineString","properties":{"highway":"residential","name":"Orchard Street","oneway":null,"user":"onurozgun","id":"way/8615749"},"arcs":[439]},{"type":"LineString","properties":{"highway":"residential","name":"Harding Street","oneway":"yes","user":"crschmidt","id":"way/8615758"},"arcs":[440]},{"type":"LineString","properties":{"highway":"residential","name":"Tremont Street","oneway":"yes","user":"OceanVortex","id":"way/8615773"},"arcs":[441]},{"type":"LineString","properties":{"highway":"secondary","name":"Webster Avenue","oneway":null,"user":"morganwahl","id":"way/8615777"},"arcs":[442]},{"type":"LineString","properties":{"highway":"residential","name":"Saginaw Avenue","oneway":null,"user":"synack","id":"way/8615790"},"arcs":[443]},{"type":"LineString","properties":{"highway":"residential","name":"Meacham Road","oneway":null,"user":"jonaz","id":"way/8615868"},"arcs":[444]},{"type":"LineString","properties":{"highway":"residential","name":"Clarendon Avenue","oneway":"yes","user":"OSMF Redaction Account","id":"way/8615912"},"arcs":[445]},{"type":"LineString","properties":{"highway":"residential","name":"Washburn Avenue","oneway":"yes","user":"OSMF Redaction Account","id":"way/8616138"},"arcs":[446]},{"type":"LineString","properties":{"highway":"residential","name":"Kingston Street","oneway":null,"user":"MassGIS Import","id":"way/8616177"},"arcs":[447]},{"type":"LineString","properties":{"highway":"secondary","name":"Kirkland Street","oneway":null,"user":"Utible","id":"way/8616219"},"arcs":[448]},{"type":"LineString","properties":{"highway":"residential","name":"Hadley Street","oneway":"yes","user":"synack","id":"way/8639321"},"arcs":[449]},{"type":"LineString","properties":{"highway":"residential","name":"Perkins Street","oneway":"yes","user":"morganwahl","id":"way/8644707"},"arcs":[450]},{"type":"LineString","properties":{"highway":"trunk","name":"Monsignor O'Brien Highway","oneway":"yes","user":"hopet","id":"way/8647657"},"arcs":[451]},{"type":"LineString","properties":{"highway":"residential","name":"Sherman Street","oneway":null,"user":"wambag","id":"way/8649670"},"arcs":[452]},{"type":"LineString","properties":{"highway":"residential","name":"Crescent Street","oneway":null,"user":"wfox","id":"way/8649976"},"arcs":[453]},{"type":"LineString","properties":{"highway":"secondary","name":"Cambridge Street","oneway":null,"user":"onurozgun","id":"way/8651189"},"arcs":[454]},{"type":"LineString","properties":{"highway":"construction","name":"Community Path","oneway":null,"user":"David Posey","id":"way/8842397"},"arcs":[455]},{"type":"LineString","properties":{"highway":"cycleway","name":null,"oneway":"no","user":"wambag","id":"way/8842520"},"arcs":[456,457,458,459,460,461]},{"type":"LineString","properties":{"highway":"primary","name":"Mystic Avenue","oneway":"yes","user":"NE2","id":"way/9037664"},"arcs":[462]},{"type":"LineString","properties":{"highway":"residential","name":"Meacham Street","oneway":null,"user":"wfox","id":"way/9037734"},"arcs":[463]},{"type":"LineString","properties":{"highway":"residential","name":"Capen Street","oneway":null,"user":"morganwahl","id":"way/9037824"},"arcs":[464]},{"type":"LineString","properties":{"highway":"residential","name":"Winchester Street","oneway":null,"user":"synack","id":"way/9037832"},"arcs":[465]},{"type":"LineString","properties":{"highway":"residential","name":"Osgood Street","oneway":null,"user":"almiki","id":"way/9037919"},"arcs":[466]},{"type":"LineString","properties":{"highway":"residential","name":"Dexter Street","oneway":null,"user":"wfox","id":"way/9037984"},"arcs":[467]},{"type":"LineString","properties":{"highway":"tertiary","name":"North Street","oneway":null,"user":"morganwahl","id":"way/9038548"},"arcs":[468]},{"type":"LineString","properties":{"highway":"residential","name":"Packard Avenue","oneway":null,"user":"JasonWoof","id":"way/9038710"},"arcs":[469]},{"type":"LineString","properties":{"highway":"residential","name":"Strathmore Road","oneway":"yes","user":"synack","id":"way/9038722"},"arcs":[470]},{"type":"LineString","properties":{"highway":"secondary","name":"Boston Avenue","oneway":null,"user":"DrMORO","id":"way/9038751"},"arcs":[471]},{"type":"LineString","properties":{"highway":"trunk","name":"Fellsway","oneway":"yes","user":"wambag","id":"way/9038805"},"arcs":[472]},{"type":"LineString","properties":{"highway":"residential","name":"Harold Street","oneway":null,"user":"MassGIS Import","id":"way/9038813"},"arcs":[473]},{"type":"LineString","properties":{"highway":"secondary","name":"Warner Street","oneway":null,"user":"synack","id":"way/9038876"},"arcs":[474]},{"type":"MultiLineString","properties":{"highway":"tertiary","name":"Boston Avenue","oneway":null,"user":"EricSJ","id":"way/9038930"},"arcs":[[475,476],[477]]},{"type":"LineString","properties":{"highway":"primary","name":"Mystic Avenue","oneway":"yes","user":"NE2","id":"way/9038961"},"arcs":[478]},{"type":"LineString","properties":{"highway":"residential","name":"Albion Street","oneway":"yes","user":"crschmidt","id":"way/9039079"},"arcs":[479]},{"type":"LineString","properties":{"highway":"residential","name":"Tannery Brook Row","oneway":null,"user":"Matthew Miller","id":"way/9428724"},"arcs":[480,481]},{"type":"LineString","properties":{"highway":"tertiary","name":"School Street","oneway":"yes","user":"onurozgun","id":"way/9428726"},"arcs":[482]},{"type":"LineString","properties":{"highway":"residential","name":"Dickson Street","oneway":null,"user":"wfox","id":"way/9428728"},"arcs":[483]},{"type":"LineString","properties":{"highway":"tertiary","name":"Morrison Avenue","oneway":null,"user":"synack","id":"way/9428731"},"arcs":[484,485,486,487,488,489]},{"type":"LineString","properties":{"highway":"residential","name":"Sydney Street","oneway":null,"user":"wambag","id":"way/9428738"},"arcs":[490,491]},{"type":"LineString","properties":{"highway":"residential","name":"Ossipee Road","oneway":null,"user":"wfox","id":"way/9428740"},"arcs":[492,493]},{"type":"LineString","properties":{"highway":"residential","name":"Sacramento Street","oneway":null,"user":"onurozgun","id":"way/9428743"},"arcs":[494]},{"type":"LineString","properties":{"highway":"residential","name":"Rose Street","oneway":"yes","user":"morganwahl","id":"way/9428746"},"arcs":[495]},{"type":"LineString","properties":{"highway":"residential","name":"Sargent Avenue","oneway":"yes","user":"wambag","id":"way/9428751"},"arcs":[496]},{"type":"LineString","properties":{"highway":"residential","name":"Mount Vernon Street","oneway":"yes","user":"synack","id":"way/9428753"},"arcs":[497]},{"type":"LineString","properties":{"highway":"residential","name":"Mount Vernon Street","oneway":"yes","user":"wambag","id":"way/9428755"},"arcs":[498,499]},{"type":"LineString","properties":{"highway":"residential","name":"Cutter Avenue","oneway":"yes","user":"onurozgun","id":"way/9428757"},"arcs":[500,501,502,503,504]},{"type":"LineString","properties":{"highway":"residential","name":"James Street","oneway":"yes","user":"wfox","id":"way/9428758"},"arcs":[505]},{"type":"LineString","properties":{"highway":"residential","name":"Joseph Street","oneway":null,"user":"morganwahl","id":"way/9428765"},"arcs":[506,507]},{"type":"LineString","properties":{"highway":"residential","name":"Greenville Street","oneway":null,"user":"OceanVortex","id":"way/9428767"},"arcs":[508,509,510,511]},{"type":"LineString","properties":{"highway":"residential","name":"Pennsylvania Avenue","oneway":"yes","user":"steverumizen","id":"way/9428768"},"arcs":[512,513,514,515,516,517,518,519,520,521,522]},{"type":"LineString","properties":{"highway":"secondary","name":"Powder House Boulevard","oneway":"yes","user":"nkhall","id":"way/9428773"},"arcs":[523]},{"type":"LineString","properties":{"highway":"residential","name":"Rush Street","oneway":null,"user":"synack","id":"way/9428775"},"arcs":[524,525]},{"type":"LineString","properties":{"highway":"residential","name":"Properzi Way","oneway":null,"user":"OceanVortex","id":"way/9428784"},"arcs":[526]},{"type":"LineString","properties":{"highway":"tertiary","name":"Mossland Street","oneway":"yes","user":"onurozgun","id":"way/9428786"},"arcs":[527]},{"type":"LineString","properties":{"highway":"residential","name":"Holyoke Road","oneway":null,"user":"wfox","id":"way/9428788"},"arcs":[528]},{"type":"LineString","properties":{"highway":"residential","name":"Garrison Avenue","oneway":null,"user":"wfox","id":"way/9428791"},"arcs":[529]},{"type":"LineString","properties":{"highway":"residential","name":"Howard Street","oneway":null,"user":"JasonWoof","id":"way/9428793"},"arcs":[530,531]},{"type":"LineString","properties":{"highway":"residential","name":"Bonair Street","oneway":"yes","user":"OceanVortex","id":"way/9428795"},"arcs":[532,533,534]},{"type":"LineString","properties":{"highway":"residential","name":"Revolution Drive","oneway":"yes","user":"wambag","id":"way/9428797"},"arcs":[535]},{"type":"LineString","properties":{"highway":"residential","name":"Tower Court","oneway":null,"user":"MassGIS Import","id":"way/9428800"},"arcs":[536]},{"type":"LineString","properties":{"highway":"residential","name":"Hadley Court","oneway":null,"user":"morganwahl","id":"way/9428801"},"arcs":[537]},{"type":"LineString","properties":{"highway":"residential","name":"Revolution Drive","oneway":"yes","user":"wambag","id":"way/9428802"},"arcs":[538]},{"type":"LineString","properties":{"highway":"residential","name":"Craigie Circle","oneway":null,"user":"OSMF Redaction Account","id":"way/9428804"},"arcs":[539]},{"type":"LineString","properties":{"highway":"living_street","name":"Kilby Street","oneway":null,"user":"morganwahl","id":"way/9428807"},"arcs":[540]},{"type":"LineString","properties":{"highway":"tertiary","name":"Lowell Street","oneway":"yes","user":"onurozgun","id":"way/9428809"},"arcs":[541,542,543]},{"type":"LineString","properties":{"highway":"residential","name":"Ash Avenue","oneway":null,"user":"MassGIS Import","id":"way/9428813"},"arcs":[544]},{"type":"LineString","properties":{"highway":"residential","name":"Dickinson Street","oneway":"yes","user":"morganwahl","id":"way/9428817"},"arcs":[545,546,547]},{"type":"LineString","properties":{"highway":"residential","name":"Cutter Park","oneway":null,"user":"MassGIS Import","id":"way/9428824"},"arcs":[548]},{"type":"LineString","properties":{"highway":"residential","name":"Edgar Court","oneway":null,"user":"synack","id":"way/9428826"},"arcs":[549]},{"type":"LineString","properties":{"highway":"residential","name":"Maine Avenue","oneway":"yes","user":"crschmidt","id":"way/9428828"},"arcs":[550]},{"type":"LineString","properties":{"highway":"residential","name":"Fenwick Street","oneway":"no","user":"Aredhel","id":"way/9428830"},"arcs":[551]},{"type":"LineString","properties":{"highway":"residential","name":"Prentiss Street","oneway":"yes","user":"wfox","id":"way/9428833"},"arcs":[552]},{"type":"LineString","properties":{"highway":"residential","name":"Dartmouth Street","oneway":"yes","user":"wfox","id":"way/9428834"},"arcs":[553,554]},{"type":"LineString","properties":{"highway":"residential","name":"Belmont Street","oneway":"yes","user":"Aredhel","id":"way/9428837"},"arcs":[555,556]},{"type":"LineString","properties":{"highway":"residential","name":"Wallace Street","oneway":"yes","user":"wfox","id":"way/9428845"},"arcs":[557,558]},{"type":"LineString","properties":{"highway":"residential","name":"Irvington Road","oneway":"yes","user":"JasonWoof","id":"way/9428848"},"arcs":[559]},{"type":"LineString","properties":{"highway":"residential","name":"Everett Avenue","oneway":"yes","user":"synack","id":"way/9428850"},"arcs":[560]},{"type":"LineString","properties":{"highway":"trunk_link","name":null,"oneway":"yes","user":"NE2","id":"way/9428853"},"arcs":[561]},{"type":"LineString","properties":{"highway":"residential","name":"Fremont Street","oneway":null,"user":"tirerim","id":"way/9428854"},"arcs":[562,563]},{"type":"LineString","properties":{"highway":"residential","name":"Garfield Avenue","oneway":null,"user":"wambag","id":"way/9428856"},"arcs":[564,565]},{"type":"LineString","properties":{"highway":"residential","name":"Olive Avenue","oneway":null,"user":"OceanVortex","id":"way/9428857"},"arcs":[566]},{"type":"LineString","properties":{"highway":"residential","name":"Cedar Court","oneway":null,"user":"wfox","id":"way/9428859"},"arcs":[567]},{"type":"LineString","properties":{"highway":"residential","name":"Flint Avenue","oneway":null,"user":"wambag","id":"way/9428861"},"arcs":[568]},{"type":"LineString","properties":{"highway":"residential","name":"Ellington Road","oneway":null,"user":"MassGIS Import","id":"way/9428863"},"arcs":[569]},{"type":"LineString","properties":{"highway":"residential","name":"Jerome Street","oneway":null,"user":"MassGIS Import","id":"way/9428865"},"arcs":[570]},{"type":"LineString","properties":{"highway":"residential","name":"Belknap Street","oneway":"yes","user":"wfox","id":"way/9428867"},"arcs":[571]},{"type":"LineString","properties":{"highway":"residential","name":"Aldrich Street","oneway":null,"user":"wambag","id":"way/9428870"},"arcs":[572]},{"type":"LineString","properties":{"highway":"residential","name":"Henderson Street","oneway":"yes","user":"synack","id":"way/9428874"},"arcs":[573]},{"type":"LineString","properties":{"highway":"residential","name":"Harrison Street","oneway":null,"user":"MassGIS Import","id":"way/9428883"},"arcs":[574,575]},{"type":"LineString","properties":{"highway":"residential","name":"Porter Street","oneway":null,"user":"wfox","id":"way/9428885"},"arcs":[576,577]},{"type":"LineString","properties":{"highway":"residential","name":"Murdock Street","oneway":null,"user":"synack","id":"way/9428886"},"arcs":[578]},{"type":"LineString","properties":{"highway":"residential","name":"Fisk Avenue","oneway":"yes","user":"crschmidt","id":"way/9428887"},"arcs":[579]},{"type":"LineString","properties":{"highway":"trunk_link","name":null,"oneway":"yes","user":"wambag","id":"way/9428888"},"arcs":[580,581]},{"type":"LineString","properties":{"highway":"residential","name":"Poplar Street","oneway":null,"user":"MassGIS Import","id":"way/9428890"},"arcs":[582]},{"type":"LineString","properties":{"highway":"residential","name":"South Street","oneway":null,"user":"OceanVortex","id":"way/9428896"},"arcs":[583,584,585]},{"type":"LineString","properties":{"highway":"residential","name":"McGrath Highway","oneway":null,"user":"wambag","id":"way/9428899"},"arcs":[586]},{"type":"LineString","properties":{"highway":"residential","name":"Walter Terrace","oneway":null,"user":"MassGIS Import","id":"way/9428907"},"arcs":[587]},{"type":"LineString","properties":{"highway":"residential","name":"First Avenue","oneway":null,"user":"MassGIS Import","id":"way/9428910"},"arcs":[588]},{"type":"LineString","properties":{"highway":"residential","name":"Thorndike Street","oneway":null,"user":"synack","id":"way/9428914"},"arcs":[589]},{"type":"LineString","properties":{"highway":"residential","name":"Columbus Avenue","oneway":null,"user":"wfox","id":"way/9428916"},"arcs":[590]},{"type":"LineString","properties":{"highway":"residential","name":"Raymond Avenue","oneway":null,"user":"wfox","id":"way/9428918"},"arcs":[591]},{"type":"LineString","properties":{"highway":"tertiary_link","name":null,"oneway":"yes","user":"wambag","id":"way/9428921"},"arcs":[592]},{"type":"LineString","properties":{"highway":"residential","name":"Mount Vernon Street","oneway":"yes","user":"probiscus","id":"way/9428922"},"arcs":[593,594,595]},{"type":"LineString","properties":{"highway":"residential","name":"Richardson Terrace","oneway":null,"user":"OceanVortex","id":"way/9428923"},"arcs":[596]},{"type":"LineString","properties":{"highway":"residential","name":"Carver Street","oneway":null,"user":"Ian McIntosh","id":"way/9428924"},"arcs":[597]},{"type":"LineString","properties":{"highway":"residential","name":"Lewis Street","oneway":null,"user":"MassGIS Import","id":"way/9428928"},"arcs":[598,599,600]},{"type":"LineString","properties":{"highway":"residential","name":"Bedford Street","oneway":null,"user":"crschmidt","id":"way/9428930"},"arcs":[601]},{"type":"LineString","properties":{"highway":"secondary","name":"Medford Street","oneway":"yes","user":"SophoM","id":"way/9428935"},"arcs":[602,603]},{"type":"LineString","properties":{"highway":"residential","name":"Bond Street","oneway":"yes","user":"wambag","id":"way/9428937"},"arcs":[604,605]},{"type":"LineString","properties":{"highway":"residential","name":"Langmaid Avenue","oneway":"yes","user":"wambag","id":"way/9428939"},"arcs":[606]},{"type":"LineString","properties":{"highway":"residential","name":"Edgar Terrace","oneway":null,"user":"synack","id":"way/9428941"},"arcs":[607]},{"type":"LineString","properties":{"highway":"residential","name":"Chetwynd Road","oneway":"yes","user":"almiki","id":"way/9428943"},"arcs":[608]},{"type":"LineString","properties":{"highway":"residential","name":"Horace Street","oneway":"yes","user":"OceanVortex","id":"way/9428945"},"arcs":[609]},{"type":"LineString","properties":{"highway":"residential","name":"Greenville Court","oneway":null,"user":"OceanVortex","id":"way/9428947"},"arcs":[610]},{"type":"LineString","properties":{"highway":"residential","name":"Ash Avenue","oneway":null,"user":"MassGIS Import","id":"way/9428948"},"arcs":[611]},{"type":"LineString","properties":{"highway":"residential","name":"Claremon Street","oneway":null,"user":"MassGIS Import","id":"way/9428952"},"arcs":[612]},{"type":"LineString","properties":{"highway":"residential","name":"Victoria Street","oneway":"yes","user":"synack","id":"way/9428954"},"arcs":[613]},{"type":"LineString","properties":{"highway":"residential","name":"North Union Street","oneway":null,"user":"wambag","id":"way/9428956"},"arcs":[614]},{"type":"LineString","properties":{"highway":"residential","name":"Steeves Circle","oneway":null,"user":"MassGIS Import","id":"way/9428958"},"arcs":[615]},{"type":"LineString","properties":{"highway":"residential","name":"Gilson Terrace","oneway":null,"user":"MassGIS Import","id":"way/9428960"},"arcs":[616]},{"type":"LineString","properties":{"highway":"residential","name":"Lincoln Avenue","oneway":"yes","user":"wambag","id":"way/9428963"},"arcs":[617,618,619]},{"type":"LineString","properties":{"highway":"residential","name":"Morton Street","oneway":"yes","user":"crschmidt","id":"way/9428965"},"arcs":[620]},{"type":"LineString","properties":{"highway":"residential","name":"Conwell Street","oneway":null,"user":"synack","id":"way/9428966"},"arcs":[621]},{"type":"LineString","properties":{"highway":"residential","name":"Hillside Circle","oneway":null,"user":"MassGIS Import","id":"way/9428969"},"arcs":[622]},{"type":"LineString","properties":{"highway":"residential","name":"Vinal Avenue","oneway":"yes","user":"morganwahl","id":"way/9428970"},"arcs":[623,624,625,626,627]},{"type":"LineString","properties":{"highway":"residential","name":"Whitfield Road","oneway":"yes","user":"RMap1","id":"way/9428973"},"arcs":[628]},{"type":"LineString","properties":{"highway":"residential","name":"Pearson Avenue","oneway":"yes","user":"JasonWoof","id":"way/9428975"},"arcs":[629]},{"type":"LineString","properties":{"highway":"residential","name":"Upland Park","oneway":null,"user":"MassGIS Import","id":"way/9428977"},"arcs":[630]},{"type":"LineString","properties":{"highway":"residential","name":"Hunting Street","oneway":"yes","user":"OceanVortex","id":"way/9428980"},"arcs":[631]},{"type":"LineString","properties":{"highway":"residential","name":"Florence Terrace","oneway":null,"user":"MassGIS Import","id":"way/9428982"},"arcs":[632]},{"type":"LineString","properties":{"highway":"residential","name":"Webster Street","oneway":null,"user":"wfox","id":"way/9428983"},"arcs":[633,634]},{"type":"LineString","properties":{"highway":"residential","name":"Roseland Street","oneway":"yes","user":"probiscus","id":"way/9428984"},"arcs":[635]},{"type":"LineString","properties":{"highway":"residential","name":"Tremont Place","oneway":null,"user":"MassGIS Import","id":"way/9428985"},"arcs":[636]},{"type":"LineString","properties":{"highway":"residential","name":"Fennell Street","oneway":null,"user":"OceanVortex","id":"way/9428987"},"arcs":[637]},{"type":"LineString","properties":{"highway":"residential","name":"Foskett Street","oneway":null,"user":"bigfoolio","id":"way/9428988"},"arcs":[638,639,640]},{"type":"LineString","properties":{"highway":"tertiary","name":"Moreland Street","oneway":"yes","user":"crschmidt","id":"way/9428989"},"arcs":[641,642,643,644]},{"type":"LineString","properties":{"highway":"residential","name":"Benedict Avenue","oneway":"yes","user":"wambag","id":"way/9428990"},"arcs":[645]},{"type":"LineString","properties":{"highway":"residential","name":"Edmands Street","oneway":"yes","user":"wambag","id":"way/9428992"},"arcs":[646]},{"type":"LineString","properties":{"highway":"residential","name":"Willow Place","oneway":null,"user":"OceanVortex","id":"way/9428993"},"arcs":[647]},{"type":"LineString","properties":{"highway":"tertiary","name":"Central Street","oneway":null,"user":"morganwahl","id":"way/9428994"},"arcs":[648,649,650,651,652,653,654,655,656,657,658]},{"type":"LineString","properties":{"highway":"trunk","name":"McGrath Highway","oneway":"yes","user":"wambag","id":"way/9428998"},"arcs":[659,660,661,662,663,664,665,666]},{"type":"LineString","properties":{"highway":"residential","name":"Oakland Avenue","oneway":"yes","user":"crschmidt","id":"way/9429001"},"arcs":[667]},{"type":"LineString","properties":{"highway":"residential","name":"Loring Street","oneway":null,"user":"wfox","id":"way/9429002"},"arcs":[668]},{"type":"LineString","properties":{"highway":"residential","name":"Hooker Avenue","oneway":null,"user":"MassGIS Import","id":"way/9429006"},"arcs":[669,670,671,672]},{"type":"LineString","properties":{"highway":"residential","name":"Laurel Avenue","oneway":null,"user":"MassGIS Import","id":"way/9429008"},"arcs":[673]},{"type":"LineString","properties":{"highway":"residential","name":"Wigglesworth Street","oneway":"yes","user":"wfox","id":"way/9429010"},"arcs":[674,675,676]},{"type":"LineString","properties":{"highway":"residential","name":"Miner Street","oneway":null,"user":"MassGIS Import","id":"way/9429014"},"arcs":[677]},{"type":"LineString","properties":{"highway":"residential","name":"Thurston Street","oneway":null,"user":"wfox","id":"way/9429016"},"arcs":[678]},{"type":"LineString","properties":{"highway":"residential","name":"Partridge Avenue","oneway":"yes","user":"OceanVortex","id":"way/9429023"},"arcs":[679,680]},{"type":"LineString","properties":{"highway":"residential","name":"Ten Hills Road","oneway":null,"user":"wambag","id":"way/9429030"},"arcs":[681,682,683,684,685,686,687]},{"type":"LineString","properties":{"highway":"residential","name":"Auburn Avenue","oneway":null,"user":"wambag","id":"way/9429032"},"arcs":[688]},{"type":"LineString","properties":{"highway":"residential","name":"South Street","oneway":null,"user":"OceanVortex","id":"way/9429033"},"arcs":[689]},{"type":"LineString","properties":{"highway":"residential","name":"Tremont Street","oneway":"yes","user":"wfox","id":"way/9429034"},"arcs":[690,691]},{"type":"LineString","properties":{"highway":"residential","name":"Otis Street","oneway":"yes","user":"OceanVortex","id":"way/9429036"},"arcs":[692]},{"type":"LineString","properties":{"highway":"residential","name":"Kent Street","oneway":null,"user":"MassGIS Import","id":"way/9429037"},"arcs":[693]},{"type":"LineString","properties":{"highway":"residential","name":"Putnam Road","oneway":null,"user":"wambag","id":"way/9429038"},"arcs":[694,695]},{"type":"LineString","properties":{"highway":"tertiary","name":"Springfield Street","oneway":null,"user":"morganwahl","id":"way/9429039"},"arcs":[696,697,698]},{"type":"LineString","properties":{"highway":"residential","name":"Trull Lane","oneway":null,"user":"JasonWoof","id":"way/9429040"},"arcs":[699]},{"type":"LineString","properties":{"highway":"residential","name":"Ellington Road","oneway":null,"user":"probiscus","id":"way/9429041"},"arcs":[700,701]},{"type":"LineString","properties":{"highway":"residential","name":null,"oneway":null,"user":"42429","id":"way/9429044"},"arcs":[702]},{"type":"LineString","properties":{"highway":"residential","name":"Lower Campus Road","oneway":"no","user":"techlady","id":"way/9429051"},"arcs":[703]},{"type":"LineString","properties":{"highway":"residential","name":"Latin Way","oneway":null,"user":"EricSJ","id":"way/9429053"},"arcs":[704]},{"type":"LineString","properties":{"highway":"track","name":null,"oneway":null,"user":"morganwahl","id":"way/9429065"},"arcs":[705]},{"type":"LineString","properties":{"highway":"residential","name":"Alston Street","oneway":"yes","user":"synack","id":"way/9429066"},"arcs":[706]},{"type":"LineString","properties":{"highway":"primary","name":"Middlesex Avenue","oneway":"yes","user":"wambag","id":"way/9429069"},"arcs":[707]},{"type":"LineString","properties":{"highway":"residential","name":"Windsor Place","oneway":null,"user":"wfox","id":"way/9429074"},"arcs":[708]},{"type":"LineString","properties":{"highway":"unclassified","name":"Inner Belt Road","oneway":null,"user":"OceanVortex","id":"way/9429076"},"arcs":[709]},{"type":"LineString","properties":{"highway":"residential","name":null,"oneway":null,"user":"wfox","id":"way/9429085"},"arcs":[710]},{"type":"LineString","properties":{"highway":"residential","name":null,"oneway":"yes","user":"morganwahl","id":"way/9429087"},"arcs":[711]},{"type":"LineString","properties":{"highway":"residential","name":"Grand Union Boulevard","oneway":"yes","user":"wambag","id":"way/9429089"},"arcs":[712]},{"type":"LineString","properties":{"highway":"residential","name":"Billingham Street","oneway":"yes","user":"synack","id":"way/9429091"},"arcs":[713,714,715]},{"type":"LineString","properties":{"highway":"residential","name":"Fairmount Avenue","oneway":null,"user":"wfox","id":"way/9429093"},"arcs":[716,717,718,719]},{"type":"LineString","properties":{"highway":"residential","name":"Laurel Street","oneway":"yes","user":"cmurtaugh","id":"way/9429097"},"arcs":[720,721,722,723,724]},{"type":"LineString","properties":{"highway":"residential","name":"Bartlett Street","oneway":"yes","user":"wfox","id":"way/9429099"},"arcs":[725,726,727,728]},{"type":"LineString","properties":{"highway":"residential","name":"Lovell Street","oneway":"yes","user":"fiveisalive","id":"way/9429102"},"arcs":[729]},{"type":"LineString","properties":{"highway":"residential","name":"Cady Avenue","oneway":null,"user":"MassGIS Import","id":"way/9429105"},"arcs":[730,731]},{"type":"LineString","properties":{"highway":"residential","name":"Grant Street","oneway":"yes","user":"wambag","id":"way/9429108"},"arcs":[732,733,734,735,736,737]},{"type":"LineString","properties":{"highway":"residential","name":"East Albion Street","oneway":null,"user":"ereuss","id":"way/9429114"},"arcs":[738,739]},{"type":"LineString","properties":{"highway":"residential","name":"Pinckney Street","oneway":null,"user":"probiscus","id":"way/9429115"},"arcs":[740,741]},{"type":"LineString","properties":{"highway":"residential","name":"Pearl Street","oneway":"yes","user":"synack","id":"way/9429116"},"arcs":[742]},{"type":"LineString","properties":{"highway":"residential","name":"Mansfield Street","oneway":"yes","user":"wfox","id":"way/9429117"},"arcs":[743]},{"type":"LineString","properties":{"highway":"residential","name":"Dell Street","oneway":"yes","user":"wambag","id":"way/9429119"},"arcs":[744]},{"type":"LineString","properties":{"highway":"residential","name":"Albion Street","oneway":"yes","user":"probiscus","id":"way/9429120"},"arcs":[745,746,747]},{"type":"LineString","properties":{"highway":"residential","name":"Century Street","oneway":null,"user":"MassGIS Import","id":"way/9429121"},"arcs":[748,749,750]},{"type":"LineString","properties":{"highway":"residential","name":"Morrison Place","oneway":null,"user":"MassGIS Import","id":"way/9429122"},"arcs":[751]},{"type":"LineString","properties":{"highway":"residential","name":"Lesley Avenue","oneway":null,"user":"wfox","id":"way/9429124"},"arcs":[752]},{"type":"LineString","properties":{"highway":"trunk","name":"Alewife Brook Parkway","oneway":null,"user":"wambag","id":"way/9429125"},"arcs":[753,754,755]},{"type":"LineString","properties":{"highway":"trunk","name":"Alewife Brook Parkway","oneway":"yes","user":"NE2","id":"way/9429126"},"arcs":[756,757]},{"type":"LineString","properties":{"highway":"residential","name":"Atherton Street","oneway":"yes","user":"OceanVortex","id":"way/9429127"},"arcs":[758,759,760]},{"type":"LineString","properties":{"highway":"residential","name":"Lincoln Street","oneway":"yes","user":"crschmidt","id":"way/9429130"},"arcs":[761,762,763]},{"type":"LineString","properties":{"highway":"residential","name":"Thorndike Street","oneway":null,"user":"MassGIS Import","id":"way/9429131"},"arcs":[764,765]},{"type":"LineString","properties":{"highway":"residential","name":"Fremont Avenue","oneway":"yes","user":"morganwahl","id":"way/9429132"},"arcs":[766]},{"type":"LineString","properties":{"highway":"tertiary","name":"Walnut Street","oneway":"yes","user":"mregan","id":"way/9429139"},"arcs":[767,768,769,770,771,772,773,774,775,776,777,778,779]},{"type":"LineString","properties":{"highway":"residential","name":"Bonner Avenue","oneway":null,"user":"morganwahl","id":"way/9429140"},"arcs":[780,781]},{"type":"LineString","properties":{"highway":"residential","name":"Boston Street","oneway":null,"user":"morganwahl","id":"way/9429144"},"arcs":[782,783,784,785]},{"type":"LineString","properties":{"highway":"trunk_link","name":null,"oneway":"yes","user":"pokey","id":"way/9429146"},"arcs":[786]},{"type":"LineString","properties":{"highway":"residential","name":"Gussie Terrace","oneway":null,"user":"JasonWoof","id":"way/9429150"},"arcs":[787]},{"type":"LineString","properties":{"highway":"residential","name":"Hawthorne Street","oneway":"yes","user":"crschmidt","id":"way/9429151"},"arcs":[788,789]},{"type":"LineString","properties":{"highway":"residential","name":"Mead Street","oneway":null,"user":"MassGIS Import","id":"way/9429154"},"arcs":[790,791]},{"type":"LineString","properties":{"highway":"residential","name":"Alfred Street","oneway":null,"user":"OceanVortex","id":"way/9429156"},"arcs":[792]},{"type":"LineString","properties":{"highway":"residential","name":"Kimball Street","oneway":null,"user":"MassGIS Import","id":"way/9429158"},"arcs":[793,794]},{"type":"LineString","properties":{"highway":"residential","name":"Elmwood Street","oneway":null,"user":"JasonWoof","id":"way/9429160"},"arcs":[795,796,797,798]},{"type":"LineString","properties":{"highway":"primary_link","name":null,"oneway":"yes","user":"wambag","id":"way/9429162"},"arcs":[799,800]},{"type":"LineString","properties":{"highway":"tertiary","name":"North Street","oneway":null,"user":"wambag","id":"way/9429164"},"arcs":[801,802,803,804,805,806,807,808,809]},{"type":"LineString","properties":{"highway":"residential","name":"Tyler Street","oneway":null,"user":"morganwahl","id":"way/9429165"},"arcs":[810,811]},{"type":"LineString","properties":{"highway":"tertiary","name":"Central Street","oneway":"yes","user":"onurozgun","id":"way/9429169"},"arcs":[812,813,814,815,816]},{"type":"LineString","properties":{"highway":"secondary","name":"Bow Street","oneway":"yes","user":"onurozgun","id":"way/9429172"},"arcs":[817,818]},{"type":"LineString","properties":{"highway":"residential","name":"Bolton Street","oneway":null,"user":"wfox","id":"way/9429176"},"arcs":[819,820]},{"type":"LineString","properties":{"highway":"residential","name":"Chestnut Street","oneway":null,"user":"onurozgun","id":"way/9429178"},"arcs":[821]},{"type":"LineString","properties":{"highway":"residential","name":"Franklin Avenue","oneway":"yes","user":"synack","id":"way/9429182"},"arcs":[822]},{"type":"LineString","properties":{"highway":"residential","name":"Elston Street","oneway":null,"user":"nkhall","id":"way/9429184"},"arcs":[823]},{"type":"LineString","properties":{"highway":"residential","name":"Blakeley Avenue","oneway":"yes","user":"OceanVortex","id":"way/9429185"},"arcs":[824]},{"type":"LineString","properties":{"highway":"residential","name":"Hawkins Street","oneway":"yes","user":"morganwahl","id":"way/9429193"},"arcs":[825,826]},{"type":"LineString","properties":{"highway":"tertiary","name":"Cherry Street","oneway":"yes","user":"synack","id":"way/9429196"},"arcs":[827,828,829]},{"type":"LineString","properties":{"highway":"residential","name":"Evergreen Square","oneway":null,"user":"Ian McIntosh","id":"way/9429200"},"arcs":[830]},{"type":"LineString","properties":{"highway":"residential","name":"Magnus Avenue","oneway":null,"user":"liryon","id":"way/9429202"},"arcs":[831]},{"type":"LineString","properties":{"highway":"residential","name":"Aberdeen Road Extension","oneway":null,"user":"crschmidt","id":"way/9429203"},"arcs":[832]},{"type":"LineString","properties":{"highway":"residential","name":"Ibbetson Street","oneway":null,"user":"OceanVortex","id":"way/9429208"},"arcs":[833,834]},{"type":"LineString","properties":{"highway":"residential","name":"Park Place","oneway":null,"user":"MassGIS Import","id":"way/9429209"},"arcs":[835]},{"type":"LineString","properties":{"highway":"residential","name":"Chetwynd Road","oneway":null,"user":"MassGIS Import","id":"way/9429211"},"arcs":[836]},{"type":"LineString","properties":{"highway":"residential","name":"Cedar Avenue","oneway":null,"user":"synack","id":"way/9429212"},"arcs":[837]},{"type":"LineString","properties":{"highway":"residential","name":"Lee Street","oneway":null,"user":"wfox","id":"way/9429218"},"arcs":[838]},{"type":"LineString","properties":{"highway":"residential","name":"Taylor Street","oneway":"yes","user":"synack","id":"way/9429221"},"arcs":[839]},{"type":"LineString","properties":{"highway":"residential","name":"Kent Court","oneway":null,"user":"MassGIS Import","id":"way/9429228"},"arcs":[840]},{"type":"LineString","properties":{"highway":"residential","name":"Belmont Square","oneway":null,"user":"MassGIS Import","id":"way/9429231"},"arcs":[841]},{"type":"LineString","properties":{"highway":"residential","name":"Porter Avenue","oneway":null,"user":"wfox","id":"way/9429234"},"arcs":[842]},{"type":"LineString","properties":{"highway":"residential","name":"Roberts Street","oneway":null,"user":"OceanVortex","id":"way/9429236"},"arcs":[843]},{"type":"LineString","properties":{"highway":"residential","name":"Harold Road","oneway":null,"user":"nkhall","id":"way/9429239"},"arcs":[844]},{"type":"LineString","properties":{"highway":"residential","name":"Willoughby Street","oneway":null,"user":"wfox","id":"way/9429242"},"arcs":[845]},{"type":"LineString","properties":{"highway":"residential","name":"George Street","oneway":"yes","user":"xybot","id":"way/9429243"},"arcs":[846]},{"type":"LineString","properties":{"highway":"residential","name":"Hillside Park","oneway":null,"user":"morganwahl","id":"way/9429244"},"arcs":[847]},{"type":"LineString","properties":{"highway":"residential","name":"Linden Avenue","oneway":null,"user":"synack","id":"way/9429250"},"arcs":[848,849,850,851,852,853,854]},{"type":"LineString","properties":{"highway":"residential","name":"Dana Street","oneway":"yes","user":"synack","id":"way/9429254"},"arcs":[855,856]},{"type":"LineString","properties":{"highway":"residential","name":"Bailey Street","oneway":null,"user":"MassGIS Import","id":"way/9429256"},"arcs":[857,858]},{"type":"LineString","properties":{"highway":"residential","name":"Windom Street","oneway":"yes","user":"synack","id":"way/9429258"},"arcs":[859]},{"type":"LineString","properties":{"highway":"tertiary","name":"Fellsway West","oneway":"yes","user":"wambag","id":"way/9429260"},"arcs":[860,861,862]},{"type":"LineString","properties":{"highway":"residential","name":"Hillsdale Road","oneway":null,"user":"wfox","id":"way/9429269"},"arcs":[863,864,865,866,867]},{"type":"LineString","properties":{"highway":"residential","name":"Linden Street","oneway":null,"user":"morganwahl","id":"way/9429272"},"arcs":[868]},{"type":"LineString","properties":{"highway":"residential","name":"Sunset Road","oneway":null,"user":"almiki","id":"way/9429275"},"arcs":[869]},{"type":"LineString","properties":{"highway":"residential","name":"Carter Terrace","oneway":null,"user":"wfox","id":"way/9429276"},"arcs":[870]},{"type":"LineString","properties":{"highway":"secondary","name":"Bow Street","oneway":"yes","user":"onurozgun","id":"way/9429279"},"arcs":[871,872]},{"type":"LineString","properties":{"highway":"residential","name":"Mallet Street","oneway":"yes","user":"synack","id":"way/9429281"},"arcs":[873,874,875]},{"type":"LineString","properties":{"highway":"residential","name":"Smith Avenue","oneway":"yes","user":"morganwahl","id":"way/9429282"},"arcs":[876]},{"type":"LineString","properties":{"highway":"residential","name":"Chester Place","oneway":null,"user":"synack","id":"way/9429283"},"arcs":[877]},{"type":"LineString","properties":{"highway":"residential","name":"Jasper Street","oneway":null,"user":"wambag","id":"way/9429289"},"arcs":[878,879]},{"type":"LineString","properties":{"highway":"residential","name":"Macarthur Street","oneway":null,"user":"wambag","id":"way/9429290"},"arcs":[880]},{"type":"LineString","properties":{"highway":"residential","name":"Cutter Street","oneway":"yes","user":"morganwahl","id":"way/9429294"},"arcs":[881,882]},{"type":"LineString","properties":{"highway":"residential","name":"Durham Street","oneway":"yes","user":"wfox","id":"way/9429296"},"arcs":[883,884]},{"type":"LineString","properties":{"highway":"residential","name":"Turner Court","oneway":null,"user":"morganwahl","id":"way/9429297"},"arcs":[885]},{"type":"LineString","properties":{"highway":"residential","name":"Vernon Street","oneway":null,"user":"MassGIS Import","id":"way/9429300"},"arcs":[886,887,888,889]},{"type":"LineString","properties":{"highway":"residential","name":"Crown Street","oneway":null,"user":"715371","id":"way/9429302"},"arcs":[890,891,892]},{"type":"LineString","properties":{"highway":"residential","name":"Quincy Street","oneway":"yes","user":"farski","id":"way/9429304"},"arcs":[893]},{"type":"LineString","properties":{"highway":"residential","name":"West Adams Street","oneway":null,"user":"MassGIS Import","id":"way/9429305"},"arcs":[894,895,896]},{"type":"LineString","properties":{"highway":"residential","name":"Marion Street","oneway":"yes","user":"T_9er","id":"way/9429306"},"arcs":[897,898]},{"type":"LineString","properties":{"highway":"residential","name":"Austin Street","oneway":"no","user":"Andrew Varnerin","id":"way/9429309"},"arcs":[899,900]},{"type":"LineString","properties":{"highway":"residential","name":"Indiana Avenue","oneway":"yes","user":"wambag","id":"way/9429310"},"arcs":[901]},{"type":"LineString","properties":{"highway":"residential","name":"Appleton Street","oneway":null,"user":"OceanVortex","id":"way/9429311"},"arcs":[902,903,904,905]},{"type":"LineString","properties":{"highway":"residential","name":"Sewall Street","oneway":null,"user":"MassGIS Import","id":"way/9429313"},"arcs":[906]},{"type":"LineString","properties":{"highway":"residential","name":"Downer Street","oneway":null,"user":"MassGIS Import","id":"way/9429314"},"arcs":[907]},{"type":"LineString","properties":{"highway":"residential","name":"Boston Avenue","oneway":"yes","user":"probiscus","id":"way/9429315"},"arcs":[908]},{"type":"LineString","properties":{"highway":"residential","name":"Cross Street East","oneway":null,"user":"wambag","id":"way/9429316"},"arcs":[909,910,911]},{"type":"LineString","properties":{"highway":"residential","name":"Henderson Street","oneway":null,"user":"synack","id":"way/9429317"},"arcs":[912]},{"type":"LineString","properties":{"highway":"residential","name":"Clark Street","oneway":"yes","user":"morganwahl","id":"way/9429319"},"arcs":[913]},{"type":"LineString","properties":{"highway":"residential","name":"Elmwood Terrace","oneway":null,"user":"MassGIS Import","id":"way/9429320"},"arcs":[914]},{"type":"LineString","properties":{"highway":"residential","name":"Greene Street","oneway":"yes","user":"wfox","id":"way/9429324"},"arcs":[915]},{"type":"LineString","properties":{"highway":"residential","name":"Pembroke Court","oneway":null,"user":"MassGIS Import","id":"way/9429325"},"arcs":[916]},{"type":"LineString","properties":{"highway":"residential","name":"Fountain Avenue","oneway":"yes","user":"crschmidt","id":"way/9429326"},"arcs":[917]},{"type":"LineString","properties":{"highway":"residential","name":"Westwood Road","oneway":"yes","user":"nkhall","id":"way/9429327"},"arcs":[918]},{"type":"LineString","properties":{"highway":"residential","name":"Alpine Street","oneway":"yes","user":"probiscus","id":"way/9429328"},"arcs":[919]},{"type":"LineString","properties":{"highway":"residential","name":"Sellon Place","oneway":null,"user":"MassGIS Import","id":"way/9429329"},"arcs":[920]},{"type":"LineString","properties":{"highway":"residential","name":"Heath Street","oneway":null,"user":"MassGIS Import","id":"way/9429330"},"arcs":[921,922,923]},{"type":"LineString","properties":{"highway":"residential","name":"Montrose Street","oneway":"yes","user":"wfox","id":"way/9429334"},"arcs":[924,925,926]},{"type":"LineString","properties":{"highway":"secondary","name":"College Avenue","oneway":"yes","user":"onurozgun","id":"way/9429335"},"arcs":[927]},{"type":"LineString","properties":{"highway":"residential","name":"Perry Street","oneway":null,"user":"JasonWoof","id":"way/9429336"},"arcs":[928]},{"type":"LineString","properties":{"highway":"residential","name":"Belmont Terrace","oneway":null,"user":"OceanVortex","id":"way/9429337"},"arcs":[929]},{"type":"LineString","properties":{"highway":"residential","name":"Dimick Street","oneway":null,"user":"morganwahl","id":"way/9429339"},"arcs":[930,931,932,933]},{"type":"LineString","properties":{"highway":"residential","name":"Cooney Street","oneway":"yes","user":"morganwahl","id":"way/9429340"},"arcs":[934,935]},{"type":"LineString","properties":{"highway":"tertiary","name":"Cameron Avenue","oneway":null,"user":"onurozgun","id":"way/9429342"},"arcs":[936,937,938,939,940]},{"type":"LineString","properties":{"highway":"residential","name":"Brastow Avenue","oneway":null,"user":"wfox","id":"way/9429345"},"arcs":[941]},{"type":"LineString","properties":{"highway":"residential","name":"Everett Street","oneway":"yes","user":"morganwahl","id":"way/9429352"},"arcs":[942,943]},{"type":"LineString","properties":{"highway":"residential","name":"Lowell Terrace","oneway":null,"user":"OceanVortex","id":"way/9429356"},"arcs":[944]},{"type":"LineString","properties":{"highway":"residential","name":"Kent Street","oneway":null,"user":"nkhall","id":"way/9429358"},"arcs":[945,946,947]},{"type":"LineString","properties":{"highway":"residential","name":"Gilman Terrace","oneway":null,"user":"wfox","id":"way/9429361"},"arcs":[948]},{"type":"LineString","properties":{"highway":"residential","name":"Newman Place","oneway":null,"user":"wfox","id":"way/9429363"},"arcs":[949]},{"type":"LineString","properties":{"highway":"tertiary","name":"School Street","oneway":"yes","user":"onurozgun","id":"way/9429365"},"arcs":[950,951]},{"type":"LineString","properties":{"highway":"tertiary","name":"School Street","oneway":"yes","user":"onurozgun","id":"way/9429366"},"arcs":[952,953,954]},{"type":"LineString","properties":{"highway":"residential","name":"Greenville Terrace","oneway":null,"user":"OceanVortex","id":"way/9429367"},"arcs":[955]},{"type":"LineString","properties":{"highway":"residential","name":"Grand Union Boulevard","oneway":"yes","user":"wambag","id":"way/9429368"},"arcs":[956]},{"type":"LineString","properties":{"highway":"residential","name":"New Hampshire Avenue","oneway":"yes","user":"crschmidt","id":"way/9429371"},"arcs":[957]},{"type":"LineString","properties":{"highway":"residential","name":"Summit Street","oneway":null,"user":"MassGIS Import","id":"way/9429373"},"arcs":[958]},{"type":"LineString","properties":{"highway":"residential","name":"Harvard Street","oneway":"yes","user":"probiscus","id":"way/9429374"},"arcs":[959,960,961]},{"type":"LineString","properties":{"highway":"residential","name":"Ward Street","oneway":"yes","user":"OceanVortex","id":"way/9429375"},"arcs":[962]},{"type":"LineString","properties":{"highway":"residential","name":"Woods Avenue","oneway":"yes","user":"OceanVortex","id":"way/9429377"},"arcs":[963]},{"type":"LineString","properties":{"highway":"residential","name":"Ames Street","oneway":null,"user":"MassGIS Import","id":"way/9429378"},"arcs":[964,965]},{"type":"LineString","properties":{"highway":"residential","name":"Crescent Street","oneway":"yes","user":"synack","id":"way/9429379"},"arcs":[966]},{"type":"LineString","properties":{"highway":"residential","name":"Alpine Street","oneway":null,"user":"probiscus","id":"way/9429381"},"arcs":[967]},{"type":"LineString","properties":{"highway":"residential","name":"Governor Winthrop Road","oneway":null,"user":"wambag","id":"way/9429382"},"arcs":[968,969,970]},{"type":"LineString","properties":{"highway":"residential","name":"Sacramento Street","oneway":null,"user":"synack","id":"way/9429384"},"arcs":[971,972]},{"type":"LineString","properties":{"highway":"residential","name":"Glover Circle","oneway":null,"user":"synack","id":"way/9429391"},"arcs":[973]},{"type":"LineString","properties":{"highway":"residential","name":"Dresden Circle","oneway":null,"user":"probiscus","id":"way/9429393"},"arcs":[974]},{"type":"LineString","properties":{"highway":"trunk","name":"Alewife Brook Parkway","oneway":"yes","user":"jwass","id":"way/9429394"},"arcs":[975]},{"type":"LineString","properties":{"highway":"residential","name":"Trull Street","oneway":"yes","user":"synack","id":"way/9429397"},"arcs":[976]},{"type":"LineString","properties":{"highway":"residential","name":"Hanson Street","oneway":"yes","user":"morganwahl","id":"way/9429398"},"arcs":[977,978,979,980,981]},{"type":"LineString","properties":{"highway":"residential","name":"High Street","oneway":"yes","user":"OceanVortex","id":"way/9429399"},"arcs":[982]},{"type":"LineString","properties":{"highway":"residential","name":"Gorham Street","oneway":"yes","user":"JasonWoof","id":"way/9429401"},"arcs":[983]},{"type":"LineString","properties":{"highway":"residential","name":"Russell Street","oneway":"yes","user":"JasonWoof","id":"way/9429402"},"arcs":[984,985,986]},{"type":"LineString","properties":{"highway":"residential","name":"Banks Street","oneway":"yes","user":"mregan","id":"way/9429403"},"arcs":[987]},{"type":"LineString","properties":{"highway":"residential","name":"Giles Park","oneway":null,"user":"morganwahl","id":"way/9429404"},"arcs":[988]},{"type":"LineString","properties":{"highway":"residential","name":"Harvard Place","oneway":null,"user":"MassGIS Import","id":"way/9429409"},"arcs":[989]},{"type":"LineString","properties":{"highway":"residential","name":"Hinckley Street","oneway":"no","user":"steverumizen","id":"way/9429412"},"arcs":[990,991,992]},{"type":"LineString","properties":{"highway":"residential","name":"Powderhouse Terrace","oneway":null,"user":"JasonWoof","id":"way/9429413"},"arcs":[993]},{"type":"LineString","properties":{"highway":"residential","name":"Bailey Road","oneway":null,"user":"wambag","id":"way/9429416"},"arcs":[994,995]},{"type":"LineString","properties":{"highway":"residential","name":"Farragut Avenue","oneway":"yes","user":"synack","id":"way/9429421"},"arcs":[996]},{"type":"LineString","properties":{"highway":"residential","name":"Stone Place","oneway":null,"user":"MassGIS Import","id":"way/9429423"},"arcs":[997]},{"type":"LineString","properties":{"highway":"residential","name":"Norfolk Street","oneway":"yes","user":"KristenK","id":"way/9429426"},"arcs":[998]},{"type":"LineString","properties":{"highway":"residential","name":"Campbell Park Place","oneway":null,"user":"MassGIS Import","id":"way/9429430"},"arcs":[999]},{"type":"LineString","properties":{"highway":"tertiary","name":"Oxford Street","oneway":null,"user":"Utible","id":"way/9429431"},"arcs":[1000]},{"type":"LineString","properties":{"highway":"tertiary","name":"Concord Avenue","oneway":null,"user":"morganwahl","id":"way/9429435"},"arcs":[1001]},{"type":"LineString","properties":{"highway":"residential","name":"Essex Street","oneway":null,"user":"wfox","id":"way/9429437"},"arcs":[1002]},{"type":"LineString","properties":{"highway":"living_street","name":"Taunton Street","oneway":null,"user":"morganwahl","id":"way/9429440"},"arcs":[1003]},{"type":"LineString","properties":{"highway":"residential","name":"River Road","oneway":null,"user":"MassGIS Import","id":"way/9429444"},"arcs":[1004]},{"type":"LineString","properties":{"highway":"residential","name":"Crest Hill Road","oneway":null,"user":"MassGIS Import","id":"way/9429446"},"arcs":[1005]},{"type":"LineString","properties":{"highway":"secondary","name":"Boston Avenue","oneway":null,"user":"morganwahl","id":"way/9429447"},"arcs":[1006]},{"type":"LineString","properties":{"highway":"residential","name":"Moore Street","oneway":"yes","user":"crschmidt","id":"way/9429449"},"arcs":[1007]},{"type":"LineString","properties":{"highway":"residential","name":"Buckingham Street","oneway":null,"user":"morganwahl","id":"way/9429451"},"arcs":[1008]},{"type":"LineString","properties":{"highway":"residential","name":"Hamlet Street","oneway":null,"user":"wambag","id":"way/9429452"},"arcs":[1009]},{"type":"LineString","properties":{"highway":"residential","name":"Upland Road","oneway":null,"user":"almiki","id":"way/9429454"},"arcs":[1010]},{"type":"LineString","properties":{"highway":"residential","name":"West Quincy Street","oneway":null,"user":"wfox","id":"way/9429456"},"arcs":[1011]},{"type":"LineString","properties":{"highway":"residential","name":"Waterhouse Street","oneway":null,"user":"synack","id":"way/9429457"},"arcs":[1012]},{"type":"LineString","properties":{"highway":"residential","name":"Watson Street","oneway":null,"user":"wfox","id":"way/9429458"},"arcs":[1013]},{"type":"LineString","properties":{"highway":"residential","name":"Hillside Avenue","oneway":null,"user":"wfox","id":"way/9429460"},"arcs":[1014]},{"type":"LineString","properties":{"highway":"residential","name":"Illinois Avenue","oneway":"yes","user":"wambag","id":"way/9429461"},"arcs":[1015]},{"type":"LineString","properties":{"highway":"residential","name":"Landers Street","oneway":null,"user":"MassGIS Import","id":"way/9429464"},"arcs":[1016]},{"type":"LineString","properties":{"highway":"residential","name":"Leland Street","oneway":"yes","user":"morganwahl","id":"way/9429466"},"arcs":[1017]},{"type":"LineString","properties":{"highway":"residential","name":"Kenwood Street","oneway":"yes","user":"Iowa Kid","id":"way/9429471"},"arcs":[1018]},{"type":"LineString","properties":{"highway":"residential","name":"Barton Street","oneway":"no","user":"mregan","id":"way/9429472"},"arcs":[1019]},{"type":"LineString","properties":{"highway":"residential","name":"Clarendon Avenue","oneway":"yes","user":"wfox","id":"way/9429473"},"arcs":[1020,1021]},{"type":"LineString","properties":{"highway":"residential","name":"Bleachery Court","oneway":null,"user":"OceanVortex","id":"way/9429475"},"arcs":[1022]},{"type":"LineString","properties":{"highway":"residential","name":"Aldersey Street","oneway":null,"user":"morganwahl","id":"way/9429477"},"arcs":[1023]},{"type":"LineString","properties":{"highway":"residential","name":"Walker Street","oneway":"yes","user":"wfox","id":"way/9429479"},"arcs":[1024]},{"type":"LineString","properties":{"highway":"residential","name":"Washington Avenue","oneway":null,"user":"wambag","id":"way/9429480"},"arcs":[1025]},{"type":"LineString","properties":{"highway":"residential","name":"Seven Pines Avenue","oneway":null,"user":"MassGIS Import","id":"way/9429481"},"arcs":[1026]},{"type":"LineString","properties":{"highway":"residential","name":"Waldo Avenue","oneway":null,"user":"morganwahl","id":"way/9429482"},"arcs":[1027]},{"type":"LineString","properties":{"highway":"residential","name":"Bonair Street","oneway":"no","user":"David Posey","id":"way/9429484"},"arcs":[1028,1029]},{"type":"LineString","properties":{"highway":"residential","name":"Rhode Island Avenue","oneway":"yes","user":"wambag","id":"way/9429485"},"arcs":[1030]},{"type":"LineString","properties":{"highway":"residential","name":"Leon Street","oneway":null,"user":"morganwahl","id":"way/9429495"},"arcs":[1031]},{"type":"LineString","properties":{"highway":"residential","name":"Crocker Street","oneway":"no","user":"steverumizen","id":"way/9429497"},"arcs":[1032]},{"type":"LineString","properties":{"highway":"residential","name":"Harding Street","oneway":"yes","user":"OceanVortex","id":"way/9429499"},"arcs":[1033]},{"type":"LineString","properties":{"highway":"residential","name":"Benedict Street","oneway":null,"user":"wambag","id":"way/9429501"},"arcs":[1034,1035]},{"type":"LineString","properties":{"highway":"residential","name":"Lowden Avenue","oneway":"yes","user":"crschmidt","id":"way/9429504"},"arcs":[1036,1037,1038]},{"type":"LineString","properties":{"highway":"residential","name":"Orchard Street","oneway":"yes","user":"synack","id":"way/9429505"},"arcs":[1039,1040,1041,1042,1043,1044]},{"type":"LineString","properties":{"highway":"residential","name":"Rush Street","oneway":null,"user":"wfox","id":"way/9429507"},"arcs":[1045]},{"type":"LineString","properties":{"highway":"residential","name":"Columbus Avenue","oneway":"yes","user":"onlynone","id":"way/9429517"},"arcs":[1046]},{"type":"LineString","properties":{"highway":"residential","name":"Sanborn Avenue","oneway":"yes","user":"morganwahl","id":"way/9429521"},"arcs":[1047]},{"type":"LineString","properties":{"highway":"residential","name":"Bay State Avenue","oneway":"yes","user":"crschmidt","id":"way/9429525"},"arcs":[1048,1049,1050]},{"type":"LineString","properties":{"highway":"secondary","name":null,"oneway":"yes","user":"SophoM","id":"way/9429526"},"arcs":[1051,1052,1053,1054,1055]},{"type":"LineString","properties":{"highway":"residential","name":"Cherry Street","oneway":null,"user":"wfox","id":"way/9429527"},"arcs":[1056]},{"type":"LineString","properties":{"highway":"residential","name":"Butler Drive","oneway":null,"user":"Aredhel","id":"way/9429529"},"arcs":[1057]},{"type":"LineString","properties":{"highway":"residential","name":"Victoria Street","oneway":null,"user":"MassGIS Import","id":"way/9429531"},"arcs":[1058,1059]},{"type":"LineString","properties":{"highway":"residential","name":"Nevada Avenue","oneway":null,"user":"MassGIS Import","id":"way/9429533"},"arcs":[1060]},{"type":"LineString","properties":{"highway":"residential","name":"Merriam Street","oneway":null,"user":"morganwahl","id":"way/9429534"},"arcs":[1061]},{"type":"LineString","properties":{"highway":"residential","name":"Prospect Hill Parkway","oneway":null,"user":"morganwahl","id":"way/9429535"},"arcs":[1062,1063]},{"type":"LineString","properties":{"highway":"residential","name":"Howe Street","oneway":"yes","user":"crschmidt","id":"way/9429538"},"arcs":[1064]},{"type":"LineString","properties":{"highway":"residential","name":"Oak Street","oneway":"yes","user":"wfox","id":"way/9429540"},"arcs":[1065,1066]},{"type":"LineString","properties":{"highway":"tertiary","name":"North Street","oneway":null,"user":"MassGIS Import","id":"way/9429543"},"arcs":[1067,1068,1069,1070]},{"type":"LineString","properties":{"highway":"residential","name":"Boston Street","oneway":"yes","user":"42429","id":"way/9429546"},"arcs":[1071,1072]},{"type":"LineString","properties":{"highway":"residential","name":"Cambria Street","oneway":"yes","user":"nkhall","id":"way/9429547"},"arcs":[1073]},{"type":"LineString","properties":{"highway":"residential","name":"Meacham Street","oneway":null,"user":"MassGIS Import","id":"way/9429550"},"arcs":[1074]},{"type":"LineString","properties":{"highway":"residential","name":"Tufts Street","oneway":null,"user":"onurozgun","id":"way/9429552"},"arcs":[1075,1076,1077,1078]},{"type":"LineString","properties":{"highway":"residential","name":"Palmer Avenue","oneway":null,"user":"wfox","id":"way/9429554"},"arcs":[1079]},{"type":"LineString","properties":{"highway":"residential","name":"Crescent Street","oneway":"yes","user":"synack","id":"way/9429555"},"arcs":[1080]},{"type":"LineString","properties":{"highway":"residential","name":"Mondamin Court","oneway":null,"user":"MassGIS Import","id":"way/9429557"},"arcs":[1081]},{"type":"LineString","properties":{"highway":"residential","name":"Villa Avenue","oneway":null,"user":"wfox","id":"way/9429559"},"arcs":[1082,1083]},{"type":"LineString","properties":{"highway":"secondary","name":"Holland Street","oneway":"yes","user":"onurozgun","id":"way/9429560"},"arcs":[1084]},{"type":"LineString","properties":{"highway":"residential","name":"Oxford Street","oneway":"yes","user":"crschmidt","id":"way/9429562"},"arcs":[1085,1086]},{"type":"LineString","properties":{"highway":"residential","name":"Wade Court","oneway":null,"user":"OceanVortex","id":"way/9429566"},"arcs":[1087]},{"type":"LineString","properties":{"highway":"residential","name":"Hayden Terrace","oneway":null,"user":"MassGIS Import","id":"way/9429567"},"arcs":[1088]},{"type":"LineString","properties":{"highway":"residential","name":"Pleasant Avenue","oneway":null,"user":"wambag","id":"way/9429568"},"arcs":[1089]},{"type":"LineString","properties":{"highway":"residential","name":"Homer Square","oneway":null,"user":"morganwahl","id":"way/9429569"},"arcs":[1090]},{"type":"LineString","properties":{"highway":"residential","name":"Milton Street","oneway":"yes","user":"Ian McIntosh","id":"way/9429570"},"arcs":[1091]},{"type":"LineString","properties":{"highway":"residential","name":"Cottage Avenue","oneway":null,"user":"synack","id":"way/9429572"},"arcs":[1092,1093,1094]},{"type":"LineString","properties":{"highway":"residential","name":"Fremont Street","oneway":null,"user":"MassGIS Import","id":"way/9429573"},"arcs":[1095]},{"type":"LineString","properties":{"highway":"residential","name":"Teele Avenue","oneway":"yes","user":"synack","id":"way/9429574"},"arcs":[1096]},{"type":"LineString","properties":{"highway":"residential","name":"Greenwood Terrace","oneway":null,"user":"wfox","id":"way/9429576"},"arcs":[1097]},{"type":"LineString","properties":{"highway":"residential","name":"Fairfax Street","oneway":"yes","user":"Michael Hohensee","id":"way/9429577"},"arcs":[1098]},{"type":"LineString","properties":{"highway":"residential","name":"Cottage Circle","oneway":null,"user":"MassGIS Import","id":"way/9429578"},"arcs":[1099]},{"type":"LineString","properties":{"highway":"residential","name":"Radcliffe Road","oneway":null,"user":"MassGIS Import","id":"way/9429580"},"arcs":[1100,1101,1102]},{"type":"LineString","properties":{"highway":"residential","name":"Elm Place","oneway":null,"user":"MassGIS Import","id":"way/9429581"},"arcs":[1103]},{"type":"LineString","properties":{"highway":"secondary","name":"Broadway","oneway":"-1","user":"Aredhel","id":"way/9429582"},"arcs":[1104]},{"type":"LineString","properties":{"highway":"residential","name":"William Street","oneway":null,"user":"MassGIS Import","id":"way/9429583"},"arcs":[1105,1106]},{"type":"LineString","properties":{"highway":"primary","name":"Mystic Avenue","oneway":"yes","user":"wambag","id":"way/9429586"},"arcs":[1107]},{"type":"LineString","properties":{"highway":"residential","name":"Richardson Street","oneway":"yes","user":"OceanVortex","id":"way/9429591"},"arcs":[1108,1109,1110,1111,1112]},{"type":"LineString","properties":{"highway":"residential","name":"Lexington Avenue","oneway":"yes","user":"synack","id":"way/9429594"},"arcs":[1113]},{"type":"LineString","properties":{"highway":"residential","name":"Connors Drive","oneway":null,"user":"tirerim","id":"way/9429596"},"arcs":[1114]},{"type":"LineString","properties":{"highway":"residential","name":"Lester Terrace","oneway":null,"user":"synack","id":"way/9429597"},"arcs":[1115]},{"type":"LineString","properties":{"highway":"residential","name":"Sunnyside Avenue","oneway":null,"user":"wambag","id":"way/9429599"},"arcs":[1116]},{"type":"LineString","properties":{"highway":"residential","name":"Cedar Street Place","oneway":null,"user":"MassGIS Import","id":"way/9429601"},"arcs":[1117]},{"type":"LineString","properties":{"highway":"residential","name":"Kenneson Road","oneway":"yes","user":"synack","id":"way/9429603"},"arcs":[1118]},{"type":"LineString","properties":{"highway":"residential","name":"Park Avenue","oneway":"yes","user":"OceanVortex","id":"way/9429605"},"arcs":[1119,1120]},{"type":"LineString","properties":{"highway":"residential","name":"Memorial Road","oneway":null,"user":"Aredhel","id":"way/9429606"},"arcs":[1121,1122,1123]},{"type":"LineString","properties":{"highway":"residential","name":"Weston Avenue","oneway":null,"user":"wfox","id":"way/9429609"},"arcs":[1124]},{"type":"LineString","properties":{"highway":"tertiary","name":"Cross Street","oneway":null,"user":"onurozgun","id":"way/9429612"},"arcs":[1125,1126,1127,1128,1129,1130,1131,1132,1133,1134,1135,1136]},{"type":"LineString","properties":{"highway":"residential","name":"Hinckley Street","oneway":"yes","user":"synack","id":"way/9429614"},"arcs":[1137,1138,1139]},{"type":"LineString","properties":{"highway":"residential","name":"Irvington Road","oneway":"yes","user":"JasonWoof","id":"way/9429615"},"arcs":[1140]},{"type":"LineString","properties":{"highway":"residential","name":"Calvin Street","oneway":"yes","user":"probiscus","id":"way/9429616"},"arcs":[1141]},{"type":"LineString","properties":{"highway":"residential","name":"Warwick Street","oneway":"yes","user":"probiscus","id":"way/9429619"},"arcs":[1142,1143]},{"type":"LineString","properties":{"highway":"residential","name":"Mount Pleasant Street","oneway":"yes","user":"morganwahl","id":"way/9429621"},"arcs":[1144]},{"type":"LineString","properties":{"highway":"unclassified","name":"Boston Avenue","oneway":null,"user":"jwsh","id":"way/9429622"},"arcs":[1145,1146,1147,1148,1149]},{"type":"LineString","properties":{"highway":"residential","name":"Burnside Avenue","oneway":"yes","user":"mregan","id":"way/9429623"},"arcs":[1150]},{"type":"LineString","properties":{"highway":"residential","name":"Nashua Street","oneway":null,"user":"MassGIS Import","id":"way/9429624"},"arcs":[1151,1152,1153]},{"type":"LineString","properties":{"highway":"residential","name":"Hall Street","oneway":"yes","user":"synack","id":"way/9429626"},"arcs":[1154]},{"type":"LineString","properties":{"highway":"trunk_link","name":null,"oneway":"yes","user":"NE2","id":"way/9429628"},"arcs":[1155,1156,1157]},{"type":"LineString","properties":{"highway":"residential","name":"Tower Street","oneway":null,"user":"paolodepetrillo","id":"way/9429629"},"arcs":[1158]},{"type":"LineString","properties":{"highway":"residential","name":"Woodbine Street","oneway":null,"user":"MassGIS Import","id":"way/9429632"},"arcs":[1159]},{"type":"LineString","properties":{"highway":"residential","name":"Kingman Road","oneway":null,"user":"wfox","id":"way/9429634"},"arcs":[1160]},{"type":"LineString","properties":{"highway":"residential","name":"Wilton Street","oneway":"yes","user":"crschmidt","id":"way/9429637"},"arcs":[1161,1162,1163]},{"type":"LineString","properties":{"highway":"residential","name":"Albion Court","oneway":null,"user":"synack","id":"way/9429638"},"arcs":[1164]},{"type":"LineString","properties":{"highway":"residential","name":"Norwood Avenue","oneway":"yes","user":"synack","id":"way/9429640"},"arcs":[1165]},{"type":"LineString","properties":{"highway":"secondary","name":"Warner Street","oneway":null,"user":"MassGIS Import","id":"way/9429641"},"arcs":[1166,1167,1168]},{"type":"LineString","properties":{"highway":"residential","name":"Putnam Street","oneway":null,"user":"teddythebeta","id":"way/9429647"},"arcs":[1169,1170]},{"type":"LineString","properties":{"highway":"tertiary","name":"Cherry Street","oneway":null,"user":"wfox","id":"way/9429649"},"arcs":[1171,1172,1173]},{"type":"LineString","properties":{"highway":"residential","name":"Francesca Avenue","oneway":"yes","user":"OceanVortex","id":"way/9429650"},"arcs":[1174]},{"type":"LineString","properties":{"highway":"residential","name":"Fairlee Street","oneway":null,"user":"MassGIS Import","id":"way/9429651"},"arcs":[1175]},{"type":"LineString","properties":{"highway":"residential","name":"Grandview Avenue","oneway":null,"user":"MassGIS Import","id":"way/9429652"},"arcs":[1176]},{"type":"LineString","properties":{"highway":"secondary_link","name":"Bow Street","oneway":"yes","user":"probiscus","id":"way/9429656"},"arcs":[1177]},{"type":"LineString","properties":{"highway":"living_street","name":"Milk Place","oneway":null,"user":"morganwahl","id":"way/9429658"},"arcs":[1178]},{"type":"LineString","properties":{"highway":"residential","name":"Brook Street","oneway":null,"user":"MassGIS Import","id":"way/9429662"},"arcs":[1179,1180]},{"type":"LineString","properties":{"highway":"residential","name":"Jay Street","oneway":"yes","user":"synack","id":"way/9429664"},"arcs":[1181]},{"type":"LineString","properties":{"highway":"living_street","name":"Bow Street Place","oneway":null,"user":"morganwahl","id":"way/9429671"},"arcs":[1182]},{"type":"LineString","properties":{"highway":"residential","name":"Holt's Avenue","oneway":null,"user":"MassGIS Import","id":"way/9429673"},"arcs":[1183]},{"type":"LineString","properties":{"highway":"tertiary","name":"Temple Street","oneway":null,"user":"wambag","id":"way/9429674"},"arcs":[1184,1185,1186,1187,1188,1189,1190,1191]},{"type":"LineString","properties":{"highway":"residential","name":"Jackson Road","oneway":null,"user":"MassGIS Import","id":"way/9429676"},"arcs":[1192,1193,1194]},{"type":"LineString","properties":{"highway":"residential","name":"Spencer Avenue","oneway":"yes","user":"OSMF Redaction Account","id":"way/9429678"},"arcs":[1195]},{"type":"LineString","properties":{"highway":"tertiary_link","name":null,"oneway":"yes","user":"wambag","id":"way/9429680"},"arcs":[1196]},{"type":"LineString","properties":{"highway":"residential","name":"Windsor Road","oneway":"yes","user":"synack","id":"way/9429681"},"arcs":[1197]},{"type":"LineString","properties":{"highway":"residential","name":"Morgan Street","oneway":"yes","user":"wfox","id":"way/9429682"},"arcs":[1198]},{"type":"LineString","properties":{"highway":"residential","name":"Whitman Street","oneway":"yes","user":"synack","id":"way/9429683"},"arcs":[1199]},{"type":"LineString","properties":{"highway":"residential","name":"Cleveland Street","oneway":null,"user":"OceanVortex","id":"way/9429684"},"arcs":[1200]},{"type":"LineString","properties":{"highway":"residential","name":"William Street","oneway":null,"user":"nkhall","id":"way/9429685"},"arcs":[1201]},{"type":"LineString","properties":{"highway":"residential","name":"Douglas Avenue","oneway":null,"user":"MassGIS Import","id":"way/9429686"},"arcs":[1202]},{"type":"LineString","properties":{"highway":"residential","name":"Ashland Street","oneway":"yes","user":"OceanVortex","id":"way/9429687"},"arcs":[1203]},{"type":"LineString","properties":{"highway":"living_street","name":"Wyatt Circle","oneway":null,"user":"morganwahl","id":"way/9429690"},"arcs":[1204]},{"type":"LineString","properties":{"highway":"residential","name":"Flint Street","oneway":null,"user":"wambag","id":"way/9429691"},"arcs":[1205,1206,1207,1208,1209]},{"type":"LineString","properties":{"highway":"residential","name":"Bellevue Terrace","oneway":null,"user":"synack","id":"way/9429694"},"arcs":[1210]},{"type":"LineString","properties":{"highway":"residential","name":"Madison Street","oneway":"yes","user":"wfox","id":"way/9429696"},"arcs":[1211]},{"type":"LineString","properties":{"highway":"primary","name":"Mystic Avenue","oneway":null,"user":"wambag","id":"way/9429697"},"arcs":[1212]},{"type":"LineString","properties":{"highway":"residential","name":"Dane Avenue","oneway":"yes","user":"morganwahl","id":"way/9429698"},"arcs":[1213,1214]},{"type":"LineString","properties":{"highway":"residential","name":"Conwell Avenue","oneway":null,"user":"wfox","id":"way/9429700"},"arcs":[1215,1216,1217,1218]},{"type":"LineString","properties":{"highway":"residential","name":"Liberty Avenue","oneway":null,"user":"JasonWoof","id":"way/9429703"},"arcs":[1219,1220,1221,1222]},{"type":"LineString","properties":{"highway":"residential","name":"Mountain Avenue","oneway":null,"user":"Ian McIntosh","id":"way/9429704"},"arcs":[1223]},{"type":"LineString","properties":{"highway":"residential","name":"Newbury Street","oneway":"yes","user":"crschmidt","id":"way/9429705"},"arcs":[1224]},{"type":"LineString","properties":{"highway":"residential","name":"Hamilton Road","oneway":null,"user":"MassGIS Import","id":"way/9429706"},"arcs":[1225,1226,1227]},{"type":"LineString","properties":{"highway":"unclassified","name":"Kidder Avenue","oneway":null,"user":"probiscus","id":"way/9429707"},"arcs":[1228,1229,1230,1231,1232,1233,1234,1235,1236,1237,1238]},{"type":"LineString","properties":{"highway":"residential","name":"Village Street","oneway":"yes","user":"morganwahl","id":"way/9429708"},"arcs":[1239,1240]},{"type":"LineString","properties":{"highway":"residential","name":"Berkeley Street","oneway":null,"user":"MassGIS Import","id":"way/9429709"},"arcs":[1241,1242]},{"type":"LineString","properties":{"highway":"residential","name":"Hudson Street","oneway":"yes","user":"probiscus","id":"way/9429710"},"arcs":[1243]},{"type":"LineString","properties":{"highway":"residential","name":"Warren Avenue","oneway":null,"user":"mregan","id":"way/9429712"},"arcs":[1244]},{"type":"LineString","properties":{"highway":"residential","name":"Endicott Avenue","oneway":null,"user":"wfox","id":"way/9429713"},"arcs":[1245]},{"type":"LineString","properties":{"highway":"residential","name":"Granite Street","oneway":null,"user":"morganwahl","id":"way/9429714"},"arcs":[1246,1247]},{"type":"LineString","properties":{"highway":"residential","name":"Sartwell Avenue","oneway":"yes","user":"synack","id":"way/9429717"},"arcs":[1248,1249]},{"type":"LineString","properties":{"highway":"residential","name":"Knapp Street","oneway":"yes","user":"OceanVortex","id":"way/9429719"},"arcs":[1250]},{"type":"LineString","properties":{"highway":"residential","name":"Walnut Road","oneway":"yes","user":"synack","id":"way/9429720"},"arcs":[1251]},{"type":"LineString","properties":{"highway":"residential","name":"Williams Court","oneway":null,"user":"Ian McIntosh","id":"way/9429722"},"arcs":[1252]},{"type":"LineString","properties":{"highway":"secondary","name":"Powder House Boulevard","oneway":"yes","user":"nkhall","id":"way/9429724"},"arcs":[1253]},{"type":"LineString","properties":{"highway":"residential","name":"Aberdeen Road","oneway":"yes","user":"wfox","id":"way/9429726"},"arcs":[1254,1255]},{"type":"LineString","properties":{"highway":"residential","name":"Hardan Road","oneway":null,"user":"MassGIS Import","id":"way/9429731"},"arcs":[1256]},{"type":"LineString","properties":{"highway":"residential","name":"Melvin Street","oneway":"yes","user":"David Posey","id":"way/9429734"},"arcs":[1257]},{"type":"LineString","properties":{"highway":"residential","name":"Charnwood Road","oneway":"yes","user":"synack","id":"way/9429736"},"arcs":[1258]},{"type":"LineString","properties":{"highway":"residential","name":"Bradford Avenue","oneway":null,"user":"MassGIS Import","id":"way/9429737"},"arcs":[1259]},{"type":"LineString","properties":{"highway":"residential","name":"Wellington Avenue","oneway":null,"user":"wambag","id":"way/9429738"},"arcs":[1260,1261]},{"type":"LineString","properties":{"highway":"residential","name":"Vernon Street","oneway":null,"user":"MassGIS Import","id":"way/9429739"},"arcs":[1262,1263]},{"type":"LineString","properties":{"highway":"residential","name":"Cypress Street","oneway":"yes","user":"crschmidt","id":"way/9429740"},"arcs":[1264]},{"type":"LineString","properties":{"highway":"residential","name":"Maine Terrace","oneway":"yes","user":"wambag","id":"way/9429741"},"arcs":[1265]},{"type":"LineString","properties":{"highway":"tertiary","name":"School Street","oneway":"yes","user":"kzmijew","id":"way/9429743"},"arcs":[1266,1267,1268,1269,1270,1271,1272,1273]},{"type":"LineString","properties":{"highway":"residential","name":"Pitman Street","oneway":"yes","user":"JasonWoof","id":"way/9429744"},"arcs":[1274]},{"type":"LineString","properties":{"highway":"residential","name":"Washington Terrace","oneway":null,"user":"synack","id":"way/9429746"},"arcs":[1275]},{"type":"LineString","properties":{"highway":"residential","name":"Earle Street","oneway":null,"user":"OceanVortex","id":"way/9429747"},"arcs":[1276]},{"type":"LineString","properties":{"highway":"residential","name":"Skilton Avenue","oneway":null,"user":"wambag","id":"way/9429748"},"arcs":[1277]},{"type":"LineString","properties":{"highway":"residential","name":"Cutler Street","oneway":null,"user":"OceanVortex","id":"way/9429750"},"arcs":[1278]},{"type":"LineString","properties":{"highway":"residential","name":"Museum Street","oneway":null,"user":"nkhall","id":"way/9429755"},"arcs":[1279]},{"type":"LineString","properties":{"highway":"residential","name":"Ware Street","oneway":null,"user":"MassGIS Import","id":"way/9429756"},"arcs":[1280,1281,1282]},{"type":"LineString","properties":{"highway":"residential","name":"Lowell Circle","oneway":null,"user":"MassGIS Import","id":"way/9429760"},"arcs":[1283]},{"type":"LineString","properties":{"highway":"residential","name":"Bowdoin Street","oneway":null,"user":"srividya_c","id":"way/9429761"},"arcs":[1284]},{"type":"LineString","properties":{"highway":"residential","name":"Belmont Place","oneway":null,"user":"MassGIS Import","id":"way/9429762"},"arcs":[1285]},{"type":"LineString","properties":{"highway":"residential","name":"Charlestown Street","oneway":null,"user":"OceanVortex","id":"way/9429774"},"arcs":[1286,1287]},{"type":"LineString","properties":{"highway":"residential","name":"Melville Road","oneway":null,"user":"MassGIS Import","id":"way/9429780"},"arcs":[1288]},{"type":"LineString","properties":{"highway":"residential","name":"Malvern Avenue","oneway":null,"user":"MassGIS Import","id":"way/9429786"},"arcs":[1289]},{"type":"LineString","properties":{"highway":"primary","name":"Mystic Avenue","oneway":"yes","user":"wambag","id":"way/9429788"},"arcs":[1290,1291,1292]},{"type":"LineString","properties":{"highway":"residential","name":"Wheeler Street","oneway":null,"user":"MassGIS Import","id":"way/9429789"},"arcs":[1293]},{"type":"LineString","properties":{"highway":"secondary","name":"Broadway","oneway":null,"user":"onurozgun","id":"way/9429791"},"arcs":[1294,1295]},{"type":"LineString","properties":{"highway":"residential","name":"Harold Street","oneway":null,"user":"crschmidt","id":"way/9429792"},"arcs":[1296]},{"type":"LineString","properties":{"highway":"trunk","name":"McGrath Highway","oneway":"yes","user":"NE2","id":"way/9429793"},"arcs":[1297]},{"type":"LineString","properties":{"highway":"trunk","name":"McGrath Highway","oneway":"yes","user":"pokey","id":"way/9429794"},"arcs":[1298]},{"type":"LineString","properties":{"highway":"residential","name":"Avon Street","oneway":null,"user":"OSMF Redaction Account","id":"way/9429795"},"arcs":[1299]},{"type":"LineString","properties":{"highway":"residential","name":"Connecticut Avenue","oneway":"yes","user":"wambag","id":"way/9429798"},"arcs":[1300]},{"type":"LineString","properties":{"highway":"residential","name":"Leonard Street","oneway":"yes","user":"JasonWoof","id":"way/9429799"},"arcs":[1301,1302]},{"type":"LineString","properties":{"highway":"tertiary","name":"Main Street","oneway":null,"user":"tirerim","id":"way/9429800"},"arcs":[1303,1304,1305,1306,1307,1308]},{"type":"LineString","properties":{"highway":"residential","name":"Harrison Road","oneway":null,"user":"MassGIS Import","id":"way/9429801"},"arcs":[1309]},{"type":"LineString","properties":{"highway":"living_street","name":"Beacon Place","oneway":null,"user":"morganwahl","id":"way/9429802"},"arcs":[1310]},{"type":"LineString","properties":{"highway":"residential","name":"Bowers Avenue","oneway":"yes","user":"probiscus","id":"way/9429803"},"arcs":[1311]},{"type":"LineString","properties":{"highway":"residential","name":"Wesley Street","oneway":"yes","user":"wfox","id":"way/9429804"},"arcs":[1312]},{"type":"LineString","properties":{"highway":"residential","name":"Oak Street","oneway":"yes","user":"wfox","id":"way/9429805"},"arcs":[1313,1314]},{"type":"LineString","properties":{"highway":"residential","name":"Hersey Street","oneway":null,"user":"MassGIS Import","id":"way/9429808"},"arcs":[1315]},{"type":"LineString","properties":{"highway":"residential","name":"Montgomery Avenue","oneway":null,"user":"wfox","id":"way/9429809"},"arcs":[1316]},{"type":"LineString","properties":{"highway":"secondary","name":"Powder House Square","oneway":"yes","user":"Iowa Kid","id":"way/9429813"},"arcs":[1317,1318,1319,1320,1321,1322,1323,1324,1325,1326,1327,1328]},{"type":"LineString","properties":{"highway":"residential","name":"Kingston Street","oneway":null,"user":"synack","id":"way/9429821"},"arcs":[1329,1330,1331,1332]},{"type":"LineString","properties":{"highway":"living_street","name":"Skehan Street","oneway":null,"user":"morganwahl","id":"way/9429824"},"arcs":[1333]},{"type":"LineString","properties":{"highway":"residential","name":"Gould Avenue","oneway":null,"user":"OceanVortex","id":"way/9429826"},"arcs":[1334]},{"type":"LineString","properties":{"highway":"unclassified","name":"Inner Belt Road","oneway":null,"user":"morganwahl","id":"way/9429828"},"arcs":[1335,1336,1337]},{"type":"LineString","properties":{"highway":"residential","name":"Miller Street","oneway":null,"user":"wfox","id":"way/9429829"},"arcs":[1338]},{"type":"LineString","properties":{"highway":"residential","name":"Properzi Way","oneway":null,"user":"morganwahl","id":"way/9429830"},"arcs":[1339,1340,1341]},{"type":"LineString","properties":{"highway":"residential","name":"Jaques Street","oneway":"yes","user":"synack","id":"way/9429831"},"arcs":[1342,1343,1344,1345,1346]},{"type":"LineString","properties":{"highway":"residential","name":"Lincoln Parkway","oneway":"yes","user":"morganwahl","id":"way/9429832"},"arcs":[1347]},{"type":"LineString","properties":{"highway":"residential","name":"Francis Street","oneway":null,"user":"MassGIS Import","id":"way/9429833"},"arcs":[1348]},{"type":"LineString","properties":{"highway":"residential","name":"Forest Street","oneway":null,"user":"wfox","id":"way/9429835"},"arcs":[1349]},{"type":"LineString","properties":{"highway":"residential","name":"Dante Terrace","oneway":null,"user":"MassGIS Import","id":"way/9429836"},"arcs":[1350]},{"type":"LineString","properties":{"highway":"residential","name":"Glendale Avenue","oneway":null,"user":"MassGIS Import","id":"way/9429837"},"arcs":[1351]},{"type":"LineString","properties":{"highway":"residential","name":"Bradley Street","oneway":null,"user":"wambag","id":"way/9429847"},"arcs":[1352,1353]},{"type":"LineString","properties":{"highway":"residential","name":"Elliot Street","oneway":null,"user":"MassGIS Import","id":"way/9429848"},"arcs":[1354]},{"type":"LineString","properties":{"highway":"residential","name":"Yorktown Street","oneway":null,"user":"MassGIS Import","id":"way/9429851"},"arcs":[1355,1356,1357]},{"type":"LineString","properties":{"highway":"residential","name":"Robinson Street","oneway":null,"user":"MassGIS Import","id":"way/9429854"},"arcs":[1358,1359]},{"type":"LineString","properties":{"highway":"residential","name":"Beacon Terrace","oneway":null,"user":"wfox","id":"way/9429856"},"arcs":[1360]},{"type":"LineString","properties":{"highway":"residential","name":"Corinthian Road","oneway":null,"user":"synack","id":"way/9429861"},"arcs":[1361]},{"type":"LineString","properties":{"highway":"residential","name":"Franey Road","oneway":null,"user":"wfox","id":"way/9429863"},"arcs":[1362]},{"type":"LineString","properties":{"highway":"residential","name":"Jerome Court","oneway":null,"user":"nkhall","id":"way/9429868"},"arcs":[1363]},{"type":"LineString","properties":{"highway":"residential","name":"Jaques Street","oneway":null,"user":"synack","id":"way/9429870"},"arcs":[1364,1365,1366]},{"type":"LineString","properties":{"highway":"residential","name":"Gordon Street","oneway":"yes","user":"wambag","id":"way/9429871"},"arcs":[1367,1368]},{"type":"LineString","properties":{"highway":"residential","name":"Meacham Street","oneway":null,"user":"MassGIS Import","id":"way/9429873"},"arcs":[1369,1370,1371,1372]},{"type":"LineString","properties":{"highway":"residential","name":"Simpson Avenue","oneway":"yes","user":"wfox","id":"way/9429875"},"arcs":[1373,1374]},{"type":"LineString","properties":{"highway":"residential","name":"West Street","oneway":null,"user":"wfox","id":"way/9429878"},"arcs":[1375,1376]},{"type":"LineString","properties":{"highway":"residential","name":"Windsor Street","oneway":null,"user":"OceanVortex","id":"way/9429879"},"arcs":[1377,1378]},{"type":"LineString","properties":{"highway":"residential","name":"Silvey Place","oneway":null,"user":"OceanVortex","id":"way/9429883"},"arcs":[1379]},{"type":"LineString","properties":{"highway":"residential","name":"Ellsworth Street","oneway":null,"user":"wambag","id":"way/9429884"},"arcs":[1380]},{"type":"LineString","properties":{"highway":"residential","name":"Otis Street","oneway":null,"user":"synack","id":"way/9429886"},"arcs":[1381,1382]},{"type":"LineString","properties":{"highway":"residential","name":"Chapel Street","oneway":null,"user":"MassGIS Import","id":"way/9429889"},"arcs":[1383]},{"type":"LineString","properties":{"highway":"residential","name":"Hardan Road","oneway":null,"user":"MassGIS Import","id":"way/9429891"},"arcs":[1384]},{"type":"LineString","properties":{"highway":"residential","name":"Preston Road","oneway":null,"user":"synack","id":"way/9429893"},"arcs":[1385]},{"type":"LineString","properties":{"highway":"residential","name":"White Street Place","oneway":null,"user":"OceanVortex","id":"way/9429895"},"arcs":[1386]},{"type":"LineString","properties":{"highway":"residential","name":"Pearl Terrace","oneway":null,"user":"wfox","id":"way/9429896"},"arcs":[1387]},{"type":"LineString","properties":{"highway":"residential","name":"Second Avenue","oneway":null,"user":"MassGIS Import","id":"way/9429899"},"arcs":[1388]},{"type":"LineString","properties":{"highway":"residential","name":"Gilman Street","oneway":"yes","user":"wambag","id":"way/9429904"},"arcs":[1389]},{"type":"LineString","properties":{"highway":"residential","name":"Summit Avenue","oneway":null,"user":"onlynone","id":"way/9429908"},"arcs":[1390]},{"type":"LineString","properties":{"highway":"residential","name":"Richdale Avenue","oneway":null,"user":"wfox","id":"way/9429911"},"arcs":[1391,1392,1393,1394]},{"type":"LineString","properties":{"highway":"residential","name":"Snow Terrace","oneway":null,"user":"MassGIS Import","id":"way/9429912"},"arcs":[1395]},{"type":"LineString","properties":{"highway":"residential","name":"Connors Drive","oneway":null,"user":"abel801","id":"way/9429915"},"arcs":[1396]},{"type":"LineString","properties":{"highway":"residential","name":"Hammond Street","oneway":null,"user":"morganwahl","id":"way/9429916"},"arcs":[1397]},{"type":"LineString","properties":{"highway":"residential","name":"Browning Road","oneway":"yes","user":"wfox","id":"way/9429917"},"arcs":[1398]},{"type":"LineString","properties":{"highway":"tertiary","name":"Cedar Street","oneway":null,"user":"onurozgun","id":"way/9429919"},"arcs":[1399,1400,1401,1402,1403]},{"type":"LineString","properties":{"highway":"residential","name":"College Hill Road","oneway":null,"user":"MassGIS Import","id":"way/9429924"},"arcs":[1404]},{"type":"LineString","properties":{"highway":"secondary","name":"College Avenue","oneway":"-1","user":"onurozgun","id":"way/9429925"},"arcs":[1405]},{"type":"MultiLineString","properties":{"highway":"residential","name":"Frontage Road","oneway":"yes","user":"tirerim","id":"way/9429929"},"arcs":[[1406],[1407]]},{"type":"LineString","properties":{"highway":"residential","name":"Joy Street","oneway":null,"user":"onurozgun","id":"way/9429931"},"arcs":[1408]},{"type":"LineString","properties":{"highway":"secondary","name":"Broadway","oneway":"yes","user":"steverumizen","id":"way/9429934"},"arcs":[1409,1410,1411,1412,1413,1414,1415,1416]},{"type":"LineString","properties":{"highway":"residential","name":"Dow Street","oneway":null,"user":"wfox","id":"way/9429939"},"arcs":[1417]},{"type":"LineString","properties":{"highway":"unclassified","name":"Third Avenue","oneway":null,"user":"morganwahl","id":"way/9429941"},"arcs":[1418]},{"type":"LineString","properties":{"highway":"residential","name":"Virginia Street","oneway":null,"user":"wambag","id":"way/9429945"},"arcs":[1419,1420]},{"type":"LineString","properties":{"highway":"residential","name":"Maple Avenue","oneway":null,"user":"MassGIS Import","id":"way/9429947"},"arcs":[1421]},{"type":"LineString","properties":{"highway":"residential","name":"Minnesota Avenue","oneway":"yes","user":"wambag","id":"way/9429948"},"arcs":[1422]},{"type":"LineString","properties":{"highway":"residential","name":"Adrian Street","oneway":"yes","user":"morganwahl","id":"way/9429951"},"arcs":[1423]},{"type":"LineString","properties":{"highway":"residential","name":"Burnham Street","oneway":null,"user":"wfox","id":"way/9429952"},"arcs":[1424]},{"type":"LineString","properties":{"highway":"residential","name":"Rossmore Street","oneway":"yes","user":"synack","id":"way/9429955"},"arcs":[1425]},{"type":"LineString","properties":{"highway":"residential","name":"Broadway Place","oneway":"no","user":"wambag","id":"way/9429958"},"arcs":[1426,1427]},{"type":"LineString","properties":{"highway":"residential","name":"Russell Road","oneway":"no","user":"dph","id":"way/9429962"},"arcs":[1428,1429]},{"type":"LineString","properties":{"highway":"residential","name":"Myrtle Street","oneway":"yes","user":"jwass","id":"way/9429964"},"arcs":[1430]},{"type":"LineString","properties":{"highway":"residential","name":"Curtis Avenue","oneway":null,"user":"almiki","id":"way/9429967"},"arcs":[1431]},{"type":"LineString","properties":{"highway":"living_street","name":"Lincoln Place","oneway":null,"user":"morganwahl","id":"way/9429972"},"arcs":[1432]},{"type":"LineString","properties":{"highway":"residential","name":"Avon Place","oneway":null,"user":"synack","id":"way/9429976"},"arcs":[1433]},{"type":"LineString","properties":{"highway":"residential","name":"Springhill Terrace","oneway":"yes","user":"wfox","id":"way/9429977"},"arcs":[1434]},{"type":"LineString","properties":{"highway":"residential","name":"Mortimer Place","oneway":null,"user":"MassGIS Import","id":"way/9429978"},"arcs":[1435]},{"type":"LineString","properties":{"highway":"residential","name":"Thorpe Street","oneway":null,"user":"wambag","id":"way/9429979"},"arcs":[1436]},{"type":"LineString","properties":{"highway":"residential","name":"Linden Place","oneway":null,"user":"MassGIS Import","id":"way/9429981"},"arcs":[1437]},{"type":"LineString","properties":{"highway":"residential","name":"Knowlton Street","oneway":null,"user":"OceanVortex","id":"way/9429982"},"arcs":[1438,1439]},{"type":"LineString","properties":{"highway":"residential","name":"Russell Road","oneway":"yes","user":"synack","id":"way/9429985"},"arcs":[1440]},{"type":"LineString","properties":{"highway":"residential","name":"Carlton Street","oneway":null,"user":"morganwahl","id":"way/9429986"},"arcs":[1441]},{"type":"LineString","properties":{"highway":"residential","name":"Pinckney Place","oneway":null,"user":"MassGIS Import","id":"way/9429988"},"arcs":[1442]},{"type":"LineString","properties":{"highway":"residential","name":"Vinal Street","oneway":null,"user":"OceanVortex","id":"way/9429990"},"arcs":[1443]},{"type":"LineString","properties":{"highway":"residential","name":"Elm Court","oneway":null,"user":"MassGIS Import","id":"way/9429991"},"arcs":[1444]},{"type":"LineString","properties":{"highway":"secondary","name":"Bow Street","oneway":"yes","user":"onurozgun","id":"way/9429993"},"arcs":[1445]},{"type":"LineString","properties":{"highway":"residential","name":"Beckwith Circle","oneway":null,"user":"wfox","id":"way/9429995"},"arcs":[1446]},{"type":"LineString","properties":{"highway":"tertiary","name":"Newton Street","oneway":null,"user":"morganwahl","id":"way/9429997"},"arcs":[1447]},{"type":"LineString","properties":{"highway":"residential","name":"Calvin Street","oneway":"yes","user":"morganwahl","id":"way/9430007"},"arcs":[1448]},{"type":"LineString","properties":{"highway":"residential","name":"Westminster Street","oneway":"yes","user":"fiveisalive","id":"way/9430009"},"arcs":[1449]},{"type":"LineString","properties":{"highway":"residential","name":"Hill Street","oneway":"yes","user":"synack","id":"way/9430010"},"arcs":[1450]},{"type":"LineString","properties":{"highway":"residential","name":"Warren Avenue","oneway":null,"user":"morganwahl","id":"way/9430013"},"arcs":[1451]},{"type":"LineString","properties":{"highway":"residential","name":"Prospect Hill Avenue","oneway":null,"user":"morganwahl","id":"way/9430019"},"arcs":[1452,1453]},{"type":"LineString","properties":{"highway":"residential","name":"Ivaldo Street","oneway":null,"user":"OSMF Redaction Account","id":"way/9430024"},"arcs":[1454,1455,1456]},{"type":"LineString","properties":{"highway":"secondary_link","name":null,"oneway":"yes","user":"osm-sputnik","id":"way/9430029"},"arcs":[1457,1458,1459]},{"type":"LineString","properties":{"highway":"residential","name":"Campbell Park","oneway":null,"user":"synack","id":"way/9430035"},"arcs":[1460]},{"type":"LineString","properties":{"highway":"residential","name":"Princeton Street","oneway":null,"user":"probiscus","id":"way/9430036"},"arcs":[1461]},{"type":"LineString","properties":{"highway":"residential","name":"Waldo Street","oneway":"no","user":"steverumizen","id":"way/9430037"},"arcs":[1462]},{"type":"LineString","properties":{"highway":"residential","name":"Electric Avenue","oneway":null,"user":"wfox","id":"way/9430038"},"arcs":[1463,1464,1465,1466]},{"type":"LineString","properties":{"highway":"residential","name":"Edgar Avenue","oneway":null,"user":"synack","id":"way/9430042"},"arcs":[1467,1468,1469,1470,1471,1472,1473]},{"type":"LineString","properties":{"highway":"residential","name":"Montrose Court","oneway":null,"user":"MassGIS Import","id":"way/9430044"},"arcs":[1474]},{"type":"LineString","properties":{"highway":"residential","name":"East Albion Street","oneway":null,"user":"tirerim","id":"way/9430046"},"arcs":[1475,1476]},{"type":"LineString","properties":{"highway":"residential","name":"Hall Avenue","oneway":"yes","user":"crschmidt","id":"way/9430048"},"arcs":[1477]},{"type":"LineString","properties":{"highway":"residential","name":"Chester Avenue","oneway":"yes","user":"OceanVortex","id":"way/9430058"},"arcs":[1478]},{"type":"LineString","properties":{"highway":"residential","name":"Wisconsin Avenue","oneway":"yes","user":"wambag","id":"way/9430060"},"arcs":[1479,1480]},{"type":"LineString","properties":{"highway":"residential","name":"Paulina Street","oneway":"yes","user":"JasonWoof","id":"way/9430069"},"arcs":[1481]},{"type":"LineString","properties":{"highway":"residential","name":"Chandler Street","oneway":null,"user":"wfox","id":"way/9430071"},"arcs":[1482,1483,1484]},{"type":"LineString","properties":{"highway":"residential","name":"Glenwood Road","oneway":"yes","user":"wfox","id":"way/9430072"},"arcs":[1485,1486]},{"type":"LineString","properties":{"highway":"residential","name":"Sewall Street","oneway":"yes","user":"xybot","id":"way/9430078"},"arcs":[1487,1488]},{"type":"LineString","properties":{"highway":"residential","name":"Lake Street","oneway":null,"user":"morganwahl","id":"way/9430079"},"arcs":[1489,1490,1491]},{"type":"LineString","properties":{"highway":"residential","name":"Stickney Avenue","oneway":"yes","user":"crschmidt","id":"way/9430081"},"arcs":[1492]},{"type":"LineString","properties":{"highway":"tertiary","name":"Lowell Street","oneway":"yes","user":"onurozgun","id":"way/9430083"},"arcs":[1493,1494,1495,1496,1497]},{"type":"LineString","properties":{"highway":"secondary","name":"College Avenue","oneway":"yes","user":"onurozgun","id":"way/9430085"},"arcs":[1498]},{"type":"LineString","properties":{"highway":"secondary","name":"College Avenue","oneway":null,"user":"cspanring","id":"way/9430086"},"arcs":[1499]},{"type":"LineString","properties":{"highway":"residential","name":"Acadia Park","oneway":null,"user":"wfox","id":"way/9430089"},"arcs":[1500]},{"type":"LineString","properties":{"highway":"residential","name":"Sterling Street","oneway":"yes","user":"OceanVortex","id":"way/9430092"},"arcs":[1501]},{"type":"LineString","properties":{"highway":"residential","name":"Allen Street","oneway":null,"user":"morganwahl","id":"way/9430095"},"arcs":[1502]},{"type":"LineString","properties":{"highway":"residential","name":"Adams Street","oneway":"yes","user":"wfox","id":"way/9430096"},"arcs":[1503]},{"type":"LineString","properties":{"highway":"residential","name":"Winter Street","oneway":"yes","user":"crschmidt","id":"way/9430099"},"arcs":[1504]},{"type":"LineString","properties":{"highway":"residential","name":"Parkdale Street","oneway":"yes","user":"morganwahl","id":"way/9430101"},"arcs":[1505]},{"type":"LineString","properties":{"highway":"residential","name":"Forster Street","oneway":"yes","user":"wfox","id":"way/9430106"},"arcs":[1506,1507]},{"type":"LineString","properties":{"highway":"residential","name":"Centre Street","oneway":null,"user":"MassGIS Import","id":"way/9430108"},"arcs":[1508]},{"type":"LineString","properties":{"highway":"residential","name":"Prescott Street","oneway":"no","user":"farski","id":"way/9430115"},"arcs":[1509]},{"type":"LineString","properties":{"highway":"residential","name":"Vermont Avenue","oneway":"yes","user":"wambag","id":"way/9430116"},"arcs":[1510]},{"type":"LineString","properties":{"highway":"residential","name":"Poplar Street","oneway":null,"user":"wambag","id":"way/9430118"},"arcs":[1511,1512,1513]},{"type":"LineString","properties":{"highway":"residential","name":"Glen Street","oneway":"yes","user":"David Posey","id":"way/9430120"},"arcs":[1514,1515,1516,1517]},{"type":"LineString","properties":{"highway":"residential","name":"Winchester Street","oneway":null,"user":"crschmidt","id":"way/9430125"},"arcs":[1518]},{"type":"LineString","properties":{"highway":"residential","name":"Herbert Street","oneway":null,"user":"nkhall","id":"way/9430128"},"arcs":[1519]},{"type":"LineString","properties":{"highway":"residential","name":"Parker Street","oneway":"yes","user":"morganwahl","id":"way/9430129"},"arcs":[1520]},{"type":"LineString","properties":{"highway":"residential","name":"Beech Street","oneway":"yes","user":"crschmidt","id":"way/9430132"},"arcs":[1521,1522]},{"type":"LineString","properties":{"highway":"residential","name":"Emerson Street","oneway":"yes","user":"morganwahl","id":"way/9430137"},"arcs":[1523]},{"type":"LineString","properties":{"highway":"residential","name":"Lexington Avenue","oneway":"yes","user":"synack","id":"way/9430141"},"arcs":[1524,1525,1526,1527]},{"type":"LineString","properties":{"highway":"secondary","name":null,"oneway":"yes","user":"morganwahl","id":"way/9430142"},"arcs":[1528,1529]},{"type":"LineString","properties":{"highway":"residential","name":"Derby Street","oneway":"yes","user":"wambag","id":"way/9430143"},"arcs":[1530,1531]},{"type":"LineString","properties":{"highway":"residential","name":"Berwick Street","oneway":null,"user":"MassGIS Import","id":"way/9430147"},"arcs":[1532]},{"type":"LineString","properties":{"highway":"residential","name":"Hathorn Street","oneway":"yes","user":"nkhall","id":"way/9430150"},"arcs":[1533,1534]},{"type":"LineString","properties":{"highway":"residential","name":"Autumn Street","oneway":"yes","user":"wambag","id":"way/9430156"},"arcs":[1535]},{"type":"LineString","properties":{"highway":"residential","name":"Arnold Avenue","oneway":null,"user":"OceanVortex","id":"way/9430157"},"arcs":[1536]},{"type":"LineString","properties":{"highway":"residential","name":"Delaware Street","oneway":"yes","user":"wambag","id":"way/9430159"},"arcs":[1537]},{"type":"LineString","properties":{"highway":"residential","name":"Liberty Road","oneway":"yes","user":"OceanVortex","id":"way/9430161"},"arcs":[1538]},{"type":"LineString","properties":{"highway":"residential","name":"Henry Avenue","oneway":"yes","user":"synack","id":"way/9430162"},"arcs":[1539]},{"type":"LineString","properties":{"highway":"residential","name":"Fairview Terrace","oneway":null,"user":"wfox","id":"way/9430163"},"arcs":[1540]},{"type":"LineString","properties":{"highway":"residential","name":"Perkins Street","oneway":null,"user":"probiscus","id":"way/9430164"},"arcs":[1541,1542,1543,1544,1545,1546]},{"type":"LineString","properties":{"highway":"residential","name":"Pembroke Street","oneway":"yes","user":"wfox","id":"way/9430165"},"arcs":[1547,1548,1549]},{"type":"LineString","properties":{"highway":"residential","name":"New Washington Street","oneway":null,"user":"morganwahl","id":"way/9430166"},"arcs":[1550,1551]},{"type":"LineString","properties":{"highway":"residential","name":"Eustis Street","oneway":"yes","user":"wfox","id":"way/9430168"},"arcs":[1552]},{"type":"LineString","properties":{"highway":"tertiary","name":"Morrison Avenue","oneway":null,"user":"synack","id":"way/9430170"},"arcs":[1553,1554,1555,1556,1557,1558,1559]},{"type":"LineString","properties":{"highway":"residential","name":"Josephine Avenue","oneway":"yes","user":"JasonWoof","id":"way/9430173"},"arcs":[1560]},{"type":"LineString","properties":{"highway":"residential","name":"Irving Street","oneway":"yes","user":"nygren","id":"way/9430174"},"arcs":[1561]},{"type":"LineString","properties":{"highway":"residential","name":"Linden Circle","oneway":null,"user":"MassGIS Import","id":"way/9430175"},"arcs":[1562]},{"type":"LineString","properties":{"highway":"residential","name":"Puritan Road","oneway":null,"user":"wambag","id":"way/9430177"},"arcs":[1563,1564,1565]},{"type":"LineString","properties":{"highway":"residential","name":"Craigie Street","oneway":null,"user":"OceanVortex","id":"way/9430179"},"arcs":[1566,1567,1568,1569,1570,1571]},{"type":"LineString","properties":{"highway":"secondary","name":"Somerville Avenue","oneway":null,"user":"cspanring","id":"way/24917825"},"arcs":[1572,1573,1574,1575,1576,1577,1578,1579,1580,1581,1582,1583,1584,1585,1586,1587,1588,1589]},{"type":"LineString","properties":{"highway":"residential","name":"Fremont Avenue","oneway":null,"user":"RussNelson","id":"way/31115886"},"arcs":[1590]},{"type":"LineString","properties":{"highway":"residential","name":"Bowdoin Street","oneway":"yes","user":"Tom Walsh","id":"way/31115887"},"arcs":[1591]},{"type":"LineString","properties":{"highway":"tertiary","name":"Lowell Street","oneway":null,"user":"onurozgun","id":"way/31120838"},"arcs":[1592,1593,1594,1595,1596,1597]},{"type":"LineString","properties":{"highway":"residential","name":"Hudson Street","oneway":"yes","user":"crschmidt","id":"way/31120860"},"arcs":[1598,1599,1600]},{"type":"LineString","properties":{"highway":"residential","name":"Albion Street","oneway":"yes","user":"dchiles","id":"way/31120864"},"arcs":[1601,1602]},{"type":"LineString","properties":{"highway":"residential","name":"Magnus Avenue","oneway":"yes","user":"morganwahl","id":"way/31127468"},"arcs":[1603]},{"type":"LineString","properties":{"highway":"residential","name":"Boston Avenue","oneway":"yes","user":"probiscus","id":"way/31133325"},"arcs":[1604]},{"type":"LineString","properties":{"highway":"residential","name":"Josephine Avenue","oneway":"yes","user":"crschmidt","id":"way/31133346"},"arcs":[1605]},{"type":"LineString","properties":{"highway":"secondary","name":"Beacon Street","oneway":null,"user":"onurozgun","id":"way/33721065"},"arcs":[1606,1607,1608,1609,1610,1611,1612,1613,1614,1615,1616,1617]},{"type":"LineString","properties":{"highway":"secondary","name":"Beacon Street","oneway":null,"user":"onurozgun","id":"way/33721104"},"arcs":[1618]},{"type":"LineString","properties":{"highway":"secondary","name":"Somerville Avenue","oneway":null,"user":"onurozgun","id":"way/33858910"},"arcs":[1619,1620,1621,1622,1623,1624,1625,1626]},{"type":"LineString","properties":{"highway":"tertiary","name":"Park Street","oneway":null,"user":"onurozgun","id":"way/34303115"},"arcs":[1627,1628,1629,1630]},{"type":"LineString","properties":{"highway":"residential","name":"Sawyer Avenue","oneway":null,"user":"fiveisalive","id":"way/37189582"},"arcs":[1631]},{"type":"LineString","properties":{"highway":"residential","name":"Columbus Avenue","oneway":null,"user":"morganwahl","id":"way/39336523"},"arcs":[1632,1633]},{"type":"LineString","properties":{"highway":"residential","name":"Houghton Street","oneway":"yes","user":"giovanni berlanda","id":"way/39621980"},"arcs":[1634,1635,1636]},{"type":"LineString","properties":{"highway":"residential","name":"Sycamore Terrace","oneway":null,"user":"wfox","id":"way/41088998"},"arcs":[1637]},{"type":"LineString","properties":{"highway":"trunk","name":"Fellsway","oneway":"yes","user":"wambag","id":"way/43795186"},"arcs":[1638,1639,1640,1641,1642,1643,1644]},{"type":"LineString","properties":{"highway":"residential","name":null,"oneway":"yes","user":"wambag","id":"way/44142846"},"arcs":[1645]},{"type":"LineString","properties":{"highway":"residential","name":null,"oneway":"yes","user":"wambag","id":"way/44142850"},"arcs":[1646]},{"type":"LineString","properties":{"highway":"secondary","name":"Webster Avenue","oneway":null,"user":"Tom Walsh","id":"way/44682915"},"arcs":[1647,1648,1649]},{"type":"LineString","properties":{"highway":"residential","name":"Concord Avenue","oneway":"yes","user":"JasonWoof","id":"way/44682916"},"arcs":[1650]},{"type":"LineString","properties":{"highway":"residential","name":"Marion Street","oneway":null,"user":"morganwahl","id":"way/44709018"},"arcs":[1651,1652,1653]},{"type":"LineString","properties":{"highway":"residential","name":"Lincoln Parkway","oneway":null,"user":"morganwahl","id":"way/44849207"},"arcs":[1654]},{"type":"LineString","properties":{"highway":"secondary","name":"Washington Street","oneway":null,"user":"onurozgun","id":"way/46226421"},"arcs":[1655,1656,1657]},{"type":"LineString","properties":{"highway":"secondary","name":"Prospect Street","oneway":"yes","user":"synack","id":"way/46226422"},"arcs":[1658]},{"type":"LineString","properties":{"highway":"secondary","name":"Prospect Street","oneway":"yes","user":"NE2","id":"way/46226423"},"arcs":[1659]},{"type":"LineString","properties":{"highway":"tertiary","name":"Newton Street","oneway":null,"user":"morganwahl","id":"way/46374629"},"arcs":[1660,1661]},{"type":"LineString","properties":{"highway":"tertiary","name":"Newton Street","oneway":"yes","user":"morganwahl","id":"way/46411508"},"arcs":[1662]},{"type":"LineString","properties":{"highway":"trunk","name":"Alewife Brook Parkway","oneway":null,"user":"wambag","id":"way/46785933"},"arcs":[1663,1664,1665,1666,1667,1668]},{"type":"LineString","properties":{"highway":"trunk","name":"Alewife Brook Parkway","oneway":"yes","user":"NE2","id":"way/46785937"},"arcs":[1669,1670]},{"type":"LineString","properties":{"highway":"secondary","name":"Powder House Boulevard","oneway":null,"user":"onurozgun","id":"way/46785938"},"arcs":[1671,1672,1673,1674,1675,1676,1677,1678,1679]},{"type":"LineString","properties":{"highway":"tertiary","name":"Cross Street","oneway":null,"user":"synack","id":"way/48734493"},"arcs":[1680,1681]},{"type":"LineString","properties":{"highway":"tertiary","name":"Cross Street","oneway":"no","user":"Alexey Lukin","id":"way/48734494"},"arcs":[1682]},{"type":"LineString","properties":{"highway":"secondary","name":"Hampshire Street","oneway":null,"user":"Aredhel","id":"way/49238448"},"arcs":[1683]},{"type":"LineString","properties":{"highway":"trunk","name":"McGrath Highway","oneway":"yes","user":"NE2","id":"way/49655012"},"arcs":[1684]},{"type":"LineString","properties":{"highway":"trunk","name":"McGrath Highway","oneway":"yes","user":"OceanVortex","id":"way/49655013"},"arcs":[1685,1686,1687,1688,1689]},{"type":"LineString","properties":{"highway":"trunk","name":"McGrath Highway","oneway":"yes","user":"pokey","id":"way/49655015"},"arcs":[1690,1691,1692,1693]},{"type":"LineString","properties":{"highway":"trunk_link","name":null,"oneway":"yes","user":"NE2","id":"way/49655017"},"arcs":[1694]},{"type":"LineString","properties":{"highway":"secondary","name":"Somerville Avenue","oneway":null,"user":"SophoM","id":"way/50447251"},"arcs":[1695,1696,1697,1698,1699,1700,1701]},{"type":"LineString","properties":{"highway":"secondary","name":"Washington Street","oneway":null,"user":"SophoM","id":"way/50447252"},"arcs":[1702]},{"type":"LineString","properties":{"highway":"primary","name":"Mystic Avenue","oneway":"yes","user":"wambag","id":"way/51811523"},"arcs":[1703]},{"type":"LineString","properties":{"highway":"path","name":null,"oneway":null,"user":"morganwahl","id":"way/54644308"},"arcs":[1704]},{"type":"LineString","properties":{"highway":"path","name":null,"oneway":null,"user":"morganwahl","id":"way/54644312"},"arcs":[1705]},{"type":"LineString","properties":{"highway":"path","name":null,"oneway":null,"user":"morganwahl","id":"way/54644313"},"arcs":[1706,1707]},{"type":"LineString","properties":{"highway":"trunk","name":"McGrath Highway","oneway":"yes","user":"morganwahl","id":"way/59034328"},"arcs":[1708]},{"type":"LineString","properties":{"highway":"trunk","name":"McGrath Highway","oneway":"yes","user":"NE2","id":"way/59034329"},"arcs":[1709,1710]},{"type":"LineString","properties":{"highway":"trunk","name":"McGrath Highway","oneway":"yes","user":"morganwahl","id":"way/59034330"},"arcs":[1711,1712]},{"type":"LineString","properties":{"highway":"trunk_link","name":null,"oneway":"yes","user":"morganwahl","id":"way/59034331"},"arcs":[1713]},{"type":"LineString","properties":{"highway":"residential","name":"Pitman Street","oneway":"yes","user":"OceanVortex","id":"way/61268332"},"arcs":[1714]},{"type":"LineString","properties":{"highway":"cycleway","name":null,"oneway":null,"user":"synack","id":"way/79763809"},"arcs":[1715]},{"type":"LineString","properties":{"highway":"cycleway","name":null,"oneway":null,"user":"wambag","id":"way/80396589"},"arcs":[1716]},{"type":"LineString","properties":{"highway":"cycleway","name":null,"oneway":null,"user":"wambag","id":"way/80396590"},"arcs":[1717,1718]},{"type":"LineString","properties":{"highway":"cycleway","name":null,"oneway":null,"user":"wambag","id":"way/80396592"},"arcs":[1719]},{"type":"LineString","properties":{"highway":"cycleway","name":"Draw 7 Park","oneway":null,"user":"OceanVortex","id":"way/80396654"},"arcs":[1720]},{"type":"LineString","properties":{"highway":"tertiary","name":"Lowell Street","oneway":null,"user":"onurozgun","id":"way/80486087"},"arcs":[1721]},{"type":"LineString","properties":{"highway":"tertiary","name":"Lowell Street","oneway":null,"user":"onurozgun","id":"way/80486089"},"arcs":[1722,1723,1724,1725,1726,1727]},{"type":"LineString","properties":{"highway":"secondary","name":null,"oneway":"yes","user":"Iowa Kid","id":"way/80512118"},"arcs":[1728]},{"type":"LineString","properties":{"highway":"cycleway","name":null,"oneway":null,"user":"synack","id":"way/80512128"},"arcs":[1729]},{"type":"LineString","properties":{"highway":"cycleway","name":null,"oneway":null,"user":"synack","id":"way/80512129"},"arcs":[1730]},{"type":"LineString","properties":{"highway":"residential","name":"Cutler Street","oneway":null,"user":"OceanVortex","id":"way/80513078"},"arcs":[1731]},{"type":"LineString","properties":{"highway":"tertiary","name":"Shore Drive","oneway":"yes","user":"wambag","id":"way/80676384"},"arcs":[1732]},{"type":"LineString","properties":{"highway":"tertiary","name":"Auburn Street","oneway":"yes","user":"wambag","id":"way/80994963"},"arcs":[1733]},{"type":"LineString","properties":{"highway":"secondary","name":"Beacon Street","oneway":null,"user":"onurozgun","id":"way/81049960"},"arcs":[1734]},{"type":"LineString","properties":{"highway":"secondary","name":"Webster Avenue","oneway":"yes","user":"OceanVortex","id":"way/81049981"},"arcs":[1735]},{"type":"LineString","properties":{"highway":"tertiary","name":"Newton Street","oneway":null,"user":"morganwahl","id":"way/81049983"},"arcs":[1736]},{"type":"LineString","properties":{"highway":"secondary","name":"Somerville Avenue","oneway":"yes","user":"OceanVortex","id":"way/81050655"},"arcs":[1737]},{"type":"LineString","properties":{"highway":"residential","name":"Lawson Terrace","oneway":null,"user":"OceanVortex","id":"way/81050656"},"arcs":[1738]},{"type":"LineString","properties":{"highway":"residential","name":"Garden Court","oneway":null,"user":"OceanVortex","id":"way/81050663"},"arcs":[1739]},{"type":"LineString","properties":{"highway":"residential","name":"Gove Court","oneway":null,"user":"OceanVortex","id":"way/81160751"},"arcs":[1740]},{"type":"LineString","properties":{"highway":"secondary","name":"Elm Street","oneway":"yes","user":"onurozgun","id":"way/81160752"},"arcs":[1741,1742]},{"type":"LineString","properties":{"highway":"secondary","name":"Elm Street","oneway":"yes","user":"onurozgun","id":"way/81160753"},"arcs":[1743]},{"type":"LineString","properties":{"highway":"secondary","name":"Elm Street","oneway":null,"user":"jwass","id":"way/81160754"},"arcs":[1744,1745,1746,1747,1748,1749,1750,1751,1752,1753,1754,1755,1756,1757,1758,1759,1760]},{"type":"LineString","properties":{"highway":"residential","name":"Parker Place","oneway":null,"user":"OceanVortex","id":"way/81160756"},"arcs":[1761]},{"type":"LineString","properties":{"highway":"residential","name":"Peterson Terrace","oneway":null,"user":"OceanVortex","id":"way/81160757"},"arcs":[1762]},{"type":"LineString","properties":{"highway":"residential","name":"Mardell Circle","oneway":null,"user":"OceanVortex","id":"way/81160759"},"arcs":[1763]},{"type":"LineString","properties":{"highway":"trunk","name":"McGrath Highway","oneway":"yes","user":"OceanVortex","id":"way/82329739"},"arcs":[1764,1765,1766,1767,1768]},{"type":"LineString","properties":{"highway":"trunk","name":"McGrath Highway","oneway":"yes","user":"NE2","id":"way/82329744"},"arcs":[1769]},{"type":"LineString","properties":{"highway":"track","name":null,"oneway":null,"user":"ChrisZontine","id":"way/82329750"},"arcs":[1770]},{"type":"LineString","properties":{"highway":"tertiary","name":"Walnut Street","oneway":"yes","user":"wambag","id":"way/82329751"},"arcs":[1771]},{"type":"LineString","properties":{"highway":"tertiary","name":"Cedar Street","oneway":null,"user":"onurozgun","id":"way/82329760"},"arcs":[1772,1773]},{"type":"LineString","properties":{"highway":"tertiary","name":"Lowell Street","oneway":null,"user":"onurozgun","id":"way/82329762"},"arcs":[1774]},{"type":"LineString","properties":{"highway":"unclassified","name":null,"oneway":"yes","user":"morganwahl","id":"way/82329763"},"arcs":[1775]},{"type":"LineString","properties":{"highway":"trunk","name":"McGrath Highway","oneway":"yes","user":"wambag","id":"way/82329768"},"arcs":[1776,1777,1778,1779,1780,1781,1782,1783]},{"type":"LineString","properties":{"highway":"track","name":null,"oneway":null,"user":"morganwahl","id":"way/82329773"},"arcs":[1784]},{"type":"LineString","properties":{"highway":"tertiary","name":"Central Street","oneway":null,"user":"morganwahl","id":"way/82329775"},"arcs":[1785]},{"type":"LineString","properties":{"highway":"tertiary","name":"Walnut Street","oneway":"yes","user":"OceanVortex","id":"way/82329777"},"arcs":[1786,1787,1788,1789,1790,1791,1792,1793,1794,1795,1796]},{"type":"LineString","properties":{"highway":"unclassified","name":null,"oneway":"yes","user":"morganwahl","id":"way/82329781"},"arcs":[1797]},{"type":"LineString","properties":{"highway":"tertiary","name":"Lowell Street","oneway":null,"user":"onurozgun","id":"way/82329786"},"arcs":[1798,1799]},{"type":"LineString","properties":{"highway":"secondary","name":"Medford Street","oneway":null,"user":"morganwahl","id":"way/82329789"},"arcs":[1800]},{"type":"LineString","properties":{"highway":"residential","name":"Sycamore Street","oneway":"yes","user":"morganwahl","id":"way/82329792"},"arcs":[1801]},{"type":"LineString","properties":{"highway":"unclassified","name":null,"oneway":"yes","user":"morganwahl","id":"way/82329793"},"arcs":[1802]},{"type":"LineString","properties":{"highway":"trunk","name":"McGrath Highway","oneway":"yes","user":"NE2","id":"way/82329807"},"arcs":[1803]},{"type":"LineString","properties":{"highway":"tertiary","name":"Central Street","oneway":null,"user":"morganwahl","id":"way/82329809"},"arcs":[1804,1805,1806,1807,1808,1809]},{"type":"LineString","properties":{"highway":"unclassified","name":"Inner Belt Road","oneway":null,"user":"morganwahl","id":"way/82329810"},"arcs":[1810,1811,1812,1813]},{"type":"LineString","properties":{"highway":"track","name":null,"oneway":null,"user":"ubermonkey","id":"way/82329812"},"arcs":[1814]},{"type":"LineString","properties":{"highway":"unclassified","name":null,"oneway":"yes","user":"morganwahl","id":"way/82329819"},"arcs":[1815]},{"type":"LineString","properties":{"highway":"unclassified","name":null,"oneway":"yes","user":"morganwahl","id":"way/82329823"},"arcs":[1816]},{"type":"LineString","properties":{"highway":"secondary","name":"Medford Street","oneway":null,"user":"Ron Newman","id":"way/82329824"},"arcs":[1817]},{"type":"LineString","properties":{"highway":"unclassified","name":null,"oneway":"yes","user":"morganwahl","id":"way/82329825"},"arcs":[1818]},{"type":"LineString","properties":{"highway":"residential","name":"Sycamore Street","oneway":"yes","user":"morganwahl","id":"way/82329827"},"arcs":[1819,1820,1821]},{"type":"LineString","properties":{"highway":"tertiary","name":"Cedar Street","oneway":null,"user":"onurozgun","id":"way/82329832"},"arcs":[1822]},{"type":"LineString","properties":{"highway":"primary","name":null,"oneway":"yes","user":"wambag","id":"way/82332097"},"arcs":[1823]},{"type":"LineString","properties":{"highway":"primary","name":"Main Street","oneway":"yes","user":"wambag","id":"way/82332101"},"arcs":[1824]},{"type":"LineString","properties":{"highway":"primary","name":null,"oneway":"yes","user":"wambag","id":"way/82332103"},"arcs":[1825]},{"type":"LineString","properties":{"highway":"track","name":null,"oneway":null,"user":"OceanVortex","id":"way/82332111"},"arcs":[1826]},{"type":"MultiLineString","properties":{"highway":"cycleway","name":null,"oneway":"no","user":"wambag","id":"way/82332122"},"arcs":[[1827,1828],[1829]]},{"type":"LineString","properties":{"highway":"track","name":null,"oneway":null,"user":"OceanVortex","id":"way/82332124"},"arcs":[1830,1831]},{"type":"LineString","properties":{"highway":"tertiary","name":"Cedar Street","oneway":"yes","user":"onurozgun","id":"way/84083458"},"arcs":[1832,1833,1834,1835,1836,1837,1838,1839,1840]},{"type":"LineString","properties":{"highway":"tertiary","name":"Shore Drive","oneway":"yes","user":"wambag","id":"way/85327548"},"arcs":[1841]},{"type":"LineString","properties":{"highway":"cycleway","name":"Mystic Way","oneway":null,"user":"wambag","id":"way/85327550"},"arcs":[1842]},{"type":"LineString","properties":{"highway":"cycleway","name":null,"oneway":null,"user":"wambag","id":"way/85327557"},"arcs":[1843]},{"type":"LineString","properties":{"highway":"trunk","name":"Fellsway","oneway":"yes","user":"wambag","id":"way/85327560"},"arcs":[1844,1845,1846,1847,1848,1849,1850,1851]},{"type":"LineString","properties":{"highway":"cycleway","name":"Mystic Way","oneway":null,"user":"wambag","id":"way/85327567"},"arcs":[1852]},{"type":"LineString","properties":{"highway":"cycleway","name":null,"oneway":null,"user":"NixG-D","id":"way/87332579"},"arcs":[1853]},{"type":"LineString","properties":{"highway":"cycleway","name":null,"oneway":null,"user":"OceanVortex","id":"way/87332582"},"arcs":[1854]},{"type":"LineString","properties":{"highway":"residential","name":"Hodgdon Place","oneway":null,"user":"morganwahl","id":"way/88479541"},"arcs":[1855]},{"type":"LineString","properties":{"highway":"residential","name":"Wyatt Street","oneway":null,"user":"JasonWoof","id":"way/88607346"},"arcs":[1856,1857,1858,1859]},{"type":"LineString","properties":{"highway":"living_street","name":"Cooney Court","oneway":null,"user":"morganwahl","id":"way/88991032"},"arcs":[1860]},{"type":"LineString","properties":{"highway":"living_street","name":"Hanson Avenue","oneway":null,"user":"morganwahl","id":"way/89365346"},"arcs":[1861]},{"type":"LineString","properties":{"highway":"residential","name":"Skehan Street","oneway":null,"user":"morganwahl","id":"way/89365363"},"arcs":[1862]},{"type":"LineString","properties":{"highway":"trunk","name":"Mystic Valley Parkway","oneway":"yes","user":"jwass","id":"way/89432031"},"arcs":[1863]},{"type":"LineString","properties":{"highway":"residential","name":"Rogers Avenue","oneway":"yes","user":"JasonWoof","id":"way/89432858"},"arcs":[1864]},{"type":"LineString","properties":{"highway":"secondary","name":"Somerville Avenue","oneway":"yes","user":"OceanVortex","id":"way/89640582"},"arcs":[1865,1866,1867,1868,1869,1870]},{"type":"LineString","properties":{"highway":"living_street","name":"Olive Square","oneway":null,"user":"morganwahl","id":"way/89640588"},"arcs":[1871]},{"type":"LineString","properties":{"highway":"secondary","name":"Bow Street","oneway":"yes","user":"OceanVortex","id":"way/89717098"},"arcs":[1872]},{"type":"LineString","properties":{"highway":"secondary","name":"Somerville Avenue","oneway":null,"user":"onurozgun","id":"way/89717125"},"arcs":[1873]},{"type":"LineString","properties":{"highway":"residential","name":"Stone Avenue","oneway":"yes","user":"mregan","id":"way/89717128"},"arcs":[1874,1875]},{"type":"LineString","properties":{"highway":"residential","name":"Wesley Park","oneway":null,"user":"morganwahl","id":"way/89717132"},"arcs":[1876]},{"type":"LineString","properties":{"highway":"trunk","name":"McGrath Highway","oneway":"yes","user":"pokey","id":"way/89900463"},"arcs":[1877]},{"type":"LineString","properties":{"highway":"trunk","name":"McGrath Highway","oneway":"yes","user":"pokey","id":"way/89900464"},"arcs":[1878]},{"type":"LineString","properties":{"highway":"secondary","name":"Medford Street","oneway":null,"user":"onurozgun","id":"way/89900465"},"arcs":[1879]},{"type":"LineString","properties":{"highway":"secondary","name":null,"oneway":"yes","user":"morganwahl","id":"way/89900466"},"arcs":[1880,1881,1882,1883,1884,1885]},{"type":"LineString","properties":{"highway":"tertiary","name":"Cross Street","oneway":null,"user":"wambag","id":"way/89900467"},"arcs":[1886,1887]},{"type":"LineString","properties":{"highway":"secondary_link","name":null,"oneway":"yes","user":"morganwahl","id":"way/89900468"},"arcs":[1888]},{"type":"LineString","properties":{"highway":"trunk_link","name":null,"oneway":"yes","user":"Maskulinum","id":"way/89900469"},"arcs":[1889]},{"type":"LineString","properties":{"highway":"secondary_link","name":null,"oneway":"yes","user":"Maskulinum","id":"way/89900470"},"arcs":[1890]},{"type":"LineString","properties":{"highway":"primary_link","name":null,"oneway":"yes","user":"wambag","id":"way/89915331"},"arcs":[1891]},{"type":"LineString","properties":{"highway":"primary","name":"Mystic Avenue","oneway":null,"user":"wambag","id":"way/89917606"},"arcs":[1892,1893,1894,1895]},{"type":"LineString","properties":{"highway":"primary","name":null,"oneway":"yes","user":"wambag","id":"way/89920280"},"arcs":[1896,1897]},{"type":"LineString","properties":{"highway":"primary_link","name":null,"oneway":"yes","user":"wambag","id":"way/89920281"},"arcs":[1898]},{"type":"LineString","properties":{"highway":"trunk_link","name":null,"oneway":"yes","user":"wambag","id":"way/90102302"},"arcs":[1899,1900,1901,1902]},{"type":"LineString","properties":{"highway":"trunk","name":"Fellsway","oneway":"yes","user":"wambag","id":"way/90102306"},"arcs":[1903]},{"type":"LineString","properties":{"highway":"secondary","name":"A. Alfred Lombardi Street","oneway":"yes","user":"wambag","id":"way/90179993"},"arcs":[1904,1905,1906]},{"type":"LineString","properties":{"highway":"residential","name":null,"oneway":"yes","user":"wambag","id":"way/90205634"},"arcs":[1907]},{"type":"LineString","properties":{"highway":"residential","name":"Canal Street","oneway":null,"user":"wambag","id":"way/90216986"},"arcs":[1908,1909]},{"type":"LineString","properties":{"highway":"residential","name":"Kensington Avenue","oneway":null,"user":"wambag","id":"way/90216988"},"arcs":[1910]},{"type":"LineString","properties":{"highway":"primary","name":"Middlesex Avenue","oneway":null,"user":"wambag","id":"way/90216994"},"arcs":[1911,1912,1913,1914,1915]},{"type":"LineString","properties":{"highway":"residential","name":"Artisan Way","oneway":null,"user":"wambag","id":"way/90217009"},"arcs":[1916,1917,1918,1919]},{"type":"LineString","properties":{"highway":"residential","name":"Great River Road","oneway":null,"user":"wambag","id":"way/90226830"},"arcs":[1920]},{"type":"LineString","properties":{"highway":"residential","name":"Assembly Row","oneway":"yes","user":"wambag","id":"way/90229931"},"arcs":[1921]},{"type":"LineString","properties":{"highway":"secondary","name":"Broadway","oneway":"yes","user":"jwass","id":"way/90286273"},"arcs":[1922,1923,1924,1925,1926,1927,1928,1929,1930,1931,1932,1933,1934,1935,1936]},{"type":"LineString","properties":{"highway":"residential","name":"Bonair Street","oneway":"yes","user":"David Posey","id":"way/90288102"},"arcs":[1937]},{"type":"LineString","properties":{"highway":"residential","name":"Gilman Street","oneway":"yes","user":"wambag","id":"way/90288884"},"arcs":[1938,1939]},{"type":"LineString","properties":{"highway":"residential","name":"Gilman Street","oneway":"yes","user":"pokey","id":"way/90288885"},"arcs":[1940]},{"type":"LineString","properties":{"highway":"residential","name":"Gilman Street","oneway":"yes","user":"wambag","id":"way/90288886"},"arcs":[1941]},{"type":"LineString","properties":{"highway":"residential","name":"Aldrich Street","oneway":"yes","user":"wambag","id":"way/90288887"},"arcs":[1942]},{"type":"LineString","properties":{"highway":"secondary","name":"Medford Street","oneway":null,"user":"techlady","id":"way/90291148"},"arcs":[1943,1944]},{"type":"LineString","properties":{"highway":"secondary","name":"Highland Avenue","oneway":"yes","user":"OceanVortex","id":"way/90291149"},"arcs":[1945]},{"type":"LineString","properties":{"highway":"residential","name":"Temple Road","oneway":"yes","user":"wambag","id":"way/91322335"},"arcs":[1946,1947,1948,1949,1950]},{"type":"LineString","properties":{"highway":"trunk_link","name":null,"oneway":"yes","user":"jwass","id":"way/91828491"},"arcs":[1951,1952]},{"type":"LineString","properties":{"highway":"trunk","name":"Mystic Valley Parkway","oneway":"yes","user":"jwass","id":"way/91828492"},"arcs":[1953]},{"type":"LineString","properties":{"highway":"secondary","name":"Mystic Valley Parkway","oneway":"yes","user":"jwass","id":"way/91828496"},"arcs":[1954]},{"type":"LineString","properties":{"highway":"trunk","name":"Mystic Valley Parkway","oneway":null,"user":"wambag","id":"way/91832682"},"arcs":[1955,1956,1957]},{"type":"LineString","properties":{"highway":"trunk","name":"Alewife Brook Parkway","oneway":"yes","user":"jwass","id":"way/91832684"},"arcs":[1958]},{"type":"LineString","properties":{"highway":"residential","name":"White Street","oneway":"yes","user":"onurozgun","id":"way/92994692"},"arcs":[1959]},{"type":"LineString","properties":{"highway":"secondary","name":"Boston Avenue","oneway":null,"user":"morganwahl","id":"way/93020600"},"arcs":[1960,1961,1962,1963]},{"type":"LineString","properties":{"highway":"residential","name":"Capen Street","oneway":null,"user":"morganwahl","id":"way/93045969"},"arcs":[1964]},{"type":"LineString","properties":{"highway":"cycleway","name":"Mystic Way","oneway":null,"user":"morganwahl","id":"way/93160328"},"arcs":[1965]},{"type":"LineString","properties":{"highway":"cycleway","name":"Mystic Way","oneway":null,"user":"wambag","id":"way/93160330"},"arcs":[1966,1967]},{"type":"LineString","properties":{"highway":"secondary","name":"Mystic Valley Parkway","oneway":null,"user":"wambag","id":"way/93160342"},"arcs":[1968]},{"type":"LineString","properties":{"highway":"cycleway","name":null,"oneway":null,"user":"morganwahl","id":"way/93160348"},"arcs":[1969,1970]},{"type":"LineString","properties":{"highway":"secondary","name":"Elm Street","oneway":"yes","user":"phyzome","id":"way/93167676"},"arcs":[1971]},{"type":"LineString","properties":{"highway":"secondary","name":"Beech Street","oneway":"yes","user":"onurozgun","id":"way/93167677"},"arcs":[1972]},{"type":"LineString","properties":{"highway":"secondary","name":"Holland Street","oneway":null,"user":"onurozgun","id":"way/93168578"},"arcs":[1973]},{"type":"LineString","properties":{"highway":"secondary_link","name":null,"oneway":"yes","user":"onurozgun","id":"way/93168579"},"arcs":[1974]},{"type":"LineString","properties":{"highway":"secondary","name":"College Avenue","oneway":null,"user":"onurozgun","id":"way/93168580"},"arcs":[1975]},{"type":"LineString","properties":{"highway":"secondary","name":"Highland Avenue","oneway":"yes","user":"onurozgun","id":"way/93168581"},"arcs":[1976]},{"type":"LineString","properties":{"highway":"secondary","name":"Holland Street","oneway":"yes","user":"onurozgun","id":"way/93168582"},"arcs":[1977]},{"type":"LineString","properties":{"highway":"secondary","name":"Holland Street","oneway":"yes","user":"onurozgun","id":"way/93168583"},"arcs":[1978]},{"type":"LineString","properties":{"highway":"residential","name":"Grand Union Boulevard","oneway":null,"user":"wambag","id":"way/93305682"},"arcs":[1979,1980]},{"type":"LineString","properties":{"highway":"trunk_link","name":null,"oneway":"yes","user":"NE2","id":"way/93305686"},"arcs":[1981,1982,1983,1984,1985]},{"type":"LineString","properties":{"highway":"cycleway","name":"Somerville Community Path","oneway":null,"user":"onurozgun","id":"way/93401904"},"arcs":[1986,1987,1988,1989,1990]},{"type":"LineString","properties":{"highway":"cycleway","name":"Somerville Community Path","oneway":null,"user":"onurozgun","id":"way/93401911"},"arcs":[1991,1992,1993]},{"type":"LineString","properties":{"highway":"cycleway","name":null,"oneway":null,"user":"OceanVortex","id":"way/95049794"},"arcs":[1994,1995,1996,1997]},{"type":"LineString","properties":{"highway":"cycleway","name":null,"oneway":null,"user":"JasonWoof","id":"way/95049796"},"arcs":[1998]},{"type":"LineString","properties":{"highway":"cycleway","name":null,"oneway":null,"user":"onurozgun","id":"way/95440247"},"arcs":[1999,2000]},{"type":"LineString","properties":{"highway":"residential","name":"Conwell Street","oneway":"yes","user":"synack","id":"way/95445594"},"arcs":[2001]},{"type":"LineString","properties":{"highway":"residential","name":"Woodstock Street","oneway":"yes","user":"synack","id":"way/97473806"},"arcs":[2002,2003]},{"type":"LineString","properties":{"highway":"residential","name":"Henderson Street","oneway":"yes","user":"JasonWoof","id":"way/97474462"},"arcs":[2004,2005]},{"type":"LineString","properties":{"highway":"residential","name":"Henderson Street","oneway":"yes","user":"JasonWoof","id":"way/97474464"},"arcs":[2006]},{"type":"LineString","properties":{"highway":"residential","name":"Waterhouse Street","oneway":"yes","user":"synack","id":"way/97475597"},"arcs":[2007]},{"type":"LineString","properties":{"highway":"residential","name":"Hinckley Street","oneway":null,"user":"synack","id":"way/97504283"},"arcs":[2008]},{"type":"LineString","properties":{"highway":"secondary","name":"College Avenue","oneway":null,"user":"Iowa Kid","id":"way/104213876"},"arcs":[2009,2010]},{"type":"LineString","properties":{"highway":"residential","name":"Pearson Avenue","oneway":"yes","user":"JasonWoof","id":"way/104213880"},"arcs":[2011]},{"type":"LineString","properties":{"highway":"residential","name":"Clifton Street","oneway":null,"user":"JasonWoof","id":"way/104214826"},"arcs":[2012]},{"type":"LineString","properties":{"highway":"residential","name":"Liberty Avenue","oneway":"yes","user":"JasonWoof","id":"way/104214827"},"arcs":[2013,2014,2015]},{"type":"LineString","properties":{"highway":"residential","name":"Myrtle Street","oneway":null,"user":"probiscus","id":"way/105957315"},"arcs":[2016]},{"type":"LineString","properties":{"highway":"residential","name":"Pinckney Street","oneway":"yes","user":"probiscus","id":"way/105957565"},"arcs":[2017,2018]},{"type":"LineString","properties":{"highway":"residential","name":"Perkins Street","oneway":"yes","user":"synack","id":"way/105958877"},"arcs":[2019]},{"type":"LineString","properties":{"highway":"secondary","name":"College Avenue","oneway":null,"user":"onurozgun","id":"way/109100959"},"arcs":[2020,2021,2022,2023]},{"type":"LineString","properties":{"highway":"secondary","name":"College Avenue","oneway":"yes","user":"Iowa Kid","id":"way/109101007"},"arcs":[2024]},{"type":"LineString","properties":{"highway":"secondary","name":"College Avenue","oneway":null,"user":"onurozgun","id":"way/109101008"},"arcs":[2025,2026,2027,2028,2029,2030,2031,2032,2033]},{"type":"LineString","properties":{"highway":"residential","name":"Rush Street","oneway":"yes","user":"synack","id":"way/115576686"},"arcs":[2034]},{"type":"LineString","properties":{"highway":"secondary_link","name":null,"oneway":"yes","user":"Alexey Lukin","id":"way/122428665"},"arcs":[2035]},{"type":"LineString","properties":{"highway":"path","name":null,"oneway":null,"user":"cspanring","id":"way/133530260"},"arcs":[2036]},{"type":"LineString","properties":{"highway":"path","name":null,"oneway":null,"user":"cspanring","id":"way/133530261"},"arcs":[2037]},{"type":"LineString","properties":{"highway":"path","name":null,"oneway":null,"user":"cspanring","id":"way/133530264"},"arcs":[2038,2039,2040]},{"type":"LineString","properties":{"highway":"cycleway","name":null,"oneway":null,"user":"wambag","id":"way/134603755"},"arcs":[2041]},{"type":"LineString","properties":{"highway":"cycleway","name":null,"oneway":null,"user":"OceanVortex","id":"way/134652665"},"arcs":[2042,2043,2044]},{"type":"LineString","properties":{"highway":"cycleway","name":null,"oneway":null,"user":"OceanVortex","id":"way/134652666"},"arcs":[2045]},{"type":"LineString","properties":{"highway":"cycleway","name":null,"oneway":null,"user":"OceanVortex","id":"way/134652667"},"arcs":[2046]},{"type":"LineString","properties":{"highway":"cycleway","name":null,"oneway":null,"user":"OceanVortex","id":"way/134655082"},"arcs":[2047]},{"type":"LineString","properties":{"highway":"primary","name":"Mystic Avenue","oneway":"yes","user":"wambag","id":"way/138749280"},"arcs":[2048,2049]},{"type":"LineString","properties":{"highway":"trunk","name":"Alewife Brook Parkway","oneway":"yes","user":"NE2","id":"way/138788963"},"arcs":[2050]},{"type":"LineString","properties":{"highway":"trunk","name":"Alewife Brook Parkway","oneway":"yes","user":"NE2","id":"way/138788967"},"arcs":[2051,2052]},{"type":"LineString","properties":{"highway":"trunk","name":"Mystic Valley Parkway","oneway":null,"user":"wambag","id":"way/138789038"},"arcs":[2053,2054]},{"type":"LineString","properties":{"highway":"residential","name":"Marshall Street","oneway":"yes","user":"Tom Walsh","id":"way/142608863"},"arcs":[2055,2056,2057,2058,2059,2060,2061,2062]},{"type":"LineString","properties":{"highway":"unclassified","name":"Stanford Terrace","oneway":"no","user":"synack","id":"way/156268858"},"arcs":[2063]},{"type":"LineString","properties":{"highway":"living_street","name":"Mount Pleasant Court","oneway":null,"user":"morganwahl","id":"way/156825969"},"arcs":[2064]},{"type":"LineString","properties":{"highway":"residential","name":"Perkins Street","oneway":"yes","user":"morganwahl","id":"way/156825973"},"arcs":[2065]},{"type":"LineString","properties":{"highway":"living_street","name":"Perkins Place","oneway":null,"user":"morganwahl","id":"way/156850680"},"arcs":[2066]},{"type":"LineString","properties":{"highway":"residential","name":"Harding Street","oneway":"yes","user":"OceanVortex","id":"way/158695006"},"arcs":[2067]},{"type":"LineString","properties":{"highway":"residential","name":"Horace Street","oneway":null,"user":"OceanVortex","id":"way/158695007"},"arcs":[2068]},{"type":"LineString","properties":{"highway":"residential","name":"South Street","oneway":"yes","user":"OceanVortex","id":"way/158695010"},"arcs":[2069,2070,2071]},{"type":"LineString","properties":{"highway":"residential","name":"Ward Street","oneway":null,"user":"OceanVortex","id":"way/158695011"},"arcs":[2072]},{"type":"LineString","properties":{"highway":"residential","name":"Willow Street","oneway":null,"user":"OceanVortex","id":"way/158695012"},"arcs":[2073]},{"type":"LineString","properties":{"highway":"construction","name":"Community Path (under construction)","oneway":null,"user":"Ron Newman","id":"way/164546555"},"arcs":[2074,2075]},{"type":"LineString","properties":{"highway":"secondary","name":"Washington Street","oneway":null,"user":"morganwahl","id":"way/164877031"},"arcs":[2076]},{"type":"LineString","properties":{"highway":"secondary","name":"Washington Street","oneway":null,"user":"morganwahl","id":"way/164877032"},"arcs":[2077]},{"type":"LineString","properties":{"highway":"secondary","name":"Broadway","oneway":null,"user":"wambag","id":"way/169669985"},"arcs":[2078,2079,2080,2081,2082,2083,2084,2085,2086,2087,2088,2089,2090,2091,2092]},{"type":"LineString","properties":{"highway":"trunk","name":"Alewife Brook Parkway","oneway":"yes","user":"jwass","id":"way/169673996"},"arcs":[2093,2094,2095]},{"type":"LineString","properties":{"highway":"trunk_link","name":"Mystic Valley Parkway","oneway":"yes","user":"jwass","id":"way/169673997"},"arcs":[2096,2097]},{"type":"LineString","properties":{"highway":"secondary_link","name":null,"oneway":"yes","user":"onurozgun","id":"way/170502324"},"arcs":[2098]},{"type":"LineString","properties":{"highway":"secondary","name":"Highland Avenue","oneway":"yes","user":"onurozgun","id":"way/170502325"},"arcs":[2099,2100]},{"type":"LineString","properties":{"highway":"secondary_link","name":null,"oneway":"yes","user":"onurozgun","id":"way/170502327"},"arcs":[2101]},{"type":"LineString","properties":{"highway":"residential","name":"Fenwick Street","oneway":"yes","user":"Aredhel","id":"way/171308002"},"arcs":[2102,2103]},{"type":"LineString","properties":{"highway":"tertiary","name":"School Street","oneway":null,"user":"onurozgun","id":"way/172237233"},"arcs":[2104,2105,2106,2107,2108,2109,2110,2111]},{"type":"LineString","properties":{"highway":"residential","name":"Bigelow Street","oneway":null,"user":"morganwahl","id":"way/172307046"},"arcs":[2112]},{"type":"LineString","properties":{"highway":"secondary","name":"Broadway","oneway":null,"user":"techlady","id":"way/175011002"},"arcs":[2113,2114,2115,2116,2117,2118,2119,2120]},{"type":"LineString","properties":{"highway":"secondary","name":"Broadway","oneway":"-1","user":"Iowa Kid","id":"way/175011005"},"arcs":[2121]},{"type":"LineString","properties":{"highway":"path","name":null,"oneway":null,"user":"pokey","id":"way/178419623"},"arcs":[2122]},{"type":"LineString","properties":{"highway":"path","name":null,"oneway":null,"user":"morganwahl","id":"way/178419624"},"arcs":[2123]},{"type":"LineString","properties":{"highway":"path","name":null,"oneway":null,"user":"morganwahl","id":"way/178419629"},"arcs":[2124]},{"type":"LineString","properties":{"highway":"path","name":null,"oneway":null,"user":"morganwahl","id":"way/178419630"},"arcs":[2125]},{"type":"LineString","properties":{"highway":"path","name":null,"oneway":null,"user":"morganwahl","id":"way/178419632"},"arcs":[2126]},{"type":"LineString","properties":{"highway":"path","name":null,"oneway":null,"user":"morganwahl","id":"way/178419633"},"arcs":[2127]},{"type":"LineString","properties":{"highway":"path","name":null,"oneway":null,"user":"morganwahl","id":"way/178419634"},"arcs":[2128]},{"type":"LineString","properties":{"highway":"path","name":null,"oneway":null,"user":"morganwahl","id":"way/178419636"},"arcs":[2129]},{"type":"LineString","properties":{"highway":"path","name":null,"oneway":null,"user":"pokey","id":"way/178419637"},"arcs":[2130]},{"type":"LineString","properties":{"highway":"path","name":null,"oneway":null,"user":"pokey","id":"way/178419639"},"arcs":[2131]},{"type":"LineString","properties":{"highway":"path","name":null,"oneway":null,"user":"pokey","id":"way/178419640"},"arcs":[2132]},{"type":"LineString","properties":{"highway":"trunk_link","name":null,"oneway":"yes","user":"morganwahl","id":"way/178419643"},"arcs":[2133]},{"type":"LineString","properties":{"highway":"path","name":null,"oneway":null,"user":"pokey","id":"way/178419644"},"arcs":[2134]},{"type":"LineString","properties":{"highway":"path","name":null,"oneway":null,"user":"morganwahl","id":"way/178419645"},"arcs":[2135]},{"type":"LineString","properties":{"highway":"path","name":null,"oneway":null,"user":"morganwahl","id":"way/178419646"},"arcs":[2136]},{"type":"LineString","properties":{"highway":"track","name":null,"oneway":null,"user":"morganwahl","id":"way/178423180"},"arcs":[2137]},{"type":"LineString","properties":{"highway":"track","name":null,"oneway":null,"user":"morganwahl","id":"way/178423182"},"arcs":[2138,2139]},{"type":"MultiLineString","properties":{"highway":"track","name":null,"oneway":null,"user":"morganwahl","id":"way/178423184"},"arcs":[[2140],[2141],[2142],[2143]]},{"type":"LineString","properties":{"highway":"residential","name":"Maxwells Green","oneway":null,"user":"Aredhel","id":"way/180322988"},"arcs":[2144]},{"type":"LineString","properties":{"highway":"residential","name":"Latin Way","oneway":"no","user":"EricSJ","id":"way/184472807"},"arcs":[2145]},{"type":"LineString","properties":{"highway":"tertiary","name":"Newton Street","oneway":"yes","user":"morganwahl","id":"way/185024505"},"arcs":[2146,2147,2148]},{"type":"LineString","properties":{"highway":"secondary","name":"Webster Avenue","oneway":"yes","user":"morganwahl","id":"way/185024514"},"arcs":[2149,2150]},{"type":"LineString","properties":{"highway":"path","name":null,"oneway":null,"user":"morganwahl","id":"way/185024525"},"arcs":[2151]},{"type":"LineString","properties":{"highway":"access_ramp","name":null,"oneway":null,"user":"morganwahl","id":"way/185024535"},"arcs":[2152]},{"type":"LineString","properties":{"highway":"path","name":null,"oneway":null,"user":"morganwahl","id":"way/185026112"},"arcs":[2153]},{"type":"LineString","properties":{"highway":"path","name":null,"oneway":null,"user":"morganwahl","id":"way/185026114"},"arcs":[2154]},{"type":"LineString","properties":{"highway":"path","name":null,"oneway":null,"user":"morganwahl","id":"way/185026118"},"arcs":[2155]},{"type":"LineString","properties":{"highway":"path","name":null,"oneway":null,"user":"morganwahl","id":"way/185026124"},"arcs":[2156,2157]},{"type":"LineString","properties":{"highway":"track","name":null,"oneway":null,"user":"morganwahl","id":"way/185682358"},"arcs":[2158,2159]},{"type":"LineString","properties":{"highway":"track","name":null,"oneway":null,"user":"morganwahl","id":"way/185682379"},"arcs":[2160]},{"type":"LineString","properties":{"highway":"secondary","name":"Bow Street","oneway":"yes","user":"onurozgun","id":"way/185856190"},"arcs":[2161]},{"type":"LineString","properties":{"highway":"secondary","name":"Bow Street","oneway":"yes","user":"onurozgun","id":"way/185856196"},"arcs":[2162,2163]},{"type":"LineString","properties":{"highway":"secondary","name":"Bow Street","oneway":"yes","user":"onurozgun","id":"way/185856197"},"arcs":[2164]},{"type":"LineString","properties":{"highway":"path","name":null,"oneway":null,"user":"morganwahl","id":"way/186988910"},"arcs":[2165]},{"type":"LineString","properties":{"highway":"path","name":null,"oneway":null,"user":"morganwahl","id":"way/188162154"},"arcs":[2166]},{"type":"LineString","properties":{"highway":"path","name":null,"oneway":null,"user":"tirerim","id":"way/200492405"},"arcs":[2167]},{"type":"LineString","properties":{"highway":"cycleway","name":null,"oneway":null,"user":"Ron Newman","id":"way/200504259"},"arcs":[2168]},{"type":"LineString","properties":{"highway":"residential","name":"Belmont Street","oneway":"yes","user":"greta","id":"way/203009474"},"arcs":[2169,2170,2171,2172,2173]},{"type":"LineString","properties":{"highway":"path","name":null,"oneway":null,"user":"oldtopos","id":"way/203669717"},"arcs":[2174]},{"type":"LineString","properties":{"highway":"residential","name":"Great River Road","oneway":null,"user":"wambag","id":"way/216374582"},"arcs":[2175,2176]},{"type":"LineString","properties":{"highway":"residential","name":null,"oneway":"yes","user":"wambag","id":"way/216374585"},"arcs":[2177]},{"type":"LineString","properties":{"highway":"residential","name":"Grand Union Boulevard","oneway":"yes","user":"wambag","id":"way/216559616"},"arcs":[2178]},{"type":"LineString","properties":{"highway":"residential","name":"Grand Union Boulevard","oneway":"yes","user":"wambag","id":"way/216559617"},"arcs":[2179]},{"type":"LineString","properties":{"highway":"residential","name":null,"oneway":null,"user":"wambag","id":"way/216559618"},"arcs":[2180,2181,2182,2183,2184,2185]},{"type":"LineString","properties":{"highway":"primary_link","name":null,"oneway":"yes","user":"wambag","id":"way/216565347"},"arcs":[2186]},{"type":"LineString","properties":{"highway":"primary","name":"Middlesex Avenue","oneway":"yes","user":"wambag","id":"way/216565352"},"arcs":[2187,2188]},{"type":"LineString","properties":{"highway":"residential","name":null,"oneway":"yes","user":"wambag","id":"way/216565354"},"arcs":[2189]},{"type":"LineString","properties":{"highway":"unclassified","name":null,"oneway":"yes","user":"jwsh","id":"way/220389986"},"arcs":[2190]},{"type":"LineString","properties":{"highway":"secondary","name":"Beech Street","oneway":"yes","user":"onurozgun","id":"way/222328144"},"arcs":[2191]},{"type":"LineString","properties":{"highway":"unclassified","name":null,"oneway":"yes","user":"jwsh","id":"way/224744563"},"arcs":[2192]},{"type":"LineString","properties":{"highway":"residential","name":"Maxwells Green","oneway":null,"user":"probiscus","id":"way/228550361"},"arcs":[2193]},{"type":"LineString","properties":{"highway":"residential","name":"Blakeley Avenue","oneway":null,"user":"OceanVortex","id":"way/247838867"},"arcs":[2194,2195,2196]},{"type":"LineString","properties":{"highway":"secondary_link","name":null,"oneway":"yes","user":"osm-sputnik","id":"way/253877360"},"arcs":[2197,2198]},{"type":"LineString","properties":{"highway":"residential","name":"Bonair Street","oneway":"no","user":"David Posey","id":"way/255453927"},"arcs":[2199]},{"type":"LineString","properties":{"highway":"residential","name":"Glen Street","oneway":"yes","user":"Ron Newman","id":"way/255479500"},"arcs":[2200,2201,2202,2203,2204,2205]},{"type":"LineString","properties":{"highway":"tertiary","name":"Pearl Street","oneway":null,"user":"David Posey","id":"way/255479501"},"arcs":[2206,2207,2208,2209,2210,2211]},{"type":"LineString","properties":{"highway":"cycleway","name":null,"oneway":null,"user":"wambag","id":"way/255479508"},"arcs":[2212,2213]},{"type":"LineString","properties":{"highway":"cycleway","name":"Wellington Undercarriage","oneway":null,"user":"wambag","id":"way/255479510"},"arcs":[2214]},{"type":"LineString","properties":{"highway":"secondary","name":"Holland Street","oneway":null,"user":"mregan","id":"way/255480979"},"arcs":[2215,2216,2217,2218,2219,2220,2221,2222,2223,2224,2225,2226,2227]},{"type":"LineString","properties":{"highway":"trunk","name":"McGrath Highway","oneway":"yes","user":"pokey","id":"way/257681343"},"arcs":[2228]},{"type":"LineString","properties":{"highway":"secondary","name":"Broadway","oneway":null,"user":"onurozgun","id":"way/279671648"},"arcs":[2229,2230,2231,2232,2233,2234,2235,2236,2237,2238,2239]},{"type":"LineString","properties":{"highway":"residential","name":null,"oneway":"yes","user":"wambag","id":"way/281984861"},"arcs":[2240]},{"type":"LineString","properties":{"highway":"primary","name":"Mystic Avenue","oneway":"yes","user":"wambag","id":"way/286619210"},"arcs":[2241,2242,2243]},{"type":"LineString","properties":{"highway":"trunk","name":"Fellsway","oneway":"yes","user":"jwass","id":"way/286619213"},"arcs":[2244,2245]},{"type":"LineString","properties":{"highway":"secondary","name":"Broadway","oneway":"yes","user":"wambag","id":"way/295037236"},"arcs":[2246,2247,2248]},{"type":"LineString","properties":{"highway":"residential","name":"Great River Road","oneway":null,"user":"wambag","id":"way/295037243"},"arcs":[2249,2250]},{"type":"LineString","properties":{"highway":"primary","name":"Mystic Avenue","oneway":"yes","user":"wambag","id":"way/295037247"},"arcs":[2251,2252,2253,2254,2255,2256]},{"type":"LineString","properties":{"highway":"cycleway","name":"Alewife Linear Park","oneway":null,"user":"onurozgun","id":"way/297244215"},"arcs":[2257]},{"type":"LineString","properties":{"highway":"residential","name":"Grove Street","oneway":null,"user":"onurozgun","id":"way/297940042"},"arcs":[2258,2259]},{"type":"LineString","properties":{"highway":"secondary","name":"Broadway","oneway":null,"user":"onurozgun","id":"way/302110861"},"arcs":[2260,2261,2262,2263,2264]},{"type":"LineString","properties":{"highway":"secondary","name":"Broadway","oneway":null,"user":"onurozgun","id":"way/302110862"},"arcs":[2265,2266,2267]},{"type":"LineString","properties":{"highway":"secondary","name":"Medford Street","oneway":null,"user":"onurozgun","id":"way/302110864"},"arcs":[2268,2269,2270,2271,2272,2273,2274,2275,2276,2277,2278,2279,2280]},{"type":"LineString","properties":{"highway":"secondary","name":"Medford Street","oneway":"yes","user":"SophoM","id":"way/302110865"},"arcs":[2281]},{"type":"LineString","properties":{"highway":"secondary","name":"Medford Street","oneway":null,"user":"onurozgun","id":"way/302110866"},"arcs":[2282,2283]},{"type":"LineString","properties":{"highway":"secondary","name":"Medford Street","oneway":null,"user":"onurozgun","id":"way/302110867"},"arcs":[2284,2285,2286]},{"type":"LineString","properties":{"highway":"secondary","name":"Somerville Avenue","oneway":null,"user":"onurozgun","id":"way/302110868"},"arcs":[2287]},{"type":"LineString","properties":{"highway":"secondary","name":"Somerville Avenue","oneway":"yes","user":"OceanVortex","id":"way/302110869"},"arcs":[2288]},{"type":"LineString","properties":{"highway":"secondary","name":"Washington Street","oneway":null,"user":"onurozgun","id":"way/302110870"},"arcs":[2289,2290,2291,2292,2293,2294,2295,2296,2297]},{"type":"LineString","properties":{"highway":"secondary","name":"Prospect Street","oneway":null,"user":"onurozgun","id":"way/302156886"},"arcs":[2298]},{"type":"LineString","properties":{"highway":"tertiary","name":"Summer Street","oneway":"no","user":"onurozgun","id":"way/303049926"},"arcs":[2299,2300,2301,2302,2303,2304,2305,2306,2307,2308,2309,2310,2311,2312,2313]},{"type":"LineString","properties":{"highway":"tertiary","name":"Summer Street","oneway":"no","user":"onurozgun","id":"way/303186721"},"arcs":[2314,2315,2316,2317,2318]},{"type":"LineString","properties":{"highway":"path","name":null,"oneway":null,"user":"Bryce C Nesbitt","id":"way/308587419"},"arcs":[2319]},{"type":"LineString","properties":{"highway":"residential","name":"Wheatland Street","oneway":"yes","user":"KristenK","id":"way/316397216"},"arcs":[2320,2321]},{"type":"LineString","properties":{"highway":"residential","name":"Assembly Row","oneway":null,"user":"wambag","id":"way/323161770"},"arcs":[2322,2323]},{"type":"LineString","properties":{"highway":"residential","name":"Foley Street","oneway":null,"user":"wambag","id":"way/323161771"},"arcs":[2324]},{"type":"LineString","properties":{"highway":"secondary","name":null,"oneway":"yes","user":"Iowa Kid","id":"way/336111997"},"arcs":[2325]},{"type":"LineString","properties":{"highway":"secondary","name":null,"oneway":"yes","user":"Iowa Kid","id":"way/336112442"},"arcs":[2326,2327]},{"type":"LineString","properties":{"highway":"secondary","name":null,"oneway":"yes","user":"Iowa Kid","id":"way/336112531"},"arcs":[2328,2329]},{"type":"LineString","properties":{"highway":"residential","name":"Austin Street","oneway":"yes","user":"Andrew Varnerin","id":"way/340779008"},"arcs":[2330]},{"type":"LineString","properties":{"highway":"secondary","name":"Broadway","oneway":"yes","user":"wambag","id":"way/341199167"},"arcs":[2331,2332,2333,2334]},{"type":"LineString","properties":{"highway":"secondary","name":"Broadway","oneway":"yes","user":"steverumizen","id":"way/341199168"},"arcs":[2335,2336,2337,2338,2339,2340,2341,2342,2343,2344]},{"type":"LineString","properties":{"highway":"residential","name":"Grand Union Boulevard","oneway":null,"user":"wambag","id":"way/353557890"},"arcs":[2345,2346]},{"type":"LineString","properties":{"highway":"residential","name":"Grand Union Boulevard","oneway":"yes","user":"wambag","id":"way/353557892"},"arcs":[2347]},{"type":"LineString","properties":{"highway":"residential","name":"Grand Union Boulevard","oneway":null,"user":"wambag","id":"way/353558620"},"arcs":[2348]},{"type":"LineString","properties":{"highway":"construction","name":"Revolution Road","oneway":null,"user":"wambag","id":"way/353558621"},"arcs":[2349]},{"type":"LineString","properties":{"highway":"residential","name":"Grand Union Boulevard","oneway":"yes","user":"wambag","id":"way/353558622"},"arcs":[2350]},{"type":"LineString","properties":{"highway":"residential","name":"Revolution Drive","oneway":null,"user":"wambag","id":"way/353559483"},"arcs":[2351]},{"type":"LineString","properties":{"highway":"residential","name":null,"oneway":"yes","user":"wambag","id":"way/353925648"},"arcs":[2352]},{"type":"LineString","properties":{"highway":"cycleway","name":null,"oneway":null,"user":"wambag","id":"way/353933858"},"arcs":[2353,2354,2355]},{"type":"LineString","properties":{"highway":"cycleway","name":null,"oneway":null,"user":"wambag","id":"way/353937682"},"arcs":[2356,2357,2358,2359,2360,2361]},{"type":"LineString","properties":{"highway":"tertiary","name":"Shore Drive","oneway":null,"user":"wambag","id":"way/353939784"},"arcs":[2362,2363,2364,2365,2366,2367,2368,2369,2370,2371]},{"type":"LineString","properties":{"highway":"primary","name":"Mystic Avenue","oneway":"yes","user":"wambag","id":"way/353944727"},"arcs":[2372,2373,2374,2375,2376]},{"type":"LineString","properties":{"highway":"cycleway","name":null,"oneway":null,"user":"wambag","id":"way/354325811"},"arcs":[2377,2378]},{"type":"LineString","properties":{"highway":"cycleway","name":null,"oneway":null,"user":"wambag","id":"way/354326119"},"arcs":[2379]},{"type":"LineString","properties":{"highway":"cycleway","name":null,"oneway":null,"user":"wambag","id":"way/354326122"},"arcs":[2380]},{"type":"LineString","properties":{"highway":"primary_link","name":null,"oneway":"yes","user":"wambag","id":"way/354371615"},"arcs":[2381]},{"type":"LineString","properties":{"highway":"cycleway","name":null,"oneway":null,"user":"wambag","id":"way/354402104"},"arcs":[2382]},{"type":"LineString","properties":{"highway":"residential","name":"Grand Union Boulevard","oneway":"yes","user":"wambag","id":"way/354626808"},"arcs":[2383]},{"type":"LineString","properties":{"highway":"residential","name":"Grand Union Boulevard","oneway":"yes","user":"wambag","id":"way/354626809"},"arcs":[2384]},{"type":"LineString","properties":{"highway":"residential","name":"Grand Union Boulevard","oneway":null,"user":"wambag","id":"way/354627006"},"arcs":[2385,2386]},{"type":"LineString","properties":{"highway":"residential","name":"Foley Street","oneway":null,"user":"wambag","id":"way/354637333"},"arcs":[2387,2388]},{"type":"LineString","properties":{"highway":"residential","name":"Cummings Street","oneway":null,"user":"wambag","id":"way/354698582"},"arcs":[2389]},{"type":"LineString","properties":{"highway":"residential","name":"Kensington Avenue","oneway":null,"user":"wambag","id":"way/354698583"},"arcs":[2390]}]}},"arcs":[[[3804,5878],[-20,-14],[-13,-22],[-235,-479]],[[7381,4295],[122,121]],[[7503,4416],[256,257]],[[6387,2231],[11,-9],[175,-145],[70,-56],[8,-6]],[[6651,2015],[60,-54],[23,-20],[13,-15]],[[6747,1926],[13,-20],[68,-102],[18,-25]],[[6846,1779],[11,-14],[31,-38],[13,-13],[18,-12],[15,-7],[22,-8],[24,-3],[20,0],[19,2],[17,5],[16,7],[50,25],[35,22]],[[6379,1440],[-21,18],[-15,2]],[[3920,5851],[14,-6],[13,-7],[14,-6]],[[5058,2393],[-147,75]],[[6677,239],[-19,100],[-25,117],[-12,63],[-3,19],[-21,42]],[[6597,580],[-77,6],[-87,13]],[[8174,5446],[2,-38],[0,-17],[0,-13],[-2,-13],[-3,-13],[-26,-99],[-1,-10],[2,-8],[4,-7],[5,-6],[8,-7]],[[7496,1658],[-55,-12],[-50,-26]],[[7391,1620],[-32,-17]],[[7359,1603],[-9,-5],[-20,-9],[-32,-17]],[[7298,1572],[-61,-37],[-54,-40]],[[3813,4600],[30,56]],[[3843,4656],[48,90]],[[3891,4746],[11,21]],[[3902,4767],[81,155]],[[3983,4922],[61,120]],[[4044,5042],[14,28]],[[4058,5070],[79,156]],[[4137,5226],[54,109]],[[6262,3378],[89,-38]],[[6351,3340],[9,-1],[156,-65]],[[6516,3274],[21,-10]],[[6537,3264],[99,-40]],[[6636,3224],[37,-16]],[[6673,3208],[95,-38]],[[6768,3170],[115,-49]],[[6883,3121],[49,-23]],[[6932,3098],[31,-12]],[[6963,3086],[96,-41]],[[7059,3045],[95,-40]],[[7154,3005],[33,-15]],[[7187,2990],[25,-11]],[[7212,2979],[92,-39],[60,-27]],[[2072,7494],[-189,98],[-215,111]],[[510,9276],[-17,-8],[-20,-9],[-13,-5],[-15,-5]],[[5171,3548],[110,-51]],[[347,9241],[29,1]],[[8619,119],[-20,14]],[[2422,4960],[-91,53],[-25,15]],[[2306,5028],[-234,138]],[[2072,5166],[-66,38]],[[3961,5832],[37,-17],[9,-4],[119,-59]],[[4126,5752],[119,-54]],[[4245,5698],[106,-45]],[[2417,4274],[-68,100]],[[2349,4374],[-6,10]],[[2343,4384],[-11,17],[-10,18],[-18,42]],[[2304,4461],[-55,127],[-10,21]],[[5654,4178],[87,154],[43,84],[20,37]],[[4457,4978],[29,57]],[[4486,5035],[44,88],[45,87],[28,47]],[[3396,2882],[41,76]],[[3437,2958],[42,82]],[[3479,3040],[2,4]],[[3481,3044],[18,36]],[[3499,3080],[47,91]],[[3546,3171],[46,91]],[[3592,3262],[54,106]],[[3646,3368],[45,88]],[[3691,3456],[53,105]],[[3744,3561],[53,103]],[[3797,3664],[35,68]],[[3832,3732],[24,47]],[[6245,1441],[3,-23],[23,-95],[18,-90],[1,-3]],[[6290,1230],[1,-5],[9,-41],[25,-116],[2,-6],[0,-5]],[[5281,3497],[27,56]],[[7406,1007],[-5,-40],[2,-9],[6,-42]],[[6618,1321],[10,20],[32,62],[8,12]],[[6954,1405],[4,-22],[4,-28],[6,-65],[10,-120],[8,-29]],[[119,7562],[20,-12]],[[1429,7202],[9,17],[52,109]],[[1490,7328],[26,57]],[[1516,7385],[25,52]],[[1541,7437],[39,82]],[[1580,7519],[15,29]],[[1595,7548],[47,100]],[[1642,7648],[26,55]],[[1668,7703],[32,67]],[[1700,7770],[38,71],[6,13],[11,24]],[[1755,7878],[35,68],[15,37]],[[1805,7983],[25,50]],[[4232,1564],[-10,10],[-55,59]],[[4167,1633],[-78,88]],[[4089,1721],[-208,228],[-14,13]],[[1651,5306],[-4,12],[-15,49],[-5,15]],[[1627,5382],[-11,39],[1,18],[9,27],[122,115]],[[3002,5239],[-68,-134]],[[3038,6322],[-65,531],[-32,262]],[[8537,2876],[-93,34],[-10,4]],[[5752,4050],[31,57],[31,56],[76,137]],[[5890,4300],[42,83]],[[5932,4383],[62,109]],[[5994,4492],[5,10],[57,100]],[[6056,4602],[82,149]],[[6627,3940],[-263,128]],[[2485,4172],[138,216],[36,71]],[[6668,1415],[14,5],[107,-10]],[[6789,1410],[96,-8],[29,0],[12,1]],[[6926,1403],[7,0]],[[6933,1403],[21,2]],[[6954,1405],[57,13],[48,19]],[[7059,1437],[120,56],[4,2]],[[4664,3450],[76,-36]],[[7518,1672],[17,8],[28,11]],[[3087,3007],[84,50]],[[8528,3904],[-49,234],[-6,22],[-7,22],[-8,23]],[[1575,6498],[7,15],[55,110]],[[1637,6623],[58,120]],[[1695,6743],[56,117]],[[1751,6860],[63,124]],[[1814,6984],[10,17],[59,116]],[[1883,7117],[31,62],[14,29],[12,24]],[[1940,7232],[48,98]],[[1988,7330],[5,11]],[[1993,7341],[27,55],[50,94],[2,4]],[[2252,7195],[1,2],[78,163]],[[8287,5035],[-2,28],[-2,20],[-3,23],[-6,32],[-4,13],[-5,11],[-10,13],[-8,9],[-9,8]],[[8238,5192],[-10,6],[-12,6],[-11,4],[-13,4],[-15,2],[-14,1]],[[5762,2251],[-63,-127],[-74,-146],[-43,-96],[-14,-22]],[[6313,3299],[-44,69],[-7,10]],[[6262,3378],[-61,78],[-82,107]],[[4603,5257],[79,147],[39,87]],[[2164,4777],[39,-46],[51,-42],[29,-25]],[[2283,4664],[105,-57],[52,-29]],[[2440,4578],[102,-55]],[[2542,4523],[117,-64]],[[2659,4459],[109,-61]],[[4463,2825],[143,-65]],[[2072,7494],[168,-87],[91,-47]],[[2331,7360],[15,-8],[97,-50],[10,-6],[63,-35],[15,-8],[85,-23],[39,-1],[10,-1],[3,1],[21,1],[113,18]],[[4961,1749],[9,20],[27,67],[4,8]],[[5001,1844],[9,25],[36,84],[46,98],[6,15]],[[4991,1263],[-2,18],[-55,212],[-14,50]],[[4920,1543],[-18,71]],[[4902,1614],[9,25],[33,73]],[[3576,6009],[-54,105]],[[2807,7201],[21,-30],[14,-11],[28,-22],[43,-16],[19,-4],[9,-3]],[[2941,7115],[23,-5],[68,12],[29,10]],[[3061,7132],[35,13]],[[1852,5185],[-36,106],[-165,15]],[[1651,5306],[-51,-39]],[[1600,5267],[-78,-63]],[[1522,5204],[-86,-69]],[[1436,5135],[-44,-38]],[[8061,532],[-18,21],[-10,16],[-3,9],[-4,7]],[[8026,585],[-63,89],[-95,135],[-102,151]],[[7766,960],[-81,119],[-89,137],[-85,114],[-53,71],[-60,22]],[[7689,1743],[13,4],[68,24]],[[7770,1771],[52,17],[87,28]],[[7909,1816],[24,6],[64,16],[115,23]],[[8112,1861],[68,14]],[[8180,1875],[108,17]],[[8288,1892],[134,27]],[[8422,1919],[118,28]],[[8540,1947],[66,15]],[[8606,1962],[71,16]],[[8677,1978],[104,24]],[[8781,2002],[32,7]],[[5840,1386],[37,5]],[[4468,1094],[41,12],[27,8],[57,20],[19,5]],[[4161,5503],[29,59],[25,64],[30,72]],[[6077,278],[36,61],[50,98],[57,112],[51,93]],[[6271,642],[42,87],[62,108]],[[6835,2605],[20,-38],[3,-10],[0,-9],[-1,-11]],[[6857,2537],[27,-25],[13,-13],[13,-14],[11,-13],[10,-14],[4,-5],[11,-17],[17,-29],[18,-24],[13,-14],[18,-12],[12,-6],[13,-6]],[[7037,2345],[15,-4],[16,-2]],[[7068,2358],[-14,5],[-14,5]],[[7040,2368],[-27,18],[-18,15],[-21,28],[-39,53]],[[6935,2482],[-46,60],[-28,34],[-26,29]],[[1199,6724],[34,77],[27,60],[23,49]],[[1283,6910],[23,42]],[[1306,6952],[55,110],[4,7]],[[1365,7069],[28,61],[36,72]],[[6375,837],[36,71]],[[2659,4459],[4,18],[35,70]],[[5482,1661],[45,101],[34,80],[7,18]],[[2751,4765],[39,67],[23,38]],[[5070,2400],[41,-20]],[[5111,2380],[98,-49]],[[5209,2331],[101,-47]],[[7633,77],[11,23],[30,30]],[[5746,751],[3,1],[18,4],[24,4]],[[5878,4930],[88,-67],[74,-47]],[[6040,4816],[98,-65]],[[6138,4751],[162,-118]],[[6300,4633],[68,-47],[58,-42]],[[6426,4544],[127,-90]],[[6553,4454],[182,-130]],[[6735,4324],[52,-36]],[[6787,4288],[88,-64],[29,-24],[30,-27],[40,-41]],[[6974,4132],[20,-19]],[[6994,4113],[78,-79]],[[7072,4034],[27,-25]],[[7099,4009],[49,-49],[15,-15]],[[7163,3945],[17,-15],[38,-27],[19,-14]],[[7237,3889],[31,-20]],[[7268,3869],[145,-93]],[[7413,3776],[67,-42],[72,-45]],[[7552,3689],[32,-20]],[[7584,3669],[27,-17],[37,-22]],[[7648,3630],[34,-19],[35,-21],[72,-43]],[[7789,3547],[28,-16]],[[7817,3531],[129,-79]],[[2151,4804],[121,156],[17,27],[17,41]],[[7794,2342],[-135,31],[-19,6],[-202,85]],[[2072,7494],[25,49],[14,28]],[[3081,4166],[-54,-106],[-48,-96],[-43,-87],[-46,-89],[-41,-79]],[[1678,4579],[89,83]],[[8614,2701],[-43,-92],[-40,-77],[-45,-85]],[[8236,2541],[-50,-97],[-50,-98]],[[8136,2346],[-53,-113]],[[8083,2233],[-5,-11]],[[8078,2222],[-34,-70],[-32,-65]],[[8012,2087],[-52,-106]],[[7960,1981],[-4,-8],[-26,-52]],[[7930,1921],[-19,-51],[-3,-19],[1,-35]],[[2836,6183],[39,25]],[[3540,2668],[-12,34],[-74,100]],[[5965,1958],[3,-17],[0,-10],[-2,-11],[-5,-8],[-9,-8],[-20,-14]],[[3130,4270],[48,108]],[[3178,4378],[29,74],[13,36]],[[3220,4488],[8,19],[68,118]],[[3296,4625],[55,92]],[[5520,3940],[14,15],[120,223]],[[2543,4888],[68,-40]],[[2611,4848],[140,-83]],[[2751,4765],[153,-90]],[[2904,4675],[102,-61]],[[3006,4614],[105,-61]],[[3111,4553],[109,-65]],[[3220,4488],[144,-85]],[[3364,4403],[138,-82]],[[3502,4321],[123,-72]],[[3625,4249],[125,-77]],[[3750,4172],[123,-76]],[[3873,4096],[113,-69]],[[3986,4027],[128,-79]],[[4114,3948],[117,-73]],[[4231,3875],[120,-74]],[[4351,3801],[113,-68]],[[4464,3733],[79,-48]],[[4543,3685],[116,-72],[85,-47],[56,-27]],[[4800,3539],[153,-70]],[[4953,3469],[141,-66]],[[5094,3403],[119,-55],[131,-60]],[[5344,3288],[129,-62]],[[5473,3226],[139,-63],[55,-25],[111,-51],[85,-38]],[[5863,3049],[90,-42],[57,-26]],[[6010,2981],[155,-72]],[[6165,2909],[17,-10],[116,-61]],[[6298,2838],[309,-166]],[[6607,2672],[110,-59]],[[6717,2613],[95,-51],[45,-25]],[[6300,4633],[-125,-250],[-92,-180]],[[6083,4203],[-109,-214],[-71,-140]],[[2252,7195],[91,-46],[24,-12],[31,-16],[31,-15],[24,-13],[5,-2],[75,-27],[57,-10],[5,-1],[23,-1],[7,0],[38,-2],[47,3],[11,1],[85,15],[16,3]],[[2904,4675],[61,114]],[[2965,4789],[23,44]],[[2988,4833],[43,91]],[[3031,4924],[53,100]],[[3084,5024],[19,39],[48,95]],[[3151,5158],[65,129]],[[3216,5287],[36,73],[60,118]],[[3312,5478],[145,294]],[[3457,5772],[119,237]],[[4944,1712],[17,37]],[[1954,6336],[53,105]],[[2007,6441],[54,106]],[[2061,6547],[43,84]],[[2104,6631],[60,119]],[[6440,4858],[318,-216]],[[6758,4642],[113,-76]],[[4935,5399],[111,-47],[18,-8],[71,-32]],[[5135,5312],[129,-58]],[[5264,5254],[95,-40]],[[5359,5214],[101,-44],[6,-4]],[[5466,5166],[134,-74]],[[5600,5092],[48,-27],[78,-44]],[[5726,5021],[124,-75],[28,-16]],[[3061,7132],[32,-279],[17,-145],[14,-113],[7,-32],[57,-112]],[[3188,6451],[186,-349]],[[4606,2760],[131,-59]],[[9136,2924],[-19,7]],[[9117,2931],[-217,84]],[[8900,3015],[-68,26]],[[8832,3041],[-137,56]],[[4344,4704],[-68,42]],[[4276,4746],[-293,176]],[[4013,5473],[-57,-116],[-82,-167]],[[2579,4052],[13,11],[60,112],[116,223]],[[2768,4398],[37,78]],[[2805,4476],[37,74]],[[2842,4550],[2,3]],[[2844,4553],[60,122]],[[5344,3288],[43,85],[54,97]],[[5441,3470],[8,17]],[[5449,3487],[48,85]],[[5497,3572],[16,31]],[[5513,3603],[27,51]],[[5540,3654],[10,20]],[[8327,5962],[-63,-240]],[[4530,3004],[84,163]],[[4614,3167],[67,130]],[[4681,3297],[59,117]],[[4740,3414],[60,125]],[[2411,5264],[324,-177]],[[5393,265],[-11,12],[-72,79],[-29,34],[-32,37],[-3,2]],[[5246,429],[-67,71],[-23,27],[-22,25],[-88,102]],[[5046,654],[-13,15],[-12,13]],[[5021,682],[-65,71],[-15,16]],[[4941,769],[-96,111]],[[4845,880],[-8,10],[-29,32]],[[4808,922],[-25,29]],[[4783,951],[-54,61],[-31,32],[-8,9],[-69,74],[-9,12]],[[4612,1139],[-14,14],[-32,37],[-74,83],[-14,15]],[[4478,1288],[-120,133]],[[4358,1421],[-50,55],[-40,48],[-27,29],[-9,11]],[[6585,1252],[1,3],[23,41],[9,25]],[[5246,429],[126,117]],[[5372,546],[24,24]],[[5396,570],[65,59]],[[5461,629],[20,19]],[[5481,648],[12,10],[50,31]],[[2883,5003],[51,102]],[[7978,4364],[42,278]],[[1988,7330],[25,-14],[51,-26],[78,-39],[110,-56]],[[5308,3553],[141,-66]],[[8519,66],[53,28],[16,16]],[[8588,110],[11,23]],[[8498,166],[26,-39],[5,-12],[-1,-22],[-9,-27]],[[679,7999],[-5,6],[-5,4],[-9,3],[-8,1],[-7,-1],[-7,-2]],[[7183,1495],[67,2],[60,0]],[[7310,1497],[33,6],[18,5],[11,2],[16,12],[16,28]],[[7404,1550],[16,29],[16,29],[60,50]],[[5890,4300],[193,-97]],[[6083,4203],[23,0],[118,-61]],[[6224,4142],[140,-74]],[[6001,775],[-3,21],[0,21]],[[5791,760],[50,-4],[45,5],[100,13],[15,1]],[[582,7913],[-2,-15],[1,-14],[3,-13],[7,-15]],[[3417,4829],[34,70]],[[3451,4899],[200,405]],[[3651,5304],[26,54],[193,391]],[[6060,5250],[124,-71]],[[4158,2669],[60,-30]],[[4218,2639],[-19,-41]],[[4199,2598],[-41,-86]],[[4158,2512],[-52,-119]],[[4158,2669],[25,-33],[16,-38]],[[8711,2807],[-78,30],[-96,39]],[[5941,545],[64,-38]],[[8061,532],[11,-9],[11,-5],[11,6],[37,28],[51,36],[15,12]],[[8197,600],[96,63]],[[5543,689],[32,19],[17,6],[84,22]],[[5676,736],[70,15]],[[3665,4003],[85,169]],[[8134,5113],[12,18],[9,11],[7,9],[9,7],[7,5],[11,4],[10,1],[11,-2],[12,-4]],[[7364,2913],[99,-43]],[[7463,2870],[53,-23],[127,-54]],[[7643,2793],[131,-55]],[[7774,2738],[156,-66]],[[4126,5752],[24,23],[26,15]],[[2859,5318],[-71,-133]],[[9295,3098],[-26,-16],[-17,-11],[-60,-39],[-15,-11],[-12,-11],[-9,-10]],[[9156,3000],[-9,-11],[-8,-13],[-8,-16],[-7,-13],[-7,-16]],[[9117,2931],[-8,-21]],[[1392,5097],[-25,-19]],[[2411,5264],[-147,81]],[[2264,5345],[-36,20],[-120,58]],[[2456,5365],[-45,-101]],[[3687,4819],[187,371]],[[2813,4870],[152,-81]],[[2768,4398],[113,-85]],[[2881,4313],[102,-77]],[[2983,4236],[98,-70]],[[3081,4166],[123,-95]],[[3204,4071],[132,-123]],[[3336,3948],[91,-87]],[[1992,5149],[23,-56]],[[2015,5093],[34,-85],[30,-62]],[[2079,4946],[66,-131]],[[2145,4815],[6,-11]],[[2151,4804],[13,-27]],[[2079,4946],[-104,-95]],[[1975,4851],[-78,-72]],[[1897,4779],[-130,-117]],[[3081,4166],[49,104]],[[4800,3539],[83,186]],[[4740,3414],[107,-51],[158,-73],[20,-18]],[[4158,2669],[6,13]],[[4164,2682],[19,41],[68,139],[43,92],[62,131]],[[7441,5004],[106,103]],[[7714,3627],[195,257]],[[8258,3260],[12,22]],[[8270,3282],[191,257]],[[7794,2342],[55,-13],[30,-11],[39,-15],[165,-70]],[[8236,2541],[48,90],[40,77]],[[8324,2708],[43,76],[5,9]],[[8372,2793],[31,63],[31,58]],[[8434,2914],[21,39],[33,66],[56,109]],[[8544,3128],[11,24]],[[8486,2447],[-35,-70],[-30,-64],[-9,-66],[-1,-78],[4,-103],[7,-147]],[[8902,3352],[38,-57],[44,-61],[30,-41],[46,-63],[28,-40]],[[9088,3090],[68,-90]],[[9156,3000],[5,-5],[6,-4],[10,-3]],[[6018,1891],[-12,21],[-22,24],[-19,22]],[[6388,258],[0,0]],[[943,5699],[3,4]],[[2713,3876],[6,4]],[[1966,5208],[-114,-23]],[[1852,5185],[-131,-28],[-230,-186]],[[1491,4971],[-53,-44]],[[2576,4052],[3,0]],[[889,5781],[14,-10]],[[4223,1546],[9,18]],[[3432,2281],[1,0]],[[3752,1916],[1,0]],[[6823,224],[1,5]],[[4680,824],[-97,125],[-99,122],[-3,5],[-13,18]],[[2338,4363],[11,11]],[[6040,278],[0,0]],[[4344,1236],[5,2]],[[4349,1238],[6,-7],[9,-3],[5,1],[39,13],[-9,26],[-47,-15],[-4,-8],[1,-7]],[[783,5944],[4,4]],[[5829,273],[1,9]],[[1526,4787],[4,3],[69,54]],[[1599,4844],[138,110],[135,105]],[[1872,5059],[120,90]],[[8398,55],[15,-5],[22,-1]],[[8506,60],[13,6]],[[7153,192],[0,-2]],[[5601,269],[0,5],[1,5]],[[2288,4446],[16,15]],[[2039,4361],[-11,11]],[[7239,181],[0,1]],[[6254,266],[0,0]],[[6513,250],[-1,0]],[[2653,3953],[7,5]],[[1351,5064],[16,14]],[[630,6194],[-6,-6]],[[708,6073],[-5,-7]],[[1178,5337],[2,3]],[[4463,1092],[5,2]],[[8962,2173],[3,-8]],[[9068,2513],[63,-29]],[[8588,110],[7,-4]],[[9473,3139],[5,81],[6,10],[9,11],[57,48]],[[8811,1868],[-30,134]],[[8813,2009],[44,7],[33,4]],[[8545,372],[204,-172]],[[8286,5628],[4,-2],[4,-2],[2,-4],[2,-3],[0,-5],[29,-15]],[[8327,5597],[-3,-25]],[[8324,5572],[-4,-24],[-1,-10],[-1,-11],[0,-12],[2,-11],[3,-11],[5,-10],[4,-7],[6,-9],[7,-7],[7,-6],[9,-5],[135,-77],[64,-34],[25,-15],[25,-16]],[[8610,5307],[20,-9],[16,-7],[16,-5],[15,-3],[18,-5],[13,-5],[12,-6],[15,-8],[16,-11],[16,-12],[18,-13],[19,-12],[20,-11]],[[8824,5200],[28,-9],[29,-8],[26,-4],[27,-3],[21,-1],[16,0],[16,-2],[27,-4],[22,-4],[23,-6],[21,-8],[19,-8],[19,-9],[17,-10],[14,-10],[14,-11],[15,-12],[13,-13],[11,-10],[9,-11],[9,-12],[7,-12],[7,-15],[5,-14],[5,-18],[6,-28],[39,8]],[[9289,4966],[27,-8]],[[6209,6113],[3,-3],[27,-27],[35,-35]],[[5924,5667],[0,-1]],[[864,9161],[25,-19]],[[4121,5815],[-2,8]],[[1106,8474],[19,-9]],[[4935,5399],[23,20]],[[1234,8739],[2,5]],[[2111,7571],[17,34]],[[5143,5331],[-8,-19]],[[1093,9468],[3,-3]],[[8291,5714],[64,240]],[[866,8913],[4,4]],[[3215,6472],[4,3]],[[3784,5911],[-39,72]],[[3745,5983],[-15,27]],[[3154,7062],[-41,75]],[[6238,6116],[-16,16]],[[4181,5793],[-5,-3]],[[964,5726],[121,-96]],[[1085,5630],[96,-81]],[[6051,3426],[-21,-42]],[[1067,7055],[-99,-174]],[[2150,5526],[306,-161]],[[2456,5365],[159,-85]],[[2615,5280],[96,-51]],[[2711,5229],[77,-44]],[[2788,5185],[146,-80]],[[2934,5105],[150,-81]],[[7502,4620],[-121,127]],[[7381,4747],[-191,198]],[[1365,7069],[26,-8],[360,-201]],[[1751,6860],[353,-229]],[[3535,2160],[43,31],[47,42]],[[5192,1029],[0,143],[3,149],[1,15]],[[6982,3646],[-229,214],[-9,10],[-3,10],[5,12],[6,11],[95,97],[127,132]],[[8804,2333],[-2,-10],[-196,-361]],[[8936,2573],[5,6],[77,143]],[[9018,2722],[79,146],[7,12],[9,13],[9,12]],[[2239,4609],[44,55]],[[2283,4664],[36,53],[21,27]],[[2340,4744],[15,19],[33,41]],[[2388,4804],[3,3]],[[2391,4807],[72,92]],[[6732,3425],[-96,-201]],[[5891,1079],[10,-7],[94,-71]],[[5995,1001],[130,-98],[9,-7]],[[6747,1926],[103,161]],[[6850,2087],[37,57]],[[6887,2144],[4,6],[23,33],[6,8],[4,4],[4,4]],[[6928,2199],[6,4],[6,5],[6,3],[7,4],[91,47]],[[8170,3765],[90,-71]],[[8260,3694],[5,-4]],[[8265,3690],[87,-66]],[[8352,3624],[12,-9]],[[8364,3615],[80,-62]],[[8444,3553],[17,-14]],[[8461,3539],[73,-57]],[[8534,3482],[20,-16]],[[8554,3466],[74,-54]],[[8628,3412],[24,-19]],[[8652,3393],[20,-19],[13,-19],[9,-23],[3,-24],[-2,-211]],[[591,7856],[27,-28],[21,-39],[2,-20]],[[7911,2979],[24,48]],[[7935,3027],[42,87]],[[4744,1928],[76,244]],[[3132,3297],[-13,-27],[-14,-12],[-165,-99],[-17,-26]],[[3073,3386],[-104,-70],[-100,152],[101,69]],[[306,6754],[107,111],[281,291]],[[1288,5526],[8,-5],[113,-12]],[[1409,5509],[138,-13]],[[7402,3415],[88,-38]],[[7490,3377],[49,-22],[100,-45]],[[7639,3310],[60,-28],[139,-64]],[[8699,3718],[-4,12],[-3,10],[-2,12],[0,9],[2,8],[6,9],[95,96],[62,61],[15,16],[14,17],[14,16],[10,15],[19,35]],[[4831,1900],[32,103]],[[7856,1948],[64,-23],[10,-4]],[[8927,4034],[-92,-91],[-22,-20],[-17,-17],[-17,-16],[-99,-100],[-8,-7],[-8,-3],[-10,-1],[-9,2],[-11,3]],[[3553,2843],[54,-29]],[[5791,1758],[-38,-123]],[[4079,3263],[27,54],[28,59],[6,12]],[[4140,3388],[35,68]],[[4175,3456],[30,54],[40,77],[52,101],[54,113]],[[6445,5742],[49,73]],[[5681,538],[-110,35],[-34,-32]],[[5537,541],[-28,-27],[-10,-98]],[[5499,416],[-7,-83],[-64,-59],[-9,-8],[-1,-1]],[[2299,4774],[41,-30]],[[6140,5285],[79,-56]],[[8708,3509],[-7,-2],[-6,-4],[-67,-91]],[[6300,4633],[9,27]],[[3312,2578],[-40,-50],[-26,-29]],[[5989,3729],[29,14],[48,89],[64,126],[46,92],[48,92]],[[6224,4142],[26,59],[50,94],[41,84],[53,101],[32,64]],[[4186,3187],[36,68],[31,57],[14,27],[37,76]],[[4304,3415],[12,26],[73,144],[75,148]],[[2264,6233],[-285,-405],[-139,-216]],[[1840,5612],[-57,-88]],[[996,9386],[-236,172],[-15,11]],[[7720,2959],[-436,199]],[[7504,931],[-13,34],[-13,45],[-16,69],[-21,115],[-22,124],[-13,70]],[[5775,5282],[13,20],[29,44],[34,52],[68,102],[73,110]],[[5992,5610],[90,135],[78,122]],[[7817,3531],[16,23]],[[7833,3554],[184,245]],[[3494,3551],[101,-48]],[[4105,5045],[-47,25]],[[7396,2675],[62,120]],[[2462,5041],[48,-28]],[[5596,3524],[36,78]],[[861,7402],[-141,-271]],[[7011,2647],[42,85]],[[4737,5073],[-124,-236]],[[3918,2052],[35,-22],[103,-65],[22,-16],[9,-5]],[[4087,1944],[7,-3],[6,-2],[11,-1],[21,0],[31,1],[17,-1],[13,-3],[18,-5],[16,-7],[20,-6],[28,-14],[20,-13]],[[3856,3779],[48,91]],[[3904,3870],[35,63],[47,94]],[[4276,4746],[58,108],[-1,17],[-196,355]],[[4751,5284],[122,-75],[5,-3],[141,-85]],[[7806,3965],[45,61],[30,38],[30,38]],[[7911,4102],[32,37],[18,21],[15,19],[60,83],[7,6],[9,2],[10,0],[11,-3]],[[7668,810],[-12,27],[-3,26],[16,30]],[[7078,309],[8,-4],[11,-5],[19,-8],[23,-7]],[[7139,285],[16,-5],[12,-3]],[[7167,277],[84,-18]],[[8228,4477],[99,103],[9,7],[10,6],[13,5],[16,3]],[[6768,3498],[65,123]],[[8568,1387],[194,10]],[[1401,5333],[48,55]],[[6789,1410],[5,17],[38,156],[-53,15],[-74,78]],[[766,7755],[249,-121],[232,-115],[180,-90],[89,-44]],[[7254,2073],[-12,-7],[-7,-3],[-5,-2],[-8,-1],[-6,0],[-7,0],[-9,4],[-9,5]],[[8804,2333],[17,33]],[[8821,2366],[39,72]],[[8860,2438],[71,128],[5,7]],[[4807,5027],[62,113]],[[3500,3312],[92,-50]],[[5082,1027],[110,2]],[[5192,1029],[109,0]],[[5301,1029],[46,0]],[[7515,114],[19,102]],[[7434,793],[1,29],[2,50],[2,26]],[[7439,898],[5,60],[-2,36],[-15,89],[-38,214],[0,28],[8,32],[9,31]],[[6432,5087],[-112,-147]],[[6320,4940],[-134,-193]],[[6758,4642],[-133,-207]],[[6203,5385],[81,-60]],[[1700,7770],[-380,174]],[[7361,243],[21,151]],[[6928,2199],[-20,25],[-10,11],[-21,21]],[[6240,5445],[80,119],[53,77],[72,101]],[[1084,6096],[236,288]],[[594,7244],[-372,-407]],[[9183,3217],[28,28],[9,11],[7,14],[5,15],[5,18],[9,54],[3,20],[5,20]],[[3128,3912],[75,-37]],[[3289,3368],[87,-48]],[[8729,2850],[96,-40]],[[8825,2810],[72,-29]],[[8897,2781],[57,-25],[64,-34]],[[7627,2078],[64,-100],[48,-67]],[[3765,3885],[23,45]],[[3811,3399],[79,-41]],[[6298,2838],[-64,-124]],[[6234,2714],[-58,-112]],[[6176,2602],[-53,-120]],[[6123,2482],[-69,-166]],[[6054,2316],[-35,-83],[-55,-130],[-31,-73],[-6,-16]],[[1940,7232],[-62,33],[-132,67],[-205,105]],[[3770,5243],[56,114],[121,244]],[[5693,5210],[50,74],[15,18]],[[7167,277],[-14,-85]],[[6772,4757],[46,65]],[[8017,2835],[149,-61]],[[8166,2774],[80,-35],[78,-31]],[[2992,3007],[-91,8]],[[6343,431],[34,-20]],[[4693,5141],[-98,58]],[[2831,5484],[128,-65]],[[2959,5419],[113,-58],[10,-5]],[[3082,5356],[22,-12],[112,-57]],[[5880,5149],[67,94]],[[5947,5243],[71,104],[15,23],[99,149]],[[6132,5519],[78,116],[78,115],[45,71]],[[6333,5821],[80,113]],[[8921,3173],[-21,-158]],[[7529,3658],[-4,-3],[-5,-2],[-6,-1],[-6,-1],[-8,0],[-2,-1],[-2,-1],[-2,-2],[-2,-1],[-8,-13],[-48,-69],[-86,-125]],[[7051,203],[11,68],[1,6],[1,5],[2,5],[3,5],[9,17]],[[4820,2871],[62,122]],[[4882,2993],[21,39]],[[4903,3032],[45,90]],[[4948,3122],[20,41]],[[4968,3163],[57,109]],[[5025,3272],[69,131]],[[5094,3403],[77,145]],[[5171,3548],[20,37]],[[5191,3585],[2,4],[48,99]],[[5241,3688],[17,33]],[[5258,3721],[44,86],[7,14]],[[7962,4441],[-3,-36],[-6,-46],[-9,-47],[-12,-46],[-16,-46],[-17,-42],[-21,-45],[-25,-41],[-24,-36],[-61,-81]],[[7768,3975],[-194,-258]],[[7574,3717],[-22,-28]],[[7552,3689],[-23,-31]],[[7529,3658],[-58,-78],[-28,-39],[-29,-41],[-27,-45]],[[7387,3455],[-22,-40],[-22,-44],[-20,-44],[-20,-45],[-20,-44],[-40,-91],[-26,-73],[-30,-84]],[[7187,2990],[-34,-108]],[[7153,2882],[-15,-54],[-18,-66],[-15,-57],[-17,-78],[-15,-84]],[[6691,4079],[-258,126]],[[4969,2124],[59,100],[83,156]],[[535,6506],[-26,31]],[[509,6537],[-101,106]],[[408,6643],[-102,111]],[[306,6754],[-84,83]],[[4800,2452],[82,-37]],[[7152,3528],[-44,-99],[-12,-28]],[[7096,3401],[-17,-37]],[[7079,3364],[-39,-98],[-36,-82],[-41,-98]],[[5219,4129],[75,150]],[[5802,3654],[101,195]],[[5359,5214],[-67,-143],[-81,-157]],[[5211,4914],[-33,-67],[-90,-177],[-57,-107],[-108,-205]],[[7924,4729],[3,2],[2,2],[1,4],[35,133]],[[7965,4870],[27,103],[13,47]],[[8005,5020],[41,156]],[[8046,5176],[2,11],[2,11],[15,108],[0,11],[0,10],[-4,11],[-4,9],[-6,9],[-7,8],[-119,121]],[[7925,5485],[-93,95]],[[7832,5580],[-94,97]],[[7738,5677],[-80,81],[-3,5],[-3,4],[-3,6]],[[7123,2525],[244,-183]],[[6827,456],[36,-12],[13,-5],[13,-6],[23,-13],[22,-14],[44,-30],[26,-17],[21,-15],[19,-12],[34,-23]],[[6433,599],[-86,-161],[-4,-7]],[[6343,431],[-46,-85],[-43,-80]],[[7782,3096],[-324,145],[-91,41],[-25,11]],[[3992,2225],[75,180]],[[7529,5700],[301,-310]],[[7830,5390],[199,-204],[5,-3],[5,-4],[7,-3]],[[5602,279],[2,8],[18,58],[32,105]],[[5654,450],[27,88]],[[5681,538],[65,213]],[[5396,3079],[17,8],[60,139]],[[2471,4937],[39,76]],[[2510,5013],[14,24],[30,-18],[18,-10]],[[9579,3344],[2,7],[11,54],[0,47],[-16,63],[-12,53],[-8,44],[7,36],[20,42],[40,71]],[[2842,6885],[-35,-2],[-16,5],[-14,9],[-18,12],[-38,23],[-13,4],[-13,-1],[-31,-10],[-36,-12],[-15,-8],[-15,-7],[-63,-46],[-26,-20],[-11,-2],[-10,2],[-71,33],[-18,8],[-20,10],[-10,6],[-49,24],[-37,19],[-6,3],[-129,73]],[[2119,6942],[14,33],[15,33]],[[8756,1551],[108,26],[64,27],[28,8],[79,9],[55,15],[52,22]],[[7254,2073],[209,-285],[-122,-78]],[[8458,4205],[1,-27],[-1,-17],[-3,-15],[-6,-10],[-9,-9],[-11,-5],[-12,-2],[-11,1],[-9,3],[-9,5]],[[6597,580],[37,10],[83,-3],[84,-12],[41,-7]],[[8322,1004],[15,-21],[13,-17],[228,-309],[26,-33],[25,-28],[26,-23],[28,-24],[22,-14],[21,-9],[19,-3],[24,-1],[16,7],[9,12],[3,27],[-1,77]],[[8052,1478],[76,15],[92,9],[99,6],[67,9],[6,40]],[[6146,1562],[17,6],[15,12],[2,4],[9,15]],[[8457,5353],[14,-16],[10,-8],[9,-6],[14,-9],[112,-70],[13,-9],[12,-12],[9,-11],[9,-13],[5,-9],[3,-11],[1,-12],[0,-12]],[[2325,5856],[86,119]],[[2411,5975],[85,119]],[[2496,6094],[49,72]],[[933,7144],[17,-11],[25,-17]],[[975,7116],[92,-61]],[[1067,7055],[90,-62]],[[1157,6993],[126,-83]],[[5056,2756],[-47,-88],[-45,-93]],[[4964,2575],[-53,-107]],[[4911,2468],[-29,-53]],[[4882,2415],[-42,-75]],[[4840,2340],[-77,-149]],[[5600,5092],[-54,-100],[-31,-57],[-59,-71],[-15,-30],[-87,-163]],[[5354,4671],[-73,-133]],[[5281,4538],[-67,-131]],[[5214,4407],[-108,-205]],[[1449,6575],[7,14],[117,219]],[[1674,6057],[29,-22]],[[1703,6035],[80,-57]],[[6994,4113],[20,20]],[[7014,4133],[146,144]],[[7160,4277],[121,119]],[[7281,4396],[120,123]],[[7401,4519],[101,101]],[[7502,4620],[161,162]],[[6111,5940],[75,-36]],[[6186,5904],[79,-43],[68,-40]],[[8756,2654],[-63,-126]],[[8693,2528],[-68,-131]],[[8821,2366],[188,-97]],[[7263,1003],[-15,122],[-25,130],[-28,136],[-12,104]],[[7390,2188],[48,32],[234,-80]],[[4488,4063],[-247,155],[-79,48],[-60,36]],[[4102,4302],[-19,11]],[[4083,4313],[-330,173]],[[6109,5240],[31,45]],[[6140,5285],[39,63],[24,37]],[[6203,5385],[8,13],[29,47]],[[2615,5280],[40,77]],[[3228,4758],[-117,-205]],[[45,6884],[-1,65],[1,18]],[[45,6967],[-3,65],[-2,83],[-1,53],[0,28],[3,27],[2,23],[4,24],[8,33],[8,28],[7,23],[8,21],[21,46],[13,23],[13,25],[18,29],[24,35]],[[168,7533],[16,23],[15,22],[16,22],[18,21],[20,22],[21,21],[25,24],[21,18],[48,41],[31,24],[32,20],[50,32],[32,19]],[[513,7842],[50,12],[28,2]],[[591,7856],[11,2],[14,4],[11,5],[13,8],[8,8],[10,16]],[[4610,2449],[-166,81]],[[4444,2530],[-100,48]],[[4344,2578],[-126,61]],[[8796,3029],[-39,-109],[-28,-70]],[[8729,2850],[-18,-43]],[[8711,2807],[-42,-120]],[[1501,5442],[46,54]],[[1547,5496],[157,161]],[[5519,1236],[13,-1],[89,-7]],[[6111,1760],[14,5],[9,4],[56,100]],[[6190,1869],[9,17]],[[6199,1886],[4,8],[65,120]],[[6268,2014],[12,22]],[[6280,2036],[31,56],[38,70]],[[6349,2162],[38,69]],[[6387,2231],[38,79]],[[6425,2310],[6,12]],[[6431,2322],[57,112]],[[6488,2434],[55,114]],[[6543,2548],[64,124]],[[6607,2672],[71,143]],[[6678,2815],[31,107]],[[6705,1676],[-33,-113],[-5,-16]],[[6667,1547],[-14,-60],[-2,-8],[-9,-35],[-4,-16],[14,-2],[16,-11]],[[6425,2310],[10,-5],[179,-102],[75,-37]],[[6689,2166],[36,-17]],[[6725,2149],[62,-28],[63,-34]],[[6850,2087],[41,-27],[52,-40],[57,-55],[58,-73]],[[7316,1606],[11,-102],[7,-40],[11,-62],[18,-99]],[[3453,3470],[193,-102]],[[2388,4804],[90,-50],[67,-36]],[[2545,4718],[107,-60],[105,-58],[87,-47]],[[985,6175],[99,-79]],[[1084,6096],[36,-29],[40,-35],[34,-30]],[[4387,5635],[8,18],[4,17],[-3,20]],[[3690,2969],[103,-54]],[[3793,2915],[86,-44]],[[1032,5569],[53,61]],[[1085,5630],[52,64]],[[1137,5694],[67,83]],[[1204,5777],[39,48],[211,258]],[[7866,4725],[-14,1],[-12,-2],[-11,-2],[-12,-3],[-11,-5],[-11,-7],[-9,-7],[-11,-10]],[[7775,4690],[-16,-17]],[[531,7288],[111,218]],[[642,7506],[65,125]],[[707,7631],[6,15],[53,109]],[[766,7755],[62,135]],[[828,7890],[74,158]],[[902,8048],[17,37]],[[919,8085],[37,76]],[[956,8161],[51,109]],[[1007,8270],[52,112]],[[4744,1928],[87,-28]],[[4831,1900],[88,-29],[37,-12],[29,-11],[16,-4]],[[4529,2262],[30,84]],[[4559,2346],[51,103]],[[4610,2449],[69,134]],[[4679,2583],[58,118]],[[4737,2701],[83,170]],[[5932,1890],[-120,-27]],[[5812,1863],[-84,-22]],[[5919,341],[60,114],[26,52]],[[6005,507],[52,110]],[[8197,600],[-55,75],[-82,123],[-100,145],[-57,84],[-30,24]],[[8112,1861],[1,348],[-35,13]],[[2542,4523],[-125,-249]],[[7806,3965],[-8,6],[-11,3],[-9,1],[-10,0]],[[5985,1405],[-2,23],[-15,97]],[[5968,1525],[3,8],[22,39],[24,45],[7,14]],[[3204,4071],[-76,-159]],[[3128,3912],[-81,-170]],[[3047,3742],[-24,-44],[-26,-39],[-58,-77]],[[3437,2958],[95,-50]],[[5082,970],[0,57]],[[3400,4243],[37,-32]],[[3632,2603],[108,209],[53,103]],[[3793,2915],[35,66],[85,-44]],[[4840,2340],[116,-59],[46,84]],[[1195,8008],[125,-64]],[[3485,3973],[178,-93]],[[5700,3716],[54,101],[28,54],[43,83]],[[7381,4747],[156,160]],[[3804,2236],[137,-131]],[[3964,2747],[53,-27]],[[3695,3717],[67,-42],[35,-11]],[[4647,5055],[-99,58]],[[843,8882],[23,31]],[[5258,3721],[255,-118]],[[8966,2965],[-69,-184]],[[6163,2073],[96,-54],[9,-5]],[[3261,3095],[115,225]],[[3376,3320],[41,81]],[[3417,3401],[25,48],[11,21]],[[3453,3470],[41,81]],[[3494,3551],[40,76]],[[3534,3627],[46,87]],[[3580,3714],[83,166]],[[7154,3005],[135,311]],[[7289,3316],[25,50],[36,73]],[[956,8161],[130,-54]],[[1086,8107],[128,-58]],[[2440,4578],[-97,-194]],[[7869,4561],[-308,-305],[-69,-76]],[[7492,4180],[-208,-205],[-11,-16],[-20,-31]],[[7253,3928],[-10,-19],[-4,-10],[-2,-10]],[[1206,7704],[57,116]],[[1263,7820],[57,124]],[[1320,7944],[53,105]],[[1373,8049],[54,111]],[[1427,8160],[25,53]],[[6869,805],[-3,371],[0,19]],[[1373,8049],[382,-171]],[[4898,2706],[50,102]],[[6343,1460],[-18,8]],[[6325,1468],[-20,3],[-30,16],[-21,15]],[[3075,5963],[32,-16],[90,-45]],[[3197,5902],[122,-61]],[[3319,5841],[138,-69]],[[4808,922],[-13,-11],[-76,-72],[-29,-27]],[[1897,4779],[-86,98]],[[6855,2913],[33,79]],[[6888,2992],[7,17],[37,89]],[[7490,3377],[34,55],[38,59],[86,139]],[[8166,2774],[57,108],[15,28],[14,27],[21,41],[23,42],[24,45],[68,132]],[[8388,3197],[13,24]],[[4478,1288],[131,40]],[[4609,1328],[145,44]],[[7857,2022],[13,-5],[79,-32],[11,-4]],[[4923,4358],[81,-77]],[[5004,4281],[63,-51],[39,-28]],[[5106,4202],[113,-73]],[[5219,4129],[127,-86],[62,-32]],[[3832,3732],[129,-99]],[[3961,3633],[23,-20],[74,-61],[8,-6]],[[4066,3546],[109,-90]],[[5442,1914],[54,106],[56,109],[52,104],[73,138]],[[1075,7770],[82,165],[38,73]],[[1195,8008],[19,41]],[[1214,8049],[47,100]],[[5090,906],[7,2],[200,2]],[[5297,910],[84,7],[74,2],[6,0],[10,1]],[[8828,3017],[4,24]],[[8832,3041],[2,15],[15,126]],[[8489,3181],[163,212]],[[2770,5366],[8,-4]],[[2778,5362],[81,-44]],[[2859,5318],[143,-79]],[[3002,5239],[102,-55],[47,-26]],[[6965,4383],[44,46]],[[4638,4729],[44,-24]],[[3970,5141],[-179,-361]],[[7957,3474],[4,10],[6,9],[163,220]],[[8130,3713],[40,52]],[[8170,3765],[43,58],[70,92]],[[4572,4758],[41,79]],[[6248,974],[-9,12],[-255,190],[-15,7]],[[1204,5777],[92,-72]],[[4964,2575],[107,-55],[93,184]],[[5518,3854],[31,66]],[[7367,2342],[159,-57],[195,-65]],[[4614,3167],[144,-66],[145,-69]],[[3813,4600],[434,-192]],[[6390,3583],[61,-26]],[[5947,5243],[177,-150]],[[6124,5093],[104,-83],[92,-70]],[[6320,4940],[120,-82]],[[6000,3324],[-188,91],[-32,17],[-16,8]],[[5764,3440],[-126,64],[-42,20]],[[5596,3524],[-99,48]],[[2006,5204],[-14,-55]],[[5465,985],[-5,7],[-9,7],[-22,12],[-23,14],[6,132],[1,21],[9,194],[1,17]],[[3930,2640],[84,-11]],[[5396,570],[-10,12],[-3,4],[-79,94],[-13,16]],[[5291,696],[-91,99]],[[5200,795],[-40,46],[-43,48],[-27,17]],[[5090,906],[-75,50],[-29,22],[-5,5],[-10,10]],[[5021,682],[-67,-63]],[[4954,619],[-61,-58]],[[946,5703],[18,23]],[[964,5726],[70,83]],[[1034,5809],[73,91]],[[1107,5900],[87,102]],[[1194,6002],[87,106],[52,65],[46,47]],[[3797,3664],[115,-92],[144,-119],[84,-65]],[[6531,1211],[-12,7],[-48,19],[-38,14],[-19,5]],[[6414,1256],[-15,0],[-94,-23],[-4,-1],[-11,-2]],[[4899,5093],[80,-50]],[[3867,1962],[21,15],[21,45],[9,30]],[[3918,2052],[23,53]],[[3941,2105],[31,75]],[[6883,3121],[33,77],[48,129]],[[4115,5003],[-71,39]],[[6119,3563],[-41,-79]],[[6078,3484],[-27,-58]],[[6030,3384],[-30,-60]],[[6000,3324],[-52,-103]],[[5948,3221],[-85,-172]],[[6887,2144],[-36,22],[-53,30]],[[9310,3080],[11,10],[10,8],[9,10],[7,9],[6,10],[4,12],[3,17],[2,19],[1,20],[-1,24],[-2,28],[-14,208],[-3,22],[-3,18],[-5,23],[-7,19],[-7,21],[-11,24],[-8,18],[-11,18],[-11,15],[-12,17],[-14,17],[-237,269],[-90,98]],[[8569,3623],[28,-21],[7,-10],[2,-10],[-4,-11],[-68,-89]],[[2411,5975],[150,-113]],[[4541,2999],[-46,-107],[-32,-67]],[[4463,2825],[-57,-120]],[[4406,2705],[-62,-127]],[[7382,394],[-97,15],[-4,1],[-3,0],[-1,-1]],[[1117,8496],[-88,72],[-151,124],[-170,140],[-125,104],[-12,6],[-24,4]],[[5461,4212],[-167,67]],[[5294,4279],[-80,128]],[[9009,2269],[-47,-96]],[[4247,4408],[-3,-12],[3,-8],[7,-8],[313,-160]],[[7299,5556],[3,-6],[4,-6],[4,-5],[331,-339]],[[7641,5200],[324,-330]],[[7965,4870],[21,-20],[6,-5],[7,-4],[7,-2]],[[3588,2274],[39,69],[20,37]],[[3647,2380],[18,29]],[[1653,5209],[-37,55],[-16,3]],[[2335,4852],[56,-45]],[[518,9236],[8,-14],[6,-11],[4,-11],[5,-12],[3,-13],[4,-16]],[[4834,4441],[116,227],[82,159],[31,53],[80,155]],[[4662,1701],[33,-119]],[[4695,1582],[26,-95]],[[4721,1487],[33,-115]],[[4754,1372],[2,-8]],[[4756,1364],[41,-151],[5,-18]],[[919,8085],[-106,120],[-89,109],[-20,24],[-20,22],[-16,10],[-14,4],[-16,3],[-17,0],[-20,1]],[[1288,5526],[2,11],[238,419]],[[1899,4289],[28,26],[84,75]],[[2011,4390],[59,58],[68,66]],[[2138,4514],[101,95]],[[2881,4313],[-46,-95],[-71,-128],[-100,-139]],[[6107,1939],[80,-46],[12,-7]],[[4370,2868],[93,-43]],[[4677,5109],[16,32]],[[4693,5141],[21,45],[37,98]],[[4751,5284],[33,69],[45,92]],[[2779,5743],[26,49],[35,65],[21,33],[21,21],[20,18],[18,9],[12,2],[8,2],[19,1],[7,-1],[12,-2],[16,-4],[4,-1],[10,-5],[40,-21]],[[7924,4729],[-4,0],[-4,1],[-3,2],[-3,3],[-363,372]],[[7547,5107],[-355,360],[-4,5],[-5,6],[-3,5]],[[797,7051],[-389,-408]],[[6424,1623],[69,-53]],[[6388,258],[28,57],[55,111]],[[1218,5351],[3,46]],[[3011,2831],[-2,48],[8,28]],[[5791,760],[50,16],[83,22],[56,15],[18,4]],[[5905,3590],[36,70],[27,54],[21,15]],[[5474,812],[119,-2],[62,16]],[[6821,5336],[-7,7],[-8,10],[-6,7],[-8,14],[-4,13],[0,16],[1,21],[-2,18],[-3,10],[-11,13],[-22,21],[-24,22]],[[7738,5677],[128,128]],[[661,9855],[33,-29]],[[985,6175],[290,356]],[[5046,654],[16,14],[138,127]],[[6689,2166],[29,86],[13,31],[126,254]],[[1427,8160],[378,-177]],[[1086,8107],[73,158]],[[89,6843],[40,48]],[[975,7116],[-85,-160]],[[7997,2536],[40,90]],[[8554,3466],[-176,-234]],[[5329,2292],[122,-56]],[[5196,1336],[3,19],[13,36],[51,160],[-2,7]],[[2496,6094],[135,-98],[43,-31]],[[751,7454],[-118,-234]],[[1138,6759],[-142,-158]],[[996,6601],[-366,-407]],[[4180,2258],[41,99]],[[6054,2316],[121,-63],[63,-33],[29,-14],[18,-10],[52,-27],[12,-7]],[[2319,6385],[162,-66],[102,-36],[44,-20],[44,-28],[24,-19],[4,-32],[-2,-12]],[[8181,2080],[-5,-92],[4,-113]],[[903,5771],[61,-45]],[[5090,906],[-11,-9],[-3,-3],[-116,-109],[-4,-3],[-15,-13]],[[6966,3613],[186,-85]],[[7152,3528],[97,-42]],[[8352,3624],[77,100],[4,9],[-1,9],[-5,8],[-28,31]],[[5537,541],[-10,13],[-61,69],[-5,6]],[[3961,3633],[153,315]],[[7277,409],[-1,-1],[-1,-1],[-1,-4],[-14,-93],[-9,-51]],[[8849,3182],[72,-9]],[[8921,3173],[75,-29]],[[3082,5356],[2,5],[20,41],[72,146]],[[3176,5548],[143,293]],[[3319,5841],[113,232]],[[1392,5097],[99,-126]],[[1491,4971],[108,-127]],[[1599,4844],[71,-80],[97,-102]],[[1767,4662],[116,-129]],[[1883,4533],[128,-143]],[[2011,4390],[17,-18]],[[7690,2536],[84,202]],[[6576,1823],[66,-75],[63,-72]],[[6190,1869],[8,-4],[95,-56],[51,-51]],[[3310,6130],[-113,-228]],[[3197,5902],[-91,-186],[-52,-106]],[[3054,5610],[-95,-191]],[[7406,1388],[-1,7]],[[7405,1395],[-2,8]],[[7403,1403],[-5,20]],[[7398,1423],[-2,20],[-1,58],[9,49]],[[7404,1550],[6,28],[-2,13],[-17,29]],[[3403,4474],[-39,-71]],[[7156,5032],[133,132]],[[153,6763],[49,52]],[[202,6815],[20,22]],[[4695,1582],[166,47]],[[7045,838],[-50,275],[-9,28]],[[6576,1823],[48,53],[5,6],[5,2],[4,0],[3,0],[5,-3],[5,-6],[42,-41],[10,-10],[11,-9],[11,-9],[11,-8],[20,-13],[11,-7],[11,-5],[10,-3],[8,-1],[16,-2],[10,2],[4,2],[5,2]],[[6831,1773],[15,6]],[[6491,3645],[-123,57],[-66,32],[-81,39]],[[5824,510],[34,86],[199,21]],[[6057,617],[214,25]],[[1059,8382],[47,92]],[[1106,8474],[11,22]],[[1117,8496],[57,113]],[[1174,8609],[60,130]],[[7058,1892],[54,-91],[25,-56]],[[7137,1745],[19,-93],[27,-157]],[[4968,3163],[-151,70],[-136,64]],[[6327,5388],[62,-43],[62,-42]],[[7689,1743],[-10,19]],[[7679,1762],[-83,119],[-81,120]],[[7515,2001],[-22,33],[-25,38],[-78,116]],[[7390,2188],[-57,82]],[[7950,2111],[62,-24]],[[8962,2173],[-188,-119],[7,-52]],[[4195,1808],[-97,112],[-11,24]],[[2212,5228],[9,20]],[[2221,5248],[43,97]],[[1966,5208],[26,-59]],[[5787,2897],[-10,4],[-169,78],[-212,100]],[[5396,3079],[-175,91],[-180,83],[-16,19]],[[3164,3535],[74,-38]],[[3417,3401],[81,-42]],[[6176,2602],[312,-168]],[[6582,1621],[36,-24],[49,-50]],[[1883,4533],[-102,-90]],[[2138,4514],[-93,105]],[[2045,4619],[-51,55]],[[1994,4674],[-97,105]],[[6186,5904],[61,96]],[[1883,7117],[-393,211]],[[3335,2722],[-70,-93]],[[1059,8382],[-154,127],[-142,122],[-142,120],[-28,-1]],[[2011,4588],[34,31]],[[6475,3608],[147,-104]],[[6622,3504],[110,-79]],[[6732,3425],[103,-75]],[[4298,2759],[108,-54]],[[2967,6247],[101,-27]],[[2222,5936],[103,-80]],[[2325,5856],[103,-76]],[[7077,5379],[-7,15],[-8,12],[-7,9],[-208,211],[-74,77],[-34,32],[-32,26],[-48,32],[-45,30],[-63,40],[-73,49],[-59,49],[-82,67],[-40,34],[-20,19],[-12,10],[-27,25]],[[4935,4954],[-128,73]],[[4807,5027],[-11,7]],[[4796,5034],[-26,16]],[[4770,5050],[-33,23]],[[4737,5073],[-60,36]],[[3351,4717],[11,-4],[64,-22],[337,-186]],[[6727,5508],[-120,-123],[-11,-14],[-3,-10],[0,-17],[0,-15],[0,-16],[52,-54],[45,-52],[38,35],[37,33]],[[1600,5267],[-75,101],[-6,8]],[[6888,3452],[191,-88]],[[3225,3474],[72,-37]],[[7072,4034],[-157,-179]],[[1840,5612],[4,-2],[113,-70]],[[1957,5540],[144,-92],[13,-8]],[[7102,4925],[-65,66],[-64,63],[-86,90],[-7,8],[-115,123]],[[6765,5275],[56,61]],[[6821,5336],[144,143]],[[996,6601],[-96,84],[-16,22],[3,19],[81,155]],[[7333,2270],[34,72]],[[7367,2342],[26,51],[21,36],[24,35]],[[7438,2464],[12,18]],[[7450,2482],[82,122]],[[7532,2604],[60,94],[19,35],[32,60]],[[7643,2793],[51,108],[26,58]],[[7720,2959],[62,137]],[[7782,3096],[4,9]],[[7786,3105],[40,87]],[[7826,3192],[12,26]],[[7838,3218],[51,108],[57,126]],[[7946,3452],[11,22]],[[4677,5109],[-30,-54]],[[4647,5055],[-45,-87]],[[4602,4968],[-49,-93]],[[1069,9490],[-9,-12],[-64,-92]],[[4991,1263],[-3,-22],[-11,-225],[-1,-15],[-5,-8]],[[3902,4767],[362,-214],[41,74]],[[4305,4627],[33,65],[6,12]],[[9252,2855],[-66,-122],[-41,-75],[-24,-46],[-53,-99]],[[4013,5473],[-66,128]],[[3947,5601],[-77,148]],[[3870,5749],[-41,81]],[[3829,5830],[-25,48]],[[3804,5878],[-20,33]],[[2983,4236],[-167,-332],[-48,-88]],[[4618,4688],[20,41]],[[4638,4729],[36,72]],[[4674,4801],[56,104],[66,129]],[[3256,4178],[84,-42],[156,-141]],[[7131,2100],[35,-83],[24,-53]],[[7190,1964],[29,-55],[26,-72],[18,-76],[12,-77]],[[7275,1684],[23,-112]],[[4066,3546],[87,172],[78,157]],[[4546,4177],[119,-54],[88,-41],[105,-54],[71,-35],[-1,-2]],[[6127,1227],[-24,194]],[[4553,4875],[60,-38]],[[4613,4837],[61,-36]],[[4674,4801],[140,-87]],[[4080,4261],[22,41]],[[5151,5021],[113,233]],[[2994,6280],[44,42]],[[3038,6322],[71,61],[75,65],[4,3]],[[3188,6451],[27,21]],[[5806,2188],[107,214]],[[5913,2402],[58,116],[38,75],[63,122],[53,110],[40,84]],[[3204,4071],[52,107]],[[3256,4178],[68,141]],[[3324,4319],[40,84]],[[2860,5540],[-440,234]],[[3239,4361],[85,-42]],[[6234,2714],[149,-82],[160,-84]],[[5728,1841],[-7,-8],[-4,-6],[-2,-7],[0,-6],[2,-10],[5,-7],[17,-16]],[[6675,1212],[21,45],[10,20]],[[7826,3192],[151,-78]],[[7977,3114],[145,-74]],[[1619,5801],[-210,-292]],[[5812,1863],[-39,150],[-1,3]],[[5824,510],[77,-30]],[[6735,4324],[14,26]],[[6749,4350],[122,216]],[[6871,4566],[35,59],[53,100]],[[6959,4725],[54,107],[4,6]],[[7017,4838],[25,47]],[[7042,4885],[23,26],[37,14]],[[7102,4925],[88,20]],[[7190,4945],[251,59]],[[6679,3766],[44,-47]],[[6723,3719],[110,-98]],[[6833,3621],[93,-86]],[[3296,4625],[130,-85],[276,-152]],[[7235,2005],[2,19],[4,16],[13,33]],[[3178,4378],[-336,172]],[[4375,1704],[-59,36],[-6,6],[-4,1],[-6,0],[-4,-1],[-5,-2],[-8,-7],[-116,-104]],[[1637,6623],[214,-120],[156,-62]],[[4406,2705],[62,-31],[25,-11],[29,-9],[17,-5],[140,-66]],[[4664,5516],[0,37],[-2,9]],[[6065,5009],[83,-64]],[[3194,3665],[142,283]],[[5476,761],[-31,2],[-22,0],[-9,-5],[-24,0],[-1,51],[85,3]],[[7188,2782],[208,-107]],[[7396,2675],[136,-71]],[[7532,2604],[158,-68]],[[7690,2536],[156,-68]],[[7846,2468],[290,-122]],[[4083,4313],[33,64]],[[5441,3470],[196,-96],[111,-57],[31,-15],[169,-81]],[[7586,4861],[77,-79]],[[5261,1558],[-8,4],[-72,11],[-136,17],[-29,6]],[[5016,1596],[-101,14],[-13,4]],[[828,7890],[120,-58]],[[948,7832],[127,-62]],[[1075,7770],[131,-66]],[[1206,7704],[140,-74],[234,-111]],[[2770,5366],[26,49]],[[2796,5415],[35,69]],[[2831,5484],[29,56]],[[2860,5540],[64,129]],[[3701,3857],[155,-78]],[[1228,6659],[-518,-585],[-2,-1]],[[642,7506],[109,-52]],[[751,7454],[110,-52]],[[861,7402],[107,-50]],[[2561,5862],[22,-16],[64,-35],[132,-68]],[[2779,5743],[145,-74]],[[2924,5669],[130,-59]],[[3054,5610],[122,-62]],[[3176,5548],[136,-70]],[[3312,5478],[113,-58]],[[3425,5420],[111,-57]],[[3536,5363],[115,-59]],[[3651,5304],[119,-61]],[[3770,5243],[104,-53]],[[3874,5190],[96,-49]],[[4902,1614],[-11,5],[-30,10]],[[4861,1629],[-61,26],[-122,43],[-16,3]],[[4948,3122],[215,-102],[167,-83]],[[5330,2937],[158,-77],[224,-105]],[[3693,4371],[299,-164],[16,-14],[36,-50],[13,-9],[365,-199]],[[6344,1758],[149,148]],[[509,6537],[316,326],[54,65],[8,15],[3,13]],[[5098,2066],[9,20],[46,110]],[[5153,2196],[56,135]],[[3298,3610],[-104,55]],[[3194,3665],[-147,77]],[[5153,2196],[229,-107]],[[6915,3855],[129,-110]],[[3453,3222],[93,-51]],[[641,7769],[5,44],[1,23],[3,29],[8,34]],[[3502,4321],[-65,-110]],[[3437,4211],[117,-105]],[[1186,7144],[20,43]],[[7249,3486],[48,109],[116,181]],[[3130,4270],[-325,206]],[[6490,4328],[99,-50]],[[7059,3772],[110,-70]],[[7169,3702],[82,-50]],[[4725,4537],[109,-96]],[[4834,4441],[89,-83]],[[4559,2346],[-162,80]],[[8864,3360],[-4,7],[-41,44],[-105,95],[-6,3]],[[5863,3049],[-38,-77],[-38,-75]],[[5787,2897],[-10,-19],[-23,-46],[-42,-77]],[[5712,2755],[-66,-135]],[[5646,2620],[-58,-121]],[[5588,2499],[-69,-140]],[[5519,2359],[-68,-123]],[[5451,2236],[-69,-147]],[[5382,2089],[-52,-101],[-8,-18]],[[4397,2426],[-121,44],[-118,42]],[[6933,1403],[-2,20],[1,45],[12,95],[48,-4],[19,3],[11,11]],[[7139,285],[5,28],[15,101],[5,30],[4,31],[1,3],[-1,3],[0,3],[-1,2],[-1,3],[-1,3],[-1,2],[-2,2],[-2,2],[-2,2],[-2,2],[-3,1],[-2,2],[-3,1],[-3,0],[-3,1],[-81,13],[-13,4],[-16,4],[-28,8],[-54,17],[-36,12],[-18,5],[-8,1],[-8,0],[-11,-2],[-27,-1]],[[6537,3264],[-41,-101],[135,-60],[42,105]],[[4602,4968],[-38,23]],[[3753,1916],[29,18],[61,27],[24,1]],[[940,7296],[55,-32],[45,-29]],[[1040,7235],[127,-83],[19,-8]],[[1186,7144],[157,-74],[22,-1]],[[4003,3233],[49,-26]],[[5516,1177],[3,59]],[[4028,2874],[105,-56]],[[6749,821],[65,-8],[55,-8]],[[6869,805],[153,0],[11,2],[9,7],[3,11],[0,13]],[[7832,5580],[140,142]],[[893,6078],[214,-178]],[[6274,6048],[1,-1],[27,-26],[67,-53],[44,-34]],[[6413,5934],[33,-26],[77,-53],[79,-50],[12,-7],[80,-53],[42,-32],[40,-37],[70,-75],[68,-71],[51,-51]],[[6965,5479],[76,-77],[9,-7],[11,-8],[16,-8]],[[8693,2528],[83,-48],[84,-42]],[[3784,5911],[87,-38],[24,-10]],[[3895,5863],[25,-12]],[[5291,696],[8,22],[0,71],[-2,121]],[[8599,133],[-305,196],[-43,27],[-45,30],[-15,11]],[[7316,1606],[43,-173],[72,-408],[8,-29],[12,-30],[14,-26],[16,-22],[20,-22],[21,-21],[30,-20],[181,-117]],[[4882,2993],[134,-63],[156,-77],[128,-61],[162,-81],[184,-91]],[[8399,3781],[-29,31],[-9,3],[-9,-2],[-7,-6],[-85,-113]],[[2264,6233],[55,152]],[[2319,6385],[53,150]],[[6040,4816],[8,24]],[[6048,4840],[-6,44],[-28,54]],[[6014,4938],[-31,59],[-43,73],[-60,79]],[[5880,5149],[-53,68],[-39,49],[-13,16]],[[5775,5282],[-17,20]],[[5758,5302],[-22,24],[-15,17]],[[1137,5694],[106,-84]],[[4899,1048],[-29,-18],[-87,-79]],[[1994,4674],[151,141]],[[7059,3045],[75,177],[58,137]],[[5740,272],[2,12],[24,64],[19,54]],[[5785,402],[35,98],[4,10]],[[5330,2937],[66,142]],[[7169,3702],[99,167]],[[2967,6247],[-1,7]],[[2966,6254],[-2,6],[-4,9],[-5,7]],[[2955,6276],[-5,6]],[[2950,6282],[-17,10],[-22,4],[-27,-10]],[[2884,6286],[-9,-9],[-5,-10]],[[2870,6267],[-7,-16]],[[2863,6251],[0,-17],[4,-13]],[[2867,6221],[7,-12],[1,-1]],[[2875,6208],[2,-2]],[[2877,6206],[10,-9],[37,-6]],[[2924,6191],[2,1],[3,2]],[[2929,6194],[29,18],[7,17],[2,10],[0,8]],[[1522,5204],[-104,127],[-17,2]],[[1401,5333],[-133,13]],[[1268,5346],[-28,3],[-22,2]],[[1218,5351],[-26,2],[-12,-13]],[[4609,1328],[-32,118],[144,41]],[[3499,3080],[82,-40]],[[8796,645],[0,13],[-12,280]],[[8784,938],[-4,43],[0,2]],[[8780,983],[-5,167]],[[3420,2459],[46,49],[11,11],[6,3],[8,0],[4,-4],[13,-11],[34,-30],[66,-61],[39,-36]],[[4358,1421],[78,72],[47,44],[61,57]],[[4544,1594],[108,100],[10,7]],[[4662,1701],[11,18]],[[6959,4725],[-141,97]],[[6818,4822],[-49,33]],[[6769,4855],[-225,156]],[[6544,5011],[-112,76]],[[6432,5087],[-79,59],[-121,101]],[[5969,1183],[-14,1],[-14,-3],[-16,-18],[-8,-35],[-7,-25],[-10,-12],[-9,-12]],[[3788,3930],[116,-60]],[[3106,2674],[62,60]],[[3593,2939],[63,-33]],[[820,5988],[214,-179]],[[6516,3274],[106,230]],[[6622,3504],[101,215]],[[4544,1594],[-134,147]],[[787,5948],[33,40]],[[820,5988],[73,90]],[[893,6078],[36,45]],[[5495,4185],[-34,27]],[[5461,4212],[-62,128],[-56,98],[-62,100]],[[2914,3230],[-66,-41]],[[1703,6035],[201,319]],[[4266,5481],[76,-86],[69,-40],[13,-8],[179,-90]],[[5540,3654],[92,-52]],[[6959,4725],[322,-329]],[[7281,4396],[100,-101]],[[7381,4295],[111,-115]],[[1174,8609],[-11,9],[-130,106],[-190,158]],[[843,8882],[-134,112],[-128,103],[-8,5],[-9,4],[-17,4]],[[5924,5666],[68,-56]],[[5992,5610],[140,-91]],[[6132,5519],[108,-74]],[[6240,5445],[87,-57]],[[2021,6313],[-238,-335]],[[1783,5978],[-146,-205]],[[2545,4718],[66,130]],[[2611,4848],[43,86]],[[6824,229],[1,5],[0,9],[0,5],[-1,5],[-2,4],[-15,40],[-2,5],[-1,6],[0,6],[0,6],[9,74],[5,22],[4,18],[5,22]],[[6827,456],[15,112]],[[3803,3189],[189,-99]],[[7786,3105],[149,-78]],[[7096,3401],[96,-42]],[[7192,3359],[83,-37],[14,-6]],[[2135,5812],[156,-112]],[[1206,7187],[1,1],[67,144]],[[5263,2656],[-64,-141],[160,-76],[160,-80]],[[2807,3402],[-90,156]],[[7501,2966],[-38,-96]],[[8597,975],[183,8]],[[7053,2732],[33,-30]],[[6123,2482],[135,-69],[173,-91]],[[5605,3777],[53,-31],[42,-30]],[[5700,3716],[81,-49],[21,-13]],[[5802,3654],[103,-64]],[[5905,3590],[71,-43],[102,-63]],[[6719,4787],[50,68]],[[6727,5508],[-6,11],[-3,19],[-6,44],[-6,22],[-10,17],[-8,19]],[[5372,546],[5,-6],[3,-3],[97,-109],[22,-12]],[[5723,4625],[62,-36],[33,-19],[78,120],[160,-88]],[[3813,4600],[-50,-95]],[[3763,4505],[-10,-19]],[[3753,4486],[-51,-98]],[[3702,4388],[-9,-17]],[[3693,4371],[-68,-122]],[[948,7832],[63,127],[6,29],[-33,24],[-82,36]],[[2884,6286],[13,26],[5,29]],[[6048,4840],[-43,38],[-41,30],[-95,58],[-82,48],[-10,6],[-109,67],[-59,36],[-14,9]],[[5317,5249],[-53,5]],[[7873,1051],[-4,27],[-30,46],[-29,44],[-21,44],[-19,62],[-19,51],[-41,66],[-56,90],[-72,94],[-64,97]],[[7946,3452],[151,-95]],[[8097,3357],[50,-30]],[[8147,3327],[71,-44],[24,-15]],[[8242,3268],[16,-8]],[[8258,3260],[11,-6],[119,-57]],[[8388,3197],[156,-69]],[[8544,3128],[46,-19],[51,-19]],[[8641,3090],[70,-27]],[[1040,7235],[88,174]],[[8784,938],[293,11],[27,1],[34,-1],[30,-1],[25,-2],[28,-4],[22,-6],[53,-12]],[[6888,2992],[243,-102]],[[7131,2890],[22,-8]],[[6294,3923],[86,-39],[97,-50]],[[8265,3690],[-209,-277]],[[5995,1001],[-71,-44],[-60,-31],[-67,-9],[-29,-4],[-38,-6],[-74,-9],[-15,-3]],[[2098,6285],[174,341]],[[7059,1437],[4,-22],[38,-220],[18,-122]],[[8654,2910],[50,135],[7,18]],[[8711,3063],[-16,34]],[[993,7400],[-25,-48]],[[968,7352],[-28,-56]],[[8288,1892],[-16,410],[96,190]],[[1263,7820],[379,-172]],[[8825,2810],[28,78]],[[7229,2315],[21,-32],[74,-36]],[[4304,3415],[72,-45],[11,1],[79,160],[77,154]],[[6599,3880],[89,-50]],[[6589,2343],[128,270]],[[3456,3667],[78,-40]],[[7679,1762],[13,32],[47,117]],[[7739,1911],[62,135]],[[940,7296],[-128,-260]],[[5604,1604],[42,98],[36,86],[4,12]],[[8561,2270],[74,-41]],[[4770,5050],[63,109]],[[2162,5274],[59,-26]],[[6018,1891],[-21,-3],[-27,3],[-38,-1]],[[3742,2001],[51,43]],[[6248,974],[29,24],[34,22]],[[4971,993],[-8,-7],[-48,-44],[-57,-50],[-13,-12]],[[1449,6875],[-9,-15],[-111,-204],[-4,-10]],[[1157,6993],[-102,-181]],[[6189,1599],[11,13],[78,76],[66,70]],[[6846,1779],[13,6],[4,2],[98,49],[97,56]],[[7058,1892],[132,72]],[[4089,1721],[106,87]],[[4195,1808],[100,82]],[[4295,1890],[158,-94]],[[7183,1495],[121,43]],[[7304,1538],[50,22],[12,12],[8,15],[5,9]],[[7379,1596],[12,24]],[[1436,5135],[-168,211]],[[4247,4408],[16,27],[9,9],[13,2],[14,-5],[192,-78],[117,-58]],[[5037,3654],[-84,-185]],[[1306,6952],[143,-77]],[[1449,6875],[28,-15],[96,-52]],[[1573,6808],[122,-65]],[[1695,6743],[211,-135],[155,-61]],[[6014,4938],[51,71]],[[6065,5009],[59,84]],[[6124,5093],[36,52],[24,34]],[[6184,5179],[35,50]],[[6219,5229],[13,18]],[[6232,5247],[52,78]],[[6284,5325],[12,21],[31,42]],[[5764,3440],[21,46]],[[6473,5596],[54,85],[-4,3],[-78,58]],[[6445,5742],[-112,79]],[[2796,5415],[-533,263]],[[7270,2116],[-163,230],[-9,9],[-27,23]],[[8147,3327],[15,19]],[[8162,3346],[202,269]],[[1528,5956],[244,446]],[[1957,5540],[120,190],[58,82]],[[2135,5812],[87,124]],[[2222,5936],[179,253]],[[5466,5166],[-73,-131],[-56,-117],[-55,-115]],[[5282,4803],[-49,-88],[-62,-118],[-76,-149],[-91,-167]],[[6871,4566],[138,-137]],[[7009,4429],[151,-152]],[[5482,1661],[122,-57]],[[5604,1604],[68,-30],[23,-8],[19,-4],[16,-3],[29,-4],[99,-13],[23,-4]],[[5881,1538],[77,-11],[10,-2]],[[6159,3645],[69,-45],[82,-59],[102,-69]],[[3713,2550],[166,321]],[[3879,2871],[34,66]],[[3913,2937],[39,77],[40,76]],[[3992,3090],[60,117]],[[4052,3207],[27,56]],[[2950,6282],[-11,15],[-11,13],[-26,31]],[[2802,7248],[2,36]],[[2891,3363],[-146,-95]],[[1007,8270],[-60,46],[-169,147],[-149,128],[-7,4],[-7,3],[-18,4]],[[6749,821],[17,203],[10,157],[3,34],[1,4],[3,17]],[[5726,5021],[-79,-162],[-53,-107],[-47,-103],[-48,-89],[-39,-71]],[[2062,5324],[-68,42],[-183,111]],[[5303,1363],[0,-12],[-2,-322]],[[5932,4383],[-128,70]],[[5804,4453],[-19,11],[-112,67]],[[4878,3862],[32,83],[18,46]],[[6010,2981],[-38,-83],[-56,-114],[-46,-96],[-61,-115],[-34,-71],[-22,-48],[-54,-113]],[[8444,3553],[70,92],[7,6],[9,1],[7,-3],[32,-26]],[[7581,867],[22,-2],[19,5],[47,23]],[[7669,893],[27,20],[70,47]],[[7766,960],[1,1],[62,43],[40,30],[4,17]],[[8253,3290],[-11,-22]],[[8242,3268],[-40,-76],[-80,-152]],[[8122,3040],[-18,-37],[-19,-36],[-38,-75],[-30,-57]],[[8017,2835],[-87,-163]],[[4126,5752],[2,38],[-7,25]],[[1975,4851],[-103,208]],[[5621,1228],[8,96],[5,56]],[[4444,2530],[-47,-104]],[[4397,2426],[-52,-108]],[[6414,1256],[-1,-19],[22,-103]],[[2988,4833],[123,-36]],[[3111,4797],[117,-39]],[[3228,4758],[112,-36]],[[3340,4722],[11,-5]],[[7439,898],[68,-49]],[[7507,849],[35,-24],[24,-16],[17,-13]],[[7503,4416],[-102,103]],[[7401,4519],[-359,366]],[[4471,4940],[82,-65]],[[8652,3113],[-11,-23]],[[8641,3090],[-53,-107],[-51,-107]],[[7639,3310],[110,174],[40,63]],[[3553,3002],[-74,38]],[[7364,2913],[-33,-79],[-69,28],[-74,32]],[[2711,5229],[67,133]],[[3006,4614],[105,183]],[[6085,4439],[-91,53]],[[8372,2793],[13,-6],[6,-2],[106,-40]],[[8497,2745],[48,-18],[69,-26]],[[8614,2701],[55,-14]],[[8669,2687],[29,-11],[58,-22]],[[8756,2654],[54,-23]],[[8810,2631],[27,-13],[81,-37],[18,-8]],[[5408,4011],[112,-71]],[[5520,3940],[29,-20]],[[5549,3920],[102,-55]],[[7770,1771],[15,-15],[32,-31],[53,-45],[51,-41],[39,-30],[34,-18],[32,-9],[35,-3],[68,-5],[87,-5],[74,-5],[91,-6],[11,-1]],[[8392,1557],[66,-4],[60,-1],[70,10],[93,16],[70,13]],[[3433,2281],[11,4],[30,26],[42,43]],[[3084,5024],[19,-6],[106,-36]],[[3209,4982],[115,-40]],[[3324,4942],[127,-43]],[[3451,4899],[127,-43]],[[3578,4856],[109,-37]],[[3687,4819],[104,-39]],[[3791,4780],[100,-34]],[[3425,5420],[-30,-61],[-186,-377]],[[2148,6270],[-444,-613]],[[3376,3320],[80,-43]],[[8053,4986],[-8,2],[-8,3],[-6,4],[-6,4],[-20,21]],[[8005,5020],[-269,275]],[[7736,5295],[-166,170],[-140,144],[-6,6],[-4,6],[-4,6]],[[3540,2668],[67,146]],[[3607,2814],[49,92]],[[3656,2906],[34,63]],[[3690,2969],[113,220]],[[3803,3189],[87,169]],[[3890,3358],[25,46]],[[3540,2668],[92,-65]],[[3632,2603],[81,-53]],[[3713,2550],[16,-11],[12,-8],[48,-26],[69,-32]],[[3858,2473],[52,-21],[52,-17],[105,-30]],[[4067,2405],[39,-12]],[[4106,2393],[67,-21]],[[4173,2372],[48,-15]],[[4221,2357],[85,-27],[39,-12]],[[4345,2318],[33,-10],[151,-46]],[[4529,2262],[89,-28]],[[4618,2234],[145,-43]],[[4763,2191],[57,-19]],[[4820,2172],[149,-48]],[[4969,2124],[106,-46],[23,-12]],[[5098,2066],[21,-9],[76,-32],[111,-47],[16,-8]],[[5322,1970],[7,-3],[12,-5],[37,-17],[23,-10],[41,-21]],[[5442,1914],[95,-41],[16,-6],[15,-7]],[[5568,1860],[14,-7]],[[5621,1228],[45,-3]],[[5527,1396],[-8,-160]],[[4351,3801],[71,134]],[[4422,3935],[66,128]],[[4488,4063],[58,114]],[[4546,4177],[21,43]],[[4567,4220],[41,85]],[[4608,4305],[28,55]],[[4422,3935],[180,-83],[128,-57],[153,-70]],[[4883,3725],[154,-71]],[[5037,3654],[154,-69]],[[5241,3688],[-138,68],[-11,5],[-105,48],[-109,53]],[[4878,3862],[-101,51],[-112,57],[-177,93]],[[5088,1298],[-1,-25],[-2,-95],[-3,-151]],[[3970,5141],[81,163],[14,27],[0,25],[0,2],[-13,40],[-39,75]],[[3425,5420],[263,537]],[[3867,1962],[-74,82]],[[3793,2044],[-89,100],[-79,89]],[[3625,2233],[-37,41]],[[3588,2274],[-72,80]],[[3516,2354],[-96,105]],[[3420,2459],[-75,82]],[[3345,2541],[-33,37]],[[3312,2578],[-47,51]],[[3265,2629],[-97,105]],[[3168,2734],[-60,68],[-15,17],[-76,88]],[[3017,2907],[-8,23],[-15,55],[-2,22]],[[2992,3007],[0,3]],[[2992,3010],[11,37]],[[2686,3312],[59,-44]],[[2745,3268],[103,-79]],[[2848,3189],[75,-56]],[[2923,3133],[89,-69]],[[3012,3064],[75,-57]],[[3087,3007],[334,-251]],[[3421,2756],[20,-15]],[[3441,2741],[99,-73]],[[4232,1564],[13,13],[65,61],[65,66]],[[4375,1704],[35,37]],[[4410,1741],[43,55]],[[4453,1796],[15,23],[11,17],[8,18],[12,31],[3,7],[7,20],[22,65],[42,122],[45,135]],[[1595,7548],[398,-207]],[[6576,1823],[-9,8],[-74,75]],[[6493,1906],[-35,27],[-63,45],[-104,53],[-11,5]],[[5654,450],[70,-26],[61,-22]],[[5785,402],[54,-23],[35,-17],[45,-21]],[[5919,341],[121,-63]],[[5994,4492],[-80,50]],[[8020,4642],[12,85],[8,46],[4,24],[6,24],[5,22],[22,80],[10,34],[15,43],[11,35],[21,78]],[[8134,5113],[29,102]],[[8163,5215],[5,19],[22,83]],[[8190,5317],[8,32]],[[8198,5349],[29,112]],[[8227,5461],[22,88]],[[8249,5549],[42,165]],[[8241,5652],[-1,-21],[-2,-16],[-1,-17],[-4,-17],[-22,-85],[-1,-7],[0,-6],[1,-6],[2,-6],[4,-4],[5,-4],[5,-2]],[[8198,5349],[13,23],[8,14],[7,9],[9,9],[9,6],[12,5],[12,3],[13,2],[30,3]],[[6512,250],[-1,7],[-40,169]],[[6471,426],[-9,43],[-9,40],[-20,90]],[[6433,599],[-27,130],[-31,108]],[[6375,837],[-35,-17],[-339,-45]],[[5471,920],[10,0],[5,0],[135,1],[14,-6],[6,-20]],[[5641,895],[14,-69]],[[5655,826],[21,-90]],[[5891,1079],[-10,-6],[-34,-23],[-21,-8],[-19,-4],[-31,-4],[-28,-1],[-40,-1],[-22,2],[-13,5]],[[5877,1391],[21,3],[12,2],[75,9]],[[5985,1405],[16,2],[30,4],[44,6],[28,4]],[[6103,1421],[124,17],[18,3]],[[6491,1066],[9,18],[5,10],[80,158]],[[6411,908],[80,158]],[[5998,817],[23,9],[22,12],[79,50],[12,8]],[[6134,896],[114,78]],[[6331,1040],[7,10]],[[655,8139],[-27,113],[-18,78],[-6,28],[-3,20]],[[601,8378],[-3,14],[-4,34],[-2,25],[-2,27],[0,14],[0,22],[2,26],[5,62]],[[597,8602],[2,43],[0,36],[-2,31],[-4,38]],[[593,8750],[-6,32],[-7,33],[-3,14],[-4,13],[-8,27],[-7,26],[-6,25],[-5,26]],[[547,8946],[-3,26],[-1,29],[0,26],[4,83]],[[547,9110],[1,49]],[[655,8139],[-2,-61],[-9,-55],[-6,-13]],[[638,8010],[-15,-34],[-27,-43],[-14,-20]],[[641,7769],[2,-20],[4,-14],[6,-28],[15,-35],[18,-24],[21,-17]],[[707,7631],[102,-59],[156,-80],[163,-83]],[[1128,7409],[146,-77]],[[1274,7332],[52,-37],[41,-38],[29,-32],[33,-23]],[[1429,7202],[61,-39],[127,-69],[111,-62],[86,-48]],[[1814,6984],[63,-37],[87,-53],[54,-36],[18,-12],[67,-46],[61,-50]],[[2164,6750],[45,-50],[63,-74]],[[2272,6626],[58,-56],[39,-34],[3,-1]],[[2372,6535],[63,-39],[72,-37],[81,-28],[67,-23],[67,-37],[67,-53],[23,-24],[25,-23]],[[7300,2193],[24,54]],[[7324,2247],[9,23]],[[7275,2130],[25,63]],[[5394,264],[-1,1]],[[7287,1746],[8,-37],[6,-28],[10,-50],[5,-25]],[[7307,1750],[-11,52],[-10,42],[-10,32],[-14,34],[-16,36],[-20,35],[-33,54],[-31,57],[-31,71]],[[7131,2163],[-29,54],[-17,35],[-7,18],[-3,10],[-3,10],[-2,14],[-2,14],[0,21]],[[7068,2339],[0,19]],[[7068,2358],[3,20]],[[7071,2378],[4,30]],[[7958,561],[-22,17],[-18,17],[-17,23],[-27,34],[-27,32],[-31,29],[-100,66],[-48,31]],[[7668,810],[-44,29],[-43,28]],[[7581,867],[-33,23],[-25,21],[-19,20]],[[7504,931],[-23,25],[-11,22],[-11,29],[-10,27]],[[7363,1303],[45,-251],[0,-19],[-2,-26]],[[6618,1321],[18,-8],[20,-11],[50,-25]],[[6706,1277],[77,-41]],[[6783,1236],[8,-4],[30,-15],[40,-19],[5,-3]],[[6866,1195],[22,-10],[39,-17],[59,-27]],[[6986,1141],[133,-68]],[[7119,1073],[67,-32],[69,-33],[8,-5]],[[7263,1003],[59,-35],[87,-52]],[[7496,1658],[22,14]],[[9382,2997],[-17,18],[-16,19],[-39,46]],[[5073,934],[7,10]],[[5093,921],[0,8]],[[5081,929],[-1,15]],[[5080,944],[2,5],[0,7],[1,0]],[[8191,397],[-233,164]],[[8169,376],[33,-21],[76,-46],[73,-45],[72,-49],[75,-49]],[[8498,166],[46,-31],[44,-25]],[[7914,564],[68,-53]],[[7982,511],[187,-135]],[[7895,562],[87,-51]],[[4158,2512],[-53,23],[-54,21],[-43,16],[-91,28]],[[3383,4808],[-18,-19],[-19,-57],[-6,-10]],[[7241,5607],[2,-3],[4,-3],[4,-3],[35,-19],[4,-3],[5,-4],[3,-4]],[[7234,5605],[1,-4],[0,-5]],[[7235,5596],[0,-8],[-1,-8],[-1,-15],[-2,-9],[-2,-9],[-2,-8],[-2,-7],[0,-3],[1,-4]],[[7235,5596],[-16,-11],[-6,-5],[-10,-7],[-33,-22]],[[9543,4655],[-12,-6],[-9,-2],[-9,-3],[-5,0],[-4,0],[0,11],[-20,0]],[[4676,4440],[25,49]],[[4701,4489],[24,48]],[[4725,4537],[89,177]],[[4814,4714],[59,113],[62,127]],[[4935,4954],[44,89]],[[4979,5043],[40,78]],[[5019,5121],[27,53],[10,12]],[[2877,6206],[-20,-36],[-6,-17],[-3,-12],[-10,-21]],[[3417,4829],[-18,3],[-16,-24]],[[3432,4792],[-2,29],[-13,8]],[[4550,4998],[-64,37]],[[8118,5609],[10,-9],[8,-9],[7,-9],[7,-10],[4,-7],[3,-9],[3,-8],[2,-9],[2,-10],[1,-9],[0,-10],[-1,-10],[-2,-10],[-2,-10],[-25,-111],[-3,-14],[-2,-15],[-2,-14],[-9,-89]],[[1201,9965],[19,3],[4,0]],[[3003,3047],[9,17]],[[6342,999],[33,-162]],[[6311,1020],[3,2],[17,18]],[[6245,1441],[17,-5],[15,-2],[38,3],[39,1],[25,2]],[[5913,2402],[52,-26]],[[4173,2372],[-25,-64]],[[3178,3387],[66,-35]],[[3441,2741],[12,17],[6,14],[-1,12],[-4,18]],[[3454,2802],[-25,31]],[[3429,2833],[11,-32],[-1,-15],[-6,-12],[-12,-18]],[[3429,2833],[-33,49]],[[3396,2882],[-135,213]],[[3261,3095],[-129,202]],[[3132,3297],[-59,89]],[[3073,3386],[-60,88],[-8,12],[-35,51]],[[2970,3537],[-31,45]],[[2939,3582],[-16,24],[-47,67]],[[2876,3673],[-18,23],[-9,13]],[[2849,3709],[-48,62],[-33,45]],[[2768,3816],[-49,64]],[[2719,3880],[-55,71]],[[2664,3951],[-4,7]],[[2660,3958],[-37,44],[-44,50]],[[2579,4052],[-30,33]],[[2549,4085],[-17,21]],[[2532,4106],[-47,66]],[[2485,4172],[-49,74],[-14,17],[-5,11]],[[3481,3044],[-89,46]],[[3595,3503],[96,-47]],[[4164,2682],[-52,25]],[[7054,2439],[-14,-71]],[[7040,2368],[-3,-23]],[[7037,2345],[-2,-26],[1,-16],[2,-15],[1,-7],[1,-6],[4,-13]],[[7044,2262],[45,-90],[42,-72]],[[7131,2100],[15,-25],[44,-71],[26,-47],[19,-39],[16,-36],[14,-40],[12,-47],[10,-49]],[[7075,2408],[23,105]],[[9390,1507],[-5,18],[-7,9],[-7,5],[-8,3],[-11,4]],[[6709,2922],[12,45]],[[4216,5384],[50,97]],[[4266,5481],[85,172]],[[4636,4360],[14,27]],[[8764,1201],[3,-23],[8,-28]],[[7098,2513],[45,213],[19,79],[26,89]],[[7188,2894],[24,85]],[[7212,2979],[11,35],[25,58],[36,86]],[[7284,3158],[26,62],[32,73]],[[7342,3293],[16,35],[8,18],[18,36],[18,33]],[[7402,3415],[19,32],[21,30],[23,33],[24,32],[95,127]],[[7584,3669],[21,28]],[[7605,3697],[201,268]],[[9250,1612],[-20,13],[-10,12],[-1,2]],[[5309,3821],[11,21],[13,24]],[[6721,2967],[14,56]],[[6735,3023],[12,49],[21,98]],[[6768,3170],[24,72],[20,58],[23,50]],[[6835,3350],[53,102]],[[6888,3452],[32,69],[6,14]],[[6926,3535],[40,78]],[[6966,3613],[16,33]],[[6982,3646],[62,99]],[[7044,3745],[15,27]],[[7059,3772],[63,106],[41,67]],[[7163,3945],[20,32]],[[8767,1284],[-4,-28],[-2,-21]],[[4650,4387],[14,30]],[[4664,4417],[12,23]],[[6436,3142],[-36,48],[-34,43]],[[5550,3674],[10,18],[11,21],[7,15]],[[8761,1235],[3,-34]],[[7073,2543],[-19,-104]],[[5333,3866],[4,9],[71,136]],[[5408,4011],[87,174]],[[5495,4185],[3,7],[63,116]],[[5561,4308],[43,93],[69,130]],[[5673,4531],[50,94]],[[5723,4625],[62,129],[1,1],[92,175]],[[8767,1284],[0,19],[-2,18],[-1,7],[-2,69]],[[8762,1397],[0,8],[-1,102],[0,6],[-2,11],[-3,27]],[[8756,1551],[-5,40]],[[8751,1591],[-33,175],[-41,212]],[[4242,4527],[21,2],[20,6],[9,17],[13,75]],[[8778,1202],[-3,33]],[[8775,1235],[0,21],[-8,28]],[[6366,3233],[-27,34],[-26,32]],[[8775,1150],[3,30],[0,22]],[[5578,3728],[27,49]],[[5605,3777],[46,88]],[[5651,3865],[40,73],[61,112]],[[4191,5335],[25,49]],[[9119,3096],[16,-23],[14,-22],[46,-72]],[[9393,2985],[-11,12]],[[9195,2979],[36,-56],[14,-19],[16,-15],[19,-15],[25,-17],[16,-10]],[[9451,4128],[22,-1],[21,1],[15,3],[12,7],[12,13],[41,57],[12,9],[7,3],[11,2],[7,0],[9,-2],[11,-2],[7,-2],[7,-2],[20,-9],[11,-8],[5,-5],[1,-7],[-2,-8]],[[9289,4966],[45,8],[5,0],[6,0],[6,-3],[6,-2],[6,0],[26,0],[9,0],[10,-2],[6,-3],[8,-4],[5,-7],[5,-7],[4,-11],[66,-163],[8,-22],[16,-47],[4,-13],[3,-12],[4,-11],[6,-12]],[[9543,4655],[13,-27],[3,-9],[1,-10],[0,-20],[1,-15],[3,-14],[3,-15],[5,-17],[7,-18],[14,-25],[13,-18],[7,-12],[7,-19],[6,-15],[3,-13],[2,-16],[3,-14],[2,-14],[5,-14],[9,-21],[8,-21]],[[9658,4308],[5,-7],[9,-7],[16,-15],[4,-6],[4,-6],[3,-5],[1,-2],[1,-2],[0,-2],[0,-3],[0,-3],[0,-2],[-1,-3],[-1,-3],[-2,-2],[-3,-3],[-4,-1],[-3,-1],[-3,-1],[-4,0],[-3,1],[-3,2],[-2,3],[-2,3],[-4,6],[-2,7],[-3,4],[-1,6],[-1,4],[0,6],[0,10],[0,11],[-1,11]],[[9447,4748],[-10,-1],[-4,-1],[-3,-1],[-3,-1],[-5,-2],[-3,-3],[-3,-5],[-2,-5],[-1,-8],[1,-23],[2,-68],[2,-60],[0,-52],[-1,-84],[1,-65],[2,-23],[3,-24],[5,-32],[9,-62],[8,-49],[6,-51]],[[9451,4128],[6,-54],[0,-33],[-1,-30],[-3,-26],[-2,-34],[-1,-38],[-1,-27],[-1,-38],[-1,-16]],[[3625,4249],[-71,-143]],[[3554,4106],[-58,-111]],[[3496,3995],[-11,-22]],[[3485,3973],[-58,-112]],[[3427,3861],[-129,-251]],[[3298,3610],[-60,-113]],[[3238,3497],[-13,-23]],[[3225,3474],[-47,-87]],[[3178,3387],[-46,-90]],[[8241,5652],[-12,-14],[-10,-9],[-10,-10],[-8,-6],[-10,-6],[-8,-3],[-10,-3],[-11,-2],[-9,1],[-10,1],[-8,3],[-8,2],[-9,3]],[[8308,5710],[-22,-82]],[[8247,5727],[64,239]],[[8264,5722],[-7,-23],[-7,-24],[-9,-23]],[[8241,5652],[-12,-32],[-8,-17],[-7,-19],[-5,-14],[-5,-17],[-30,-107]],[[8174,5446],[-55,-209]],[[8119,5237],[-13,-47]],[[8106,5190],[-45,-176],[-8,-28]],[[8053,4986],[-10,-35],[-11,-30],[-14,-39],[-6,-21],[-6,-22]],[[8006,4839],[-21,-81],[-5,-21]],[[7980,4737],[-4,-21],[-3,-19],[-4,-27]],[[8372,5950],[-64,-240]],[[28,6903],[1,20],[1,33],[1,11]],[[154,7541],[-40,-63],[-20,-31],[-18,-34],[-40,-111],[-12,-27],[-10,-38],[-2,-26],[0,-24],[2,-21],[3,-24],[8,-54],[3,-55],[3,-66]],[[5016,1596],[17,77]],[[5481,648],[-4,15],[-1,98]],[[5476,761],[-2,51]],[[5474,812],[-3,93],[0,5],[0,10]],[[5471,920],[0,11],[0,5],[-1,34],[-2,9],[-3,6]],[[4954,619],[32,-38]],[[4756,1364],[7,3],[82,24],[-14,60]],[[4721,1487],[199,56]],[[581,9336],[-15,-14],[-42,-39]],[[3324,4942],[212,421]],[[5582,1853],[54,-30],[50,-23]],[[5686,1800],[21,-8],[32,-11]],[[5739,1781],[5,-2],[47,-21]],[[5791,1758],[23,-11],[72,-40],[111,-61],[11,-6],[16,-9]],[[6024,1631],[2,-1],[67,-39],[41,-23],[12,-6]],[[6146,1562],[20,-8],[5,-2],[16,-9],[10,-8],[8,-6],[6,-4],[4,-5],[5,-6],[3,-6],[4,-9],[3,-8],[5,-17],[10,-33]],[[5870,1466],[2,18],[9,54]],[[6245,1441],[5,8],[4,8],[2,9],[1,9],[-1,7],[-2,20]],[[6379,1440],[201,-101],[20,-11],[18,-7]],[[6325,1468],[-7,16],[106,139]],[[6424,1623],[152,200]],[[6018,1891],[10,23],[38,93],[48,112]],[[7400,1309],[-22,123],[-14,65],[-21,88],[-9,43],[-27,122]],[[7733,738],[53,-35],[26,-22],[23,-24],[40,-50],[24,-29],[15,-14]],[[7434,793],[12,-69],[16,-53],[27,-82],[58,-192],[9,-27]],[[7298,1572],[6,-34]],[[7304,1538],[6,-41]],[[7310,1497],[21,-111]],[[7331,1386],[1,-8]],[[7332,1378],[9,-48],[21,-129],[27,-152],[17,-42]],[[7406,1007],[14,-37],[1,-11],[3,-18],[2,-14],[4,-13],[9,-16]],[[7254,2073],[16,43]],[[7270,2116],[5,14]],[[7434,793],[8,21],[10,17],[9,5],[18,4],[28,9]],[[7275,1684],[9,-15],[11,-5],[13,-1],[12,2],[9,5],[7,8],[4,13],[3,12]],[[7403,1403],[-9,12],[-4,5],[-7,2],[-9,2],[-22,-5],[-9,-5],[-6,-8],[-6,-20]],[[9088,3090],[17,-17],[10,-8],[11,-6],[13,-5],[9,-2],[12,0],[11,2],[11,6],[16,9],[14,11],[11,10],[8,14],[4,13],[3,14],[0,13],[-2,11],[-5,14]],[[7077,5379],[212,-215]],[[7289,5164],[152,-160]],[[7441,5004],[96,-97]],[[7537,4907],[49,-46]],[[8073,4267],[40,-54],[15,-22],[15,-24],[34,-61],[17,-28],[19,-28],[21,-32],[22,-30],[21,-27],[24,-31],[32,-40],[25,-31],[27,-34],[28,-31],[30,-28],[34,-34],[33,-30],[32,-29],[33,-27],[34,-28],[108,-86],[22,-20],[27,-24],[27,-25],[55,-57],[54,-54]],[[8902,3352],[38,-40],[66,-70],[19,-22],[17,-21],[17,-21],[19,-24],[18,-25],[23,-33]],[[7980,4737],[-4,-8],[-4,-7],[-6,-5],[-7,-5],[-8,-4],[-8,-2],[-9,-2],[-9,0],[-11,1]],[[7911,4102],[32,49],[19,33],[24,43],[48,96]],[[8034,4323],[3,11],[0,12],[-1,13],[-4,12],[-8,18],[-17,32],[-13,23],[-17,26],[-14,22]],[[7963,4492],[-28,37],[-21,27],[-20,21],[-25,26],[-94,87]],[[7775,4690],[-17,15],[-17,15],[-16,13],[-16,13],[-46,36]],[[7806,3965],[54,89],[25,42],[21,38],[22,47],[18,47],[14,46],[11,46],[7,44]],[[9122,2905],[9,10],[5,9]],[[9136,2924],[7,15],[7,14],[5,11],[7,10],[8,8],[7,6]],[[9177,2988],[133,92]],[[8311,5423],[-22,18],[-10,9],[-8,11],[-8,11],[-5,12],[-4,15],[-3,13],[-1,16],[-1,21]],[[9333,4744],[-9,1],[-11,0],[-11,-2],[-138,-29],[-99,-21]],[[9065,4693],[-110,-22],[-162,-33]],[[8228,4477],[53,-93],[4,-5],[5,-4],[6,-2]],[[8458,4205],[-29,135]],[[8429,4340],[-5,28],[-18,87]],[[8406,4455],[-31,146]],[[8375,4601],[-30,145]],[[8345,4746],[-58,289]],[[9316,4958],[-14,-1],[-13,-2],[-15,-2],[-49,-11]],[[9225,4942],[-198,-41],[-4,-1]],[[9023,4900],[-19,-4]],[[9004,4896],[-253,-52]],[[9348,4265],[-19,259]],[[8964,5083],[40,-187]],[[7957,3474],[-124,80]],[[7833,3554],[-119,73]],[[7714,3627],[-109,70]],[[7605,3697],[-31,20]],[[7574,3717],[-42,26],[-98,61],[-41,28],[-140,96]],[[7253,3928],[-70,49]],[[7183,3977],[-48,37],[-18,15]],[[7117,4029],[-18,18],[-70,71],[-15,15]],[[7014,4133],[-69,71],[-22,19],[-20,15],[-154,112]],[[6749,4350],[-124,85]],[[6625,4435],[-61,43]],[[6564,4478],[-28,20],[-91,66],[-20,13],[-116,83]],[[6309,4660],[-123,87]],[[6186,4747],[-21,14],[-53,37],[-64,42]],[[6048,4840],[-73,41],[-97,49]],[[7387,3455],[-14,-12],[-11,-4],[-12,0]],[[7053,2732],[-72,65],[-126,116]],[[6855,2913],[-120,110]],[[7086,2702],[60,-38]],[[7146,2664],[195,-119],[109,-63]],[[7131,2890],[-78,-158]],[[6835,2605],[-111,148],[-46,62]],[[6678,2815],[-52,68],[-48,64],[-49,68],[-38,50],[-47,66],[-8,11]],[[6935,2482],[-24,23],[-9,7],[-9,7],[-8,5],[-8,4],[-20,9]],[[7547,5107],[94,93]],[[7641,5200],[95,95]],[[7736,5295],[94,95]],[[7830,5390],[95,95]],[[7925,5485],[133,132],[7,8],[6,8],[6,8]],[[555,9261],[-1,1],[-3,8],[-4,5],[-8,4],[-6,3],[-9,1]],[[524,9283],[-8,-2]],[[555,9261],[3,16],[3,15],[5,13],[15,31]],[[445,9249],[12,-2],[23,-1],[16,-2],[15,-3]],[[581,9336],[98,132],[14,20],[14,21],[38,60]],[[745,9569],[20,28],[19,25],[17,22],[18,19],[14,17]],[[833,9680],[11,12]],[[548,9159],[3,23],[2,17],[2,15],[-1,35]],[[2876,3673],[-4,-3]],[[694,9826],[92,-81],[32,-29],[15,-14]],[[833,9702],[11,-10]],[[844,9692],[13,-11],[106,-95],[106,-96]],[[1069,9490],[6,-6],[18,-16]],[[889,9142],[0,0]],[[348,9256],[26,0]],[[374,9256],[10,1],[11,4],[7,3],[38,15],[28,15],[27,16],[22,13],[22,15],[26,31],[27,39],[93,133],[60,85],[27,31],[29,28],[9,4],[13,2]],[[823,9691],[10,-11]],[[376,9242],[20,1],[24,3],[25,3]],[[1224,9999],[-67,-24],[-57,-37],[-56,-42],[-47,-28],[-75,-60],[-55,-54],[-24,-30],[1,-8],[-11,-14]],[[833,9702],[-10,-11]],[[2164,4777],[55,-127],[6,-14],[14,-27]],[[2532,4106],[-1,-1]],[[1930,5276],[-26,47]],[[2072,5166],[-16,1],[-13,-1],[-11,-4],[-9,-8],[-6,-11],[-3,-13],[-1,-15],[2,-22]],[[2006,5204],[20,43],[5,9]],[[2006,5204],[-40,4]],[[2006,5204],[-40,31],[-36,41]],[[1930,5276],[13,-35],[23,-33]],[[8227,5461],[84,-38]],[[8311,5423],[83,-39],[24,-11],[39,-20]],[[7391,1620],[-20,25],[-18,36],[-10,22]],[[7343,1703],[-2,7]],[[7341,1710],[-16,63],[-26,102],[-15,39],[-19,40],[-30,51]],[[7235,2005],[-44,64]],[[7191,2069],[-60,94]],[[2146,5222],[63,-6],[115,-36],[42,-12]],[[2366,5168],[23,-7],[21,-6],[97,-33],[-9,-20],[80,-28],[117,-38],[25,-8],[311,-104]],[[3031,4924],[352,-116]],[[3383,4808],[49,-16]],[[3432,4792],[313,-104],[33,-4],[31,-12],[34,-16]],[[1225,5432],[38,-3],[221,-18]],[[1484,5411],[143,-29]],[[1627,5382],[81,-21],[76,-20],[120,-18]],[[375,9226],[19,1],[18,1],[19,3],[11,0],[15,1],[8,-1],[8,-1],[9,-2],[8,-3],[7,-4],[6,-3],[5,-5],[6,-7],[5,-7],[5,-8],[5,-11],[1,-16],[-2,-53],[-3,-72],[0,-62],[6,-59],[11,-54],[8,-36],[12,-49],[7,-49],[4,-58],[0,-68],[-4,-125],[0,-16],[9,-83],[18,-80],[6,-26]],[[602,8274],[25,-96],[8,-36],[3,-33],[0,-36],[-5,-32],[-25,-57],[-29,-47],[-31,-39],[-40,-35]],[[508,7863],[-81,-53],[-66,-46],[-34,-26],[-31,-28],[-26,-25]],[[270,7685],[-36,-33],[-24,-30],[-22,-28],[-34,-53]],[[345,9226],[30,0]],[[1501,5442],[6,-2],[-23,-29]],[[1484,5411],[-27,-21],[-8,-2]],[[3788,3930],[85,166]],[[202,6815],[-73,76]],[[129,6891],[-63,62],[-21,14]],[[24,6967],[7,0]],[[31,6967],[14,0]],[[0,6967],[24,0]],[[129,6891],[351,429]],[[4553,4875],[-24,-45]],[[2561,5862],[66,56],[47,47]],[[2674,5965],[1,1],[54,49],[57,56],[52,49]],[[3770,5243],[-192,-387]],[[2735,5087],[53,98]],[[2924,5669],[124,240]],[[3048,5909],[27,54]],[[3075,5963],[32,64],[82,157]],[[8368,2492],[85,167],[44,86]],[[8625,2397],[-64,-127]],[[8561,2270],[-28,-55],[7,-268]],[[9068,2513],[-132,60]],[[2902,6341],[-14,103],[-12,153],[-16,136],[-14,113],[-1,8],[-3,31]],[[2842,6885],[-20,187]],[[2822,7072],[-12,106],[-3,23]],[[2807,7201],[-5,47]],[[2838,6120],[13,10],[73,61]],[[2031,5256],[0,2],[31,66]],[[2062,5324],[46,99]],[[2108,5423],[6,17]],[[2114,5440],[36,86]],[[2150,5526],[19,45],[14,30],[24,27],[30,32],[26,18]],[[2263,5678],[28,22]],[[2291,5700],[129,74]],[[2420,5774],[8,6]],[[2428,5780],[60,34],[73,48]],[[7977,3114],[120,243]],[[7332,1378],[8,-5],[8,-3],[10,-1],[9,0],[12,2],[7,4],[10,7],[5,6],[4,7]],[[8680,1559],[1,-19]],[[8738,1534],[-6,-1],[-7,2],[-8,4],[-6,4]],[[8724,1564],[-3,-10],[-4,-5],[-6,-6]],[[8711,1543],[-11,-1],[-19,-2]],[[8681,1540],[-19,-2]],[[7116,5608],[4,-4],[4,-5],[5,-4],[22,-19],[3,-2],[4,-3]],[[382,7795],[-13,-5],[-4,1]],[[365,7791],[-5,1],[-4,3],[-6,14],[5,13],[1,0],[13,6],[13,-6],[5,-9],[1,-4],[-4,-10]],[[384,7799],[-2,-4]],[[384,7799],[10,4],[42,26],[38,24],[16,15],[6,2],[6,-2],[6,-5]],[[270,7685],[1,22],[12,26],[9,18],[12,11],[14,9],[14,6],[20,4],[13,10]],[[435,8233],[167,41]],[[8528,3904],[-20,30],[-17,26],[-103,169]],[[8388,4129],[-97,157],[-20,32],[-25,39],[-20,30],[-23,31],[-24,29],[-26,31],[-28,31],[-131,135],[-25,26]],[[582,7913],[-35,-36],[-34,-35]],[[658,7899],[4,9],[6,18],[5,21],[4,25],[2,27]],[[679,7999],[-1,64],[-23,76]],[[844,9692],[11,12],[26,27],[17,19],[19,19],[18,18],[19,17],[17,16],[16,13],[22,18],[25,20],[19,15],[20,15],[24,14],[20,12],[19,10],[18,9],[16,7],[15,6],[16,6]],[[1201,9965],[13,4],[10,5]],[[6787,4288],[-96,-209]],[[6691,4079],[-4,-9],[-60,-130]],[[6627,3940],[-28,-60]],[[6599,3880],[-108,-235]],[[6491,3645],[-16,-37]],[[6475,3608],[-24,-51]],[[6451,3557],[-39,-85]],[[6412,3472],[-61,-132]],[[3429,2652],[-84,-111]],[[9028,2425],[15,32],[25,56]],[[9131,2484],[0,0]],[[8810,2631],[5,12],[24,55]],[[7239,182],[12,77]],[[7382,394],[26,167]],[[7607,217],[-6,-3],[-6,-2],[-7,-1],[-6,-1],[-9,0],[-39,6]],[[7534,216],[-173,27]],[[7361,243],[-110,16]],[[7382,394],[174,-24]],[[7050,201],[1,2]],[[3843,4656],[202,-61],[169,-57],[28,-11]],[[4242,4527],[310,-113],[53,-20],[73,-34]],[[7659,1731],[30,12]],[[7563,1691],[24,10],[72,30]],[[1199,6724],[-61,35]],[[1138,6759],[-83,53]],[[1055,6812],[-59,42],[-9,8],[-19,19]],[[968,6881],[-78,75]],[[890,6956],[-9,9],[-69,71]],[[812,7036],[-15,15]],[[797,7051],[-74,76],[-3,4]],[[720,7131],[-26,25]],[[694,7156],[-61,64]],[[633,7220],[-39,24]],[[594,7244],[-63,44]],[[531,7288],[-51,32]],[[480,7320],[-190,129],[-122,84]],[[168,7533],[-14,8]],[[154,7541],[-15,9]],[[516,9281],[-6,-5]],[[510,9276],[-3,-12],[0,-6],[1,-9],[3,-8]],[[511,9241],[7,-5]],[[518,9236],[5,-1],[8,-2],[6,2],[7,2],[4,3],[4,5],[2,4]],[[554,9249],[1,12]],[[2463,4899],[9,7],[7,4],[6,0],[8,0],[10,-5],[40,-17]],[[2543,4888],[-29,23],[-43,26]],[[2471,4937],[-18,10],[-31,13]],[[2463,4899],[5,10],[1,7],[-1,7],[-7,8],[-39,29]],[[6309,4660],[131,198]],[[6440,4858],[104,153]],[[6119,3563],[40,82]],[[6159,3645],[62,128]],[[6221,3773],[73,150]],[[6294,3923],[70,145]],[[6364,4068],[69,137]],[[6433,4205],[57,123]],[[6490,4328],[19,36],[44,90]],[[6553,4454],[11,24]],[[6725,2149],[-67,-123],[-7,-11]],[[3068,6220],[41,-3],[37,-12],[43,-21]],[[3189,6184],[121,-54]],[[3310,6130],[64,-28]],[[3374,6102],[58,-29]],[[3432,6073],[144,-64]],[[3576,6009],[104,-48],[8,-4]],[[3688,5957],[14,-7]],[[3702,5950],[82,-39]],[[3068,6220],[-87,-8],[-52,-18]],[[7736,784],[53,-35],[27,-18],[16,-13],[18,-17],[16,-16],[16,-20],[13,-16],[15,-20],[18,-21],[19,-18],[13,-10],[17,-12],[31,-19]],[[7831,609],[-4,6],[-6,7],[-5,7],[-4,4],[-4,5],[-6,6],[-4,4],[-3,4],[-5,4],[-6,5],[-8,6],[-7,6],[-5,4],[-8,5],[-48,31],[-105,68]],[[8014,558],[-1,-1]],[[7831,609],[-2,-1],[1,-2]],[[7851,586],[-18,22],[-2,1]],[[8026,585],[-13,-8],[-1,-1],[1,-1]],[[8017,568],[1,-1],[0,-1],[0,-1]],[[7841,579],[4,3],[1,1],[1,1],[-1,1]],[[8008,549],[1,0],[41,-29],[40,-29],[40,-29],[72,-53]],[[8162,366],[-139,94],[-76,53],[-29,20],[-18,13],[-20,15]],[[7880,561],[-9,5],[-8,7],[-5,4],[-7,9]],[[7583,796],[19,-2],[40,-22],[129,-86],[33,-28],[27,-32],[24,-28],[28,-27],[12,-9]],[[8401,216],[-7,4],[-92,58],[-68,42],[-50,31],[-22,15]],[[8207,486],[1,10],[1,4],[5,5],[13,9],[26,18],[7,1],[3,1],[45,29]],[[8515,209],[-34,21],[-20,9],[-31,17],[-96,63],[-39,24],[-27,17],[-34,24],[-32,25]],[[9440,167],[-1,-18],[0,-8],[-3,-6],[-5,-7],[-11,-2],[-26,3],[-8,0],[-11,-4],[-5,-6]],[[8679,278],[40,-30],[28,-21],[12,-11]],[[8759,216],[4,-5]],[[9999,0],[-31,7],[-36,12],[-17,8],[-24,4],[-62,-4],[-43,-7],[-14,-9],[-19,-8],[-77,20],[-59,16]],[[9253,124],[-33,9],[-97,17]],[[8859,222],[-18,11],[-13,6],[-7,0],[-7,1],[-10,-6],[-5,-4]],[[8774,220],[-15,-4]],[[4664,4417],[-13,25],[-12,25],[-15,24],[-18,19],[-18,15],[-22,15],[-31,18],[-26,14]],[[2148,7008],[8,14],[19,32],[53,97],[24,44]],[[6338,1050],[6,6],[91,78]],[[6435,1134],[96,77]],[[6531,1211],[15,14],[14,10],[25,17]],[[6327,1057],[4,-17]],[[6331,1040],[7,-22],[4,-19]],[[6926,1403],[0,-19]],[[6931,1380],[13,-1],[1,-21],[-12,1]],[[6527,1567],[12,-2]],[[6539,1565],[6,-1],[6,-4]],[[6582,1621],[-29,-18],[-9,-10]],[[6493,1570],[7,-8],[10,1],[9,3],[8,1]],[[6527,1567],[6,7],[11,19]],[[9421,958],[0,13],[-4,21],[-2,21],[-1,11],[2,45],[3,14],[2,10]],[[9421,1093],[1,12],[-3,11],[-5,7],[-8,7],[-4,12],[-2,28],[6,74]],[[9462,1045],[-5,17],[-17,17],[-19,14]],[[5728,1841],[-30,-3],[-20,-1],[-26,1],[-22,4],[-48,11]],[[6189,1599],[-78,161]],[[6111,1760],[-32,70],[-14,23],[-17,17],[-18,14],[-12,7]],[[6254,1502],[-8,10],[-7,7],[-12,18],[-10,14],[-7,11],[-15,23],[-6,14]],[[6729,1868],[-9,1],[-14,3],[-7,3],[-5,3],[-6,6],[-6,6],[-2,3],[-5,10],[-2,8],[-3,11]],[[6822,1782],[9,-9]],[[5590,5124],[38,-23]],[[6677,5194],[4,-21],[6,-16],[10,-12],[79,-81],[67,-69],[-4,-10],[1,-12],[4,-7],[58,-35],[14,-10],[49,-49],[8,-6],[15,-6],[12,-9],[17,-13]],[[4186,3187],[-52,-106],[-57,-109],[-49,-98]],[[4028,2874],[-64,-127]],[[3964,2747],[-22,-45],[-3,-10],[-2,-15],[-7,-37]],[[3930,2640],[-3,-13],[-10,-27]],[[3917,2600],[-26,-54],[-33,-73]],[[535,6506],[-58,-71]],[[8770,5098],[13,-8],[14,-8],[14,-7],[14,-5],[14,-3],[15,-2],[15,0],[15,2],[13,2],[16,4],[51,10]],[[8964,5083],[25,5],[12,2],[14,1],[12,0],[14,-1],[15,-3],[13,-4],[13,-5],[13,-6],[63,-31],[14,-9],[12,-9],[11,-12],[9,-12],[7,-12],[5,-13],[4,-14],[5,-18]],[[8973,4110],[-22,-1],[-14,1],[-11,3],[-12,5],[-9,8],[-11,12]],[[8709,5175],[-9,6],[-9,7],[-10,11],[-10,14],[-10,13],[-10,11],[-10,9],[-18,14],[-99,65],[-16,9],[-19,9],[-15,6],[-17,4]],[[8672,5125],[13,-30],[6,-17],[5,-16],[25,-67]],[[8677,5169],[-4,-5],[-5,-9]],[[8668,5155],[-2,-10],[1,-10],[5,-10]],[[8672,5125],[7,-7],[5,-3],[11,-3],[8,0],[9,2]],[[8712,5114],[6,4],[5,5],[5,8],[2,8],[0,10]],[[8730,5149],[-3,10],[-4,6],[-7,6],[-7,4]],[[8709,5175],[-12,2],[-11,-3],[-9,-5]],[[8163,5215],[-14,1],[-10,-1],[-8,-2],[-7,-2],[-7,-5],[-5,-6],[-6,-10]],[[8163,5215],[59,-53]],[[8222,5162],[15,-14],[9,-11],[7,-12],[6,-11],[28,-79]],[[8770,5098],[-16,14],[-10,9],[-5,8],[-5,7],[-4,13]],[[3829,5830],[21,27],[15,7],[30,-1]],[[2548,4084],[1,1]],[[3745,5983],[-3,-18],[-15,-13],[-25,-2]],[[4509,4572],[-17,6]],[[7806,3965],[64,-48],[5,-3],[6,-3],[5,-2],[2,-1],[2,-2],[3,-3],[5,-7],[5,-6],[6,-6]],[[7909,3884],[108,-85]],[[8017,3799],[4,-3],[90,-69],[19,-14]],[[7404,1550],[-3,20],[-4,12],[-10,9],[-8,5]],[[7379,1596],[-20,7]],[[7350,3439],[-101,47]],[[7515,2001],[63,43],[49,34]],[[7627,2078],[17,12],[28,50]],[[7672,2140],[49,80]],[[7721,2220],[32,53],[41,69]],[[7794,2342],[27,67],[25,59]],[[7846,2468],[41,98],[43,106]],[[7930,2672],[59,-25],[48,-21]],[[8037,2626],[60,-26],[139,-59]],[[8236,2541],[132,-49]],[[8368,2492],[118,-45]],[[8486,2447],[139,-50]],[[8625,2397],[82,-29],[97,-35]],[[8066,5649],[7,9]],[[8073,5658],[4,5],[4,5],[5,4],[5,2],[5,2],[7,1],[19,-1],[7,1],[7,1],[6,2],[5,3],[6,4]],[[8153,5687],[77,67],[7,4],[7,3],[9,2],[10,0],[9,-2],[42,-13],[9,-5],[7,-6],[5,-8],[4,-9],[1,-9],[0,-13],[-10,-78]],[[1904,5323],[-8,15],[-17,28],[-59,96],[-9,15]],[[1811,5477],[-28,47]],[[1783,5524],[-35,57]],[[1748,5581],[-44,76]],[[1704,5657],[-67,116]],[[1637,5773],[-18,28]],[[1619,5801],[-40,67],[-51,88]],[[1528,5956],[-72,123],[-2,4]],[[1454,6083],[-75,137]],[[1379,6220],[-2,4],[-7,18],[-50,142]],[[1320,6384],[-45,147]],[[1275,6531],[-35,100],[-12,28]],[[1228,6659],[-7,22],[-7,19],[-15,24]],[[7449,1034],[-8,46],[-41,229]],[[2836,6183],[-14,-3],[-125,-8]],[[2697,6172],[-111,-6],[-41,0]],[[2545,6166],[-12,1],[-80,10],[-52,12]],[[2401,6189],[-10,2],[-127,42]],[[2264,6233],[-116,37]],[[2148,6270],[-50,15]],[[2098,6285],[-77,28]],[[2021,6313],[-67,23]],[[1954,6336],[-50,18]],[[1904,6354],[-132,48]],[[1772,6402],[-96,40],[-83,46],[-18,10]],[[8712,5114],[14,-2],[12,-3],[32,-11]],[[7969,4670],[-10,8],[-14,10],[-16,9],[-15,8]],[[7914,4705],[-13,6],[-35,14]],[[7866,4725],[-178,71],[-11,5],[-12,6],[-11,6],[-13,8],[-55,40]],[[7969,4670],[-4,-43],[-2,-66],[0,-69]],[[7963,4492],[-1,-51]],[[9109,2910],[13,-5]],[[9122,2905],[130,-50]],[[9252,2855],[61,-23]],[[9329,4524],[-1,21],[0,22],[0,22],[1,25],[3,65],[1,25],[0,40]],[[9333,4744],[1,121],[-1,23],[-1,18],[-3,16],[-4,15],[-9,21]],[[9310,3080],[-15,18]],[[9295,3098],[-27,31],[-17,19],[-20,21]],[[9231,3169],[-48,48]],[[9183,3217],[-196,204],[-288,297]],[[8699,3718],[-65,66]],[[8634,3784],[-54,57],[-28,32],[-24,31]],[[1225,5432],[-27,7],[-76,31],[-32,2]],[[2306,5028],[52,122],[8,18]],[[2366,5168],[13,28],[32,68]],[[4351,5653],[36,-18]],[[4387,5635],[69,-29],[208,-90]],[[4664,5516],[57,-25]],[[4721,5491],[108,-46]],[[4829,5445],[106,-46]],[[1575,6498],[-28,16],[-98,61]],[[1449,6575],[-5,2],[-119,69]],[[1325,6646],[-18,11],[-108,67]],[[6119,3563],[-130,166]],[[5989,3729],[-86,120]],[[5903,3849],[-78,105]],[[5825,3954],[-42,56],[-31,40]],[[5752,4050],[-98,128]],[[5654,4178],[-93,130]],[[5561,4308],[-101,181]],[[5460,4489],[-41,67],[-65,115]],[[5354,4671],[-72,132]],[[5282,4803],[-71,111]],[[5211,4914],[-60,107]],[[5151,5021],[-8,14]],[[5143,5035],[-87,151]],[[7409,916],[6,-30],[13,-63],[6,-30]],[[5056,5186],[-63,110],[-32,56],[-26,47]],[[4935,5399],[-7,35]],[[7556,370],[27,-77],[24,-76]],[[7607,217],[4,-8],[5,-7],[11,-14],[47,-58]],[[7674,130],[39,-38],[55,-56]],[[7409,916],[30,-18]],[[6343,1460],[-27,-1],[-29,-3],[-11,-1],[-15,-7],[-16,-7]],[[4612,1139],[21,5],[10,3],[112,32],[47,16]],[[4802,1195],[5,2],[59,20],[125,46]],[[4991,1263],[15,5],[82,30]],[[5088,1298],[16,5],[92,33]],[[5196,1336],[50,14],[57,13]],[[5303,1363],[71,16],[3,0],[46,10]],[[5423,1389],[55,8],[10,0],[39,-1]],[[5527,1396],[49,-2],[58,-14]],[[5634,1380],[11,-2],[19,-3],[30,-4],[13,1],[26,0],[9,0],[28,3],[70,11]],[[6077,278],[0,0]],[[3427,3861],[153,-147]],[[3580,3714],[164,-153]],[[3744,3561],[78,-76],[93,-81]],[[3915,3404],[164,-141]],[[4079,3263],[107,-76]],[[4186,3187],[78,-54],[32,-20],[60,-28]],[[4356,3085],[174,-81]],[[4530,3004],[11,-5]],[[4541,2999],[92,-43],[118,-55],[69,-30]],[[4820,2871],[128,-63]],[[4948,2808],[108,-52]],[[5056,2756],[108,-52]],[[5164,2704],[99,-48]],[[5263,2656],[325,-157]],[[5588,2499],[89,-128]],[[5677,2371],[22,-30]],[[5699,2341],[63,-90]],[[5762,2251],[44,-63]],[[5806,2188],[121,-174]],[[5927,2014],[5,-6],[33,-50]],[[4016,4092],[0,-15],[-30,-50]],[[7381,4295],[-241,-244],[-23,-22]],[[7117,4029],[-18,-20]],[[9109,4480],[-44,213]],[[9065,4693],[-42,207]],[[8836,4424],[-140,-29],[-16,-3],[-251,-52]],[[2867,6221],[-31,-38]],[[2870,6267],[-33,4]],[[2837,6271],[26,-20]],[[2966,6254],[28,26]],[[2994,6280],[-39,-4]],[[8849,3182],[18,164],[-1,8],[-2,6]],[[8711,3063],[85,-34]],[[8796,3029],[32,-12]],[[8828,3017],[49,-18],[43,-16],[46,-18]],[[8966,2965],[143,-55]],[[8695,3097],[-43,16]],[[8652,3113],[-52,20],[-45,19]],[[8555,3152],[-66,29]],[[8489,3181],[-88,40]],[[8401,3221],[-23,11]],[[8378,3232],[-85,39],[-23,11]],[[8270,3282],[-17,8]],[[8253,3290],[-21,13],[-70,43]],[[8162,3346],[-106,67]],[[8056,3413],[-99,61]],[[8927,4034],[-7,16],[-6,16],[-6,17],[-5,19],[-4,16],[-5,20]],[[8894,4138],[-58,286]],[[8813,4538],[2,12],[1,12],[-2,11],[-4,23],[-4,13],[-5,13],[-8,16]],[[8836,4424],[-23,114]],[[8973,4110],[18,21],[17,17],[20,17],[22,17],[21,14],[21,11],[18,8],[19,7],[9,2],[11,3],[199,38]],[[8927,4034],[5,-14],[7,-13],[10,-15],[13,-18],[15,-16],[265,-301],[22,-28],[12,-19],[12,-20],[9,-19],[11,-23],[7,-17],[6,-19],[4,-21],[4,-20],[2,-22],[14,-202],[2,-38],[0,-29],[-1,-15],[-3,-16],[-3,-12],[-7,-12],[-8,-8],[-10,-7],[-20,-12]],[[8927,4034],[16,29],[14,23],[16,24]],[[8227,5461],[-9,2],[-9,0],[-8,-1],[-8,-2],[-8,-4],[-5,-5],[-6,-5]],[[7384,5621],[-86,-53]],[[7298,5568],[-72,-43]],[[7226,5525],[-30,-17],[-15,-10],[-9,-6],[-7,-6]],[[6883,5786],[22,-22],[31,-31],[43,-39],[22,-11],[23,-11],[24,-17],[32,-30],[7,-5],[6,-4],[7,-4],[8,-3],[8,-1]],[[7116,5608],[10,-2],[11,-1],[9,0],[11,0],[5,0],[5,-2],[13,-5],[7,-2],[4,0],[6,0],[4,1],[33,8]],[[7234,5605],[7,2]],[[7241,5607],[10,2],[9,2],[12,2],[68,6],[29,3],[5,0],[5,0],[5,-1]],[[7384,5621],[68,41],[19,11],[15,10],[11,7],[9,6],[8,7],[9,7],[7,6],[9,5],[10,6],[89,54],[12,6],[14,7],[12,5],[16,6],[15,5],[14,5],[14,5],[15,4],[16,4],[16,3],[14,3],[10,1],[10,1],[9,0],[8,-1],[10,-3],[10,-4],[9,-5],[9,-6],[10,-9],[12,-9],[180,-141]],[[8073,5658],[48,-38],[7,-5],[7,-4],[8,-2],[8,-2],[8,2],[8,2],[15,8],[7,5],[8,5],[7,5],[6,6],[6,7],[5,7],[5,8],[5,11],[4,12],[12,42]],[[8118,5609],[-41,32]],[[8077,5641],[-11,8]],[[8066,5649],[-94,73]],[[7972,5722],[-106,83]],[[7866,5805],[-6,4],[-6,4],[-7,4],[-8,3],[-8,2],[-7,1],[-8,0],[-9,-1],[-9,-1],[-14,-2],[-16,-4],[-15,-3],[-14,-4],[-14,-5],[-14,-5],[-15,-5],[-14,-6],[-11,-4],[-11,-5],[-11,-5]],[[7649,5773],[-19,-11],[-66,-39],[-12,-7],[-11,-7],[-12,-9]],[[7529,5700],[-10,-8],[-12,-9],[-13,-8],[-11,-8],[-12,-7],[-55,-33]],[[7416,5627],[-117,-71]],[[7299,5556],[-97,-59],[-11,-7],[-11,-7]],[[7180,5483],[-8,-6],[-7,-6],[-7,-7],[-81,-85]],[[7663,4782],[35,-44],[15,-17],[13,-15],[33,-33]],[[7759,4673],[78,-79],[16,-17],[16,-16]],[[7869,4561],[18,-20],[17,-20],[15,-17],[13,-17],[13,-19],[17,-27]],[[7962,4441],[39,-68],[17,-26],[16,-24]],[[8034,4323],[39,-56]],[[8357,5586],[-6,1],[-6,2]],[[8345,5589],[-7,3],[-11,5]],[[8327,5597],[3,23]],[[8345,5589],[-11,-7],[-5,-4],[-5,-6]],[[8238,5192],[-18,21],[-7,9],[-5,8],[-6,10],[-3,11],[-3,13],[-2,16],[-2,16],[-2,21]],[[8610,5307],[17,-14],[12,-8],[15,-10],[18,-11],[20,-12],[21,-11],[22,-9],[37,-15],[26,-9],[26,-8]],[[8721,4995],[-10,79],[0,13],[0,12],[1,15]],[[8793,4638],[-3,-16],[-1,-13],[2,-13],[6,-27],[3,-12],[6,-10],[7,-9]],[[8793,4638],[-42,206]],[[8751,4844],[-30,151]],[[8836,4424],[163,33],[4,1],[106,22]],[[9109,4480],[99,21],[100,20],[11,2],[10,1]],[[8229,4653],[82,78],[10,7],[11,5],[13,3]],[[8296,4373],[6,0],[7,2],[7,4],[63,63],[6,5],[6,4],[7,2],[8,2]]],"transform":{"scale":[0.000006115330363013352,0.000004478093663258269],"translate":[-71.13457795550762,42.37318419177608]}}
 
 /***/ },
-/* 439 */
+/* 454 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = {"type":"Topology","objects":{"intersections-clipped":{"type":"GeometryCollection","crs":{"type":"name","properties":{"name":"urn:ogc:def:crs:OGC:1.3:CRS84"}},"geometries":[{"type":"Point","properties":{"refs":["way/8603503","way/172307046"]},"coordinates":[6862,1977]},{"type":"Point","properties":{"refs":["way/8603503","way/9428767"]},"coordinates":[6962,1888]},{"type":"Point","properties":{"refs":["way/8603359","way/9430143"]},"coordinates":[7744,4400]},{"type":"Point","properties":{"refs":["way/8603503","way/9429535","way/9430019"]},"coordinates":[7064,1740]},{"type":"Point","properties":{"refs":["way/8604767","way/9429289"]},"coordinates":[7153,3071]},{"type":"Point","properties":{"refs":["way/8604767","way/9429361"]},"coordinates":[7102,3093]},{"type":"Point","properties":{"refs":["way/8605471","way/9428768","way/9429958","way/341199168"]},"coordinates":[8978,3069]},{"type":"Point","properties":{"refs":["way/9428786","way/33858910"]},"coordinates":[3001,3106]},{"type":"Point","properties":{"refs":["way/9428786","way/81160754","way/84083458"]},"coordinates":[3219,3271]},{"type":"Point","properties":{"refs":["way/8604814","way/8605312","way/297940042"]},"coordinates":[2363,5018]},{"type":"Point","properties":{"refs":["way/8605312","way/8608834"]},"coordinates":[2202,4791]},{"type":"Point","properties":{"refs":["way/9429023","way/302110864"]},"coordinates":[5372,4903]},{"type":"Point","properties":{"refs":["way/9430072","way/302110864"]},"coordinates":[5444,4790]},{"type":"Point","properties":{"refs":["way/8605442","way/9430072"]},"coordinates":[5635,5157]},{"type":"Point","properties":{"refs":["way/8605777","way/80512128","way/80512129"]},"coordinates":[3513,4817]},{"type":"Point","properties":{"refs":["way/8608836","way/9430128"]},"coordinates":[2020,4839]},{"type":"Point","properties":{"refs":["way/8608834","way/8608836"]},"coordinates":[2128,4935]},{"type":"Point","properties":{"refs":["way/9429697","way/89917606","way/286619210"]},"coordinates":[7830,4849]},{"type":"Point","properties":{"refs":["way/8605381","way/9429878"]},"coordinates":[2679,4836]},{"type":"Point","properties":{"refs":["way/8605381","way/9430162"]},"coordinates":[3088,4600]},{"type":"Point","properties":{"refs":["way/8605381","way/8605417","way/8605490"]},"coordinates":[2982,4662]},{"type":"Point","properties":{"refs":["way/90216994","way/323161771"]},"coordinates":[8704,4324]},{"type":"Point","properties":{"refs":["way/8605370","way/8605381"]},"coordinates":[3309,4473]},{"type":"Point","properties":{"refs":["way/8605370","way/9429681"]},"coordinates":[3265,4362]},{"type":"Point","properties":{"refs":["way/8605490","way/9429681"]},"coordinates":[2918,4535]},{"type":"Point","properties":{"refs":["way/8605127","way/8605490","way/8607510"]},"coordinates":[2841,4382]},{"type":"Point","properties":{"refs":["way/8605490","way/9429736"]},"coordinates":[2880,4461]},{"type":"Point","properties":{"refs":["way/8605024","way/9430106"]},"coordinates":[6118,4367]},{"type":"Point","properties":{"refs":["way/8605056","way/8605127","way/8605260"]},"coordinates":[2728,4443]},{"type":"Point","properties":{"refs":["way/8605381","way/9429527","way/9429649"]},"coordinates":[3459,4387]},{"type":"Point","properties":{"refs":["way/9429099","way/302110864"]},"coordinates":[5519,4657]},{"type":"Point","properties":{"refs":["way/8605127","way/9429258"]},"coordinates":[2502,4563]},{"type":"Point","properties":{"refs":["way/8605381","way/9429124"]},"coordinates":[3196,4538]},{"type":"Point","properties":{"refs":["way/8605127","way/9428757"]},"coordinates":[2339,4651]},{"type":"Point","properties":{"refs":["way/8615790","way/81160754"]},"coordinates":[2729,3938]},{"type":"Point","properties":{"refs":["way/8605024","way/9429917"]},"coordinates":[6246,4588]},{"type":"Point","properties":{"refs":["way/8604828","way/9428757","way/9429402","way/93167676"]},"coordinates":[2294,4595]},{"type":"Point","properties":{"refs":["way/8605127","way/8608834","way/93167676"]},"coordinates":[2215,4764]},{"type":"Point","properties":{"refs":["way/8605331","way/8607510","way/8608837"]},"coordinates":[3165,4148]},{"type":"Point","properties":{"refs":["way/8607510","way/9429623"]},"coordinates":[3063,4219]},{"type":"Point","properties":{"refs":["way/8605024","way/82329827","way/302110864"]},"coordinates":[5931,4031]},{"type":"Point","properties":{"refs":["way/9429218","way/302110864"]},"coordinates":[6007,3934]},{"type":"Point","properties":{"refs":["way/8607510","way/9429403"]},"coordinates":[2958,4296]},{"type":"Point","properties":{"refs":["way/8605381","way/8605842"]},"coordinates":[3858,4154]},{"type":"Point","properties":{"refs":["way/8605842"]},"coordinates":[3770,3984]},{"type":"Point","properties":{"refs":["way/8604840","way/8605377","way/302110864"]},"coordinates":[5830,4160]},{"type":"Point","properties":{"refs":["way/82329809","way/302110864"]},"coordinates":[5733,4292]},{"type":"Point","properties":{"refs":["way/8605056","way/81160754"]},"coordinates":[2548,4154]},{"type":"Point","properties":{"refs":["way/8605370","way/8608837","way/9429736"]},"coordinates":[3216,4253]},{"type":"Point","properties":{"refs":["way/8605381","way/9429919","way/84083458"]},"coordinates":[3729,4232]},{"type":"Point","properties":{"refs":["way/8604828","way/9429184","way/81160754"]},"coordinates":[2477,4257]},{"type":"Point","properties":{"refs":["way/8610033","way/247838867"]},"coordinates":[8165,3864]},{"type":"Point","properties":{"refs":["way/8604852","way/9429302"]},"coordinates":[3943,3710]},{"type":"Point","properties":{"refs":["way/8610033","way/90286273"]},"coordinates":[7963,3604]},{"type":"Point","properties":{"refs":["way/8605381","way/9428885","way/308587419"]},"coordinates":[4103,4008]},{"type":"Point","properties":{"refs":["way/8605381","way/9429497"]},"coordinates":[4235,3928]},{"type":"Point","properties":{"refs":["way/8605381","way/9429726"]},"coordinates":[3602,4305]},{"type":"Point","properties":{"refs":["way/8605024","way/8605698"]},"coordinates":[6074,4283]},{"type":"Point","properties":{"refs":["way/8605394","way/8605698"]},"coordinates":[6274,4185]},{"type":"Point","properties":{"refs":["way/8605381","way/9428837"]},"coordinates":[4597,3711]},{"type":"Point","properties":{"refs":["way/8605381","way/9429977"]},"coordinates":[4679,3662]},{"type":"Point","properties":{"refs":["way/8605394","way/9429016","way/302110864"]},"coordinates":[6087,3828]},{"type":"Point","properties":{"refs":["way/8604852","way/9429234","way/9429345"]},"coordinates":[3907,3642]},{"type":"Point","properties":{"refs":["way/8607510","way/9429687"]},"coordinates":[3429,3928]},{"type":"Point","properties":{"refs":["way/9429260","way/90286273"]},"coordinates":[7485,3908]},{"type":"Point","properties":{"refs":["way/8607510","way/9429196","way/9429649"]},"coordinates":[3293,4052]},{"type":"Point","properties":{"refs":["way/8605381","way/9429647"]},"coordinates":[6359,2879]},{"type":"Point","properties":{"refs":["way/8605381","way/9430115"]},"coordinates":[6198,2952]},{"type":"Point","properties":{"refs":["way/8607510","way/84083458","way/303049926"]},"coordinates":[3524,3840]},{"type":"Point","properties":{"refs":["way/9430165","way/82329827"]},"coordinates":[5827,3844]},{"type":"Point","properties":{"refs":["way/8605381","way/95445594"]},"coordinates":[3985,4077]},{"type":"Point","properties":{"refs":["way/9429250","way/81160754"]},"coordinates":[3352,3067]},{"type":"Point","properties":{"refs":["way/8605524","way/9429547"]},"coordinates":[4822,3271]},{"type":"Point","properties":{"refs":["way/8605524","way/9429327"]},"coordinates":[4753,3140]},{"type":"Point","properties":{"refs":["way/8604852","way/9429722"]},"coordinates":[3646,3144]},{"type":"Point","properties":{"refs":["way/8605023","way/8605797","way/9430150"]},"coordinates":[8816,2847]},{"type":"Point","properties":{"refs":["way/8604852","way/9428924"]},"coordinates":[3694,3235]},{"type":"Point","properties":{"refs":["way/8605023","way/8610038"]},"coordinates":[8708,2885]},{"type":"Point","properties":{"refs":["way/8604767","way/9429010"]},"coordinates":[7185,3058]},{"type":"Point","properties":{"refs":["way/9428994","way/9429169","way/303049926"]},"coordinates":[4966,2841]},{"type":"Point","properties":{"refs":["way/9429276","way/303049926"]},"coordinates":[5099,2778]},{"type":"Point","properties":{"refs":["way/9429097","way/303049926"]},"coordinates":[5210,2725]},{"type":"Point","properties":{"refs":["way/9429835","way/33721065"]},"coordinates":[3255,2703]},{"type":"Point","properties":{"refs":["way/9429893","way/303049926"]},"coordinates":[5425,2625]},{"type":"Point","properties":{"refs":["way/9429460","way/255479501"]},"coordinates":[8297,2594]},{"type":"Point","properties":{"refs":["way/9429324","way/303049926"]},"coordinates":[5322,2673]},{"type":"Point","properties":{"refs":["way/8605850","way/9429507"]},"coordinates":[8025,2707]},{"type":"Point","properties":{"refs":["way/8605381","way/9428970"]},"coordinates":[6497,2808]},{"type":"Point","properties":{"refs":["way/8605291","way/9429714"]},"coordinates":[5369,2296]},{"type":"Point","properties":{"refs":["way/8605291"]},"coordinates":[5474,2250]},{"type":"Point","properties":{"refs":["way/9429829","way/33721065"]},"coordinates":[3516,2426]},{"type":"Point","properties":{"refs":["way/9430168","way/33721065"]},"coordinates":[3616,2319]},{"type":"Point","properties":{"refs":["way/8605291"]},"coordinates":[5225,2367]},{"type":"Point","properties":{"refs":["way/8604852","way/81160754"]},"coordinates":[3491,2853]},{"type":"Point","properties":{"refs":["way/8605218","way/8605225","way/90291148"]},"coordinates":[7053,2573]},{"type":"Point","properties":{"refs":["way/8605345","way/8610038","way/255479501"]},"coordinates":[8503,2508]},{"type":"Point","properties":{"refs":["way/8605342","way/8610040","way/255479501"]},"coordinates":[8763,2414]},{"type":"Point","properties":{"refs":["way/8605356","way/8610043","way/303186721"]},"coordinates":[6152,1920]},{"type":"Point","properties":{"refs":["way/9428970","way/303186721"]},"coordinates":[6113,1977]},{"type":"Point","properties":{"refs":["way/8605205","way/9428753"]},"coordinates":[8887,1924]},{"type":"Point","properties":{"refs":["way/8605205","way/8610040"]},"coordinates":[8697,1881]},{"type":"Point","properties":{"refs":["way/8605205","way/105957565"]},"coordinates":[8818,1909]},{"type":"Point","properties":{"refs":["way/8614935","way/9430168"]},"coordinates":[3529,2246]},{"type":"Point","properties":{"refs":["way/33721065","way/156268858"]},"coordinates":[3439,2509]},{"type":"Point","properties":{"refs":["way/8605381","way/9429979"]},"coordinates":[6931,2581]},{"type":"Point","properties":{"refs":["way/8605218","way/8605381","way/9429452","way/90291149"]},"coordinates":[7075,2505]},{"type":"Point","properties":{"refs":["way/9429384","way/33721065"]},"coordinates":[3690,2239]},{"type":"Point","properties":{"refs":["way/8605096","way/303186721"]},"coordinates":[5942,2216]},{"type":"Point","properties":{"refs":["way/9428743","way/33721065"]},"coordinates":[3728,2197]},{"type":"Point","properties":{"refs":["way/9429647","way/303186721"]},"coordinates":[5987,2153]},{"type":"Point","properties":{"refs":["way/8605205","way/82329810"]},"coordinates":[8960,1940]},{"type":"Point","properties":{"refs":["way/8605169","way/89365363"]},"coordinates":[5070,1501]},{"type":"Point","properties":{"refs":["way/8605169","way/9429698","way/9429708"]},"coordinates":[5052,1573]},{"type":"Point","properties":{"refs":["way/9429193","way/89640582"]},"coordinates":[6213,1590]},{"type":"Point","properties":{"refs":["way/9430129","way/302110870"]},"coordinates":[5809,1337]},{"type":"Point","properties":{"refs":["way/8604858","way/9429352"]},"coordinates":[6488,1185]},{"type":"Point","properties":{"refs":["way/8604858","way/46226421","way/81050655","way/89640582","way/89717098","way/302110869"]},"coordinates":[6442,1398]},{"type":"Point","properties":{"refs":["way/9429634","way/46226421"]},"coordinates":[6295,1378]},{"type":"Point","properties":{"refs":["way/8605323","way/8610037","way/255479500"]},"coordinates":[8046,2308]},{"type":"Point","properties":{"refs":["way/8605545","way/8605568"]},"coordinates":[5407,377]},{"type":"Point","properties":{"refs":["way/8605568","way/9429916"]},"coordinates":[5538,495]},{"type":"Point","properties":{"refs":["way/8604879","way/50447251","way/302110865","way/302110868"]},"coordinates":[7647,868]},{"type":"Point","properties":{"refs":["way/8605568","way/9429339"]},"coordinates":[5563,520]},{"type":"Point","properties":{"refs":["way/8605310","way/8605831","way/9429039"]},"coordinates":[5925,702]},{"type":"Point","properties":{"refs":["way/9429087","way/89640582"]},"coordinates":[6339,1521]},{"type":"Point","properties":{"refs":["way/8604962","way/9429682"]},"coordinates":[4290,1592]},{"type":"Point","properties":{"refs":["way/9428807","way/89640582"]},"coordinates":[5972,1718]},{"type":"Point","properties":{"refs":["way/8604962","way/9430024"]},"coordinates":[4209,1681]},{"type":"Point","properties":{"refs":["way/9429986","way/89640582"]},"coordinates":[5863,1760]},{"type":"Point","properties":{"refs":["way/9429272","way/50447251"]},"coordinates":[7085,1150]},{"type":"Point","properties":{"refs":["way/8605169","way/9429616","way/302110870"]},"coordinates":[5144,1219]},{"type":"Point","properties":{"refs":["way/9430095","way/50447251"]},"coordinates":[6999,1191]},{"type":"Point","properties":{"refs":["way/8610038","way/341199168"]},"coordinates":[8833,3125]},{"type":"Point","properties":{"refs":["way/9428945","way/9429375","way/158695007","way/158695011"]},"coordinates":[7620,343]},{"type":"Point","properties":{"refs":["way/158695007"]},"coordinates":[7646,511]},{"type":"Point","properties":{"refs":["way/9430150","way/341199168"]},"coordinates":[8934,3085]},{"type":"Point","properties":{"refs":["way/8605471","way/9428990"]},"coordinates":[9191,2986]},{"type":"Point","properties":{"refs":["way/8605084","way/33858910"]},"coordinates":[3172,2979]},{"type":"Point","properties":{"refs":["way/33858910","way/81049960"]},"coordinates":[3094,3036]},{"type":"Point","properties":{"refs":["way/8605442","way/9037984","way/302110861","way/302110866"]},"coordinates":[5086,5392]},{"type":"Point","properties":{"refs":["way/8605216","way/9429540"]},"coordinates":[6468,592]},{"type":"Point","properties":{"refs":["way/8605831","way/44709018"]},"coordinates":[5852,688]},{"type":"Point","properties":{"refs":["way/8605545","way/9429482"]},"coordinates":[5092,720]},{"type":"Point","properties":{"refs":["way/8605545","way/9430007"]},"coordinates":[4992,832]},{"type":"Point","properties":{"refs":["way/46411508","way/81049983","way/185024514"]},"coordinates":[6531,994]},{"type":"Point","properties":{"refs":["way/8605079","way/9429931","way/50447252"]},"coordinates":[7760,1631]},{"type":"Point","properties":{"refs":["way/9429955","way/50447251"]},"coordinates":[7347,1027]},{"type":"Point","properties":{"refs":["way/8605208","way/8605545","way/302110870"]},"coordinates":[4751,1094]},{"type":"Point","properties":{"refs":["way/8605061","way/9429955"]},"coordinates":[7285,1395]},{"type":"Point","properties":{"refs":["way/8605545","way/9429296"]},"coordinates":[4612,1244]},{"type":"Point","properties":{"refs":["way/8605381","way/9429366","way/9429743"]},"coordinates":[6046,3021]},{"type":"Point","properties":{"refs":["way/8605169","way/8605423"]},"coordinates":[5095,1672]},{"type":"Point","properties":{"refs":["way/8605381","way/9429040"]},"coordinates":[5642,3200]},{"type":"Point","properties":{"refs":["way/8605381","way/8605500"]},"coordinates":[5508,3262]},{"type":"Point","properties":{"refs":["way/8605281","way/8605381"]},"coordinates":[2823,4753]},{"type":"Point","properties":{"refs":["way/9428791","way/169669985"]},"coordinates":[694,7165]},{"type":"Point","properties":{"refs":["way/9428867","way/169669985"]},"coordinates":[720,7140]},{"type":"Point","properties":{"refs":["way/43795186","way/44142846","way/93305682","way/353925648"]},"coordinates":[8494,5455]},{"type":"Point","properties":{"refs":["way/43795186","way/90205634"]},"coordinates":[8517,5543]},{"type":"Point","properties":{"refs":["way/8604756","way/8605061","way/8605696","way/9429117","way/9429546","way/9430029"]},"coordinates":[7413,1453]},{"type":"Point","properties":{"refs":["way/8605696","way/9429526","way/253877360"]},"coordinates":[7642,1508]},{"type":"Point","properties":{"refs":["way/8604950","way/37189582"]},"coordinates":[1627,7561]},{"type":"Point","properties":{"refs":["way/8604950","way/9429700"]},"coordinates":[1611,7531]},{"type":"Point","properties":{"refs":["way/8605168","way/8605423"]},"coordinates":[5112,1710]},{"type":"Point","properties":{"refs":["way/8605490","way/8614797","way/81160754"]},"coordinates":[2646,4033]},{"type":"Point","properties":{"refs":["way/8605024","way/9430163","way/41088998"]},"coordinates":[6181,4477]},{"type":"Point","properties":{"refs":["way/8605500","way/9429242"]},"coordinates":[5684,3580]},{"type":"Point","properties":{"refs":["way/8605500","way/9429334"]},"coordinates":[5667,3549]},{"type":"Point","properties":{"refs":["way/8605850","way/9429896"]},"coordinates":[7703,2840]},{"type":"Point","properties":{"refs":["way/8605850","way/9429612"]},"coordinates":[7889,2763]},{"type":"Point","properties":{"refs":["way/8605549","way/46226422","way/185024505"]},"coordinates":[6793,1208]},{"type":"Point","properties":{"refs":["way/9428809","way/9430083","way/303049926"]},"coordinates":[4198,3236]},{"type":"Point","properties":{"refs":["way/8605417","way/8607508"]},"coordinates":[3045,4777]},{"type":"Point","properties":{"refs":["way/8605281","way/8607508"]},"coordinates":[2888,4858]},{"type":"Point","properties":{"refs":["way/8605311","way/9429603"]},"coordinates":[7298,4015]},{"type":"Point","properties":{"refs":["way/9428896","way/9429499","way/158695006","way/158695010"]},"coordinates":[7484,206]},{"type":"Point","properties":{"refs":["way/9429375","way/9429499"]},"coordinates":[7510,357]},{"type":"Point","properties":{"refs":["way/90216994","way/354698582"]},"coordinates":[8616,4734]},{"type":"Point","properties":{"refs":["way/8604746","way/9429074"]},"coordinates":[6806,530]},{"type":"Point","properties":{"refs":["way/8605266","way/9430079"]},"coordinates":[5651,1621]},{"type":"Point","properties":{"refs":["way/8609435","way/9429416","way/91322335"]},"coordinates":[7790,5097]},{"type":"Point","properties":{"refs":["way/8605095","way/90216994","way/216565352"]},"coordinates":[8556,5025]},{"type":"Point","properties":{"refs":["way/8604852","way/81160756"]},"coordinates":[3579,3016]},{"type":"Point","properties":{"refs":["way/8615773","way/9429034"]},"coordinates":[6451,213]},{"type":"Point","properties":{"refs":["way/8604746","way/9429034","way/44682915"]},"coordinates":[6636,549]},{"type":"Point","properties":{"refs":["way/8605436","way/9428939"]},"coordinates":[6973,4628]},{"type":"Point","properties":{"refs":["way/8604767","way/9429254"]},"coordinates":[7384,2976]},{"type":"Point","properties":{"refs":["way/8605879","way/8610042"]},"coordinates":[9456,2972]},{"type":"Point","properties":{"refs":["way/8610042","way/89915331"]},"coordinates":[9386,3062]},{"type":"Point","properties":{"refs":["way/8610042","way/89920280"]},"coordinates":[9193,3327]},{"type":"Point","properties":{"refs":["way/8605310","way/8605740","way/9429435"]},"coordinates":[5972,711]},{"type":"Point","properties":{"refs":["way/9428856","way/90286273"]},"coordinates":[8087,3530]},{"type":"Point","properties":{"refs":["way/8605474","way/9428886"]},"coordinates":[4403,4733]},{"type":"Point","properties":{"refs":["way/8605474","way/9429619"]},"coordinates":[4474,4691]},{"type":"Point","properties":{"refs":["way/9430089","way/33858910"]},"coordinates":[2818,3242]},{"type":"Point","properties":{"refs":["way/9429856","way/33858910"]},"coordinates":[2924,3162]},{"type":"Point","properties":{"refs":["way/8605193","way/8605821"]},"coordinates":[8322,481]},{"type":"Point","properties":{"refs":["way/8605142","way/8605463"]},"coordinates":[4744,2729]},{"type":"Point","properties":{"refs":["way/8610034","way/341199168"]},"coordinates":[8538,3256]},{"type":"Point","properties":{"refs":["way/9429934","way/9430120"]},"coordinates":[8510,3242]},{"type":"Point","properties":{"refs":["way/9430060","way/341199168"]},"coordinates":[8427,3321]},{"type":"Point","properties":{"refs":["way/9429033","way/9429879"]},"coordinates":[7044,404]},{"type":"Point","properties":{"refs":["way/8605500","way/9429868"]},"coordinates":[5711,3631]},{"type":"Point","properties":{"refs":["way/8605311","way/316397216"]},"coordinates":[7326,3990]},{"type":"Point","properties":{"refs":["way/90286273","way/316397216"]},"coordinates":[7345,4010]},{"type":"Point","properties":{"refs":["way/8605311","way/9429260"]},"coordinates":[7469,3869]},{"type":"Point","properties":{"refs":["way/82329777","way/90286273"]},"coordinates":[7413,3958]},{"type":"Point","properties":{"refs":["way/9429911","way/82329827"]},"coordinates":[5779,3756]},{"type":"Point","properties":{"refs":["way/8605345","way/9429554"]},"coordinates":[8271,2050]},{"type":"Point","properties":{"refs":["way/8605345","way/9428801"]},"coordinates":[8187,1883]},{"type":"Point","properties":{"refs":["way/8604845","way/80513078"]},"coordinates":[4621,5025]},{"type":"Point","properties":{"refs":["way/8607498","way/9429559"]},"coordinates":[2320,5337]},{"type":"Point","properties":{"refs":["way/8605101","way/82329824"]},"coordinates":[6512,3274]},{"type":"Point","properties":{"refs":["way/8604762","way/9428859"]},"coordinates":[4178,5060]},{"type":"Point","properties":{"refs":["way/8604767","way/142608863"]},"coordinates":[6552,3315]},{"type":"Point","properties":{"refs":["way/9428802","way/295037247"]},"coordinates":[8916,3763]},{"type":"Point","properties":{"refs":["way/33721065","way/33721104"]},"coordinates":[3073,2982]},{"type":"Point","properties":{"refs":["way/8604762","way/9429363"]},"coordinates":[4162,5032]},{"type":"Point","properties":{"refs":["way/82329789","way/82329824"]},"coordinates":[6567,3206]},{"type":"Point","properties":{"refs":["way/8605500","way/82329792"]},"coordinates":[5723,3652]},{"type":"Point","properties":{"refs":["way/82329792","way/82329827"]},"coordinates":[5752,3706]},{"type":"Point","properties":{"refs":["way/82329789","way/90291148"]},"coordinates":[6640,3115]},{"type":"Point","properties":{"refs":["way/8604762","way/9428886"]},"coordinates":[4259,5217]},{"type":"Point","properties":{"refs":["way/8605345","way/9429297"]},"coordinates":[8218,1943]},{"type":"Point","properties":{"refs":["way/8605187","way/9429391","way/9429597"]},"coordinates":[1632,5259]},{"type":"Point","properties":{"refs":["way/9429995","way/33721065"]},"coordinates":[3902,2007]},{"type":"Point","properties":{"refs":["way/9428956","way/295037247"]},"coordinates":[9485,3191]},{"type":"Point","properties":{"refs":["way/8605821"]},"coordinates":[8563,613]},{"type":"Point","properties":{"refs":["way/8604767","way/9429847"]},"coordinates":[6722,3248]},{"type":"Point","properties":{"refs":["way/8604845"]},"coordinates":[4591,4967]},{"type":"Point","properties":{"refs":["way/8604767","way/9429748"]},"coordinates":[6885,3182]},{"type":"Point","properties":{"refs":["way/9429426","way/44682915"]},"coordinates":[6675,374]},{"type":"Point","properties":{"refs":["way/9430009","way/302110862"]},"coordinates":[1347,6650]},{"type":"Point","properties":{"refs":["way/8605228","way/9429093"]},"coordinates":[1303,6917]},{"type":"Point","properties":{"refs":["way/8605228","way/169669985","way/255480979","way/302110862"]},"coordinates":[1216,6729]},{"type":"Point","properties":{"refs":["way/8605216","way/8605229","way/44682915","way/44682916","way/81049981"]},"coordinates":[6577,789]},{"type":"Point","properties":{"refs":["way/8605712","way/8605740","way/44682916"]},"coordinates":[6190,727]},{"type":"Point","properties":{"refs":["way/8604709","way/9429279","way/302110869"]},"coordinates":[6543,1418]},{"type":"Point","properties":{"refs":["way/9429193","way/46226421"]},"coordinates":[6173,1362]},{"type":"Point","properties":{"refs":["way/9428788","way/81160754"]},"coordinates":[3050,3513]},{"type":"Point","properties":{"refs":["way/9429196","way/81160754"]},"coordinates":[3018,3559]},{"type":"Point","properties":{"refs":["way/8604884","way/9429534","way/50447251"]},"coordinates":[7209,1096]},{"type":"Point","properties":{"refs":["way/8605061","way/9429746"]},"coordinates":[7154,1360]},{"type":"Point","properties":{"refs":["way/8604762","way/9429619"]},"coordinates":[4016,4754]},{"type":"Point","properties":{"refs":["way/8604762","way/9430170"]},"coordinates":[4004,4733]},{"type":"Point","properties":{"refs":["way/8604762","way/8605474"]},"coordinates":[4099,4911]},{"type":"Point","properties":{"refs":["way/8604950","way/8605228","way/46785938"]},"coordinates":[1455,7212]},{"type":"Point","properties":{"refs":["way/8605228","way/9430038"]},"coordinates":[1328,6959]},{"type":"Point","properties":{"refs":["way/89900465","way/158695011","way/302110867"]},"coordinates":[7799,318]},{"type":"Point","properties":{"refs":["way/9428935","way/89900465","way/89900468","way/302110865"]},"coordinates":[7673,745]},{"type":"Point","properties":{"refs":["way/9429458","way/9429713","way/169669985"]},"coordinates":[897,6963]},{"type":"Point","properties":{"refs":["way/8604730"]},"coordinates":[5213,2359]},{"type":"Point","properties":{"refs":["way/8604822","way/8605854","way/9430125"]},"coordinates":[4247,5748]},{"type":"Point","properties":{"refs":["way/8604767","way/9428758"]},"coordinates":[6847,3197]},{"type":"Point","properties":{"refs":["way/8604822","way/8605214"]},"coordinates":[4371,5694]},{"type":"Point","properties":{"refs":["way/8605777","way/9429622"]},"coordinates":[3983,5745]},{"type":"Point","properties":{"refs":["way/8603122","way/9429622"]},"coordinates":[3914,5876]},{"type":"Point","properties":{"refs":["way/9429051","way/109100959"]},"coordinates":[2918,6891]},{"type":"Point","properties":{"refs":["way/8604752","way/85327560","way/353925648"]},"coordinates":[8439,5439]},{"type":"Point","properties":{"refs":["way/9429051","way/9429053","way/184472807"]},"coordinates":[2200,7016]},{"type":"Point","properties":{"refs":["way/8604791","way/93160342"]},"coordinates":[364,9269]},{"type":"Point","properties":{"refs":["way/8604781","way/91828496","way/93160342"]},"coordinates":[435,9277]},{"type":"Point","properties":{"refs":["way/8605789","way/8605790","way/8609187"]},"coordinates":[4280,2637]},{"type":"Point","properties":{"refs":["way/8605789","way/8605790"]},"coordinates":[4323,2566]},{"type":"Point","properties":{"refs":["way/9429044"]},"coordinates":[9939,3739]},{"type":"Point","properties":{"refs":["way/8605442","way/9429640","way/9429929"]},"coordinates":[5426,5246]},{"type":"Point","properties":{"refs":["way/9429640","way/302110864"]},"coordinates":[5309,5011]},{"type":"Point","properties":{"refs":["way/8605854","way/9039079"]},"coordinates":[4299,5787]},{"type":"Point","properties":{"refs":["way/8604752","way/8605095","way/43795186","way/216565347","way/216565352"]},"coordinates":[8428,5207]},{"type":"Point","properties":{"refs":["way/43795186","way/44142850"]},"coordinates":[8464,5342]},{"type":"Point","properties":{"refs":["way/80486089","way/302110864","way/302110866"]},"coordinates":[5211,5178]},{"type":"Point","properties":{"refs":["way/85327560","way/216565347"]},"coordinates":[8369,5181]},{"type":"Point","properties":{"refs":["way/9430177","way/85327560"]},"coordinates":[8314,4975]},{"type":"Point","properties":{"refs":["way/9429382","way/85327560"]},"coordinates":[8266,4827]},{"type":"Point","properties":{"refs":["way/8605806"]},"coordinates":[6127,494]},{"type":"Point","properties":{"refs":["way/9429925","way/9430085","way/109100959"]},"coordinates":[2980,6343]},{"type":"Point","properties":{"refs":["way/8604756","way/8605696","way/50447252"]},"coordinates":[7738,1618]},{"type":"Point","properties":{"refs":["way/8605671","way/8647657","way/59034329"]},"coordinates":[8868,56]},{"type":"Point","properties":{"refs":["way/8605205","way/9429964"]},"coordinates":[8558,1853]},{"type":"Point","properties":{"refs":["way/8605205","way/9429480"]},"coordinates":[8446,1837]},{"type":"Point","properties":{"refs":["way/9429053"]},"coordinates":[2169,6949]},{"type":"Point","properties":{"refs":["way/8604950","way/9428973"]},"coordinates":[1571,7449]},{"type":"Point","properties":{"refs":["way/9429939","way/46785938"]},"coordinates":[1143,7420]},{"type":"Point","properties":{"refs":["way/8604779","way/8605090","way/8605164","way/8605330"]},"coordinates":[2120,7505]},{"type":"Point","properties":{"refs":["way/8605847","way/216565352"]},"coordinates":[8489,5153]},{"type":"Point","properties":{"refs":["way/8605786"]},"coordinates":[6251,5241]},{"type":"Point","properties":{"refs":["way/9429421","way/169669985"]},"coordinates":[800,7059]},{"type":"Point","properties":{"refs":["way/8605178","way/8605456"]},"coordinates":[3144,7141]},{"type":"Point","properties":{"refs":["way/9428728","way/9429609","way/169669985"]},"coordinates":[977,6887]},{"type":"Point","properties":{"refs":["way/97475597","way/169669985"]},"coordinates":[472,7330]},{"type":"Point","properties":{"refs":["way/8605090","way/46785938"]},"coordinates":[1854,6991]},{"type":"Point","properties":{"refs":["way/9430069","way/279671648"]},"coordinates":[1810,6404]},{"type":"Point","properties":{"refs":["way/8604950","way/9429967"]},"coordinates":[1676,7661]},{"type":"Point","properties":{"refs":["way/9428773","way/9429724","way/46785938"]},"coordinates":[639,7783]},{"type":"Point","properties":{"refs":["way/8604950","way/9428943"]},"coordinates":[1736,7784]},{"type":"Point","properties":{"refs":["way/8604779","way/8604950"]},"coordinates":[1703,7717]},{"type":"Point","properties":{"refs":["way/9430179","way/303049926"]},"coordinates":[4029,3379]},{"type":"Point","properties":{"refs":["way/8605381","way/9430037"]},"coordinates":[5104,3445]},{"type":"Point","properties":{"refs":["way/8605381","way/9428994"]},"coordinates":[5250,3379]},{"type":"Point","properties":{"refs":["way/8605077"]},"coordinates":[4805,3426]},{"type":"Point","properties":{"refs":["way/8605077","way/8605524","way/8609186"]},"coordinates":[4883,3389]},{"type":"Point","properties":{"refs":["way/8605381","way/8605524","way/8609185"]},"coordinates":[4945,3516]},{"type":"Point","properties":{"refs":["way/9429948","way/341199168"]},"coordinates":[8317,3388]},{"type":"Point","properties":{"refs":["way/8605311","way/9429290"]},"coordinates":[7895,3607]},{"type":"Point","properties":{"refs":["way/8604852","way/303049926"]},"coordinates":[3852,3537]},{"type":"Point","properties":{"refs":["way/8604767","way/8605101"]},"coordinates":[6459,3353]},{"type":"Point","properties":{"refs":["way/8605101","way/9429365","way/172237233","way/302110864"]},"coordinates":[6311,3539]},{"type":"Point","properties":{"refs":["way/8605216","way/302156886"]},"coordinates":[6268,225]},{"type":"Point","properties":{"refs":["way/9429431","way/33721065"]},"coordinates":[3099,2878]},{"type":"Point","properties":{"refs":["way/8604852","way/81160757"]},"coordinates":[3797,3432]},{"type":"Point","properties":{"refs":["way/8605381","way/9428809","way/31120838"]},"coordinates":[4481,3780]},{"type":"Point","properties":{"refs":["way/8605545","way/9429830"]},"coordinates":[4487,1378]},{"type":"Point","properties":{"refs":["way/9429117","way/50447251"]},"coordinates":[7496,957]},{"type":"Point","properties":{"refs":["way/9429310","way/341199168"]},"coordinates":[8766,3154]},{"type":"Point","properties":{"refs":["way/8605205","way/8605345"]},"coordinates":[8164,1777]},{"type":"Point","properties":{"refs":["way/9429176","way/39621980"]},"coordinates":[6104,288]},{"type":"Point","properties":{"refs":["way/8615088","way/39621980"]},"coordinates":[6229,225]},{"type":"Point","properties":{"refs":["way/8605089","way/138749280","way/295037247"]},"coordinates":[8806,3883]},{"type":"Point","properties":{"refs":["way/9429162","way/286619210"]},"coordinates":[8120,4712]},{"type":"Point","properties":{"refs":["way/8605417","way/9428731","way/9430170"]},"coordinates":[3168,5014]},{"type":"Point","properties":{"refs":["way/8605417","way/9430141"]},"coordinates":[3069,4821]},{"type":"Point","properties":{"refs":["way/85327560","way/138749280","way/286619210","way/286619213"]},"coordinates":[8227,4656]},{"type":"Point","properties":{"refs":["way/85327560","way/89920281"]},"coordinates":[8239,4724]},{"type":"Point","properties":{"refs":["way/9428797","way/295037247"]},"coordinates":[8983,3696]},{"type":"Point","properties":{"refs":["way/8605311","way/82329777"]},"coordinates":[7392,3925]},{"type":"Point","properties":{"refs":["way/8605311","way/9429809"]},"coordinates":[7501,3848]},{"type":"Point","properties":{"refs":["way/8605090","way/9428973"]},"coordinates":[1984,7242]},{"type":"Point","properties":{"refs":["way/8604950","way/9429574"]},"coordinates":[1518,7338]},{"type":"Point","properties":{"refs":["way/8605311","way/9429734"]},"coordinates":[7652,3755]},{"type":"Point","properties":{"refs":["way/8605502","way/85327560"]},"coordinates":[8532,5718]},{"type":"Point","properties":{"refs":["way/9430071","way/279671648"]},"coordinates":[2462,6189]},{"type":"Point","properties":{"refs":["way/8604950","way/9428918"]},"coordinates":[1544,7395]},{"type":"Point","properties":{"refs":["way/31133346","way/175011002"]},"coordinates":[3794,5955]},{"type":"Point","properties":{"refs":["way/8605417","way/9429281"]},"coordinates":[3554,5769]},{"type":"Point","properties":{"refs":["way/9429861","way/279671648"]},"coordinates":[1946,6355]},{"type":"Point","properties":{"refs":["way/9430174","way/279671648"]},"coordinates":[2199,6271]},{"type":"Point","properties":{"refs":["way/9428845","way/9429799","way/279671648"]},"coordinates":[2320,6234]},{"type":"Point","properties":{"refs":["way/9429875","way/279671648"]},"coordinates":[2068,6314]},{"type":"Point","properties":{"refs":["way/9429952","way/46785938"]},"coordinates":[2328,6630]},{"type":"Point","properties":{"refs":["way/8605424","way/279671648"]},"coordinates":[1998,6337]},{"type":"Point","properties":{"refs":["way/9429952","way/279671648"]},"coordinates":[2147,6286]},{"type":"Point","properties":{"refs":["way/8605370","way/9429678"]},"coordinates":[3388,4611]},{"type":"Point","properties":{"refs":["way/8604845","way/8605107","way/9429863"]},"coordinates":[4741,5248]},{"type":"Point","properties":{"refs":["way/8608836","way/9429283","way/9429572"]},"coordinates":[1940,4766]},{"type":"Point","properties":{"refs":["way/9429863","way/82329760"]},"coordinates":[4392,5475]},{"type":"Point","properties":{"refs":["way/8605545","way/9429802"]},"coordinates":[4927,904]},{"type":"Point","properties":{"refs":["way/8605545","way/9429282"]},"coordinates":[4953,875]},{"type":"Point","properties":{"refs":["way/9429160"]},"coordinates":[1044,5564]},{"type":"Point","properties":{"refs":["way/91322335","way/353939784"]},"coordinates":[8339,5636]},{"type":"Point","properties":{"refs":["way/8604822","way/82329760","way/302110861"]},"coordinates":[4480,5648]},{"type":"Point","properties":{"refs":["way/9429156","way/302110861"]},"coordinates":[4518,5630]},{"type":"Point","properties":{"refs":["way/8605442","way/9429023"]},"coordinates":[5525,5206]},{"type":"Point","properties":{"refs":["way/8605532","way/8607498","way/8607499","way/297940042"]},"coordinates":[2471,5256]},{"type":"Point","properties":{"refs":["way/8604965","way/8605187"]},"coordinates":[1684,5298]},{"type":"Point","properties":{"refs":["way/9429030","way/91322335"]},"coordinates":[8182,5479]},{"type":"Point","properties":{"refs":["way/9429038","way/91322335"]},"coordinates":[8083,5383]},{"type":"Point","properties":{"refs":["way/8605107","way/302110861"]},"coordinates":[4864,5485]},{"type":"Point","properties":{"refs":["way/8605187","way/8614784"]},"coordinates":[1893,5176]},{"type":"Point","properties":{"refs":["way/8605187","way/8606961","way/9429505"]},"coordinates":[1417,5088]},{"type":"Point","properties":{"refs":["way/9430177","way/91322335"]},"coordinates":[7985,5287]},{"type":"Point","properties":{"refs":["way/9429382","way/91322335"]},"coordinates":[7887,5192]},{"type":"Point","properties":{"refs":["way/8605480","way/9429622","way/31133325"]},"coordinates":[4131,5467]},{"type":"Point","properties":{"refs":["way/8605847","way/43795186"]},"coordinates":[8398,5104]},{"type":"Point","properties":{"refs":["way/8604974","way/8605579","way/9428731"]},"coordinates":[3014,5095]},{"type":"Point","properties":{"refs":["way/8605417","way/9429311"]},"coordinates":[3238,5149]},{"type":"Point","properties":{"refs":["way/8604814","way/9429335","way/93168580","way/93168581","way/93168582"]},"coordinates":[2052,5195]},{"type":"Point","properties":{"refs":["way/8605187","way/9430035"]},"coordinates":[1462,5126]},{"type":"Point","properties":{"refs":["way/8605187","way/9429821"]},"coordinates":[1551,5195]},{"type":"Point","properties":{"refs":["way/9428746","way/9429466","way/302110870"]},"coordinates":[5356,1292]},{"type":"Point","properties":{"refs":["way/8605311","way/9428856"]},"coordinates":[8069,3507]},{"type":"Point","properties":{"refs":["way/8605579"]},"coordinates":[2961,4993]},{"type":"Point","properties":{"refs":["way/8604870","way/8605662"]},"coordinates":[5472,3529]},{"type":"Point","properties":{"refs":["way/8604785","way/8604870"]},"coordinates":[5444,3473]},{"type":"Point","properties":{"refs":["way/8605205","way/9429182"]},"coordinates":[8376,1823]},{"type":"Point","properties":{"refs":["way/8605500","way/9429696"]},"coordinates":[5610,3445]},{"type":"Point","properties":{"refs":["way/8605345","way/9429691"]},"coordinates":[8400,2312]},{"type":"Point","properties":{"refs":["way/8605345","way/9429182"]},"coordinates":[8340,2186]},{"type":"Point","properties":{"refs":["way/9429656","way/89640582"]},"coordinates":[5918,1742]},{"type":"Point","properties":{"refs":["way/8605417","way/9428988"]},"coordinates":[3305,5279]},{"type":"Point","properties":{"refs":["way/8605331","way/81160754"]},"coordinates":[2925,3687]},{"type":"Point","properties":{"refs":["way/9428788","way/81160754"]},"coordinates":[3157,3361]},{"type":"Point","properties":{"refs":["way/81160754","way/93167677"]},"coordinates":[2597,4087]},{"type":"Point","properties":{"refs":["way/8605545","way/49238448"]},"coordinates":[5560,212]},{"type":"Point","properties":{"refs":["way/9429623","way/81160754"]},"coordinates":[2841,3794]},{"type":"Point","properties":{"refs":["way/8614626","way/81160754"]},"coordinates":[2790,3860]},{"type":"Point","properties":{"refs":["way/81160754","way/92994692"]},"coordinates":[2953,3650]},{"type":"Point","properties":{"refs":["way/9429069","way/138749280"]},"coordinates":[8661,4110]},{"type":"Point","properties":{"refs":["way/8605592","way/43795186"]},"coordinates":[8280,4628]},{"type":"Point","properties":{"refs":["way/8605207","way/302110870"]},"coordinates":[6022,1343]},{"type":"Point","properties":{"refs":["way/8605789","way/9429127"]},"coordinates":[4342,2607]},{"type":"Point","properties":{"refs":["way/8610038","way/9430164"]},"coordinates":[8644,2763]},{"type":"Point","properties":{"refs":["way/8610038","way/9428983"]},"coordinates":[8594,2676]},{"type":"Point","properties":{"refs":["way/8605205","way/8649976","way/9429555"]},"coordinates":[9068,1965]},{"type":"Point","properties":{"refs":["way/8605205","way/8651189"]},"coordinates":[9101,1971]},{"type":"Point","properties":{"refs":["way/8605306","way/302110867"]},"coordinates":[7922,76]},{"type":"Point","properties":{"refs":["way/8604762","way/82329832"]},"coordinates":[4315,5327]},{"type":"Point","properties":{"refs":["way/82329760","way/82329832"]},"coordinates":[4341,5377]},{"type":"Point","properties":{"refs":["way/9429576","way/33721065"]},"coordinates":[3356,2597]},{"type":"Point","properties":{"refs":["way/8604726","way/9429791"]},"coordinates":[4034,5849]},{"type":"Point","properties":{"refs":["way/8605084"]},"coordinates":[3258,3029]},{"type":"Point","properties":{"refs":["way/8609187","way/303049926"]},"coordinates":[4485,3058]},{"type":"Point","properties":{"refs":["way/8605471","way/9429309"]},"coordinates":[9120,3013]},{"type":"Point","properties":{"refs":["way/8608834","way/93168579"]},"coordinates":[2061,5083]},{"type":"Point","properties":{"refs":["way/9429473","way/169669985"]},"coordinates":[1153,6764]},{"type":"Point","properties":{"refs":["way/46226422","way/46226423"]},"coordinates":[6696,1021]},{"type":"Point","properties":{"refs":["way/8605229","way/46226423"]},"coordinates":[6613,861]},{"type":"Point","properties":{"refs":["way/8605207","way/46226421"]},"coordinates":[6061,1348]},{"type":"Point","properties":{"refs":["way/81049981","way/185024514"]},"coordinates":[6542,952]},{"type":"Point","properties":{"refs":["way/8605096","way/8605266","way/24917825"]},"coordinates":[5741,1821]},{"type":"Point","properties":{"refs":["way/9429374","way/303049926"]},"coordinates":[4677,2971]},{"type":"Point","properties":{"refs":["way/9428993","way/158695012"]},"coordinates":[7276,149]},{"type":"Point","properties":{"refs":["way/8615529","way/9428980"]},"coordinates":[7382,138]},{"type":"Point","properties":{"refs":["way/9428896","way/9428993","way/9429033"]},"coordinates":[7304,256]},{"type":"Point","properties":{"refs":["way/8605568","way/8605831"]},"coordinates":[5715,640]},{"type":"Point","properties":{"refs":["way/8605568","way/88607346"]},"coordinates":[5651,598]},{"type":"Point","properties":{"refs":["way/8604881","way/8605061","way/9429140"]},"coordinates":[6880,1372]},{"type":"Point","properties":{"refs":["way/8604881","way/8605549","way/50447251","way/89717125"]},"coordinates":[6828,1277]},{"type":"Point","properties":{"refs":["way/9428834","way/9429437","way/302110864"]},"coordinates":[6177,3707]},{"type":"Point","properties":{"refs":["way/8605061","way/9428916"]},"coordinates":[7005,1367]},{"type":"Point","properties":{"refs":["way/8605089","way/9429069","way/90216994"]},"coordinates":[8733,4188]},{"type":"Point","properties":{"refs":["way/9428899","way/90216994"]},"coordinates":[8647,4587]},{"type":"Point","properties":{"refs":["way/8615749","way/9429505"]},"coordinates":[2075,4356]},{"type":"Point","properties":{"refs":["way/8604828","way/8615737"]},"coordinates":[2361,4445]},{"type":"Point","properties":{"refs":["way/8604962","way/9429358","way/9429755","way/33721065"]},"coordinates":[3979,1924]},{"type":"Point","properties":{"refs":["way/8604828","way/8615085"]},"coordinates":[2408,4358]},{"type":"Point","properties":{"refs":["way/8604950","way/9429454"]},"coordinates":[1845,7999]},{"type":"Point","properties":{"refs":["way/9428954","way/169669985"]},"coordinates":[590,7254]},{"type":"Point","properties":{"refs":["way/9430010","way/169669985"]},"coordinates":[1068,6818]},{"type":"Point","properties":{"refs":["way/9429472","way/169669985"]},"coordinates":[631,7229]},{"type":"Point","properties":{"refs":["way/9429164","way/169669985"]},"coordinates":[525,7298]},{"type":"Point","properties":{"refs":["way/8605424","way/9428740"]},"coordinates":[2153,6635]},{"type":"Point","properties":{"refs":["way/8605424","way/46785938"]},"coordinates":[2216,6755]},{"type":"Point","properties":{"refs":["way/8615777","way/44682915"]},"coordinates":[6719,196]},{"type":"Point","properties":{"refs":["way/8605208","way/8615076","way/8616219"]},"coordinates":[4602,1048]},{"type":"Point","properties":{"refs":["way/8604950","way/9429275"]},"coordinates":[1792,7893]},{"type":"Point","properties":{"refs":["way/8615485"]},"coordinates":[8671,0]},{"type":"Point","properties":{"refs":["way/8605671","way/8605673","way/8615485"]},"coordinates":[8797,11]},{"type":"Point","properties":{"refs":["way/9429479","way/279671648"]},"coordinates":[2768,6172]},{"type":"Point","properties":{"refs":["way/9429091","way/279671648"]},"coordinates":[2611,6166]},{"type":"Point","properties":{"refs":["way/104214827","way/175011002"]},"coordinates":[3277,6184]},{"type":"Point","properties":{"refs":["way/9429582","way/175011002","way/175011005"]},"coordinates":[3151,6221]},{"type":"Point","properties":{"refs":["way/9429074","way/9429747","way/9429879"]},"coordinates":[7060,518]},{"type":"Point","properties":{"refs":["way/8615007","way/9429879"]},"coordinates":[7041,175]},{"type":"Point","properties":{"refs":["way/8605225","way/90291149"]},"coordinates":[7156,2449]},{"type":"Point","properties":{"refs":["way/9429336","way/302110870"]},"coordinates":[5591,1346]},{"type":"Point","properties":{"refs":["way/8604767","way/9429804"]},"coordinates":[7285,3017]},{"type":"Point","properties":{"refs":["way/8605442","way/9430096"]},"coordinates":[5904,5011]},{"type":"Point","properties":{"refs":["way/8605260"]},"coordinates":[2769,4532]},{"type":"Point","properties":{"refs":["way/8605127","way/9429184"]},"coordinates":[2607,4508]},{"type":"Point","properties":{"refs":["way/9430096","way/302110864"]},"coordinates":[5629,4474]},{"type":"Point","properties":{"refs":["way/8605442","way/9429099"]},"coordinates":[5774,5082]},{"type":"Point","properties":{"refs":["way/8604852","way/9429150"]},"coordinates":[3751,3343]},{"type":"Point","properties":{"refs":["way/8605442","way/9038722"]},"coordinates":[5292,5304]},{"type":"Point","properties":{"refs":["way/8616177","way/9429821"]},"coordinates":[1197,5332]},{"type":"Point","properties":{"refs":["way/9038805","way/43795186"]},"coordinates":[8561,5710]},{"type":"Point","properties":{"refs":["way/9429658","way/50447251"]},"coordinates":[6919,1233]},{"type":"Point","properties":{"refs":["way/31115887","way/302110870"]},"coordinates":[5698,1353]},{"type":"Point","properties":{"refs":["way/9430101","way/302110870"]},"coordinates":[5466,1320]},{"type":"Point","properties":{"refs":["way/8606961","way/8615868"]},"coordinates":[1390,5068]},{"type":"Point","properties":{"refs":["way/8604709","way/81050655","way/89717125"]},"coordinates":[6581,1397]},{"type":"Point","properties":{"refs":["way/9428945","way/158695010"]},"coordinates":[7597,190]},{"type":"Point","properties":{"refs":["way/8615758","way/158695006"]},"coordinates":[7471,128]},{"type":"Point","properties":{"refs":["way/9428930","way/158695010"]},"coordinates":[7777,162]},{"type":"Point","properties":{"refs":["way/158695010","way/302110867"]},"coordinates":[7852,164]},{"type":"Point","properties":{"refs":["way/8605205","way/9430166"]},"coordinates":[8021,1732]},{"type":"Point","properties":{"refs":["way/31127468","way/302110870"]},"coordinates":[5244,1254]},{"type":"Point","properties":{"refs":["way/9428765","way/9429951"]},"coordinates":[6183,955]},{"type":"Point","properties":{"refs":["way/8605205","way/9429552","way/164877031"]},"coordinates":[7937,1703]},{"type":"Point","properties":{"refs":["way/9429115","way/105957565","way/255479501"]},"coordinates":[8907,2363]},{"type":"Point","properties":{"refs":["way/8605500","way/8605662"]},"coordinates":[5618,3463]},{"type":"Point","properties":{"refs":["way/8615275","way/8615275"]},"coordinates":[4478,1193]},{"type":"Point","properties":{"refs":["way/8615369"]},"coordinates":[6012,229]},{"type":"Point","properties":{"refs":["way/8604962","way/8605545","way/8614834","way/34303115"]},"coordinates":[4357,1522]},{"type":"Point","properties":{"refs":["way/51811523","way/82332101"]},"coordinates":[9690,2969]},{"type":"Point","properties":{"refs":["way/97474462","way/97474464"]},"coordinates":[0,6974]},{"type":"Point","properties":{"refs":["way/8842520","way/354325811","way/354326119"]},"coordinates":[8598,5592]},{"type":"Point","properties":{"refs":["way/8842520","way/85327550"]},"coordinates":[8555,5623]},{"type":"Point","properties":{"refs":["way/82332122","way/82332122"]},"coordinates":[9976,4292]},{"type":"Point","properties":{"refs":["way/8842520","way/82332122"]},"coordinates":[9594,4955]},{"type":"Point","properties":{"refs":["way/8842397"]},"coordinates":[8824,320]},{"type":"Point","properties":{"refs":["way/8604965","way/93401911"]},"coordinates":[1659,5375]},{"type":"Point","properties":{"refs":["way/8605417","way/93401904"]},"coordinates":[3113,4913]},{"type":"Point","properties":{"refs":["way/8605330","way/9038710"]},"coordinates":[2161,7583]},{"type":"Point","properties":{"refs":["way/80994963","way/138789038"]},"coordinates":[1219,9999]},{"type":"Point","properties":{"refs":["way/9037832","way/9430125"]},"coordinates":[4242,5812]},{"type":"Point","properties":{"refs":["way/9038751","way/93020600"]},"coordinates":[1107,9497]},{"type":"Point","properties":{"refs":["way/9037824"]},"coordinates":[870,9188]},{"type":"Point","properties":{"refs":["way/9038813","way/9429239"]},"coordinates":[872,8937]},{"type":"Point","properties":{"refs":["way/82329777","way/90288884"]},"coordinates":[6949,2995]},{"type":"Point","properties":{"refs":["way/9429484","way/82329777"]},"coordinates":[7189,3590]},{"type":"Point","properties":{"refs":["way/9428817","way/9429495"]},"coordinates":[5708,491]},{"type":"Point","properties":{"refs":["way/9429140","way/9429569"]},"coordinates":[6879,1505]},{"type":"Point","properties":{"refs":["way/9428830","way/90286273","way/171308002"]},"coordinates":[6508,4646]},{"type":"Point","properties":{"refs":["way/9429272","way/9429774"]},"coordinates":[7088,757]},{"type":"Point","properties":{"refs":["way/9429108","way/9430078"]},"coordinates":[7389,4260]},{"type":"Point","properties":{"refs":["way/9429281","way/9429525"]},"coordinates":[3286,5899]},{"type":"Point","properties":{"refs":["way/9429283"]},"coordinates":[1851,4865]},{"type":"Point","properties":{"refs":["way/9429934","way/9430060"]},"coordinates":[8412,3301]},{"type":"Point","properties":{"refs":["way/9428826","way/9430042"]},"coordinates":[6415,5221]},{"type":"Point","properties":{"refs":["way/61268332","way/203009474"]},"coordinates":[4031,2568]},{"type":"Point","properties":{"refs":["way/9429315","way/9430170"]},"coordinates":[3900,4768]},{"type":"Point","properties":{"refs":["way/8605090","way/9429574"]},"coordinates":[1925,7126]},{"type":"Point","properties":{"refs":["way/9429319","way/9429832"]},"coordinates":[6156,1138]},{"type":"Point","properties":{"refs":["way/8607499","way/9428731"]},"coordinates":[2518,5358]},{"type":"Point","properties":{"refs":["way/9429423","way/89717128"]},"coordinates":[6627,1583]},{"type":"Point","properties":{"refs":["way/9429099","way/9429854"]},"coordinates":[5443,4523]},{"type":"Point","properties":{"refs":["way/9429313","way/9430078"]},"coordinates":[7233,4413]},{"type":"Point","properties":{"refs":["way/9428899","way/90216988"]},"coordinates":[8495,4462]},{"type":"Point","properties":{"refs":["way/9429934","way/115576686"]},"coordinates":[8359,3332]},{"type":"Point","properties":{"refs":["way/9429139","way/9429568"]},"coordinates":[6693,2400]},{"type":"Point","properties":{"refs":["way/9429559"]},"coordinates":[2266,5219]},{"type":"Point","properties":{"refs":["way/9429572","way/9429803"]},"coordinates":[2040,4660]},{"type":"Point","properties":{"refs":["way/9429212","way/9429250"]},"coordinates":[3768,3860]},{"type":"Point","properties":{"refs":["way/9429533","way/9429708"]},"coordinates":[5009,1588]},{"type":"Point","properties":{"refs":["way/9429302","way/9429497"]},"coordinates":[4077,3610]},{"type":"Point","properties":{"refs":["way/9430166","way/82329810"]},"coordinates":[9037,1550]},{"type":"Point","properties":{"refs":["way/9429066","way/93305686"]},"coordinates":[7577,1670]},{"type":"Point","properties":{"refs":["way/8605164","way/9430086","way/109100959"]},"coordinates":[2876,7258]},{"type":"Point","properties":{"refs":["way/9429313"]},"coordinates":[7187,4367]},{"type":"Point","properties":{"refs":["way/8605436","way/9429674","way/9430078"]},"coordinates":[7090,4551]},{"type":"Point","properties":{"refs":["way/8605693","way/46785937"]},"coordinates":[636,8027]},{"type":"Point","properties":{"refs":["way/8605142","way/9429374","way/9429409"]},"coordinates":[4596,2795]},{"type":"Point","properties":{"refs":["way/9428969","way/9430179"]},"coordinates":[4003,3333]},{"type":"Point","properties":{"refs":["way/9430046"]},"coordinates":[6678,5591]},{"type":"Point","properties":{"refs":["way/82329768","way/90286273"]},"coordinates":[7850,3675]},{"type":"Point","properties":{"refs":["way/9429281","way/104214827"]},"coordinates":[3160,5961]},{"type":"Point","properties":{"refs":["way/49655013","way/89900463"]},"coordinates":[7541,1710]},{"type":"Point","properties":{"refs":["way/9429361"]},"coordinates":[7186,3301]},{"type":"Point","properties":{"refs":["way/9037664","way/9429788"]},"coordinates":[6472,6047]},{"type":"Point","properties":{"refs":["way/9429316"]},"coordinates":[8552,3895]},{"type":"Point","properties":{"refs":["way/9429218","way/9429911"]},"coordinates":[5878,3694]},{"type":"Point","properties":{"refs":["way/9429122"]},"coordinates":[2724,5349]},{"type":"Point","properties":{"refs":["way/9428767","way/82329739"]},"coordinates":[7269,2226]},{"type":"Point","properties":{"refs":["way/9429139","way/9429652"]},"coordinates":[6750,2516]},{"type":"Point","properties":{"refs":["way/8615448","way/9430128"]},"coordinates":[1914,5049]},{"type":"Point","properties":{"refs":["way/9428801"]},"coordinates":[8110,1910]},{"type":"Point","properties":{"refs":["way/9429760"]},"coordinates":[4120,3207]},{"type":"Point","properties":{"refs":["way/9429722"]},"coordinates":[3551,3195]},{"type":"Point","properties":{"refs":["way/9428800","way/9429165"]},"coordinates":[4978,1862]},{"type":"Point","properties":{"refs":["way/8614799","way/9429481"]},"coordinates":[910,5768]},{"type":"Point","properties":{"refs":["way/9429125","way/97473806","way/97474462"]},"coordinates":[21,6974]},{"type":"Point","properties":{"refs":["way/9428883","way/9429557"]},"coordinates":[4207,1906]},{"type":"Point","properties":{"refs":["way/9430106","way/82329809"]},"coordinates":[5850,4517]},{"type":"Point","properties":{"refs":["way/9429164","way/9429543","way/9429577"]},"coordinates":[1072,8402]},{"type":"Point","properties":{"refs":["way/9429130","way/341199167"]},"coordinates":[9084,3001]},{"type":"Point","properties":{"refs":["way/9429006","way/9429421"]},"coordinates":[398,6647]},{"type":"Point","properties":{"refs":["way/9429580","way/142608863"]},"coordinates":[6679,3585]},{"type":"Point","properties":{"refs":["way/9429717","way/84083458"]},"coordinates":[3390,3587]},{"type":"Point","properties":{"refs":["way/9429531","way/97473806"]},"coordinates":[184,6821]},{"type":"Point","properties":{"refs":["way/9429762","way/203009474"]},"coordinates":[4146,2844]},{"type":"Point","properties":{"refs":["way/9429904","way/90288885"]},"coordinates":[7313,2671]},{"type":"Point","properties":{"refs":["way/9429398","way/9429824","way/89365363"]},"coordinates":[4864,1444]},{"type":"Point","properties":{"refs":["way/9429664","way/255480979"]},"coordinates":[1651,5798]},{"type":"Point","properties":{"refs":["way/9429304","way/303049926","way/303186721"]},"coordinates":[5854,2337]},{"type":"Point","properties":{"refs":["way/9428883","way/9429358"]},"coordinates":[4032,2014]},{"type":"Point","properties":{"refs":["way/9428983","way/9429294"]},"coordinates":[8431,2743]},{"type":"Point","properties":{"refs":["way/59034331","way/178419643"]},"coordinates":[8151,512]},{"type":"Point","properties":{"refs":["way/8604730","way/9429097"]},"coordinates":[5060,2435]},{"type":"Point","properties":{"refs":["way/9428731","way/9429122"]},"coordinates":[2683,5272]},{"type":"Point","properties":{"refs":["way/9428941","way/9430042"]},"coordinates":[6482,5318]},{"type":"Point","properties":{"refs":["way/354698582"]},"coordinates":[8496,4639]},{"type":"Point","properties":{"refs":["way/9428994","way/9429795"]},"coordinates":[5030,2964]},{"type":"Point","properties":{"refs":["way/9429409"]},"coordinates":[4500,2839]},{"type":"Point","properties":{"refs":["way/9429743","way/24917825"]},"coordinates":[5486,1933]},{"type":"Point","properties":{"refs":["way/9429325"]},"coordinates":[5689,3833]},{"type":"Point","properties":{"refs":["way/9429402","way/9429572"]},"coordinates":[2189,4499]},{"type":"Point","properties":{"refs":["way/9428809","way/9429302"]},"coordinates":[4298,3432]},{"type":"Point","properties":{"refs":["way/8605712","way/9429435","way/46374629"]},"coordinates":[6186,769]},{"type":"Point","properties":{"refs":["way/8644707","way/9429621","way/105958877","way/156825969"]},"coordinates":[9365,2480]},{"type":"Point","properties":{"refs":["way/9429934","way/9430150"]},"coordinates":[8923,3062]},{"type":"Point","properties":{"refs":["way/8605356","way/9429172","way/9429993"]},"coordinates":[6117,1852]},{"type":"Point","properties":{"refs":["way/9429707","way/9430173","way/31133346"]},"coordinates":[3521,5413]},{"type":"Point","properties":{"refs":["way/9428793","way/9429131"]},"coordinates":[1577,5490]},{"type":"Point","properties":{"refs":["way/9429457"]},"coordinates":[67,6849]},{"type":"Point","properties":{"refs":["way/8605757","way/9428773","way/9429126"]},"coordinates":[587,7871]},{"type":"Point","properties":{"refs":["way/46785938","way/336112442"]},"coordinates":[2913,6271]},{"type":"Point","properties":{"refs":["way/9428738","way/9429221"]},"coordinates":[7618,4734]},{"type":"Point","properties":{"refs":["way/9428859"]},"coordinates":[4226,5035]},{"type":"Point","properties":{"refs":["way/9429851"]},"coordinates":[936,6123]},{"type":"Point","properties":{"refs":["way/9429756","way/9429962","way/9429985"]},"coordinates":[948,7306]},{"type":"Point","properties":{"refs":["way/9429374","way/9429581","way/9429684"]},"coordinates":[4537,2674]},{"type":"Point","properties":{"refs":["way/9429501"]},"coordinates":[9291,3116]},{"type":"Point","properties":{"refs":["way/9429472","way/9429706"]},"coordinates":[753,7466]},{"type":"Point","properties":{"refs":["way/9429131","way/95440247"]},"coordinates":[1529,5436]},{"type":"Point","properties":{"refs":["way/9429831","way/9430042"]},"coordinates":[6428,5239]},{"type":"Point","properties":{"refs":["way/8605311","way/172237233"]},"coordinates":[6761,4438]},{"type":"Point","properties":{"refs":["way/8639321","way/9429379","way/9429555"]},"coordinates":[9256,2137]},{"type":"Point","properties":{"refs":["way/9429982"]},"coordinates":[8053,2009]},{"type":"Point","properties":{"refs":["way/9429446","way/353939784"]},"coordinates":[8120,5801]},{"type":"Point","properties":{"refs":["way/9429504","way/175011002"]},"coordinates":[3529,6072]},{"type":"Point","properties":{"refs":["way/9428916","way/9429140","way/9429517"]},"coordinates":[6918,1636]},{"type":"Point","properties":{"refs":["way/82329781","way/82329810","way/82329823"]},"coordinates":[9054,1240]},{"type":"Point","properties":{"refs":["way/9429221","way/89917606"]},"coordinates":[7780,4896]},{"type":"Point","properties":{"refs":["way/82329751","way/82329777"]},"coordinates":[6934,2938]},{"type":"Point","properties":{"refs":["way/9429461","way/341199168"]},"coordinates":[8650,3206]},{"type":"Point","properties":{"refs":["way/9428963","way/9429972"]},"coordinates":[9113,2780]},{"type":"Point","properties":{"refs":["way/59034330","way/89900464"]},"coordinates":[8170,513]},{"type":"Point","properties":{"refs":["way/8604767","way/9428998"]},"coordinates":[7417,2961]},{"type":"Point","properties":{"refs":["way/9429076","way/9429828"]},"coordinates":[9083,595]},{"type":"Point","properties":{"refs":["way/9429336","way/88607346"]},"coordinates":[5634,938]},{"type":"Point","properties":{"refs":["way/9429601"]},"coordinates":[3389,3412]},{"type":"Point","properties":{"refs":["way/9429391"]},"coordinates":[1687,5200]},{"type":"Point","properties":{"refs":["way/9428757","way/9429151"]},"coordinates":[2448,4792]},{"type":"Point","properties":{"refs":["way/9429398","way/9429533"]},"coordinates":[4837,1541]},{"type":"Point","properties":{"refs":["way/9429097","way/9429324"]},"coordinates":[5115,2543]},{"type":"Point","properties":{"refs":["way/8605003","way/9429641"]},"coordinates":[3121,6323]},{"type":"Point","properties":{"refs":["way/9429317"]},"coordinates":[4709,4745]},{"type":"Point","properties":{"refs":["way/9428740","way/9429756"]},"coordinates":[1388,7077]},{"type":"Point","properties":{"refs":["way/9429662","way/9430120"]},"coordinates":[8386,3012]},{"type":"Point","properties":{"refs":["way/9429836","way/9430179"]},"coordinates":[3761,2877]},{"type":"Point","properties":{"refs":["way/9428941","way/9429121"]},"coordinates":[6398,5378]},{"type":"Point","properties":{"refs":["way/9429105","way/9429875"]},"coordinates":[1821,5976]},{"type":"Point","properties":{"refs":["way/9429605","way/9430071"]},"coordinates":[2001,5534]},{"type":"Point","properties":{"refs":["way/9429538","way/172237233"]},"coordinates":[6417,3751]},{"type":"Point","properties":{"refs":["way/9429037"]},"coordinates":[4109,2189]},{"type":"Point","properties":{"refs":["way/9429800","way/9429929","way/90286273"]},"coordinates":[6238,4828]},{"type":"Point","properties":{"refs":["way/9430132","way/24917825"]},"coordinates":[4475,2283]},{"type":"Point","properties":{"refs":["way/9429830"]},"coordinates":[4814,1679]},{"type":"Point","properties":{"refs":["way/8604762","way/9429328","way/9429919"]},"coordinates":[3924,4586]},{"type":"Point","properties":{"refs":["way/9429995"]},"coordinates":[3850,1963]},{"type":"Point","properties":{"refs":["way/8615292","way/9429851"]},"coordinates":[790,5946]},{"type":"Point","properties":{"refs":["way/9429269","way/9429275"]},"coordinates":[1397,8066]},{"type":"Point","properties":{"refs":["way/9429377","way/46785933"]},"coordinates":[542,8971]},{"type":"Point","properties":{"refs":["way/8605340","way/8608836","way/9429505"]},"coordinates":[1805,4648]},{"type":"Point","properties":{"refs":["way/8605214"]},"coordinates":[4283,5496]},{"type":"Point","properties":{"refs":["way/8605311","way/142608863"]},"coordinates":[7003,4271]},{"type":"Point","properties":{"refs":["way/8605377","way/9430165"]},"coordinates":[5691,3920]},{"type":"Point","properties":{"refs":["way/9428937","way/9429831"]},"coordinates":[6636,5077]},{"type":"Point","properties":{"refs":["way/9428867","way/9429706"]},"coordinates":[866,7414]},{"type":"Point","properties":{"refs":["way/9429139","way/82329751"]},"coordinates":[6922,2893]},{"type":"Point","properties":{"refs":["way/9429352","way/185024505"]},"coordinates":[6738,1167]},{"type":"Point","properties":{"refs":["way/9428817","way/9429039"]},"coordinates":[5858,488]},{"type":"Point","properties":{"refs":["way/9429525","way/9429707"]},"coordinates":[3137,5605]},{"type":"Point","properties":{"refs":["way/9429612","way/9429662"]},"coordinates":[8079,3165]},{"type":"Point","properties":{"refs":["way/9429997","way/81049983"]},"coordinates":[6510,974]},{"type":"Point","properties":{"refs":["way/9429871","way/46785933"]},"coordinates":[541,9136]},{"type":"Point","properties":{"refs":["way/8605053","way/142608863"]},"coordinates":[6837,3920]},{"type":"Point","properties":{"refs":["way/9430108","way/31120864"]},"coordinates":[5026,3841]},{"type":"Point","properties":{"refs":["way/9428746","way/9428928"]},"coordinates":[5351,982]},{"type":"Point","properties":{"refs":["way/9429404"]},"coordinates":[6299,1901]},{"type":"Point","properties":{"refs":["way/9429200"]},"coordinates":[3632,2879]},{"type":"Point","properties":{"refs":["way/9429740","way/9429744","way/9430132"]},"coordinates":[4528,2392]},{"type":"Point","properties":{"refs":["way/9428883","way/9430024"]},"coordinates":[4422,1852]},{"type":"Point","properties":{"refs":["way/9429856"]},"coordinates":[2993,3204]},{"type":"Point","properties":{"refs":["way/8614784","way/9429505"]},"coordinates":[1519,4960]},{"type":"Point","properties":{"refs":["way/8605456","way/175011002"]},"coordinates":[3469,6101]},{"type":"Point","properties":{"refs":["way/9429296","way/9429398"]},"coordinates":[4898,1329]},{"type":"Point","properties":{"refs":["way/9429356","way/80486089"]},"coordinates":[5131,5033]},{"type":"Point","properties":{"refs":["way/8605342","way/9430164"]},"coordinates":[8895,2670]},{"type":"Point","properties":{"refs":["way/9429146","way/49655017"]},"coordinates":[7599,1259]},{"type":"Point","properties":{"refs":["way/9429089","way/93305682","way/216559616"]},"coordinates":[8732,5346]},{"type":"Point","properties":{"refs":["way/9429464"]},"coordinates":[5493,2257]},{"type":"Point","properties":{"refs":["way/9428793","way/9429401"]},"coordinates":[1309,5520]},{"type":"Point","properties":{"refs":["way/9428970","way/9429477"]},"coordinates":[6244,2281]},{"type":"Point","properties":{"refs":["way/9429705","way/255480979"]},"coordinates":[1247,6663]},{"type":"Point","properties":{"refs":["way/9429281","way/9429504"]},"coordinates":[3412,5838]},{"type":"Point","properties":{"refs":["way/9428765","way/9429832","way/44849207"]},"coordinates":[6075,1034]},{"type":"Point","properties":{"refs":["way/9429612","way/9429691"]},"coordinates":[7774,2572]},{"type":"Point","properties":{"refs":["way/9429158","way/9430083"]},"coordinates":[3992,2842]},{"type":"Point","properties":{"refs":["way/9428865","way/9429334"]},"coordinates":[5770,3500]},{"type":"Point","properties":{"refs":["way/9429144","way/172307046"]},"coordinates":[6939,2113]},{"type":"Point","properties":{"refs":["way/9429154","way/9429342"]},"coordinates":[1211,6001]},{"type":"Point","properties":{"refs":["way/90216988","way/354698583"]},"coordinates":[8566,4357]},{"type":"Point","properties":{"refs":["way/9429016","way/9429911"]},"coordinates":[5983,3631]},{"type":"Point","properties":{"refs":["way/9428863","way/9429041"]},"coordinates":[2574,5003]},{"type":"Point","properties":{"refs":["way/9429836"]},"coordinates":[3696,2909]},{"type":"Point","properties":{"refs":["way/9428888","way/90102302"]},"coordinates":[8167,4084]},{"type":"Point","properties":{"refs":["way/9429883","way/9430083"]},"coordinates":[4109,3063]},{"type":"Point","properties":{"refs":["way/9430159","way/82329768"]},"coordinates":[7419,2865]},{"type":"Point","properties":{"refs":["way/9429550"]},"coordinates":[6655,5296]},{"type":"Point","properties":{"refs":["way/82329775","way/82329809"]},"coordinates":[5497,3845]},{"type":"Point","properties":{"refs":["way/89900463","way/257681343"]},"coordinates":[7638,1266]},{"type":"Point","properties":{"refs":["way/9430142","way/89900468"]},"coordinates":[7748,801]},{"type":"Point","properties":{"refs":["way/9429525","way/175011002"]},"coordinates":[3403,6129]},{"type":"Point","properties":{"refs":["way/9429958"]},"coordinates":[8936,2881]},{"type":"Point","properties":{"refs":["way/9430089"]},"coordinates":[2969,3338]},{"type":"Point","properties":{"refs":["way/9430058","way/49655013"]},"coordinates":[7297,2344]},{"type":"Point","properties":{"refs":["way/8605311","way/8605394","way/9428830"]},"coordinates":[6499,4619]},{"type":"Point","properties":{"refs":["way/9428775","way/9429662","way/115576686"]},"coordinates":[8235,3087]},{"type":"Point","properties":{"refs":["way/9429108","way/90286273"]},"coordinates":[7238,4115]},{"type":"Point","properties":{"refs":["way/9428755","way/9428922","way/9430164","way/105958877"]},"coordinates":[9228,2540]},{"type":"Point","properties":{"refs":["way/41088998"]},"coordinates":[6099,4527]},{"type":"Point","properties":{"refs":["way/9429875","way/255480979"]},"coordinates":[1670,5769]},{"type":"Point","properties":{"refs":["way/82329744","way/82329768"]},"coordinates":[7325,2480]},{"type":"Point","properties":{"refs":["way/9429032","way/9429326","way/9429612"]},"coordinates":[7604,2308]},{"type":"Point","properties":{"refs":["way/9429091","way/9429373"]},"coordinates":[2471,5973]},{"type":"Point","properties":{"refs":["way/9429169","way/9429740"]},"coordinates":[4696,2311]},{"type":"Point","properties":{"refs":["way/46785933","way/46785937","way/138788967"]},"coordinates":[653,8157]},{"type":"Point","properties":{"refs":["way/9429091","way/9429583"]},"coordinates":[2382,5853]},{"type":"Point","properties":{"refs":["way/9428850","way/9429612"]},"coordinates":[7969,2930]},{"type":"Point","properties":{"refs":["way/9430141","way/9430162"]},"coordinates":[3196,4784]},{"type":"Point","properties":{"refs":["way/9428982"]},"coordinates":[6988,4744]},{"type":"Point","properties":{"refs":["way/9429837","way/9429851"]},"coordinates":[824,5987]},{"type":"Point","properties":{"refs":["way/9430157"]},"coordinates":[3654,2973]},{"type":"Point","properties":{"refs":["way/9428848","way/9429615"]},"coordinates":[1007,9415]},{"type":"Point","properties":{"refs":["way/90286273","way/172237233"]},"coordinates":[6772,4462]},{"type":"Point","properties":{"refs":["way/9428988","way/9429703"]},"coordinates":[2907,5478]},{"type":"Point","properties":{"refs":["way/9428809","way/9429345"]},"coordinates":[4262,3363]},{"type":"Point","properties":{"refs":["way/9429030","way/9429780"]},"coordinates":[8085,5575]},{"type":"Point","properties":{"refs":["way/9429628","way/89900469"]},"coordinates":[7508,1644]},{"type":"Point","properties":{"refs":["way/9429601","way/84083458"]},"coordinates":[3315,3450]},{"type":"Point","properties":{"refs":["way/9428921","way/93305686"]},"coordinates":[7421,2032]},{"type":"Point","properties":{"refs":["way/9428977"]},"coordinates":[5870,5201]},{"type":"Point","properties":{"refs":["way/9429413","way/9429707"]},"coordinates":[2853,5739]},{"type":"Point","properties":{"refs":["way/80486087","way/80486089"]},"coordinates":[4843,4474]},{"type":"Point","properties":{"refs":["way/49655013","way/82329744"]},"coordinates":[7301,2375]},{"type":"Point","properties":{"refs":["way/9429889","way/109101008"]},"coordinates":[2347,5696]},{"type":"Point","properties":{"refs":["way/9429151","way/9429878"]},"coordinates":[2611,4705]},{"type":"Point","properties":{"refs":["way/9429030","way/9429416"]},"coordinates":[8180,4716]},{"type":"Point","properties":{"refs":["way/9429831","way/9429912"]},"coordinates":[6984,4844]},{"type":"Point","properties":{"refs":["way/9429269","way/9429967"]},"coordinates":[1283,7834]},{"type":"Point","properties":{"refs":["way/9428914","way/95440247"]},"coordinates":[1475,5381]},{"type":"Point","properties":{"refs":["way/9428768","way/9428828"]},"coordinates":[8910,3387]},{"type":"Point","properties":{"refs":["way/9429624"]},"coordinates":[4757,4675]},{"type":"Point","properties":{"refs":["way/9429250","way/9429981"]},"coordinates":[3635,3604]},{"type":"Point","properties":{"refs":["way/9429032"]},"coordinates":[7351,2492]},{"type":"Point","properties":{"refs":["way/9429014","way/9429378"]},"coordinates":[5457,4262]},{"type":"Point","properties":{"refs":["way/9430137","way/185024505"]},"coordinates":[6639,1089]},{"type":"Point","properties":{"refs":["way/9430048","way/109101008"]},"coordinates":[2318,5673]},{"type":"Point","properties":{"refs":["way/9429381","way/31120838"]},"coordinates":[4704,4202]},{"type":"Point","properties":{"refs":["way/9429988","way/105957565"]},"coordinates":[8840,2235]},{"type":"Point","properties":{"refs":["way/9429203"]},"coordinates":[3496,4226]},{"type":"Point","properties":{"refs":["way/91828491","way/169673996"]},"coordinates":[510,9309]},{"type":"Point","properties":{"refs":["way/9428923"]},"coordinates":[5017,5130]},{"type":"Point","properties":{"refs":["way/9429638"]},"coordinates":[4200,4244]},{"type":"Point","properties":{"refs":["way/9429480"]},"coordinates":[8447,2043]},{"type":"Point","properties":{"refs":["way/9429521","way/9429712","way/9430013"]},"coordinates":[6544,1718]},{"type":"Point","properties":{"refs":["way/9428874","way/9429591"]},"coordinates":[4880,5063]},{"type":"Point","properties":{"refs":["way/8603122","way/9429707","way/89432858"]},"coordinates":[3637,5356]},{"type":"Point","properties":{"refs":["way/90102302","way/353944727"]},"coordinates":[8294,4307]},{"type":"Point","properties":{"refs":["way/9429739","way/80486089"]},"coordinates":[4867,4523]},{"type":"Point","properties":{"refs":["way/9428924"]},"coordinates":[3599,3287]},{"type":"Point","properties":{"refs":["way/9430175"]},"coordinates":[3553,3251]},{"type":"Point","properties":{"refs":["way/9429726","way/84083458"]},"coordinates":[3655,4087]},{"type":"Point","properties":{"refs":["way/9430036","way/31120838"]},"coordinates":[4747,4289]},{"type":"Point","properties":{"refs":["way/48734493","way/48734494"]},"coordinates":[7535,2157]},{"type":"Point","properties":{"refs":["way/9429423","way/185026124"]},"coordinates":[6698,1528]},{"type":"Point","properties":{"refs":["way/9428985","way/9429034"]},"coordinates":[6543,380]},{"type":"Point","properties":{"refs":["way/9429804","way/9429886"]},"coordinates":[7422,3334]},{"type":"Point","properties":{"refs":["way/8605311","way/9428998"]},"coordinates":[7796,3666]},{"type":"Point","properties":{"refs":["way/9429384"]},"coordinates":[3770,2376]},{"type":"Point","properties":{"refs":["way/9429234"]},"coordinates":[3801,3695]},{"type":"Point","properties":{"refs":["way/9429676"]},"coordinates":[6891,3744]},{"type":"Point","properties":{"refs":["way/9428738","way/9429674"]},"coordinates":[7420,4934]},{"type":"Point","properties":{"refs":["way/9429569","way/185026118"]},"coordinates":[6790,1580]},{"type":"Point","properties":{"refs":["way/9429131","way/9430174","way/255480979"]},"coordinates":[1739,5653]},{"type":"Point","properties":{"refs":["way/9429158","way/9430179"]},"coordinates":[3796,2940]},{"type":"Point","properties":{"refs":["way/9429401","way/9430069","way/255480979"]},"coordinates":[1557,5954]},{"type":"Point","properties":{"refs":["way/9429567"]},"coordinates":[3598,3334]},{"type":"Point","properties":{"refs":["way/9428775","way/9429884"]},"coordinates":[8191,2998]},{"type":"Point","properties":{"refs":["way/9429828","way/9429899"]},"coordinates":[9067,936]},{"type":"Point","properties":{"refs":["way/9429172","way/9429656","way/185856190"]},"coordinates":[5907,1802]},{"type":"Point","properties":{"refs":["way/9429737"]},"coordinates":[6798,4261]},{"type":"Point","properties":{"refs":["way/9428998","way/9429945"]},"coordinates":[7382,2853]},{"type":"Point","properties":{"refs":["way/9428960","way/9429250","way/9430175"]},"coordinates":[3471,3294]},{"type":"Point","properties":{"refs":["way/8605698","way/9428834"]},"coordinates":[6420,4124]},{"type":"Point","properties":{"refs":["way/9429559","way/9429991"]},"coordinates":[2275,5240]},{"type":"Point","properties":{"refs":["way/9430099","way/255480979"]},"coordinates":[1850,5470]},{"type":"Point","properties":{"refs":["way/9429367"]},"coordinates":[7015,2161]},{"type":"Point","properties":{"refs":["way/8605806","way/9429176"]},"coordinates":[6193,456]},{"type":"Point","properties":{"refs":["way/9429457","way/97473806","way/97475597"]},"coordinates":[108,6897]},{"type":"Point","properties":{"refs":["way/9428966","way/9429833","way/95445594"]},"coordinates":[3898,3910]},{"type":"Point","properties":{"refs":["way/9428724"]},"coordinates":[1198,5544]},{"type":"Point","properties":{"refs":["way/9429529","way/89917606"]},"coordinates":[7523,5155]},{"type":"Point","properties":{"refs":["way/9430170","way/9430173"]},"coordinates":[3298,4971]},{"type":"Point","properties":{"refs":["way/8605777","way/9429707"]},"coordinates":[3755,5297]},{"type":"Point","properties":{"refs":["way/8605176","way/8605417","way/175011002"]},"coordinates":[3678,6007]},{"type":"Point","properties":{"refs":["way/9429637","way/80486089"]},"coordinates":[4960,4701]},{"type":"Point","properties":{"refs":["way/9428983","way/9430120"]},"coordinates":[8277,2805]},{"type":"Point","properties":{"refs":["way/9429037","way/24917825"]},"coordinates":[4187,2371]},{"type":"Point","properties":{"refs":["way/9429010","way/9429599"]},"coordinates":[7305,3339]},{"type":"Point","properties":{"refs":["way/59034329","way/59034330"]},"coordinates":[8434,324]},{"type":"Point","properties":{"refs":["way/9430009","way/9430038"]},"coordinates":[1475,6882]},{"type":"Point","properties":{"refs":["way/9428804"]},"coordinates":[3654,2814]},{"type":"Point","properties":{"refs":["way/9428837","way/203009474","way/303049926"]},"coordinates":[4310,3160]},{"type":"Point","properties":{"refs":["way/9429538","way/142608863"]},"coordinates":[6697,3622]},{"type":"Point","properties":{"refs":["way/9429337"]},"coordinates":[4131,2597]},{"type":"Point","properties":{"refs":["way/9429144","way/9429452"]},"coordinates":[6901,2130]},{"type":"Point","properties":{"refs":["way/9428861"]},"coordinates":[7698,2765]},{"type":"Point","properties":{"refs":["way/9428724","way/9429160"]},"coordinates":[1098,5625]},{"type":"Point","properties":{"refs":["way/9429821","way/9430035"]},"coordinates":[1288,5338]},{"type":"Point","properties":{"refs":["way/9429330","way/9430042"]},"coordinates":[6316,5084]},{"type":"Point","properties":{"refs":["way/9429030","way/9430177"]},"coordinates":[8264,5009]},{"type":"Point","properties":{"refs":["way/8605381","way/9429139"]},"coordinates":[6817,2640]},{"type":"Point","properties":{"refs":["way/9429889","way/9430071"]},"coordinates":[2186,5809]},{"type":"Point","properties":{"refs":["way/9429105","way/9429861"]},"coordinates":[1739,6034]},{"type":"Point","properties":{"refs":["way/9429484","way/9429734","way/255453927"]},"coordinates":[7482,3462]},{"type":"Point","properties":{"refs":["way/9429685","way/302110861"]},"coordinates":[4804,5510]},{"type":"Point","properties":{"refs":["way/9037919","way/9429543"]},"coordinates":[1120,8495]},{"type":"Point","properties":{"refs":["way/9428907","way/9429676"]},"coordinates":[7051,3598]},{"type":"Point","properties":{"refs":["way/9429325","way/9430165"]},"coordinates":[5721,3900]},{"type":"Point","properties":{"refs":["way/8605786","way/9430042"]},"coordinates":[6378,5170]},{"type":"Point","properties":{"refs":["way/9428921","way/9429066","way/9429680","way/89900467"]},"coordinates":[7486,2036]},{"type":"Point","properties":{"refs":["way/9429612","way/9429884"]},"coordinates":[8038,3077]},{"type":"Point","properties":{"refs":["way/9429091","way/9429471"]},"coordinates":[2560,6094]},{"type":"Point","properties":{"refs":["way/8605416","way/109100959"]},"coordinates":[2897,7080]},{"type":"Point","properties":{"refs":["way/9429991"]},"coordinates":[2214,5266]},{"type":"Point","properties":{"refs":["way/9428992","way/9429254","way/90288102","way/255453927"]},"coordinates":[7586,3415]},{"type":"Point","properties":{"refs":["way/9428887","way/80486089"]},"coordinates":[5172,5112]},{"type":"Point","properties":{"refs":["way/49655012","way/82329739"]},"coordinates":[7521,1706]},{"type":"Point","properties":{"refs":["way/9429650","way/9429703"]},"coordinates":[2936,5534]},{"type":"Point","properties":{"refs":["way/9429231","way/203009474"]},"coordinates":[4079,2716]},{"type":"Point","properties":{"refs":["way/8603503","way/9429546"]},"coordinates":[7366,1706]},{"type":"Point","properties":{"refs":["way/9428845","way/9429605"]},"coordinates":[1880,5607]},{"type":"Point","properties":{"refs":["way/9429694"]},"coordinates":[4237,4361]},{"type":"Point","properties":{"refs":["way/9429540","way/9429673","way/9429805"]},"coordinates":[6006,459]},{"type":"Point","properties":{"refs":["way/9429505","way/9429570"]},"coordinates":[1925,4518]},{"type":"Point","properties":{"refs":["way/9428857","way/9429250"]},"coordinates":[3593,3528]},{"type":"Point","properties":{"refs":["way/9429988"]},"coordinates":[8917,2193]},{"type":"Point","properties":{"refs":["way/8614958","way/9429755"]},"coordinates":[3861,1877]},{"type":"Point","properties":{"refs":["way/8615912","way/9429473"]},"coordinates":[628,6194]},{"type":"Point","properties":{"refs":["way/9429178","way/9429931","way/9430118"]},"coordinates":[8128,1005]},{"type":"Point","properties":{"refs":["way/9428826","way/9429121"]},"coordinates":[6333,5278]},{"type":"Point","properties":{"refs":["way/9428922","way/9429789"]},"coordinates":[9150,2405]},{"type":"Point","properties":{"refs":["way/9428738","way/9429108"]},"coordinates":[7743,4607]},{"type":"Point","properties":{"refs":["way/8604852","way/9428885","way/9429704"]},"coordinates":[3968,3758]},{"type":"Point","properties":{"refs":["way/9429641","way/336112531"]},"coordinates":[3076,6281]},{"type":"Point","properties":{"refs":["way/9429365","way/9429911"]},"coordinates":[6269,3460]},{"type":"Point","properties":{"refs":["way/9430081","way/142608863"]},"coordinates":[6615,3448]},{"type":"Point","properties":{"refs":["way/9428988","way/9429525"]},"coordinates":[3039,5412]},{"type":"Point","properties":{"refs":["way/9429326","way/255479500"]},"coordinates":[7971,2185]},{"type":"Point","properties":{"refs":["way/9429597"]},"coordinates":[1548,5369]},{"type":"Point","properties":{"refs":["way/9429146","way/9429794","way/49655012"]},"coordinates":[7550,1565]},{"type":"Point","properties":{"refs":["way/9429097","way/9429209"]},"coordinates":[4987,2305]},{"type":"Point","properties":{"refs":["way/9429606","way/9429674"]},"coordinates":[7329,4913]},{"type":"Point","properties":{"refs":["way/9429099","way/9429378"]},"coordinates":[5374,4391]},{"type":"Point","properties":{"refs":["way/80486087","way/82329786"]},"coordinates":[4817,4424]},{"type":"Point","properties":{"refs":["way/9429342","way/9429837"]},"coordinates":[1045,5806]},{"type":"Point","properties":{"refs":["way/9429160","way/9429801"]},"coordinates":[1152,5689]},{"type":"Point","properties":{"refs":["way/9429329"]},"coordinates":[6592,3560]},{"type":"Point","properties":{"refs":["way/9429780","way/353939784"]},"coordinates":[8231,5718]},{"type":"Point","properties":{"refs":["way/8614590","way/9429426"]},"coordinates":[6590,205]},{"type":"Point","properties":{"refs":["way/9428768","way/9429371"]},"coordinates":[8812,3458]},{"type":"Point","properties":{"refs":["way/9429572","way/9429578"]},"coordinates":[2093,4605]},{"type":"Point","properties":{"refs":["way/9429087","way/9430013","way/185856196","way/185856197"]},"coordinates":[6384,1558]},{"type":"Point","properties":{"refs":["way/9429169","way/24917825"]},"coordinates":[4664,2227]},{"type":"Point","properties":{"refs":["way/8605777","way/9430170"]},"coordinates":[3548,4888]},{"type":"Point","properties":{"refs":["way/9429504","way/9429707"]},"coordinates":[3263,5542]},{"type":"Point","properties":{"refs":["way/9428853","way/49655015"]},"coordinates":[7746,883]},{"type":"Point","properties":{"refs":["way/9430024","way/34303115"]},"coordinates":[4586,1757]},{"type":"Point","properties":{"refs":["way/9429065","way/82329810"]},"coordinates":[9042,1509]},{"type":"Point","properties":{"refs":["way/9429578"]},"coordinates":[2058,4574]},{"type":"Point","properties":{"refs":["way/9429169","way/9429684"]},"coordinates":[4820,2551]},{"type":"Point","properties":{"refs":["way/80512118","way/104213876","way/109101007"]},"coordinates":[2914,6119]},{"type":"Point","properties":{"refs":["way/9429573"]},"coordinates":[6444,5999]},{"type":"Point","properties":{"refs":["way/8605024","way/8605311"]},"coordinates":[6330,4738]},{"type":"Point","properties":{"refs":["way/9429208","way/9430083"]},"coordinates":[4027,2908]},{"type":"Point","properties":{"refs":["way/9429311","way/9429703"]},"coordinates":[2843,5359]},{"type":"Point","properties":{"refs":["way/8605436","way/9429330","way/171308002"]},"coordinates":[6644,4847]},{"type":"Point","properties":{"refs":["way/9429430"]},"coordinates":[1239,5390]},{"type":"Point","properties":{"refs":["way/9428952","way/255480979"]},"coordinates":[1342,6386]},{"type":"Point","properties":{"refs":["way/9429444","way/9429606"]},"coordinates":[7039,5329]},{"type":"Point","properties":{"refs":["way/9429614","way/9429750"]},"coordinates":[4740,4957]},{"type":"Point","properties":{"refs":["way/9428854","way/9429873"]},"coordinates":[6180,5605]},{"type":"Point","properties":{"refs":["way/9428856","way/247838867"]},"coordinates":[8277,3777]},{"type":"Point","properties":{"refs":["way/9429743","way/9429893"]},"coordinates":[5690,2325]},{"type":"Point","properties":{"refs":["way/9429976","way/48734493"]},"coordinates":[7559,2212]},{"type":"Point","properties":{"refs":["way/9429799","way/46785938"]},"coordinates":[2431,6538]},{"type":"Point","properties":{"refs":["way/8605311","way/9429612","way/9429934"]},"coordinates":[8204,3428]},{"type":"Point","properties":{"refs":["way/9429543","way/9429871"]},"coordinates":[1190,8631]},{"type":"Point","properties":{"refs":["way/8614784","way/9429560","way/93168581","way/93168583"]},"coordinates":[2011,5199]},{"type":"Point","properties":{"refs":["way/9429760","way/9430083"]},"coordinates":[4171,3180]},{"type":"Point","properties":{"refs":["way/9428885","way/9429833"]},"coordinates":[4017,3849]},{"type":"Point","properties":{"refs":["way/8605757","way/46785937","way/138788963"]},"coordinates":[577,7929]},{"type":"Point","properties":{"refs":["way/9428751","way/82329777"]},"coordinates":[7205,3623]},{"type":"Point","properties":{"refs":["way/9429680","way/93305686"]},"coordinates":[7467,1967]},{"type":"Point","properties":{"refs":["way/9429628","way/9430019"]},"coordinates":[7420,1927]},{"type":"Point","properties":{"refs":["way/9429632","way/31120838"]},"coordinates":[4683,4159]},{"type":"Point","properties":{"refs":["way/9428824"]},"coordinates":[2355,4761]},{"type":"Point","properties":{"refs":["way/9429466","way/9429698"]},"coordinates":[5423,1517]},{"type":"Point","properties":{"refs":["way/9429001","way/172237233"]},"coordinates":[6636,4187]},{"type":"Point","properties":{"refs":["way/9429108","way/9430143"]},"coordinates":[7639,4504]},{"type":"Point","properties":{"refs":["way/9429144","way/9429546","way/9430019"]},"coordinates":[7284,1854]},{"type":"Point","properties":{"refs":["way/9429626","way/84083458"]},"coordinates":[3595,3975]},{"type":"Point","properties":{"refs":["way/9429010","way/9429484"]},"coordinates":[7380,3504]},{"type":"Point","properties":{"refs":["way/8605797","way/9429130"]},"coordinates":[8996,2777]},{"type":"Point","properties":{"refs":["way/8605323","way/9429612"]},"coordinates":[7677,2431]},{"type":"Point","properties":{"refs":["way/9428982","way/9429831"]},"coordinates":[7035,4810]},{"type":"Point","properties":{"refs":["way/9428795","way/9430156"]},"coordinates":[7885,3284]},{"type":"Point","properties":{"refs":["way/9429132","way/9430129","way/31115886"]},"coordinates":[5796,1183]},{"type":"Point","properties":{"refs":["way/9429124","way/9430141"]},"coordinates":[3318,4745]},{"type":"Point","properties":{"refs":["way/9429628","way/82329739"]},"coordinates":[7359,2063]},{"type":"Point","properties":{"refs":["way/9429951","way/44709018"]},"coordinates":[5817,848]},{"type":"Point","properties":{"refs":["way/9428767","way/9429144"]},"coordinates":[7068,2051]},{"type":"Point","properties":{"refs":["way/9428870"]},"coordinates":[7235,2615]},{"type":"Point","properties":{"refs":["way/9429371","way/9430116"]},"coordinates":[8848,3600]},{"type":"Point","properties":{"refs":["way/8605850","way/9430120","way/255479500","way/255479501"]},"coordinates":[8187,2641]},{"type":"Point","properties":{"refs":["way/9429115","way/9430164"]},"coordinates":[9042,2622]},{"type":"Point","properties":{"refs":["way/9428958","way/9429196"]},"coordinates":[3214,3891]},{"type":"Point","properties":{"refs":["way/9429774","way/9430095"]},"coordinates":[6964,773]},{"type":"Point","properties":{"refs":["way/9429626","way/9429649"]},"coordinates":[3347,4160]},{"type":"Point","properties":{"refs":["way/8605090","way/9430038"]},"coordinates":[1730,6748]},{"type":"Point","properties":{"refs":["way/9428793","way/9429664"]},"coordinates":[1434,5504]},{"type":"Point","properties":{"refs":["way/9429036","way/82329768"]},"coordinates":[7578,3267]},{"type":"Point","properties":{"refs":["way/9428994","way/82329775"]},"coordinates":[5473,3800]},{"type":"Point","properties":{"refs":["way/9428928","way/9429202","way/31127468"]},"coordinates":[5238,980]},{"type":"Point","properties":{"refs":["way/9428768","way/9429316"]},"coordinates":[8435,3743]},{"type":"Point","properties":{"refs":["way/9428800"]},"coordinates":[5011,1966]},{"type":"Point","properties":{"refs":["way/49655015","way/59034328"]},"coordinates":[8216,511]},{"type":"Point","properties":{"refs":["way/9429412","way/9429591","way/9429614"]},"coordinates":[4818,5100]},{"type":"Point","properties":{"refs":["way/9429302","way/9429629"]},"coordinates":[4185,3522]},{"type":"Point","properties":{"refs":["way/9429883","way/9430179"]},"coordinates":[3913,3162]},{"type":"Point","properties":{"refs":["way/9429085","way/9430166"]},"coordinates":[8665,1516]},{"type":"Point","properties":{"refs":["way/9429121"]},"coordinates":[6301,5232]},{"type":"Point","properties":{"refs":["way/9428989","way/9429800"]},"coordinates":[6064,5140]},{"type":"Point","properties":{"refs":["way/8605789","way/24917825"]},"coordinates":[4227,2359]},{"type":"Point","properties":{"refs":["way/82332124"]},"coordinates":[9758,4735]},{"type":"Point","properties":{"refs":["way/9429102","way/9430038"]},"coordinates":[1604,6814]},{"type":"Point","properties":{"refs":["way/9429119","way/255479500"]},"coordinates":[7920,2103]},{"type":"Point","properties":{"refs":["way/9429673"]},"coordinates":[6085,429]},{"type":"Point","properties":{"refs":["way/9429125","way/169669985"]},"coordinates":[149,7545]},{"type":"Point","properties":{"refs":["way/8607503","way/9430170"]},"coordinates":[3792,4807]},{"type":"Point","properties":{"refs":["way/9429676","way/82329777"]},"coordinates":[7147,3511]},{"type":"Point","properties":{"refs":["way/9429244"]},"coordinates":[6357,2036]},{"type":"Point","properties":{"refs":["way/9429762"]},"coordinates":[4254,2788]},{"type":"Point","properties":{"refs":["way/9429896"]},"coordinates":[7742,2938]},{"type":"Point","properties":{"refs":["way/97504283"]},"coordinates":[4665,4818]},{"type":"Point","properties":{"refs":["way/9429947"]},"coordinates":[6682,3813]},{"type":"Point","properties":{"refs":["way/9429154","way/9429449"]},"coordinates":[994,6175]},{"type":"Point","properties":{"refs":["way/89432031","way/91828492","way/91832682"]},"coordinates":[576,9364]},{"type":"Point","properties":{"refs":["way/8605090","way/9428740"]},"coordinates":[1788,6866]},{"type":"Point","properties":{"refs":["way/9428887","way/9429412"]},"coordinates":[4895,5276]},{"type":"Point","properties":{"refs":["way/9428922","way/9429116"]},"coordinates":[9109,2331]},{"type":"Point","properties":{"refs":["way/9429979"]},"coordinates":[6798,2308]},{"type":"Point","properties":{"refs":["way/9429624","way/9429637"]},"coordinates":[4815,4789]},{"type":"Point","properties":{"refs":["way/9429437","way/9429911"]},"coordinates":[6090,3567]},{"type":"Point","properties":{"refs":["way/9429738","way/9429809"]},"coordinates":[7399,3680]},{"type":"Point","properties":{"refs":["way/9429296","way/9429824"]},"coordinates":[4748,1285]},{"type":"Point","properties":{"refs":["way/8605532","way/104214826"]},"coordinates":[2807,5077]},{"type":"Point","properties":{"refs":["way/9428918","way/9429164"]},"coordinates":[768,7769]},{"type":"Point","properties":{"refs":["way/9429228"]},"coordinates":[3914,2201]},{"type":"Point","properties":{"refs":["way/8605311","way/9429674"]},"coordinates":[6949,4308]},{"type":"Point","properties":{"refs":["way/9428965","way/9429982"]},"coordinates":[7989,1873]},{"type":"Point","properties":{"refs":["way/9429632","way/9430108"]},"coordinates":[5078,3972]},{"type":"Point","properties":{"refs":["way/9428837","way/9429977"]},"coordinates":[4432,3391]},{"type":"Point","properties":{"refs":["way/9429676","way/9429847"]},"coordinates":[6937,3697]},{"type":"Point","properties":{"refs":["way/9428988","way/9429504"]},"coordinates":[3166,5348]},{"type":"Point","properties":{"refs":["way/9429314"]},"coordinates":[4823,4692]},{"type":"Point","properties":{"refs":["way/9429030","way/9429382"]},"coordinates":[8223,4858]},{"type":"Point","properties":{"refs":["way/9428795","way/82329768"]},"coordinates":[7640,3390]},{"type":"Point","properties":{"refs":["way/9428768","way/9429798"]},"coordinates":[8528,3672]},{"type":"Point","properties":{"refs":["way/9428775"]},"coordinates":[8167,2950]},{"type":"Point","properties":{"refs":["way/8605311","way/82329768"]},"coordinates":[7828,3646]},{"type":"Point","properties":{"refs":["way/9037734","way/9429873"]},"coordinates":[6110,5662]},{"type":"Point","properties":{"refs":["way/9429309","way/9429501","way/340779008"]},"coordinates":[9138,3155]},{"type":"Point","properties":{"refs":["way/9429793","way/59034328"]},"coordinates":[8457,345]},{"type":"Point","properties":{"refs":["way/9428845","way/255480979"]},"coordinates":[1822,5518]},{"type":"Point","properties":{"refs":["way/9428994","way/31120860"]},"coordinates":[5350,3561]},{"type":"Point","properties":{"refs":["way/9429164","way/9429399"]},"coordinates":[926,8102]},{"type":"Point","properties":{"refs":["way/9429566","way/84083458"]},"coordinates":[3328,3473]},{"type":"Point","properties":{"refs":["way/9429731","way/9429756"]},"coordinates":[1203,7152]},{"type":"Point","properties":{"refs":["way/9429085"]},"coordinates":[8313,1436]},{"type":"Point","properties":{"refs":["way/9429719","way/9429743"]},"coordinates":[5548,2053]},{"type":"Point","properties":{"refs":["way/9429116","way/9429379"]},"coordinates":[9304,2234]},{"type":"Point","properties":{"refs":["way/9429554"]},"coordinates":[8208,2075]},{"type":"Point","properties":{"refs":["way/9429209"]},"coordinates":[5155,2331]},{"type":"Point","properties":{"refs":["way/9429356"]},"coordinates":[5048,5083]},{"type":"Point","properties":{"refs":["way/9428755","way/9428963"]},"coordinates":[9313,2691]},{"type":"Point","properties":{"refs":["way/9429712","way/39336523"]},"coordinates":[6698,1868]},{"type":"Point","properties":{"refs":["way/9429615","way/93020600"]},"coordinates":[1081,9520]},{"type":"Point","properties":{"refs":["way/9038876","way/9429641"]},"coordinates":[3304,6475]},{"type":"Point","properties":{"refs":["way/9428990","way/9429501"]},"coordinates":[9213,3146]},{"type":"Point","properties":{"refs":["way/8605856","way/9428731","way/104214826"]},"coordinates":[2862,5176]},{"type":"Point","properties":{"refs":["way/9429634"]},"coordinates":[6320,1183]},{"type":"Point","properties":{"refs":["way/8605090","way/9429683"]},"coordinates":[1670,6627]},{"type":"Point","properties":{"refs":["way/9429731","way/9429891"]},"coordinates":[1224,7197]},{"type":"Point","properties":{"refs":["way/9428989","way/9429788"]},"coordinates":[6615,5932]},{"type":"Point","properties":{"refs":["way/9429108","way/9429870"]},"coordinates":[7514,4380]},{"type":"Point","properties":{"refs":["way/9430079","way/89640588"]},"coordinates":[6064,1496]},{"type":"Point","properties":{"refs":["way/9429040","way/9429562","way/9429808"]},"coordinates":[5563,3051]},{"type":"Point","properties":{"refs":["way/91832682","way/93020600","way/138789038"]},"coordinates":[849,9724]},{"type":"Point","properties":{"refs":["way/9429527"]},"coordinates":[3498,4459]},{"type":"Point","properties":{"refs":["way/8605193","way/9429526"]},"coordinates":[7636,1380]},{"type":"Point","properties":{"refs":["way/9429791","way/220389986"]},"coordinates":[4008,5860]},{"type":"Point","properties":{"refs":["way/8605053","way/8605698","way/172237233"]},"coordinates":[6564,4049]},{"type":"Point","properties":{"refs":["way/9429254","way/9429886"]},"coordinates":[7523,3290]},{"type":"Point","properties":{"refs":["way/9428994","way/31120864"]},"coordinates":[5403,3666]},{"type":"Point","properties":{"refs":["way/9429507","way/9429691"]},"coordinates":[7938,2503]},{"type":"Point","properties":{"refs":["way/9429552","way/9429612","way/48734493"]},"coordinates":[7568,2235]},{"type":"Point","properties":{"refs":["way/8604726","way/8604822"]},"coordinates":[4076,5829]},{"type":"Point","properties":{"refs":["way/9429700","way/9429924"]},"coordinates":[957,7847]},{"type":"Point","properties":{"refs":["way/9429306","way/44709018","way/88607346"]},"coordinates":[5640,873]},{"type":"Point","properties":{"refs":["way/8605456","way/9429641"]},"coordinates":[3276,6453]},{"type":"Point","properties":{"refs":["way/9429260","way/9429870"]},"coordinates":[7733,4162]},{"type":"Point","properties":{"refs":["way/9429300","way/9430165","way/82329809"]},"coordinates":[5575,3992]},{"type":"Point","properties":{"refs":["way/8605311","way/8605442","way/82329809","way/90286273"]},"coordinates":[6062,4918]},{"type":"Point","properties":{"refs":["way/9429328","way/9429381","way/9430036"]},"coordinates":[4372,4393]},{"type":"Point","properties":{"refs":["way/9429139","way/9429477"]},"coordinates":[6550,2126]},{"type":"Point","properties":{"refs":["way/9429440","way/44709018"]},"coordinates":[5831,778]},{"type":"Point","properties":{"refs":["way/9428969"]},"coordinates":[3921,3375]},{"type":"Point","properties":{"refs":["way/8605348","way/9429813"]},"coordinates":[2953,6208]},{"type":"Point","properties":{"refs":["way/9429800","way/9430042"]},"coordinates":[6203,4927]},{"type":"Point","properties":{"refs":["way/9429269","way/9429454"]},"coordinates":[1452,8178]},{"type":"Point","properties":{"refs":["way/9429342","way/255480979"]},"coordinates":[1403,6221]},{"type":"Point","properties":{"refs":["way/9429127","way/9429374"]},"coordinates":[4473,2546]},{"type":"Point","properties":{"refs":["way/9428994","way/9429242"]},"coordinates":[5420,3698]},{"type":"Point","properties":{"refs":["way/9429709","way/9429743"]},"coordinates":[5889,2725]},{"type":"Point","properties":{"refs":["way/9429030","way/9429038"]},"coordinates":[8307,5167]},{"type":"Point","properties":{"refs":["way/9429023","way/9429300","way/9429739"]},"coordinates":[5072,4342]},{"type":"Point","properties":{"refs":["way/93168578","way/93168582","way/93168583"]},"coordinates":[1973,5268]},{"type":"Point","properties":{"refs":["way/9429279","way/89717098","way/185856197"]},"coordinates":[6451,1460]},{"type":"Point","properties":{"refs":["way/8603359","way/9429162","way/353944727"]},"coordinates":[8009,4660]},{"type":"Point","properties":{"refs":["way/9429339","way/9429451"]},"coordinates":[5359,747]},{"type":"Point","properties":{"refs":["way/9428791","way/9429006"]},"coordinates":[292,6759]},{"type":"Point","properties":{"refs":["way/9429981"]},"coordinates":[3554,3645]},{"type":"Point","properties":{"refs":["way/9429621","way/295037236"]},"coordinates":[9556,2825]},{"type":"Point","properties":{"refs":["way/9428861","way/9429691"]},"coordinates":[7633,2644]},{"type":"Point","properties":{"refs":["way/9428726","way/9429366"]},"coordinates":[6219,3359]},{"type":"Point","properties":{"refs":["way/9430163"]},"coordinates":[6276,4423]},{"type":"Point","properties":{"refs":["way/9429586","way/9429788","way/89917606","way/353939784"]},"coordinates":[7303,5372]},{"type":"Point","properties":{"refs":["way/9428728","way/9429093"]},"coordinates":[1080,7062]},{"type":"Point","properties":{"refs":["way/9428928","way/9430101"]},"coordinates":[5464,983]},{"type":"Point","properties":{"refs":["way/9428928"]},"coordinates":[5512,983]},{"type":"Point","properties":{"refs":["way/9429737","way/172237233"]},"coordinates":[6696,4311]},{"type":"Point","properties":{"refs":["way/9428765","way/46374629"]},"coordinates":[6327,848]},{"type":"Point","properties":{"refs":["way/9428804","way/9430179"]},"coordinates":[3710,2784]},{"type":"Point","properties":{"refs":["way/9428767","way/9428947"]},"coordinates":[7149,2163]},{"type":"Point","properties":{"refs":["way/9429316","way/247838867"]},"coordinates":[8393,3691]},{"type":"Point","properties":{"refs":["way/8609186","way/9428994","way/9429562"]},"coordinates":[5178,3246]},{"type":"Point","properties":{"refs":["way/9429093"]},"coordinates":[941,7153]},{"type":"Point","properties":{"refs":["way/9428853","way/9428935","way/9429526"]},"coordinates":[7644,1346]},{"type":"Point","properties":{"refs":["way/9428755","way/90179993","way/295037236"]},"coordinates":[9421,2876]},{"type":"Point","properties":{"refs":["way/9428757","way/9428824"]},"coordinates":[2398,4731]},{"type":"Point","properties":{"refs":["way/9429706","way/9429962"]},"coordinates":[978,7362]},{"type":"Point","properties":{"refs":["way/9429339","way/9429792"]},"coordinates":[5454,647]},{"type":"Point","properties":{"refs":["way/9429801"]},"coordinates":[1262,5605]},{"type":"Point","properties":{"refs":["way/9430058","way/89900467"]},"coordinates":[7503,2080]},{"type":"Point","properties":{"refs":["way/9428987","way/9429412"]},"coordinates":[4834,5132]},{"type":"Point","properties":{"refs":["way/9429813","way/9430085"]},"coordinates":[3030,6283]},{"type":"Point","properties":{"refs":["way/9429393"]},"coordinates":[2393,4840]},{"type":"Point","properties":{"refs":["way/9429108","way/9429697","way/90102302","way/353944727"]},"coordinates":[7910,4770]},{"type":"Point","properties":{"refs":["way/9429566"]},"coordinates":[3252,3511]},{"type":"Point","properties":{"refs":["way/9429120","way/9429694"]},"coordinates":[4203,4296]},{"type":"Point","properties":{"refs":["way/8604767","way/8605850","way/9430159"]},"coordinates":[7601,2884]},{"type":"Point","properties":{"refs":["way/9428828","way/9429741"]},"coordinates":[8992,3485]},{"type":"Point","properties":{"refs":["way/9429378","way/9429854"]},"coordinates":[5630,4195]},{"type":"Point","properties":{"refs":["way/9429139","way/185856196"]},"coordinates":[6303,1720]},{"type":"Point","properties":{"refs":["way/9430147"]},"coordinates":[4605,4928]},{"type":"Point","properties":{"refs":["way/9429329","way/142608863"]},"coordinates":[6655,3534]},{"type":"Point","properties":{"refs":["way/9428970","way/9429652"]},"coordinates":[6431,2683]},{"type":"Point","properties":{"refs":["way/8605480","way/8607503","way/9429707"]},"coordinates":[3987,5181]},{"type":"Point","properties":{"refs":["way/8604879","way/49655017","way/89900466"]},"coordinates":[7644,961]},{"type":"Point","properties":{"refs":["way/9429990"]},"coordinates":[4980,5150]},{"type":"Point","properties":{"refs":["way/9429591","way/9429624"]},"coordinates":[4942,5023]},{"type":"Point","properties":{"refs":["way/9429710","way/31120838","way/31120860"]},"coordinates":[4554,3915]},{"type":"Point","properties":{"refs":["way/9430044"]},"coordinates":[5966,3461]},{"type":"Point","properties":{"refs":["way/9428970","way/9429568"]},"coordinates":[6370,2570]},{"type":"Point","properties":{"refs":["way/9428907"]},"coordinates":[6984,3474]},{"type":"Point","properties":{"refs":["way/9038961","way/9429586"]},"coordinates":[6434,6116]},{"type":"Point","properties":{"refs":["way/8604974","way/9429311"]},"coordinates":[3084,5231]},{"type":"Point","properties":{"refs":["way/9429674","way/9429831","way/9429870"]},"coordinates":[7181,4712]},{"type":"Point","properties":{"refs":["way/9429160","way/9429320"]},"coordinates":[1222,5773]},{"type":"Point","properties":{"refs":["way/24917825","way/203009474"]},"coordinates":[3970,2440]},{"type":"Point","properties":{"refs":["way/8605091","way/8605164"]},"coordinates":[2389,7370]},{"type":"Point","properties":{"refs":["way/9429010","way/9429886"]},"coordinates":[7323,3376]},{"type":"Point","properties":{"refs":["way/9429475","way/24917825"]},"coordinates":[4346,2323]},{"type":"Point","properties":{"refs":["way/9430115","way/303186721"]},"coordinates":[5877,2307]},{"type":"Point","properties":{"refs":["way/9428966"]},"coordinates":[3874,3865]},{"type":"Point","properties":{"refs":["way/9429115","way/9429789"]},"coordinates":[8977,2495]},{"type":"Point","properties":{"refs":["way/9428994","way/9429547"]},"coordinates":[5120,3136]},{"type":"Point","properties":{"refs":["way/9429394","way/46785933","way/91832684"]},"coordinates":[543,9185]},{"type":"Point","properties":{"refs":["way/9429319","way/9429997","way/46374629"]},"coordinates":[6445,928]},{"type":"Point","properties":{"refs":["way/9429651"]},"coordinates":[3329,4344]},{"type":"Point","properties":{"refs":["way/9428795","way/9429290"]},"coordinates":[7731,3352]},{"type":"Point","properties":{"refs":["way/9428975","way/9429707","way/104213880"]},"coordinates":[3879,5235]},{"type":"Point","properties":{"refs":["way/9429014","way/9429300"]},"coordinates":[5379,4110]},{"type":"Point","properties":{"refs":["way/9429738","way/82329777"]},"coordinates":[7285,3751]},{"type":"Point","properties":{"refs":["way/9429444","way/9429596","way/9429915"]},"coordinates":[6941,5502]},{"type":"Point","properties":{"refs":["way/9428731","way/9430161"]},"coordinates":[2782,5220]},{"type":"Point","properties":{"refs":["way/9428863"]},"coordinates":[2524,5031]},{"type":"Point","properties":{"refs":["way/9429202"]},"coordinates":[5238,923]},{"type":"Point","properties":{"refs":["way/9428935","way/9430142","way/89900466","way/302110868"]},"coordinates":[7678,850]},{"type":"Point","properties":{"refs":["way/9429714","way/9429719"]},"coordinates":[5311,2161]},{"type":"Point","properties":{"refs":["way/8605490","way/9429151"]},"coordinates":[2920,4539]},{"type":"Point","properties":{"refs":["way/9428758","way/9429580"]},"coordinates":[6947,3400]},{"type":"Point","properties":{"refs":["way/9428970","way/9429908"]},"coordinates":[6315,2449]},{"type":"Point","properties":{"refs":["way/9429164","way/46785938"]},"coordinates":[707,7644]},{"type":"Point","properties":{"refs":["way/9428989","way/9429873"]},"coordinates":[6325,5513]},{"type":"Point","properties":{"refs":["way/9429743","way/9429795"]},"coordinates":[5822,2588]},{"type":"Point","properties":{"refs":["way/9429127","way/9429169"]},"coordinates":[4749,2416]},{"type":"Point","properties":{"refs":["way/9429831","way/171308002"]},"coordinates":[6752,5000]},{"type":"Point","properties":{"refs":["way/9429097","way/24917825"]},"coordinates":[4907,2155]},{"type":"Point","properties":{"refs":["way/9429460"]},"coordinates":[8256,2503]},{"type":"Point","properties":{"refs":["way/8605311","way/9429800"]},"coordinates":[6230,4804]},{"type":"Point","properties":{"refs":["way/9429895"]},"coordinates":[2882,3377]},{"type":"Point","properties":{"refs":["way/9429674","way/9430143"]},"coordinates":[7267,4873]},{"type":"Point","properties":{"refs":["way/9429309","way/341199167"]},"coordinates":[9117,2989]},{"type":"Point","properties":{"refs":["way/8607498","way/109101008"]},"coordinates":[2158,5417]},{"type":"Point","properties":{"refs":["way/9429830","way/9429848"]},"coordinates":[4680,1553]},{"type":"Point","properties":{"refs":["way/9429703","way/9430048"]},"coordinates":[2870,5408]},{"type":"Point","properties":{"refs":["way/9429671"]},"coordinates":[5952,1978]},{"type":"Point","properties":{"refs":["way/8610038","way/9429934"]},"coordinates":[8822,3101]},{"type":"Point","properties":{"refs":["way/9428768","way/9430116"]},"coordinates":[8718,3529]},{"type":"Point","properties":{"refs":["way/9429402","way/9429505"]},"coordinates":[2057,4374]},{"type":"Point","properties":{"refs":["way/9429119","way/9429552"]},"coordinates":[7628,2152]},{"type":"Point","properties":{"refs":["way/9428998","way/90286273"]},"coordinates":[7818,3694]},{"type":"Point","properties":{"refs":["way/9428937","way/90286273"]},"coordinates":[6381,4734]},{"type":"Point","properties":{"refs":["way/9429649","way/9429651"]},"coordinates":[3417,4303]},{"type":"Point","properties":{"refs":["way/9428888","way/9429185","way/82329768","way/90102306","way/247838867"]},"coordinates":[8059,3946]},{"type":"Point","properties":{"refs":["way/9429256","way/9429456"]},"coordinates":[1100,8125]},{"type":"Point","properties":{"refs":["way/8614596","way/9429342"]},"coordinates":[955,5699]},{"type":"Point","properties":{"refs":["way/9429813","way/9429925"]},"coordinates":[2962,6287]},{"type":"Point","properties":{"refs":["way/9428848","way/91832682"]},"coordinates":[747,9599]},{"type":"Point","properties":{"refs":["way/9428975","way/9429622"]},"coordinates":[4062,5596]},{"type":"Point","properties":{"refs":["way/9429464","way/9429743"]},"coordinates":[5620,2200]},{"type":"Point","properties":{"refs":["way/9430164","way/105957315"]},"coordinates":[8774,2714]},{"type":"Point","properties":{"refs":["way/9429243","way/341199167"]},"coordinates":[9260,2936]},{"type":"Point","properties":{"refs":["way/31120838","way/82329762"]},"coordinates":[4776,4344]},{"type":"Point","properties":{"refs":["way/8605351","way/9430179","way/24917825","way/33858910"]},"coordinates":[3641,2637]},{"type":"Point","properties":{"refs":["way/9429557","way/9430024"]},"coordinates":[4319,1769]},{"type":"Point","properties":{"refs":["way/9429583","way/109101008"]},"coordinates":[2490,5776]},{"type":"Point","properties":{"refs":["way/9429945","way/90288887"]},"coordinates":[7360,2861]},{"type":"Point","properties":{"refs":["way/9429709","way/9429808"]},"coordinates":[5494,2908]},{"type":"Point","properties":{"refs":["way/9429413","way/104214827"]},"coordinates":[3131,5906]},{"type":"Point","properties":{"refs":["way/9428726","way/9429365"]},"coordinates":[6240,3401]},{"type":"Point","properties":{"refs":["way/9428910"]},"coordinates":[8848,1344]},{"type":"Point","properties":{"refs":["way/9428724","way/9429342","way/9429481"]},"coordinates":[973,5722]},{"type":"Point","properties":{"refs":["way/9428813","way/9428948","way/9430046"]},"coordinates":[6649,5738]},{"type":"Point","properties":{"refs":["way/9429686","way/9430042"]},"coordinates":[6256,4998]},{"type":"Point","properties":{"refs":["way/9430037","way/31120860"]},"coordinates":[5191,3631]},{"type":"Point","properties":{"refs":["way/9428965","way/255479500"]},"coordinates":[7873,2041]},{"type":"Point","properties":{"refs":["way/9428998","way/82329807"]},"coordinates":[7300,2510]},{"type":"Point","properties":{"refs":["way/9429125","way/9429126","way/138788963"]},"coordinates":[506,7857]},{"type":"Point","properties":{"refs":["way/9429164","way/9429706"]},"coordinates":[640,7518]},{"type":"Point","properties":{"refs":["way/9428795","way/9429612"]},"coordinates":[8091,3191]},{"type":"Point","properties":{"refs":["way/9429576"]},"coordinates":[3428,2691]},{"type":"Point","properties":{"refs":["way/9429342","way/9429786"]},"coordinates":[1122,5898]},{"type":"Point","properties":{"refs":["way/9429577","way/46785933"]},"coordinates":[589,8774]},{"type":"Point","properties":{"refs":["way/8604813","way/8605671","way/9429793"]},"coordinates":[8879,79]},{"type":"Point","properties":{"refs":["way/9428985"]},"coordinates":[6579,359]},{"type":"Point","properties":{"refs":["way/9429703","way/9429707","way/104214827"]},"coordinates":[3003,5665]},{"type":"Point","properties":{"refs":["way/9429260","way/353944727"]},"coordinates":[8123,4546]},{"type":"Point","properties":{"refs":["way/9430092","way/46785933"]},"coordinates":[593,8623]},{"type":"Point","properties":{"refs":["way/9429964","way/105957315","way/255479501"]},"coordinates":[8640,2459]},{"type":"Point","properties":{"refs":["way/9428960"]},"coordinates":[3381,3343]},{"type":"Point","properties":{"refs":["way/9429449","way/255480979"]},"coordinates":[1295,6534]},{"type":"Point","properties":{"refs":["way/8605091","way/8605416","way/8605613","way/184472807"]},"coordinates":[2307,7204]},{"type":"Point","properties":{"refs":["way/9428910","way/82329810"]},"coordinates":[9048,1355]},{"type":"Point","properties":{"refs":["way/8605424","way/9430038"]},"coordinates":[2109,6551]},{"type":"Point","properties":{"refs":["way/9429211","way/9429305"]},"coordinates":[1213,8025]},{"type":"Point","properties":{"refs":["way/8605311","way/9428834"]},"coordinates":[6629,4529]},{"type":"Point","properties":{"refs":["way/9429805","way/39621980"]},"coordinates":[5966,350]},{"type":"Point","properties":{"refs":["way/9429337","way/203009474"]},"coordinates":[4045,2609]},{"type":"Point","properties":{"refs":["way/9429813","way/336112531"]},"coordinates":[3035,6277]},{"type":"Point","properties":{"refs":["way/9429120","way/31120838","way/31120864"]},"coordinates":[4623,4044]},{"type":"Point","properties":{"refs":["way/9429978"]},"coordinates":[6900,3809]},{"type":"Point","properties":{"refs":["way/9429304","way/24917825"]},"coordinates":[5610,1876]},{"type":"Point","properties":{"refs":["way/9429691","way/255479500"]},"coordinates":[8100,2435]},{"type":"Point","properties":{"refs":["way/9428963","way/9429243"]},"coordinates":[9188,2750]},{"type":"Point","properties":{"refs":["way/8604767","way/82329777"]},"coordinates":[6983,3143]},{"type":"Point","properties":{"refs":["way/8605178","way/109100959"]},"coordinates":[2882,7211]},{"type":"Point","properties":{"refs":["way/9429741","way/340779008"]},"coordinates":[9154,3335]},{"type":"Point","properties":{"refs":["way/8604767","way/82329768"]},"coordinates":[7443,2951]},{"type":"Point","properties":{"refs":["way/9429203","way/9429726"]},"coordinates":[3534,4194]},{"type":"Point","properties":{"refs":["way/9429738"]},"coordinates":[7484,3629]},{"type":"Point","properties":{"refs":["way/82332097","way/82332103"]},"coordinates":[9497,2950]},{"type":"Point","properties":{"refs":["way/8615585","way/9429039"]},"coordinates":[5776,226]},{"type":"Point","properties":{"refs":["way/9429306","way/9429792"]},"coordinates":[5460,862]},{"type":"Point","properties":{"refs":["way/9429120","way/9429919"]},"coordinates":[3862,4471]},{"type":"Point","properties":{"refs":["way/9429105"]},"coordinates":[1708,6056]},{"type":"Point","properties":{"refs":["way/9428937","way/9429330"]},"coordinates":[6520,4928]},{"type":"Point","properties":{"refs":["way/9429912"]},"coordinates":[6933,4774]},{"type":"Point","properties":{"refs":["way/9429001","way/142608863"]},"coordinates":[6903,4060]},{"type":"Point","properties":{"refs":["way/9429311","way/9430161"]},"coordinates":[2852,5354]},{"type":"Point","properties":{"refs":["way/9429139","way/90291148"]},"coordinates":[6891,2785]},{"type":"Point","properties":{"refs":["way/9428784","way/24917825"]},"coordinates":[4967,2137]},{"type":"Point","properties":{"refs":["way/9429099","way/9429300"]},"coordinates":[5263,4184]},{"type":"Point","properties":{"refs":["way/9428870","way/9429904","way/90288884","way/90288887"]},"coordinates":[7279,2701]},{"type":"Point","properties":{"refs":["way/9428768","way/9429310"]},"coordinates":[8934,3368]},{"type":"Point","properties":{"refs":["way/9429132","way/9429761","way/31115887"]},"coordinates":[5690,1192]},{"type":"Point","properties":{"refs":["way/9429239","way/9429871"]},"coordinates":[848,8906]},{"type":"Point","properties":{"refs":["way/9429305","way/9429700"]},"coordinates":[1088,7785]},{"type":"Point","properties":{"refs":["way/9429704"]},"coordinates":[3807,3836]},{"type":"Point","properties":{"refs":["way/9428958"]},"coordinates":[3292,3855]},{"type":"Point","properties":{"refs":["way/9429358"]},"coordinates":[4088,2145]},{"type":"Point","properties":{"refs":["way/9429231"]},"coordinates":[4135,2688]},{"type":"Point","properties":{"refs":["way/44142850","way/90205634","way/93305682"]},"coordinates":[8581,5416]},{"type":"Point","properties":{"refs":["way/8842520","way/90217009","way/295037243"]},"coordinates":[9622,4947]},{"type":"Point","properties":{"refs":["way/9428994","way/9429327"]},"coordinates":[5052,3004]},{"type":"Point","properties":{"refs":["way/9430170","way/104213880"]},"coordinates":[3680,4844]},{"type":"Point","properties":{"refs":["way/9429377","way/9429543"]},"coordinates":[1132,8517]},{"type":"Point","properties":{"refs":["way/8605311","way/9428751"]},"coordinates":[7197,4113]},{"type":"Point","properties":{"refs":["way/9429581"]},"coordinates":[4425,2729]},{"type":"Point","properties":{"refs":["way/9429485","way/9429798"]},"coordinates":[8672,3759]},{"type":"Point","properties":{"refs":["way/9429294","way/9429934"]},"coordinates":[8661,3171]},{"type":"Point","properties":{"refs":["way/9429158","way/9429208"]},"coordinates":[3903,2885]},{"type":"Point","properties":{"refs":["way/9429591","way/80486089"]},"coordinates":[5085,4943]},{"type":"Point","properties":{"refs":["way/9428998","way/286619213","way/353944727"]},"coordinates":[8220,4425]},{"type":"Point","properties":{"refs":["way/48734494","way/89900467"]},"coordinates":[7509,2093]},{"type":"Point","properties":{"refs":["way/9429193","way/9430079"]},"coordinates":[6155,1483]},{"type":"Point","properties":{"refs":["way/8605789","way/9429744","way/61268332"]},"coordinates":[4281,2479]},{"type":"Point","properties":{"refs":["way/31115886"]},"coordinates":[5842,1180]},{"type":"Point","properties":{"refs":["way/9429580","way/9429847"]},"coordinates":[6833,3480]},{"type":"Point","properties":{"refs":["way/8604785","way/9428994"]},"coordinates":[5330,3524]},{"type":"Point","properties":{"refs":["way/9428888","way/89920280","way/353944727"]},"coordinates":[8335,4250]},{"type":"Point","properties":{"refs":["way/8605003","way/8605178"]},"coordinates":[3021,7124]},{"type":"Point","properties":{"refs":["way/9429006","way/203669717"]},"coordinates":[529,6509]},{"type":"Point","properties":{"refs":["way/9430099","way/109101008"]},"coordinates":[2110,5317]},{"type":"Point","properties":{"refs":["way/9429828","way/9429941"]},"coordinates":[9071,891]},{"type":"Point","properties":{"refs":["way/82329786","way/180322988"]},"coordinates":[4805,4401]},{"type":"Point","properties":{"refs":["way/24917825","way/34303115"]},"coordinates":[4757,2199]},{"type":"Point","properties":{"refs":["way/9428874","way/9429317","way/9429637"]},"coordinates":[4751,4825]},{"type":"Point","properties":{"refs":["way/9429674","way/90286273"]},"coordinates":[6964,4333]},{"type":"Point","properties":{"refs":["way/9429172","way/9429671"]},"coordinates":[5994,1824]},{"type":"Point","properties":{"refs":["way/9429164","way/9430092"]},"coordinates":[1018,8289]},{"type":"Point","properties":{"refs":["way/9429603","way/9429720"]},"coordinates":[7135,3835]},{"type":"Point","properties":{"refs":["way/89717132"]},"coordinates":[6306,2083]},{"type":"Point","properties":{"refs":["way/9429878"]},"coordinates":[2723,4923]},{"type":"Point","properties":{"refs":["way/9428731","way/109101008"]},"coordinates":[2202,5520]},{"type":"Point","properties":{"refs":["way/9429891","way/46785938"]},"coordinates":[1294,7342]},{"type":"Point","properties":{"refs":["way/9429682","way/34303115"]},"coordinates":[4506,1664]},{"type":"Point","properties":{"refs":["way/9429162","way/90102302"]},"coordinates":[8026,4676]},{"type":"Point","properties":{"refs":["way/9428768","way/9430060"]},"coordinates":[8636,3592]},{"type":"Point","properties":{"refs":["way/8615448","way/9429505"]},"coordinates":[1631,4833]},{"type":"Point","properties":{"refs":["way/9429160","way/255480979"]},"coordinates":[1480,6082]},{"type":"Point","properties":{"refs":["way/9430170","way/89432858"]},"coordinates":[3417,4931]},{"type":"Point","properties":{"refs":["way/8608834","way/8615448","way/9429335","way/9429560"]},"coordinates":[2037,5139]},{"type":"Point","properties":{"refs":["way/9428952","way/9429154"]},"coordinates":[1097,6095]},{"type":"Point","properties":{"refs":["way/9429399","way/46785933"]},"coordinates":[597,8397]},{"type":"Point","properties":{"refs":["way/9429854","way/82329809"]},"coordinates":[5665,4167]},{"type":"Point","properties":{"refs":["way/9428989","way/9429114","way/9430046"]},"coordinates":[6533,5818]},{"type":"Point","properties":{"refs":["way/9429691"]},"coordinates":[7419,2752]},{"type":"Point","properties":{"refs":["way/9429430","way/9429821"]},"coordinates":[1236,5344]},{"type":"Point","properties":{"refs":["way/9428948","way/9429121","way/9429873"]},"coordinates":[6436,5438]},{"type":"Point","properties":{"refs":["way/9428813"]},"coordinates":[6699,5812]},{"type":"Point","properties":{"refs":["way/82329739","way/82329807"]},"coordinates":[7279,2406]},{"type":"Point","properties":{"refs":["way/9429250","way/9429567"]},"coordinates":[3513,3376]},{"type":"Point","properties":{"refs":["way/8605168","way/9429714","way/24917825"]},"coordinates":[5255,2029]},{"type":"Point","properties":{"refs":["way/49655013","way/93305686"]},"coordinates":[7360,2127]},{"type":"Point","properties":{"refs":["way/9429297"]},"coordinates":[8111,1985]},{"type":"Point","properties":{"refs":["way/8605370","way/9429594","way/9430141"]},"coordinates":[3445,4704]},{"type":"Point","properties":{"refs":["way/9429978","way/142608863"]},"coordinates":[6809,3859]},{"type":"Point","properties":{"refs":["way/9428977","way/9429800"]},"coordinates":[5938,5294]},{"type":"Point","properties":{"refs":["way/9428850","way/82329768"]},"coordinates":[7518,3131]},{"type":"Point","properties":{"refs":["way/9429947","way/172237233"]},"coordinates":[6493,3903]},{"type":"Point","properties":{"refs":["way/9430118","way/49655015"]},"coordinates":[7825,819]},{"type":"Point","properties":{"refs":["way/9429479","way/9429799"]},"coordinates":[2376,6387]},{"type":"Point","properties":{"refs":["way/9429972"]},"coordinates":[9142,2858]},{"type":"Point","properties":{"refs":["way/9429076"]},"coordinates":[8592,958]},{"type":"Point","properties":{"refs":["way/9429614","way/9429637","way/9430147","way/97504283"]},"coordinates":[4690,4863]},{"type":"Point","properties":{"refs":["way/9429289","way/9429945"]},"coordinates":[7108,2964]},{"type":"Point","properties":{"refs":["way/8609435","way/9429674","way/89917606"]},"coordinates":[7681,4993]},{"type":"Point","properties":{"refs":["way/8605218","way/82329739"]},"coordinates":[7261,2311]},{"type":"Point","properties":{"refs":["way/9429582","way/9429813","way/9429813"]},"coordinates":[3047,6248]},{"type":"Point","properties":{"refs":["way/8605693","way/138788967"]},"coordinates":[678,8016]},{"type":"Point","properties":{"refs":["way/8605218","way/49655013"]},"coordinates":[7294,2304]},{"type":"Point","properties":{"refs":["way/9429534","way/9429774"]},"coordinates":[7270,790]},{"type":"Point","properties":{"refs":["way/9428890","way/49655015"]},"coordinates":[7916,762]},{"type":"Point","properties":{"refs":["way/9429030","way/9429446"]},"coordinates":[7988,5673]},{"type":"Point","properties":{"refs":["way/9428914","way/9429821"]},"coordinates":[1425,5325]},{"type":"Point","properties":{"refs":["way/9429363"]},"coordinates":[4236,4992]},{"type":"Point","properties":{"refs":["way/9429306","way/9429339","way/9429482"]},"coordinates":[5245,859]},{"type":"Point","properties":{"refs":["way/9429114","way/9429573"]},"coordinates":[6380,5902]},{"type":"Point","properties":{"refs":["way/9430081","way/172237233"]},"coordinates":[6352,3623]},{"type":"Point","properties":{"refs":["way/9429339","way/9429616","way/9430007"]},"coordinates":[5123,946]},{"type":"Point","properties":{"refs":["way/9429127","way/9430132"]},"coordinates":[4577,2497]},{"type":"Point","properties":{"refs":["way/9429002","way/24917825"]},"coordinates":[5121,2088]},{"type":"Point","properties":{"refs":["way/90288885","way/90288886"]},"coordinates":[7375,2632]},{"type":"Point","properties":{"refs":["way/8604840","way/9430106"]},"coordinates":[5985,4437]},{"type":"Point","properties":{"refs":["way/9429384","way/9429829"]},"coordinates":[3751,2346]},{"type":"Point","properties":{"refs":["way/9429848","way/34303115"]},"coordinates":[4542,1701]},{"type":"Point","properties":{"refs":["way/9429475"]},"coordinates":[4304,2223]},{"type":"Point","properties":{"refs":["way/9428784","way/9429165"]},"coordinates":[4888,1890]},{"type":"Point","properties":{"refs":["way/9428753","way/9428922","way/255479501"]},"coordinates":[9092,2298]},{"type":"Point","properties":{"refs":["way/9429334","way/9430044"]},"coordinates":[5944,3415]},{"type":"Point","properties":{"refs":["way/9429562","way/9429743"]},"coordinates":[5968,2868]},{"type":"Point","properties":{"refs":["way/9429596","way/9429606"]},"coordinates":[6980,5267]},{"type":"Point","properties":{"refs":["way/9429126","way/9429724","way/138788967"]},"coordinates":[656,7914]},{"type":"Point","properties":{"refs":["way/9429412","way/302110861"]},"coordinates":[4975,5438]},{"type":"Point","properties":{"refs":["way/9429583","way/9430071"]},"coordinates":[2276,5933]},{"type":"Point","properties":{"refs":["way/9429687","way/9429717"]},"coordinates":[3282,3642]},{"type":"Point","properties":{"refs":["way/9429300","way/9430072"]},"coordinates":[5157,4264]},{"type":"Point","properties":{"refs":["way/9429658"]},"coordinates":[6887,1168]},{"type":"Point","properties":{"refs":["way/9429599","way/82329777"]},"coordinates":[7107,3427]},{"type":"Point","properties":{"refs":["way/80396654"]},"coordinates":[9796,4641]},{"type":"Point","properties":{"refs":["way/9429686"]},"coordinates":[6342,4934]},{"type":"Point","properties":{"refs":["way/8605424","way/9429683"]},"coordinates":[2054,6443]},{"type":"Point","properties":{"refs":["way/9429580","way/82329777"]},"coordinates":[7052,3325]},{"type":"Point","properties":{"refs":["way/9429743","way/303049926"]},"coordinates":[5761,2466]},{"type":"Point","properties":{"refs":["way/9429256","way/9429305"]},"coordinates":[1232,8066]},{"type":"Point","properties":{"refs":["way/9429756","way/9429939"]},"coordinates":[1052,7245]},{"type":"Point","properties":{"refs":["way/9429289","way/90288884"]},"coordinates":[7073,2884]},{"type":"Point","properties":{"refs":["way/9428963","way/9429130"]},"coordinates":[9014,2820]},{"type":"Point","properties":{"refs":["way/9429550","way/9429873","way/9430042"]},"coordinates":[6527,5381]},{"type":"Point","properties":{"refs":["way/9428890","way/9430118"]},"coordinates":[7916,846]},{"type":"Point","properties":{"refs":["way/9429008"]},"coordinates":[4945,2418]},{"type":"Point","properties":{"refs":["way/8610043","way/9429993","way/89717132","way/185856196"]},"coordinates":[6207,1852]},{"type":"Point","properties":{"refs":["way/9429986","way/9430079"]},"coordinates":[5778,1563]},{"type":"Point","properties":{"refs":["way/9429794","way/89900464"]},"coordinates":[7983,689]},{"type":"Point","properties":{"refs":["way/49655015","way/257681343"]},"coordinates":[7689,988]},{"type":"Point","properties":{"refs":["way/9429228","way/9429358"]},"coordinates":[4056,2069]},{"type":"Point","properties":{"refs":["way/9429373","way/9429707","way/104213876","way/109101008"]},"coordinates":[2627,5859]},{"type":"Point","properties":{"refs":["way/8605463","way/9429169"]},"coordinates":[4880,2670]},{"type":"Point","properties":{"refs":["way/8604965","way/255480979"]},"coordinates":[1785,5576]},{"type":"Point","properties":{"refs":["way/9429008","way/9429097"]},"coordinates":[5030,2381]},{"type":"Point","properties":{"refs":["way/8605225","way/82329739"]},"coordinates":[7265,2334]},{"type":"Point","properties":{"refs":["way/9428943","way/9429211","way/9429269"]},"coordinates":[1341,7960]},{"type":"Point","properties":{"refs":["way/9429352","way/9430137"]},"coordinates":[6616,1212]},{"type":"Point","properties":{"refs":["way/8605673","way/59034329"]},"coordinates":[8775,112]},{"type":"Point","properties":{"refs":["way/9429039","way/39621980"]},"coordinates":[5830,398]},{"type":"Point","properties":{"refs":["way/8605417","way/9429707"]},"coordinates":[3404,5472]},{"type":"Point","properties":{"refs":["way/9429334","way/9429366"]},"coordinates":[6188,3299]},{"type":"Point","properties":{"refs":["way/9429591","way/9429990"]},"coordinates":[4915,5040]},{"type":"Point","properties":{"refs":["way/9429826"]},"coordinates":[3683,3012]},{"type":"Point","properties":{"refs":["way/8609185","way/31120860"]},"coordinates":[5031,3703]},{"type":"Point","properties":{"refs":["way/9429398","way/9429708","way/9429830"]},"coordinates":[4803,1661]},{"type":"Point","properties":{"refs":["way/9429899"]},"coordinates":[8877,928]},{"type":"Point","properties":{"refs":["way/9429164","way/9429700"]},"coordinates":[832,7905]},{"type":"Point","properties":{"refs":["way/9428954","way/9429006","way/9429531"]},"coordinates":[205,6843]},{"type":"Point","properties":{"refs":["way/9429786","way/9429851"]},"coordinates":[900,6077]},{"type":"Point","properties":{"refs":["way/9429320"]},"coordinates":[1317,5700]},{"type":"Point","properties":{"refs":["way/9429236","way/9429614"]},"coordinates":[4787,5045]},{"type":"Point","properties":{"refs":["way/9429150","way/9429250"]},"coordinates":[3550,3446]},{"type":"Point","properties":{"refs":["way/9429397","way/9429739"]},"coordinates":[4981,4425]},{"type":"Point","properties":{"refs":["way/9428865","way/9429868"]},"coordinates":[5807,3579]},{"type":"Point","properties":{"refs":["way/9429962"]},"coordinates":[1003,7411]},{"type":"Point","properties":{"refs":["way/9038548","way/9429543"]},"coordinates":[1253,8762]},{"type":"Point","properties":{"refs":["way/8603503","way/9429139"]},"coordinates":[6588,2196]},{"type":"Point","properties":{"refs":["way/9429093","way/9430010"]},"coordinates":[1173,7000]},{"type":"Point","properties":{"refs":["way/9429276"]},"coordinates":[5047,2675]},{"type":"Point","properties":{"refs":["way/9429552","way/255479500"]},"coordinates":[7757,1964]},{"type":"Point","properties":{"refs":["way/9429093","way/9429458"]},"coordinates":[985,7125]},{"type":"Point","properties":{"refs":["way/9429164","way/9429256"]},"coordinates":[965,8179]},{"type":"Point","properties":{"refs":["way/9428817","way/9429916"]},"coordinates":[5670,364]},{"type":"Point","properties":{"refs":["way/9428989","way/9429330"]},"coordinates":[6133,5235]},{"type":"Point","properties":{"refs":["way/9429552","way/9429982"]},"coordinates":[7926,1722]},{"type":"Point","properties":{"refs":["way/9429176","way/9429540"]},"coordinates":[6247,567]},{"type":"Point","properties":{"refs":["way/9429917","way/82329809"]},"coordinates":[5902,4611]},{"type":"Point","properties":{"refs":["way/9429164","way/9429924"]},"coordinates":[909,8064]},{"type":"Point","properties":{"refs":["way/9429315","way/9429707","way/31133325"]},"coordinates":[4086,5132]},{"type":"Point","properties":{"refs":["way/9428994","way/9429709"]},"coordinates":[5099,3094]},{"type":"Point","properties":{"refs":["way/9429517","way/9429535","way/39336523","way/89717128"]},"coordinates":[6784,1784]},{"type":"Point","properties":{"refs":["way/9428757","way/170502324","way/170502327"]},"coordinates":[2525,4887]},{"type":"Point","properties":{"refs":["way/8605856","way/9429311"]},"coordinates":[2935,5311]},{"type":"Point","properties":{"refs":["way/9429208","way/24917825"]},"coordinates":[3736,2571]},{"type":"Point","properties":{"refs":["way/9429041"]},"coordinates":[2639,4999]},{"type":"Point","properties":{"refs":["way/9429269","way/9429700"]},"coordinates":[1224,7717]},{"type":"Point","properties":{"refs":["way/9428939","way/90286273"]},"coordinates":[6835,4419]},{"type":"Point","properties":{"refs":["way/8616138","way/9429705"]},"coordinates":[708,6072]},{"type":"Point","properties":{"refs":["way/9429440","way/9429690","way/88607346"]},"coordinates":[5643,764]},{"type":"Point","properties":{"refs":["way/9429366","way/9429696"]},"coordinates":[6134,3195]},{"type":"Point","properties":{"refs":["way/9429314","way/9429624"]},"coordinates":[4778,4716]},{"type":"Point","properties":{"refs":["way/9429006","way/9429713"]},"coordinates":[502,6540]},{"type":"Point","properties":{"refs":["way/9429130","way/9430164"]},"coordinates":[8952,2656]},{"type":"Point","properties":{"refs":["way/9429473","way/9429609"]},"coordinates":[1007,6605]},{"type":"Point","properties":{"refs":["way/81160752","way/81160753","way/81160754"]},"coordinates":[3525,2803]},{"type":"Point","properties":{"refs":["way/85327557","way/353937682"]},"coordinates":[8515,5723]},{"type":"Point","properties":{"refs":["way/353933858","way/353937682"]},"coordinates":[7621,5616]},{"type":"Point","properties":{"refs":["way/80396590","way/353937682"]},"coordinates":[7465,5600]},{"type":"Point","properties":{"refs":["way/8605090","way/8605613"]},"coordinates":[2033,7340]},{"type":"Point","properties":{"refs":["way/8605090","way/37189582"]},"coordinates":[2039,7352]},{"type":"Point","properties":{"refs":["way/9429102","way/302110862"]},"coordinates":[1475,6579]},{"type":"Point","properties":{"refs":["way/8605090","way/279671648","way/302110862"]},"coordinates":[1606,6501]},{"type":"Point","properties":{"refs":["way/9429139","way/9429521"]},"coordinates":[6385,1831]},{"type":"Point","properties":{"refs":["way/9429139","way/9429404"]},"coordinates":[6394,1848]},{"type":"Point","properties":{"refs":["way/9429139","way/9429244"]},"coordinates":[6466,1977]},{"type":"Point","properties":{"refs":["way/9429139","way/39336523"]},"coordinates":[6478,1999]},{"type":"Point","properties":{"refs":["way/9429139","way/9429144"]},"coordinates":[6628,2276]},{"type":"Point","properties":{"refs":["way/9429139","way/9429908"]},"coordinates":[6634,2288]},{"type":"Point","properties":{"refs":["way/8604852","way/9429826"]},"coordinates":[3598,3052]},{"type":"Point","properties":{"refs":["way/81160756"]},"coordinates":[3488,3062]},{"type":"Point","properties":{"refs":["way/8604852","way/9429200"]},"coordinates":[3534,2929]},{"type":"Point","properties":{"refs":["way/8605568","way/9429495"]},"coordinates":[5630,580]},{"type":"Point","properties":{"refs":["way/9428833","way/33721065"]},"coordinates":[3404,2545]},{"type":"Point","properties":{"refs":["way/9429212","way/84083458"]},"coordinates":[3584,3953]},{"type":"Point","properties":{"refs":["way/203669717"]},"coordinates":[469,6437]},{"type":"Point","properties":{"refs":["way/8605592","way/90102306"]},"coordinates":[8237,4348]},{"type":"Point","properties":{"refs":["way/8605311","way/9430156"]},"coordinates":[8040,3524]},{"type":"Point","properties":{"refs":["way/8605545","way/9429451"]},"coordinates":[5200,605]},{"type":"Point","properties":{"refs":["way/8605545","way/9429340"]},"coordinates":[5174,632]},{"type":"Point","properties":{"refs":["way/9429690","way/88607346"]},"coordinates":[5645,713]},{"type":"Point","properties":{"refs":["way/8605291","way/9429002"]},"coordinates":[5268,2346]},{"type":"Point","properties":{"refs":["way/8604756","way/9429526","way/9430029","way/93305686"]},"coordinates":[7628,1579]},{"type":"Point","properties":{"refs":["way/8604756","way/9429628","way/89900466"]},"coordinates":[7532,1531]},{"type":"Point","properties":{"refs":["way/44849207"]},"coordinates":[5850,993]},{"type":"Point","properties":{"refs":["way/9429368","way/51811523","way/90179993","way/295037247"]},"coordinates":[9616,3053]},{"type":"Point","properties":{"refs":["way/59034330","way/59034331"]},"coordinates":[8241,460]},{"type":"Point","properties":{"refs":["way/9429250","way/303049926"]},"coordinates":[3682,3692]},{"type":"Point","properties":{"refs":["way/8605821","way/9429178"]},"coordinates":[8463,550]},{"type":"Point","properties":{"refs":["way/8605193","way/9430118"]},"coordinates":[8017,913]},{"type":"Point","properties":{"refs":["way/8603359","way/9429870","way/316397216"]},"coordinates":[7619,4278]},{"type":"Point","properties":{"refs":["way/54644308"]},"coordinates":[5228,886]},{"type":"Point","properties":{"refs":["way/54644312"]},"coordinates":[5249,874]},{"type":"Point","properties":{"refs":["way/54644313"]},"coordinates":[5236,882]},{"type":"Point","properties":{"refs":["way/54644312"]},"coordinates":[5249,882]},{"type":"Point","properties":{"refs":["way/54644308","way/54644313"]},"coordinates":[5235,897]},{"type":"Point","properties":{"refs":["way/54644313"]},"coordinates":[5238,909]},{"type":"Point","properties":{"refs":["way/79763809","way/80512128","way/93401904"]},"coordinates":[3478,4796]},{"type":"Point","properties":{"refs":["way/9430141","way/79763809"]},"coordinates":[3433,4708]},{"type":"Point","properties":{"refs":["way/80396589","way/353933858"]},"coordinates":[7532,5563]},{"type":"Point","properties":{"refs":["way/80396654","way/82332122"]},"coordinates":[9857,4641]},{"type":"Point","properties":{"refs":["way/8605348","way/279671648","way/336111997"]},"coordinates":[2911,6183]},{"type":"Point","properties":{"refs":["way/9429650","way/109101008"]},"coordinates":[2481,5771]},{"type":"Point","properties":{"refs":["way/9429605","way/109101008"]},"coordinates":[2164,5433]},{"type":"Point","properties":{"refs":["way/80512129","way/93401904"]},"coordinates":[3529,4779]},{"type":"Point","properties":{"refs":["way/80513078"]},"coordinates":[4687,4988]},{"type":"Point","properties":{"refs":["way/9428987"]},"coordinates":[4733,5190]},{"type":"Point","properties":{"refs":["way/9428923","way/9429591"]},"coordinates":[4952,5017]},{"type":"Point","properties":{"refs":["way/9429750"]},"coordinates":[4701,4980]},{"type":"Point","properties":{"refs":["way/9429236"]},"coordinates":[4685,5104]},{"type":"Point","properties":{"refs":["way/9429030","way/353939784"]},"coordinates":[7896,5769]},{"type":"Point","properties":{"refs":["way/134603755"]},"coordinates":[7387,5566]},{"type":"Point","properties":{"refs":["way/9429382","way/353939784"]},"coordinates":[7533,5550]},{"type":"Point","properties":{"refs":["way/9429038","way/353939784"]},"coordinates":[7771,5695]},{"type":"Point","properties":{"refs":["way/9430177","way/353939784"]},"coordinates":[7654,5622]},{"type":"Point","properties":{"refs":["way/9429416","way/353939784"]},"coordinates":[7410,5477]},{"type":"Point","properties":{"refs":["way/9429941"]},"coordinates":[9601,877]},{"type":"Point","properties":{"refs":["way/33721104","way/81049960"]},"coordinates":[3084,3019]},{"type":"Point","properties":{"refs":["way/9429647","way/81050656"]},"coordinates":[6098,2368]},{"type":"Point","properties":{"refs":["way/81050656"]},"coordinates":[6152,2342]},{"type":"Point","properties":{"refs":["way/9428807"]},"coordinates":[5933,1595]},{"type":"Point","properties":{"refs":["way/8605168","way/9429165"]},"coordinates":[5154,1805]},{"type":"Point","properties":{"refs":["way/24917825","way/81050663"]},"coordinates":[4297,2338]},{"type":"Point","properties":{"refs":["way/81050663"]},"coordinates":[4270,2273]},{"type":"Point","properties":{"refs":["way/81160751","way/84083458"]},"coordinates":[3265,3362]},{"type":"Point","properties":{"refs":["way/81160751"]},"coordinates":[3335,3326]},{"type":"Point","properties":{"refs":["way/33858910","way/81160752"]},"coordinates":[3538,2710]},{"type":"Point","properties":{"refs":["way/8605351","way/81160752"]},"coordinates":[3552,2772]},{"type":"Point","properties":{"refs":["way/33858910","way/81160753"]},"coordinates":[3517,2725]},{"type":"Point","properties":{"refs":["way/9428857","way/81160757"]},"coordinates":[3698,3479]},{"type":"Point","properties":{"refs":["way/8604852","way/9430157"]},"coordinates":[3577,3012]},{"type":"Point","properties":{"refs":["way/8609187","way/81160759"]},"coordinates":[4287,2651]},{"type":"Point","properties":{"refs":["way/81160759"]},"coordinates":[4233,2676]},{"type":"Point","properties":{"refs":["way/9430083","way/24917825"]},"coordinates":[3820,2517]},{"type":"Point","properties":{"refs":["way/82329762","way/82329786"]},"coordinates":[4790,4371]},{"type":"Point","properties":{"refs":["way/82329819","way/82329825"]},"coordinates":[9064,1158]},{"type":"Point","properties":{"refs":["way/82329773"]},"coordinates":[9554,1571]},{"type":"Point","properties":{"refs":["way/82329812","way/164546555"]},"coordinates":[4368,4512]},{"type":"Point","properties":{"refs":["way/9429828","way/82329763","way/82329825"]},"coordinates":[9061,1104]},{"type":"Point","properties":{"refs":["way/82329763","way/82329793"]},"coordinates":[9050,1156]},{"type":"Point","properties":{"refs":["way/8604762","way/93401904","way/164546555"]},"coordinates":[3955,4643]},{"type":"Point","properties":{"refs":["way/9429619","way/82329812"]},"coordinates":[4433,4613]},{"type":"Point","properties":{"refs":["way/82329750"]},"coordinates":[9659,1505]},{"type":"Point","properties":{"refs":["way/82329781","way/82329793"]},"coordinates":[9047,1190]},{"type":"Point","properties":{"refs":["way/82329819","way/82329823"]},"coordinates":[9062,1191]},{"type":"Point","properties":{"refs":["way/82329750"]},"coordinates":[9699,1465]},{"type":"Point","properties":{"refs":["way/82332111","way/82332124"]},"coordinates":[9761,4109]},{"type":"Point","properties":{"refs":["way/82332097","way/89920280"]},"coordinates":[9418,3069]},{"type":"Point","properties":{"refs":["way/82332124"]},"coordinates":[9758,3811]},{"type":"Point","properties":{"refs":["way/80676384","way/85327548","way/353939784"]},"coordinates":[8381,5604]},{"type":"Point","properties":{"refs":["way/44142846","way/85327548","way/85327560"]},"coordinates":[8509,5647]},{"type":"Point","properties":{"refs":["way/85327550","way/85327567"]},"coordinates":[8578,5706]},{"type":"Point","properties":{"refs":["way/80676384","way/85327560"]},"coordinates":[8382,5228]},{"type":"Point","properties":{"refs":["way/95049794","way/95049796"]},"coordinates":[363,9254]},{"type":"Point","properties":{"refs":["way/87332579","way/87332582","way/97474462"]},"coordinates":[7,6974]},{"type":"Point","properties":{"refs":["way/87332582","way/95049794","way/169669985"]},"coordinates":[134,7553]},{"type":"Point","properties":{"refs":["way/95049794","way/134652666"]},"coordinates":[501,7878]},{"type":"Point","properties":{"refs":["way/9429698","way/88479541"]},"coordinates":[5169,1555]},{"type":"Point","properties":{"refs":["way/88479541"]},"coordinates":[5187,1632]},{"type":"Point","properties":{"refs":["way/9429398","way/302110870"]},"coordinates":[4947,1150]},{"type":"Point","properties":{"refs":["way/88991032"]},"coordinates":[5139,531]},{"type":"Point","properties":{"refs":["way/9429802"]},"coordinates":[5048,1002]},{"type":"Point","properties":{"refs":["way/9429340","way/88991032"]},"coordinates":[5105,569]},{"type":"Point","properties":{"refs":["way/9429398","way/89365346"]},"coordinates":[4900,1321]},{"type":"Point","properties":{"refs":["way/89365346"]},"coordinates":[4978,1409]},{"type":"Point","properties":{"refs":["way/93020600","way/93160348"]},"coordinates":[838,9734]},{"type":"Point","properties":{"refs":["way/93160330","way/93160348"]},"coordinates":[827,9723]},{"type":"Point","properties":{"refs":["way/91832682","way/93160330"]},"coordinates":[837,9711]},{"type":"Point","properties":{"refs":["way/89640588"]},"coordinates":[6053,1424]},{"type":"Point","properties":{"refs":["way/24917825","way/89640582","way/185856190"]},"coordinates":[5755,1814]},{"type":"Point","properties":{"refs":["way/9429279","way/89717128"]},"coordinates":[6525,1426]},{"type":"Point","properties":{"refs":["way/9429526","way/89900470"]},"coordinates":[7641,1360]},{"type":"Point","properties":{"refs":["way/8605696","way/89900466"]},"coordinates":[7545,1454]},{"type":"Point","properties":{"refs":["way/9430029","way/89900466"]},"coordinates":[7538,1496]},{"type":"Point","properties":{"refs":["way/89900469","way/93305686"]},"coordinates":[7579,1663]},{"type":"Point","properties":{"refs":["way/89900466","way/89900470"]},"coordinates":[7566,1343]},{"type":"Point","properties":{"refs":["way/89915331","way/295037247"]},"coordinates":[9534,3142]},{"type":"Point","properties":{"refs":["way/90102302","way/286619213"]},"coordinates":[8221,4477]},{"type":"Point","properties":{"refs":["way/9428768","way/9429948"]},"coordinates":[8534,3668]},{"type":"Point","properties":{"refs":["way/9429316","way/9429612","way/90286273","way/341199168"]},"coordinates":[8214,3450]},{"type":"Point","properties":{"refs":["way/9428768","way/9429485"]},"coordinates":[8624,3601]},{"type":"Point","properties":{"refs":["way/9429036","way/9429612"]},"coordinates":[8033,3068]},{"type":"Point","properties":{"refs":["way/9429294","way/341199168"]},"coordinates":[8674,3194]},{"type":"Point","properties":{"refs":["way/9428768","way/9429461"]},"coordinates":[8833,3442]},{"type":"Point","properties":{"refs":["way/9430120","way/341199168"]},"coordinates":[8521,3264]},{"type":"Point","properties":{"refs":["way/8610034","way/9428768"]},"coordinates":[8736,3516]},{"type":"Point","properties":{"refs":["way/9429934","way/9429958","way/341199167"]},"coordinates":[8995,3035]},{"type":"Point","properties":{"refs":["way/8610042","way/90179993"]},"coordinates":[9478,2960]},{"type":"Point","properties":{"refs":["way/8605471","way/8605879"]},"coordinates":[9416,2902]},{"type":"Point","properties":{"refs":["way/8605879","way/295037247","way/353558622"]},"coordinates":[9600,3070]},{"type":"Point","properties":{"refs":["way/90216986","way/353557892","way/354626809","way/354627006"]},"coordinates":[9080,4624]},{"type":"Point","properties":{"refs":["way/90217009","way/354627006"]},"coordinates":[9036,4832]},{"type":"Point","properties":{"refs":["way/90226830","way/295037243","way/354637333"]},"coordinates":[9635,4509]},{"type":"Point","properties":{"refs":["way/90226830","way/353558621"]},"coordinates":[9655,4248]},{"type":"Point","properties":{"refs":["way/90217009","way/90229931"]},"coordinates":[9299,4885]},{"type":"Point","properties":{"refs":["way/90217009","way/323161770"]},"coordinates":[9318,4889]},{"type":"Point","properties":{"refs":["way/90216986","way/323161770"]},"coordinates":[9362,4680]},{"type":"Point","properties":{"refs":["way/90229931","way/216374582"]},"coordinates":[9258,5074]},{"type":"Point","properties":{"refs":["way/90217009","way/216374582"]},"coordinates":[9527,4931]},{"type":"Point","properties":{"refs":["way/216374582","way/216565354","way/281984861"]},"coordinates":[9056,5088]},{"type":"Point","properties":{"refs":["way/8605311","way/9429108"]},"coordinates":[7217,4094]},{"type":"Point","properties":{"refs":["way/9428992","way/9428998"]},"coordinates":[7771,3635]},{"type":"Point","properties":{"refs":["way/9428998","way/90288102"]},"coordinates":[7624,3431]},{"type":"Point","properties":{"refs":["way/8604767","way/9429748"]},"coordinates":[6744,3238]},{"type":"Point","properties":{"refs":["way/9429720","way/82329777"]},"coordinates":[7269,3723]},{"type":"Point","properties":{"refs":["way/9429612","way/90288886"]},"coordinates":[7689,2449]},{"type":"Point","properties":{"refs":["way/8605345","way/8610037"]},"coordinates":[8345,2198]},{"type":"Point","properties":{"refs":["way/9429447","way/93020600"]},"coordinates":[694,9859]},{"type":"Point","properties":{"refs":["way/9037824","way/93045969"]},"coordinates":[895,9169]},{"type":"Point","properties":{"refs":["way/93160328","way/93160330"]},"coordinates":[362,9284]},{"type":"Point","properties":{"refs":["way/9429403","way/81160754"]},"coordinates":[2734,3931]},{"type":"Point","properties":{"refs":["way/8604828","way/9429258"]},"coordinates":[2401,4368]},{"type":"Point","properties":{"refs":["way/8608834","way/9429803"]},"coordinates":[2196,4803]},{"type":"Point","properties":{"refs":["way/8604814","way/93168579"]},"coordinates":[2120,5157]},{"type":"Point","properties":{"refs":["way/93401904","way/297940042"]},"coordinates":[2425,5159]},{"type":"Point","properties":{"refs":["way/93401911","way/297244215"]},"coordinates":[1243,5425]},{"type":"Point","properties":{"refs":["way/93168580","way/109101008"]},"coordinates":[2078,5248]},{"type":"Point","properties":{"refs":["way/93401904"]},"coordinates":[2197,5213]},{"type":"Point","properties":{"refs":["way/93168578","way/93401911","way/255480979"]},"coordinates":[1946,5316]},{"type":"Point","properties":{"refs":["way/9429594","way/9429919"]},"coordinates":[3872,4490]},{"type":"Point","properties":{"refs":["way/9429120","way/9429638"]},"coordinates":[4222,4285]},{"type":"Point","properties":{"refs":["way/9429678","way/9429919"]},"coordinates":[3808,4372]},{"type":"Point","properties":{"refs":["way/9429710","way/9429919"]},"coordinates":[3799,4355]},{"type":"Point","properties":{"refs":["way/93401911","way/95440247"]},"coordinates":[1512,5404]},{"type":"Point","properties":{"refs":["way/9429985","way/169669985"]},"coordinates":[816,7044]},{"type":"Point","properties":{"refs":["way/9429761"]},"coordinates":[5687,1132]},{"type":"Point","properties":{"refs":["way/9429976"]},"coordinates":[7461,2280]},{"type":"Point","properties":{"refs":["way/156825969"]},"coordinates":[9323,2391]},{"type":"Point","properties":{"refs":["way/9429397","way/302110864"]},"coordinates":[5300,5025]},{"type":"Point","properties":{"refs":["way/9428998","way/9429185"]},"coordinates":[8019,3955]},{"type":"Point","properties":{"refs":["way/9429526","way/122428665"]},"coordinates":[7643,1352]},{"type":"Point","properties":{"refs":["way/89900466","way/122428665"]},"coordinates":[7567,1335]},{"type":"Point","properties":{"refs":["way/133530261"]},"coordinates":[9023,1492]},{"type":"Point","properties":{"refs":["way/133530264"]},"coordinates":[8945,1496]},{"type":"Point","properties":{"refs":["way/133530260","way/133530264"]},"coordinates":[8965,1498]},{"type":"Point","properties":{"refs":["way/133530261","way/133530264"]},"coordinates":[8996,1502]},{"type":"Point","properties":{"refs":["way/133530260"]},"coordinates":[8963,1518]},{"type":"Point","properties":{"refs":["way/133530264"]},"coordinates":[9009,1522]},{"type":"Point","properties":{"refs":["way/8842520","way/354402104"]},"coordinates":[9113,5192]},{"type":"Point","properties":{"refs":["way/8842520","way/354402104"]},"coordinates":[8891,5300]},{"type":"Point","properties":{"refs":["way/134603755","way/353937682"]},"coordinates":[7344,5603]},{"type":"Point","properties":{"refs":["way/95049794","way/134652667"]},"coordinates":[254,7699]},{"type":"Point","properties":{"refs":["way/134652665","way/134652667"]},"coordinates":[353,7806]},{"type":"Point","properties":{"refs":["way/134652665","way/134652665"]},"coordinates":[371,7810]},{"type":"Point","properties":{"refs":["way/134652665","way/134652666"]},"coordinates":[372,7813]},{"type":"Point","properties":{"refs":["way/134655082"]},"coordinates":[425,8252]},{"type":"Point","properties":{"refs":["way/95049794","way/134655082"]},"coordinates":[599,8293]},{"type":"Point","properties":{"refs":["way/8604884","way/8605061"]},"coordinates":[7176,1362]},{"type":"Point","properties":{"refs":["way/9429746"]},"coordinates":[7246,1532]},{"type":"Point","properties":{"refs":["way/9429114"]},"coordinates":[6303,5938]},{"type":"Point","properties":{"refs":["way/8605225","way/49655013"]},"coordinates":[7294,2324]},{"type":"Point","properties":{"refs":["way/156268858"]},"coordinates":[3526,2620]},{"type":"Point","properties":{"refs":["way/8644707","way/156825973"]},"coordinates":[9431,2451]},{"type":"Point","properties":{"refs":["way/9430164","way/156850680"]},"coordinates":[9098,2599]},{"type":"Point","properties":{"refs":["way/156850680"]},"coordinates":[9128,2666]},{"type":"Point","properties":{"refs":["way/9428896","way/9428980"]},"coordinates":[7397,224]},{"type":"Point","properties":{"refs":["way/9428896","way/9429747"]},"coordinates":[7368,232]},{"type":"Point","properties":{"refs":["way/82332111"]},"coordinates":[9999,4159]},{"type":"Point","properties":{"refs":["way/9428797","way/9428802","way/9429368","way/353557890","way/353558622","way/353559483"]},"coordinates":[9219,4015]},{"type":"Point","properties":{"refs":["way/164546555"]},"coordinates":[4819,4344]},{"type":"Point","properties":{"refs":["way/8605079","way/164877032"]},"coordinates":[7807,1651]},{"type":"Point","properties":{"refs":["way/164877031","way/164877032"]},"coordinates":[7906,1691]},{"type":"Point","properties":{"refs":["way/8604920","way/169669985"]},"coordinates":[119,7562]},{"type":"Point","properties":{"refs":["way/8605381","way/170502324","way/170502325"]},"coordinates":[2608,4877]},{"type":"Point","properties":{"refs":["way/8604814","way/170502325","way/170502327"]},"coordinates":[2483,4949]},{"type":"Point","properties":{"refs":["way/9428757","way/9429393"]},"coordinates":[2451,4795]},{"type":"Point","properties":{"refs":["way/9429041","way/170502325"]},"coordinates":[2533,4926]},{"type":"Point","properties":{"refs":["way/8605524","way/303049926"]},"coordinates":[4666,2976]},{"type":"Point","properties":{"refs":["way/9038930","way/9429622","way/9429791","way/175011002"]},"coordinates":[3894,5909]},{"type":"Point","properties":{"refs":["way/9428984","way/33721065"]},"coordinates":[3073,2979]},{"type":"Point","properties":{"refs":["way/178419646"]},"coordinates":[8793,155]},{"type":"Point","properties":{"refs":["way/178419644"]},"coordinates":[8674,162]},{"type":"Point","properties":{"refs":["way/178419639","way/178419644"]},"coordinates":[8427,314]},{"type":"Point","properties":{"refs":["way/178419637","way/178419646"]},"coordinates":[8469,357]},{"type":"Point","properties":{"refs":["way/178419645"]},"coordinates":[8473,435]},{"type":"Point","properties":{"refs":["way/178419623","way/178419637"]},"coordinates":[8267,499]},{"type":"Point","properties":{"refs":["way/178419639","way/178419640"]},"coordinates":[8135,510]},{"type":"Point","properties":{"refs":["way/178419629"]},"coordinates":[8273,506]},{"type":"Point","properties":{"refs":["way/178419629"]},"coordinates":[8274,508]},{"type":"Point","properties":{"refs":["way/178419645"]},"coordinates":[8578,513]},{"type":"Point","properties":{"refs":["way/178419634"]},"coordinates":[8278,514]},{"type":"Point","properties":{"refs":["way/178419634"]},"coordinates":[8277,518]},{"type":"Point","properties":{"refs":["way/178419633"]},"coordinates":[8272,525]},{"type":"Point","properties":{"refs":["way/178419636"]},"coordinates":[8095,528]},{"type":"Point","properties":{"refs":["way/8605193","way/178419633"]},"coordinates":[8286,535]},{"type":"Point","properties":{"refs":["way/178419636"]},"coordinates":[8100,535]},{"type":"Point","properties":{"refs":["way/178419632","way/178419640"]},"coordinates":[8105,535]},{"type":"Point","properties":{"refs":["way/178419630"]},"coordinates":[8083,556]},{"type":"Point","properties":{"refs":["way/178419624","way/178419630","way/178419632"]},"coordinates":[8084,559]},{"type":"Point","properties":{"refs":["way/178419624"]},"coordinates":[7848,733]},{"type":"Point","properties":{"refs":["way/178419623"]},"coordinates":[7986,735]},{"type":"Point","properties":{"refs":["way/9430142","way/178419643"]},"coordinates":[7827,748]},{"type":"Point","properties":{"refs":["way/178423180"]},"coordinates":[9751,113]},{"type":"Point","properties":{"refs":["way/178423182","way/178423184"]},"coordinates":[9045,162]},{"type":"Point","properties":{"refs":["way/178423182"]},"coordinates":[8963,225]},{"type":"Point","properties":{"refs":["way/9429196","way/9429717"]},"coordinates":[3130,3720]},{"type":"Point","properties":{"refs":["way/180322988","way/228550361"]},"coordinates":[4644,4558]},{"type":"Point","properties":{"refs":["way/46411508","way/185024505"]},"coordinates":[6538,1003]},{"type":"Point","properties":{"refs":["way/8604858","way/185024514"]},"coordinates":[6527,1011]},{"type":"Point","properties":{"refs":["way/185024535"]},"coordinates":[7154,1315]},{"type":"Point","properties":{"refs":["way/185024535"]},"coordinates":[7152,1337]},{"type":"Point","properties":{"refs":["way/185024525"]},"coordinates":[7147,1341]},{"type":"Point","properties":{"refs":["way/8605061","way/185024525"]},"coordinates":[7147,1360]},{"type":"Point","properties":{"refs":["way/185026114"]},"coordinates":[6759,1518]},{"type":"Point","properties":{"refs":["way/185026112","way/185026124"]},"coordinates":[6734,1526]},{"type":"Point","properties":{"refs":["way/185026112","way/185026114"]},"coordinates":[6746,1524]},{"type":"Point","properties":{"refs":["way/185026118","way/185026124"]},"coordinates":[6752,1552]},{"type":"Point","properties":{"refs":["way/185682358"]},"coordinates":[9731,911]},{"type":"Point","properties":{"refs":["way/185682379"]},"coordinates":[9773,998]},{"type":"Point","properties":{"refs":["way/185682358","way/185682379"]},"coordinates":[9731,1048]},{"type":"Point","properties":{"refs":["way/185682358"]},"coordinates":[9715,1200]},{"type":"Point","properties":{"refs":["way/9429535","way/188162154"]},"coordinates":[7049,1733]},{"type":"Point","properties":{"refs":["way/186988910"]},"coordinates":[6942,1829]},{"type":"Point","properties":{"refs":["way/186988910"]},"coordinates":[6882,1883]},{"type":"Point","properties":{"refs":["way/80396592"]},"coordinates":[7400,5545]},{"type":"Point","properties":{"refs":["way/188162154"]},"coordinates":[7039,1743]},{"type":"Point","properties":{"refs":["way/9428854"]},"coordinates":[6354,5864]},{"type":"Point","properties":{"refs":["way/200492405"]},"coordinates":[5802,5091]},{"type":"Point","properties":{"refs":["way/9428854","way/9429800"]},"coordinates":[5955,5274]},{"type":"Point","properties":{"refs":["way/9429674","way/200504259"]},"coordinates":[7241,4826]},{"type":"Point","properties":{"refs":["way/200504259"]},"coordinates":[6889,5185]},{"type":"Point","properties":{"refs":["way/9429606","way/9429788"]},"coordinates":[7187,5472]},{"type":"Point","properties":{"refs":["way/216374585","way/353558621","way/353559483"]},"coordinates":[9266,4091]},{"type":"Point","properties":{"refs":["way/216559618","way/216565354"]},"coordinates":[9015,5140]},{"type":"Point","properties":{"refs":["way/216559618","way/281984861","way/354626808"]},"coordinates":[8996,5105]},{"type":"Point","properties":{"refs":["way/9429089","way/216559618"]},"coordinates":[8951,5146]},{"type":"Point","properties":{"refs":["way/216559616","way/216559618"]},"coordinates":[8993,5166]},{"type":"Point","properties":{"refs":["way/216559617","way/216559618"]},"coordinates":[8955,5116]},{"type":"Point","properties":{"refs":["way/216559618","way/216559618"]},"coordinates":[8960,5160]},{"type":"Point","properties":{"refs":["way/43795186","way/354371615"]},"coordinates":[8456,5309]},{"type":"Point","properties":{"refs":["way/9429622","way/220389986"]},"coordinates":[3940,5827]},{"type":"Point","properties":{"refs":["way/81160754","way/222328144"]},"coordinates":[2614,4066]},{"type":"Point","properties":{"refs":["way/9038930","way/224744563"]},"coordinates":[3853,5982]},{"type":"Point","properties":{"refs":["way/175011002","way/224744563"]},"coordinates":[3808,5948]},{"type":"Point","properties":{"refs":["way/228550361"]},"coordinates":[4626,4564]},{"type":"Point","properties":{"refs":["way/9429529"]},"coordinates":[7385,5022]},{"type":"Point","properties":{"refs":["way/9428767","way/9429367"]},"coordinates":[7107,2108]},{"type":"Point","properties":{"refs":["way/9428947"]},"coordinates":[7096,2221]},{"type":"Point","properties":{"refs":["way/8604756","way/253877360"]},"coordinates":[7596,1562]},{"type":"Point","properties":{"refs":["way/90216994","way/354698583"]},"coordinates":[8679,4439]},{"type":"Point","properties":{"refs":["way/255479508","way/353937682"]},"coordinates":[8335,5654]},{"type":"Point","properties":{"refs":["way/323161770","way/354637333"]},"coordinates":[9408,4465]},{"type":"Point","properties":{"refs":["way/9430029","way/253877360"]},"coordinates":[7616,1555]},{"type":"Point","properties":{"refs":["way/8605381","way/9429629"]},"coordinates":[4356,3854]},{"type":"Point","properties":{"refs":["way/308587419"]},"coordinates":[4134,4073]},{"type":"Point","properties":{"refs":["way/8604781","way/169673996"]},"coordinates":[503,9304]},{"type":"Point","properties":{"refs":["way/89432031","way/91828491"]},"coordinates":[518,9311]},{"type":"Point","properties":{"refs":["way/91832684","way/169673997"]},"coordinates":[548,9277]},{"type":"Point","properties":{"refs":["way/91828491","way/91828492","way/169673997"]},"coordinates":[550,9288]},{"type":"Point","properties":{"refs":["way/9429394","way/169673996","way/169673997"]},"coordinates":[511,9263]},{"type":"Point","properties":{"refs":["way/91828496","way/169673996"]},"coordinates":[504,9269]},{"type":"Point","properties":{"refs":["way/9429915"]},"coordinates":[6901,5635]},{"type":"Point","properties":{"refs":["way/8610034","way/9429934"]},"coordinates":[8526,3234]},{"type":"Point","properties":{"refs":["way/9429813","way/336112531"]},"coordinates":[3046,6255]},{"type":"Point","properties":{"refs":["way/9429813","way/336111997"]},"coordinates":[2943,6222]},{"type":"Point","properties":{"refs":["way/9429813","way/336112442"]},"coordinates":[2939,6251]},{"type":"Point","properties":{"refs":["way/9429813","way/336112442"]},"coordinates":[2947,6268]},{"type":"Point","properties":{"refs":["way/9429471","way/104213876"]},"coordinates":[2744,5963]},{"type":"Point","properties":{"refs":["way/9429813","way/80512118"]},"coordinates":[2955,6206]},{"type":"Point","properties":{"refs":["way/9429813","way/175011005"]},"coordinates":[3008,6194]},{"type":"Point","properties":{"refs":["way/9429813","way/109101007"]},"coordinates":[3003,6191]},{"type":"Point","properties":{"refs":["way/323161771","way/353557890","way/353558620","way/354637333"]},"coordinates":[9125,4408]},{"type":"Point","properties":{"refs":["way/353557892","way/353558620","way/354626809"]},"coordinates":[9101,4523]},{"type":"Point","properties":{"refs":["way/216374585","way/353557890"]},"coordinates":[9185,4120]},{"type":"Point","properties":{"refs":["way/8605879","way/295037236","way/341199167"]},"coordinates":[9408,2881]},{"type":"Point","properties":{"refs":["way/9428956"]},"coordinates":[9558,3372]},{"type":"Point","properties":{"refs":["way/8605471","way/90179993"]},"coordinates":[9436,2895]},{"type":"Point","properties":{"refs":["way/255479508","way/255479510"]},"coordinates":[8417,5683]},{"type":"Point","properties":{"refs":["way/255479510","way/354326119"]},"coordinates":[8601,5616]},{"type":"Point","properties":{"refs":["way/80396590","way/353933858"]},"coordinates":[7457,5519]},{"type":"Point","properties":{"refs":["way/353933858"]},"coordinates":[7395,5480]},{"type":"Point","properties":{"refs":["way/80396590","way/80396592"]},"coordinates":[7467,5591]},{"type":"Point","properties":{"refs":["way/80396589","way/353937682"]},"coordinates":[7473,5601]},{"type":"Point","properties":{"refs":["way/255479508","way/353939784"]},"coordinates":[8328,5645]},{"type":"Point","properties":{"refs":["way/89920281","way/286619210"]},"coordinates":[8170,4692]},{"type":"Point","properties":{"refs":["way/8842520","way/354326122"]},"coordinates":[8594,5567]},{"type":"Point","properties":{"refs":["way/354325811"]},"coordinates":[8628,5580]},{"type":"Point","properties":{"refs":["way/354325811","way/354326122"]},"coordinates":[8616,5584]},{"type":"Point","properties":{"refs":["way/8605095","way/354371615"]},"coordinates":[8505,5183]},{"type":"Point","properties":{"refs":["way/216559617","way/354626808","way/354627006"]},"coordinates":[9005,4984]},{"type":"Point","properties":{"refs":["way/90216986","way/295037243"]},"coordinates":[9640,4731]}]}},"arcs":[],"transform":{"scale":[0.000005905550555056375,0.000004438193819382245],"translate":[-71.1344298,42.3734304]}}
 
 /***/ },
-/* 440 */
+/* 455 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var _toConsumableArray = __webpack_require__(441)['default'];
+	var _toConsumableArray = __webpack_require__(456)['default'];
 
 	var _slicedToArray = __webpack_require__(1)['default'];
 
 	var _Object$defineProperty = __webpack_require__(268)['default'];
 
-	var _Map = __webpack_require__(428)['default'];
+	var _Map = __webpack_require__(443)['default'];
 
 	var _interopRequireDefault = __webpack_require__(29)['default'];
 
@@ -52807,15 +53398,15 @@
 	  value: true
 	});
 
-	var _lodashCollectionSortBy = __webpack_require__(432);
+	var _lodashCollectionSortBy = __webpack_require__(447);
 
 	var _lodashCollectionSortBy2 = _interopRequireDefault(_lodashCollectionSortBy);
 
-	var _moment = __webpack_require__(319);
+	var _moment = __webpack_require__(334);
 
 	var _moment2 = _interopRequireDefault(_moment);
 
-	var videoContext = __webpack_require__(442);
+	var videoContext = __webpack_require__(457);
 
 	var vidChapters = new _Map();
 
@@ -52904,7 +53495,7 @@
 	module.exports = exports['default'];
 
 /***/ },
-/* 441 */
+/* 456 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -52924,90 +53515,90 @@
 	exports.__esModule = true;
 
 /***/ },
-/* 442 */
+/* 457 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var map = {
-		"./GOPR0002.json": 443,
-		"./GOPR0003.json": 444,
-		"./GOPR0004.json": 445,
-		"./GOPR0005.json": 446,
-		"./GOPR0006.json": 447,
-		"./GOPR0008.json": 448,
-		"./GOPR0009.json": 449,
-		"./GOPR0010.json": 450,
-		"./GOPR0011.json": 451,
-		"./GOPR0039.json": 452,
-		"./GOPR0040.json": 453,
-		"./GOPR7388.json": 454,
-		"./GOPR7390.json": 455,
-		"./GOPR7391.json": 456,
-		"./GOPR7392.json": 457,
-		"./GOPR7393.json": 458,
-		"./GOPR7394.json": 459,
-		"./GOPR7396.json": 460,
-		"./GP010003.json": 461,
-		"./GP010005.json": 462,
-		"./GP010006.json": 463,
-		"./GP010009.json": 464,
-		"./GP010010.json": 465,
-		"./GP010012.json": 466,
-		"./GP010039.json": 467,
-		"./GP010040.json": 468,
-		"./GP017388.json": 469,
-		"./GP017390.json": 470,
-		"./GP017392.json": 471,
-		"./GP017393.json": 472,
-		"./GP017394.json": 473,
-		"./GP017396.json": 474,
-		"./GP020003.json": 475,
-		"./GP020005.json": 476,
-		"./GP020006.json": 477,
-		"./GP020009.json": 478,
-		"./GP020010.json": 479,
-		"./GP020012.json": 480,
-		"./GP020039.json": 481,
-		"./GP027388.json": 482,
-		"./GP027390.json": 483,
-		"./GP027392.json": 484,
-		"./GP027393.json": 485,
-		"./GP027394.json": 486,
-		"./GP027396.json": 487,
-		"./GP030005.json": 488,
-		"./GP030006.json": 489,
-		"./GP030009.json": 490,
-		"./GP030010.json": 491,
-		"./GP030012.json": 492,
-		"./GP030039.json": 493,
-		"./GP037388.json": 494,
-		"./GP037390.json": 495,
-		"./GP037393.json": 496,
-		"./GP037396.json": 497,
-		"./GP040005.json": 498,
-		"./GP040006.json": 499,
-		"./GP040007.json": 500,
-		"./GP040009.json": 501,
-		"./GP040010.json": 502,
-		"./GP040012.json": 503,
-		"./GP047388.json": 504,
-		"./GP047390.json": 505,
-		"./GP047393.json": 506,
-		"./GP050005.json": 507,
-		"./GP050006.json": 508,
-		"./GP050007.json": 509,
-		"./GP050010.json": 510,
-		"./GP050012.json": 511,
-		"./GP057390.json": 512,
-		"./GP057393.json": 513,
-		"./GP060005.json": 514,
-		"./GP060006.json": 515,
-		"./GP060007.json": 516,
-		"./GP060012.json": 517,
-		"./GP067390.json": 518,
-		"./GP070007.json": 519,
-		"./GP070012.json": 520,
-		"./GP080007.json": 521,
-		"./GP080012.json": 522
+		"./GOPR0002.json": 458,
+		"./GOPR0003.json": 459,
+		"./GOPR0004.json": 460,
+		"./GOPR0005.json": 461,
+		"./GOPR0006.json": 462,
+		"./GOPR0008.json": 463,
+		"./GOPR0009.json": 464,
+		"./GOPR0010.json": 465,
+		"./GOPR0011.json": 466,
+		"./GOPR0039.json": 467,
+		"./GOPR0040.json": 468,
+		"./GOPR7388.json": 469,
+		"./GOPR7390.json": 470,
+		"./GOPR7391.json": 471,
+		"./GOPR7392.json": 472,
+		"./GOPR7393.json": 473,
+		"./GOPR7394.json": 474,
+		"./GOPR7396.json": 475,
+		"./GP010003.json": 476,
+		"./GP010005.json": 477,
+		"./GP010006.json": 478,
+		"./GP010009.json": 479,
+		"./GP010010.json": 480,
+		"./GP010012.json": 481,
+		"./GP010039.json": 482,
+		"./GP010040.json": 483,
+		"./GP017388.json": 484,
+		"./GP017390.json": 485,
+		"./GP017392.json": 486,
+		"./GP017393.json": 487,
+		"./GP017394.json": 488,
+		"./GP017396.json": 489,
+		"./GP020003.json": 490,
+		"./GP020005.json": 491,
+		"./GP020006.json": 492,
+		"./GP020009.json": 493,
+		"./GP020010.json": 494,
+		"./GP020012.json": 495,
+		"./GP020039.json": 496,
+		"./GP027388.json": 497,
+		"./GP027390.json": 498,
+		"./GP027392.json": 499,
+		"./GP027393.json": 500,
+		"./GP027394.json": 501,
+		"./GP027396.json": 502,
+		"./GP030005.json": 503,
+		"./GP030006.json": 504,
+		"./GP030009.json": 505,
+		"./GP030010.json": 506,
+		"./GP030012.json": 507,
+		"./GP030039.json": 508,
+		"./GP037388.json": 509,
+		"./GP037390.json": 510,
+		"./GP037393.json": 511,
+		"./GP037396.json": 512,
+		"./GP040005.json": 513,
+		"./GP040006.json": 514,
+		"./GP040007.json": 515,
+		"./GP040009.json": 516,
+		"./GP040010.json": 517,
+		"./GP040012.json": 518,
+		"./GP047388.json": 519,
+		"./GP047390.json": 520,
+		"./GP047393.json": 521,
+		"./GP050005.json": 522,
+		"./GP050006.json": 523,
+		"./GP050007.json": 524,
+		"./GP050010.json": 525,
+		"./GP050012.json": 526,
+		"./GP057390.json": 527,
+		"./GP057393.json": 528,
+		"./GP060005.json": 529,
+		"./GP060006.json": 530,
+		"./GP060007.json": 531,
+		"./GP060012.json": 532,
+		"./GP067390.json": 533,
+		"./GP070007.json": 534,
+		"./GP070012.json": 535,
+		"./GP080007.json": 536,
+		"./GP080012.json": 537
 	};
 	function webpackContext(req) {
 		return __webpack_require__(webpackContextResolve(req));
@@ -53020,491 +53611,491 @@
 	};
 	webpackContext.resolve = webpackContextResolve;
 	module.exports = webpackContext;
-	webpackContext.id = 442;
+	webpackContext.id = 457;
 
-
-/***/ },
-/* 443 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = {"duration":"746.278867","start":"2015-06-13 16:39:56"}
-
-/***/ },
-/* 444 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = {"duration":"1046.045000","start":"2015-06-13 16:52:53"}
-
-/***/ },
-/* 445 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = {"duration":"542.008133","start":"2015-06-13 17:35:40"}
-
-/***/ },
-/* 446 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = {"duration":"1046.045000","start":"2015-06-13 18:57:10"}
-
-/***/ },
-/* 447 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = {"duration":"1046.045000","start":"2015-06-14 12:55:35"}
-
-/***/ },
-/* 448 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = {"duration":"273.873600","start":"2015-06-18 19:37:52"}
-
-/***/ },
-/* 449 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = {"duration":"1046.045000","start":"2015-06-18 19:47:27"}
-
-/***/ },
-/* 450 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = {"duration":"1046.045000","start":"2015-06-20 14:42:33"}
-
-/***/ },
-/* 451 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = {"duration":"715.347967","start":"2015-06-20 16:33:00"}
-
-/***/ },
-/* 452 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = {"duration":"1045.544500","start":"2015-06-30 19:14:04"}
-
-/***/ },
-/* 453 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = {"duration":"1045.544500","start":"2015-06-30 20:26:21"}
-
-/***/ },
-/* 454 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = {"duration":"1046.045000","start":"2015-05-30 13:14:44"}
-
-/***/ },
-/* 455 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = {"duration":"1046.045000","start":"2015-05-31 14:24:53"}
-
-/***/ },
-/* 456 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = {"duration":"789.872417","start":"2015-06-06 14:59:27"}
-
-/***/ },
-/* 457 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = {"duration":"1046.045000","start":"2015-06-06 15:12:47"}
 
 /***/ },
 /* 458 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {"duration":"1046.045000","start":"2015-06-07 16:03:44"}
+	module.exports = {"duration":"746.278867","start":"2015-06-13 16:39:56"}
 
 /***/ },
 /* 459 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {"duration":"1046.045000","start":"2015-06-07 18:26:54"}
+	module.exports = {"duration":"1046.045000","start":"2015-06-13 16:52:53"}
 
 /***/ },
 /* 460 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {"duration":"1046.045000","start":"2015-06-07 19:28:54"}
+	module.exports = {"duration":"542.008133","start":"2015-06-13 17:35:40"}
 
 /***/ },
 /* 461 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {"duration":"1046.045000","start":"2015-06-13 17:10:19"}
+	module.exports = {"duration":"1046.045000","start":"2015-06-13 18:57:10"}
 
 /***/ },
 /* 462 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {"duration":"1046.045000","start":"2015-06-13 19:14:36"}
+	module.exports = {"duration":"1046.045000","start":"2015-06-14 12:55:35"}
 
 /***/ },
 /* 463 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {"duration":"1046.045000","start":"2015-06-14 13:13:01"}
+	module.exports = {"duration":"273.873600","start":"2015-06-18 19:37:52"}
 
 /***/ },
 /* 464 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {"duration":"1046.045000","start":"2015-06-18 20:04:54"}
+	module.exports = {"duration":"1046.045000","start":"2015-06-18 19:47:27"}
 
 /***/ },
 /* 465 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {"duration":"1046.045000","start":"2015-06-20 14:59:59"}
+	module.exports = {"duration":"1046.045000","start":"2015-06-20 14:42:33"}
 
 /***/ },
 /* 466 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {"duration":"1046.045000","start":"2015-06-20 18:24:39"}
+	module.exports = {"duration":"715.347967","start":"2015-06-20 16:33:00"}
 
 /***/ },
 /* 467 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {"duration":"1045.544500","start":"2015-06-30 19:31:30"}
+	module.exports = {"duration":"1045.544500","start":"2015-06-30 19:14:04"}
 
 /***/ },
 /* 468 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {"duration":"744.660583","start":"2015-06-30 20:43:47"}
+	module.exports = {"duration":"1045.544500","start":"2015-06-30 20:26:21"}
 
 /***/ },
 /* 469 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {"duration":"1046.045000","start":"2015-05-30 13:32:10"}
+	module.exports = {"duration":"1046.045000","start":"2015-05-30 13:14:44"}
 
 /***/ },
 /* 470 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {"duration":"1046.045000","start":"2015-05-31 14:42:20"}
+	module.exports = {"duration":"1046.045000","start":"2015-05-31 14:24:53"}
 
 /***/ },
 /* 471 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {"duration":"1046.045000","start":"2015-06-06 15:30:14"}
+	module.exports = {"duration":"789.872417","start":"2015-06-06 14:59:27"}
 
 /***/ },
 /* 472 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {"duration":"1046.045000","start":"2015-06-07 16:21:10"}
+	module.exports = {"duration":"1046.045000","start":"2015-06-06 15:12:47"}
 
 /***/ },
 /* 473 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {"duration":"1046.045000","start":"2015-06-07 18:44:21"}
+	module.exports = {"duration":"1046.045000","start":"2015-06-07 16:03:44"}
 
 /***/ },
 /* 474 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {"duration":"1046.045000","start":"2015-06-07 19:46:21"}
+	module.exports = {"duration":"1046.045000","start":"2015-06-07 18:26:54"}
 
 /***/ },
 /* 475 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {"duration":"401.667933","start":"2015-06-13 17:27:45"}
+	module.exports = {"duration":"1046.045000","start":"2015-06-07 19:28:54"}
 
 /***/ },
 /* 476 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {"duration":"1046.045000","start":"2015-06-13 19:32:02"}
+	module.exports = {"duration":"1046.045000","start":"2015-06-13 17:10:19"}
 
 /***/ },
 /* 477 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {"duration":"1046.045000","start":"2015-06-14 13:30:27"}
+	module.exports = {"duration":"1046.045000","start":"2015-06-13 19:14:36"}
 
 /***/ },
 /* 478 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {"duration":"1046.045000","start":"2015-06-18 20:22:20"}
+	module.exports = {"duration":"1046.045000","start":"2015-06-14 13:13:01"}
 
 /***/ },
 /* 479 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {"duration":"1046.045000","start":"2015-06-20 15:17:25"}
+	module.exports = {"duration":"1046.045000","start":"2015-06-18 20:04:54"}
 
 /***/ },
 /* 480 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {"duration":"1046.045000","start":"2015-06-20 18:42:05"}
+	module.exports = {"duration":"1046.045000","start":"2015-06-20 14:59:59"}
 
 /***/ },
 /* 481 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {"duration":"1045.544500","start":"2015-06-30 19:48:56"}
+	module.exports = {"duration":"1046.045000","start":"2015-06-20 18:24:39"}
 
 /***/ },
 /* 482 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {"duration":"1046.045000","start":"2015-05-30 13:49:36"}
+	module.exports = {"duration":"1045.544500","start":"2015-06-30 19:31:30"}
 
 /***/ },
 /* 483 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {"duration":"1046.045000","start":"2015-05-31 14:59:46"}
+	module.exports = {"duration":"744.660583","start":"2015-06-30 20:43:47"}
 
 /***/ },
 /* 484 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {"duration":"813.187375","start":"2015-06-06 15:47:40"}
+	module.exports = {"duration":"1046.045000","start":"2015-05-30 13:32:10"}
 
 /***/ },
 /* 485 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {"duration":"1046.045000","start":"2015-06-07 16:38:36"}
+	module.exports = {"duration":"1046.045000","start":"2015-05-31 14:42:20"}
 
 /***/ },
 /* 486 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {"duration":"468.342875","start":"2015-06-07 19:01:47"}
+	module.exports = {"duration":"1046.045000","start":"2015-06-06 15:30:14"}
 
 /***/ },
 /* 487 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {"duration":"1046.045000","start":"2015-06-07 20:03:47"}
+	module.exports = {"duration":"1046.045000","start":"2015-06-07 16:21:10"}
 
 /***/ },
 /* 488 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {"duration":"1046.045000","start":"2015-06-13 19:49:28"}
+	module.exports = {"duration":"1046.045000","start":"2015-06-07 18:44:21"}
 
 /***/ },
 /* 489 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {"duration":"1046.045000","start":"2015-06-14 13:47:53"}
+	module.exports = {"duration":"1046.045000","start":"2015-06-07 19:46:21"}
 
 /***/ },
 /* 490 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {"duration":"1046.045000","start":"2015-06-18 20:39:46"}
+	module.exports = {"duration":"401.667933","start":"2015-06-13 17:27:45"}
 
 /***/ },
 /* 491 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {"duration":"1046.045000","start":"2015-06-20 15:34:51"}
+	module.exports = {"duration":"1046.045000","start":"2015-06-13 19:32:02"}
 
 /***/ },
 /* 492 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {"duration":"1046.045000","start":"2015-06-20 18:59:31"}
+	module.exports = {"duration":"1046.045000","start":"2015-06-14 13:30:27"}
 
 /***/ },
 /* 493 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {"duration":"836.735900","start":"2015-06-30 20:06:21"}
+	module.exports = {"duration":"1046.045000","start":"2015-06-18 20:22:20"}
 
 /***/ },
 /* 494 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {"duration":"1046.045000","start":"2015-05-30 14:07:02"}
+	module.exports = {"duration":"1046.045000","start":"2015-06-20 15:17:25"}
 
 /***/ },
 /* 495 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {"duration":"1046.045000","start":"2015-05-31 15:17:12"}
+	module.exports = {"duration":"1046.045000","start":"2015-06-20 18:42:05"}
 
 /***/ },
 /* 496 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {"duration":"1046.045000","start":"2015-06-07 16:56:02"}
+	module.exports = {"duration":"1045.544500","start":"2015-06-30 19:48:56"}
 
 /***/ },
 /* 497 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {"duration":"189.480958","start":"2015-06-07 20:21:13"}
+	module.exports = {"duration":"1046.045000","start":"2015-05-30 13:49:36"}
 
 /***/ },
 /* 498 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {"duration":"1046.045000","start":"2015-06-13 20:06:55"}
+	module.exports = {"duration":"1046.045000","start":"2015-05-31 14:59:46"}
 
 /***/ },
 /* 499 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {"duration":"1046.045000","start":"2015-06-14 14:05:19"}
+	module.exports = {"duration":"813.187375","start":"2015-06-06 15:47:40"}
 
 /***/ },
 /* 500 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {"duration":"1046.045000","start":"2015-06-14 18:35:23"}
+	module.exports = {"duration":"1046.045000","start":"2015-06-07 16:38:36"}
 
 /***/ },
 /* 501 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {"duration":"0.367033","start":"2015-06-18 20:57:12"}
+	module.exports = {"duration":"468.342875","start":"2015-06-07 19:01:47"}
 
 /***/ },
 /* 502 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {"duration":"1046.045000","start":"2015-06-20 15:52:17"}
+	module.exports = {"duration":"1046.045000","start":"2015-06-07 20:03:47"}
 
 /***/ },
 /* 503 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {"duration":"1046.045000","start":"2015-06-20 19:16:57"}
+	module.exports = {"duration":"1046.045000","start":"2015-06-13 19:49:28"}
 
 /***/ },
 /* 504 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {"duration":"993.826167","start":"2015-05-30 14:24:28"}
+	module.exports = {"duration":"1046.045000","start":"2015-06-14 13:47:53"}
 
 /***/ },
 /* 505 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {"duration":"1046.045000","start":"2015-05-31 15:34:38"}
+	module.exports = {"duration":"1046.045000","start":"2015-06-18 20:39:46"}
 
 /***/ },
 /* 506 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {"duration":"1046.045000","start":"2015-06-07 17:13:28"}
+	module.exports = {"duration":"1046.045000","start":"2015-06-20 15:34:51"}
 
 /***/ },
 /* 507 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {"duration":"1046.045000","start":"2015-06-13 20:24:21"}
+	module.exports = {"duration":"1046.045000","start":"2015-06-20 18:59:31"}
 
 /***/ },
 /* 508 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {"duration":"1046.045000","start":"2015-06-14 14:22:45"}
+	module.exports = {"duration":"836.735900","start":"2015-06-30 20:06:21"}
 
 /***/ },
 /* 509 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {"duration":"1046.045000","start":"2015-06-14 18:52:49"}
+	module.exports = {"duration":"1046.045000","start":"2015-05-30 14:07:02"}
 
 /***/ },
 /* 510 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {"duration":"915.014100","start":"2015-06-20 16:09:43"}
+	module.exports = {"duration":"1046.045000","start":"2015-05-31 15:17:12"}
 
 /***/ },
 /* 511 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {"duration":"1046.045000","start":"2015-06-20 19:34:23"}
+	module.exports = {"duration":"1046.045000","start":"2015-06-07 16:56:02"}
 
 /***/ },
 /* 512 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {"duration":"1046.045000","start":"2015-05-31 15:52:04"}
+	module.exports = {"duration":"189.480958","start":"2015-06-07 20:21:13"}
 
 /***/ },
 /* 513 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {"duration":"108.733625","start":"2015-06-07 17:30:54"}
+	module.exports = {"duration":"1046.045000","start":"2015-06-13 20:06:55"}
 
 /***/ },
 /* 514 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {"duration":"91.458033","start":"2015-06-13 20:41:47"}
+	module.exports = {"duration":"1046.045000","start":"2015-06-14 14:05:19"}
 
 /***/ },
 /* 515 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {"duration":"713.112400","start":"2015-06-14 14:40:11"}
+	module.exports = {"duration":"1046.045000","start":"2015-06-14 18:35:23"}
 
 /***/ },
 /* 516 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {"duration":"1046.045000","start":"2015-06-14 19:10:15"}
+	module.exports = {"duration":"0.367033","start":"2015-06-18 20:57:12"}
 
 /***/ },
 /* 517 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {"duration":"1046.045000","start":"2015-06-20 19:51:49"}
+	module.exports = {"duration":"1046.045000","start":"2015-06-20 15:52:17"}
 
 /***/ },
 /* 518 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {"duration":"128.545083","start":"2015-05-31 16:09:30"}
+	module.exports = {"duration":"1046.045000","start":"2015-06-20 19:16:57"}
 
 /***/ },
 /* 519 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {"duration":"1046.045000","start":"2015-06-14 19:27:41"}
+	module.exports = {"duration":"993.826167","start":"2015-05-30 14:24:28"}
 
 /***/ },
 /* 520 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {"duration":"1046.045000","start":"2015-06-20 20:09:15"}
+	module.exports = {"duration":"1046.045000","start":"2015-05-31 15:34:38"}
 
 /***/ },
 /* 521 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {"duration":"891.457233","start":"2015-06-14 19:45:07"}
+	module.exports = {"duration":"1046.045000","start":"2015-06-07 17:13:28"}
 
 /***/ },
 /* 522 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {"duration":"774.874100","start":"2015-06-20 20:26:41"}
+	module.exports = {"duration":"1046.045000","start":"2015-06-13 20:24:21"}
 
 /***/ },
 /* 523 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = {"duration":"1046.045000","start":"2015-06-14 14:22:45"}
+
+/***/ },
+/* 524 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = {"duration":"1046.045000","start":"2015-06-14 18:52:49"}
+
+/***/ },
+/* 525 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = {"duration":"915.014100","start":"2015-06-20 16:09:43"}
+
+/***/ },
+/* 526 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = {"duration":"1046.045000","start":"2015-06-20 19:34:23"}
+
+/***/ },
+/* 527 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = {"duration":"1046.045000","start":"2015-05-31 15:52:04"}
+
+/***/ },
+/* 528 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = {"duration":"108.733625","start":"2015-06-07 17:30:54"}
+
+/***/ },
+/* 529 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = {"duration":"91.458033","start":"2015-06-13 20:41:47"}
+
+/***/ },
+/* 530 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = {"duration":"713.112400","start":"2015-06-14 14:40:11"}
+
+/***/ },
+/* 531 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = {"duration":"1046.045000","start":"2015-06-14 19:10:15"}
+
+/***/ },
+/* 532 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = {"duration":"1046.045000","start":"2015-06-20 19:51:49"}
+
+/***/ },
+/* 533 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = {"duration":"128.545083","start":"2015-05-31 16:09:30"}
+
+/***/ },
+/* 534 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = {"duration":"1046.045000","start":"2015-06-14 19:27:41"}
+
+/***/ },
+/* 535 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = {"duration":"1046.045000","start":"2015-06-20 20:09:15"}
+
+/***/ },
+/* 536 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = {"duration":"891.457233","start":"2015-06-14 19:45:07"}
+
+/***/ },
+/* 537 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = {"duration":"774.874100","start":"2015-06-20 20:26:41"}
+
+/***/ },
+/* 538 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* eslint-disable camelcase */
@@ -53514,7 +54105,7 @@
 
 	var _Object$defineProperty = __webpack_require__(268)['default'];
 
-	var _Promise = __webpack_require__(524)['default'];
+	var _Promise = __webpack_require__(539)['default'];
 
 	var _Object$assign = __webpack_require__(275)['default'];
 
@@ -53526,18 +54117,18 @@
 	  value: true
 	});
 
-	var _geo = __webpack_require__(410);
+	var _geo = __webpack_require__(425);
 
-	var _ways = __webpack_require__(427);
+	var _ways = __webpack_require__(442);
 
-	var _videos = __webpack_require__(440);
+	var _videos = __webpack_require__(455);
 
 	var _videos2 = _interopRequireDefault(_videos);
 
 	var tripData = new _Promise(function (resolve) {
 	  // note that the callback parameter must be named "require" or webpack won't notice
 	  __webpack_require__.e/* nsure */(1, function (require) {
-	    return resolve(__webpack_require__(532));
+	    return resolve(__webpack_require__(547));
 	  });
 	});
 
@@ -53689,23 +54280,23 @@
 	module.exports = exports['default'];
 
 /***/ },
-/* 524 */
+/* 539 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = { "default": __webpack_require__(525), __esModule: true };
+	module.exports = { "default": __webpack_require__(540), __esModule: true };
 
 /***/ },
-/* 525 */
+/* 540 */
 /***/ function(module, exports, __webpack_require__) {
 
-	__webpack_require__(313);
+	__webpack_require__(328);
 	__webpack_require__(18);
 	__webpack_require__(4);
-	__webpack_require__(526);
+	__webpack_require__(541);
 	module.exports = __webpack_require__(6).core.Promise;
 
 /***/ },
-/* 526 */
+/* 541 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -53714,17 +54305,17 @@
 	  , cof      = __webpack_require__(11)
 	  , $def     = __webpack_require__(16)
 	  , assert   = __webpack_require__(14)
-	  , forOf    = __webpack_require__(309)
-	  , setProto = __webpack_require__(528).set
-	  , same     = __webpack_require__(527)
-	  , species  = __webpack_require__(312)
+	  , forOf    = __webpack_require__(324)
+	  , setProto = __webpack_require__(543).set
+	  , same     = __webpack_require__(542)
+	  , species  = __webpack_require__(327)
 	  , SPECIES  = __webpack_require__(12)('species')
 	  , RECORD   = __webpack_require__(9).safe('record')
 	  , PROMISE  = 'Promise'
 	  , global   = $.g
 	  , process  = global.process
 	  , isNode   = cof(process) == 'process'
-	  , asap     = process && process.nextTick || __webpack_require__(529).set
+	  , asap     = process && process.nextTick || __webpack_require__(544).set
 	  , P        = global[PROMISE]
 	  , isFunction     = $.isFunction
 	  , isObject       = $.isObject
@@ -53894,7 +54485,7 @@
 	      $reject.call(record, err);
 	    }
 	  };
-	  __webpack_require__(310)(P.prototype, {
+	  __webpack_require__(325)(P.prototype, {
 	    // 25.4.5.3 Promise.prototype.then(onFulfilled, onRejected)
 	    then: function then(onFulfilled, onRejected){
 	      var S = assertObject(assertObject(this).constructor)[SPECIES];
@@ -53971,7 +54562,7 @@
 	});
 
 /***/ },
-/* 527 */
+/* 542 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = Object.is || function is(x, y){
@@ -53979,7 +54570,7 @@
 	};
 
 /***/ },
-/* 528 */
+/* 543 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// Works with __proto__ only. Old v8 can't work with null proto objects.
@@ -54009,15 +54600,15 @@
 	};
 
 /***/ },
-/* 529 */
+/* 544 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	var $      = __webpack_require__(6)
 	  , ctx    = __webpack_require__(26)
 	  , cof    = __webpack_require__(11)
-	  , invoke = __webpack_require__(530)
-	  , cel    = __webpack_require__(531)
+	  , invoke = __webpack_require__(545)
+	  , cel    = __webpack_require__(546)
 	  , global             = $.g
 	  , isFunction         = $.isFunction
 	  , html               = $.html
@@ -54093,7 +54684,7 @@
 	};
 
 /***/ },
-/* 530 */
+/* 545 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// Fast apply
@@ -54117,7 +54708,7 @@
 	};
 
 /***/ },
-/* 531 */
+/* 546 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var $        = __webpack_require__(6)
@@ -54130,21 +54721,6 @@
 	};
 
 /***/ },
-/* 532 */,
-/* 533 */,
-/* 534 */,
-/* 535 */,
-/* 536 */,
-/* 537 */,
-/* 538 */,
-/* 539 */,
-/* 540 */,
-/* 541 */,
-/* 542 */,
-/* 543 */,
-/* 544 */,
-/* 545 */,
-/* 546 */,
 /* 547 */,
 /* 548 */,
 /* 549 */,
@@ -54155,13 +54731,28 @@
 /* 554 */,
 /* 555 */,
 /* 556 */,
-/* 557 */
+/* 557 */,
+/* 558 */,
+/* 559 */,
+/* 560 */,
+/* 561 */,
+/* 562 */,
+/* 563 */,
+/* 564 */,
+/* 565 */,
+/* 566 */,
+/* 567 */,
+/* 568 */,
+/* 569 */,
+/* 570 */,
+/* 571 */,
+/* 572 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = {"type":"Topology","objects":{"somerville":{"type":"GeometryCollection","geometries":[{"type":"Polygon","id":"relation/1933746","arcs":[[-1]]}]}},"arcs":[[[1211,9999],[-36,-3],[-58,-13],[-105,-17],[-16,-6],[-52,-42],[-17,-5],[-120,-23],[-98,-41],[-76,-45],[-74,-46],[-46,-15],[-24,-22],[-11,-56],[4,-114],[5,-95],[-6,-36],[-5,-16],[-23,-21],[-26,-17],[-30,-10],[-42,-1],[-13,0],[3,-10],[9,-68],[-8,-48],[-13,-162],[-12,-98],[-21,-129],[-16,-111],[-4,-104],[10,-61],[15,-55],[22,-77],[38,-93],[15,-79],[6,-64],[3,-69],[-6,-50],[-22,-59],[-25,-83],[-46,-73],[-99,-181],[-56,-96],[-45,-83],[-37,-89],[-23,-75],[-11,-51],[-12,-63],[-1,-70],[2,-78],[-8,-136],[506,-566],[577,-884],[105,-160],[327,-517],[44,-60],[66,-92],[6,-8],[6,-8],[266,-347],[306,276],[114,-189],[134,-172],[56,-76],[36,-42],[292,-376],[-157,-112],[96,-165],[-95,-60],[-44,-25],[228,-284],[225,-372],[607,-710],[160,-18],[461,-510],[-98,-57],[190,-228],[669,-825],[263,9],[242,5],[412,9],[602,-39],[640,-66],[596,-183],[103,199],[130,-112],[51,-38],[53,-23],[44,-1],[40,12],[43,19],[125,20],[77,45],[107,60],[78,60],[172,-23],[48,-32],[66,-13],[63,-17],[81,-18],[60,-5],[125,-4],[189,-58],[103,-139],[128,-20],[219,137],[56,-5],[-439,1478],[-909,219],[1097,2101],[34,65],[95,182],[-88,166],[-132,313],[-27,87],[-7,17],[-82,203],[-18,49],[-41,135],[-59,102],[-196,65],[-19,43],[-10,67],[-12,110],[-12,81],[-19,73],[-10,43],[-16,49],[-18,28],[-36,43],[-39,38],[-38,28],[-37,29],[-32,19],[-54,21],[-53,7],[-438,-28],[-60,-1],[-51,4],[-68,18],[-145,27],[-105,19],[-94,-4],[-86,-2],[-89,-13],[-90,-21],[-94,-43],[-77,-38],[-112,-54],[-75,-29],[-63,-13],[-58,-10],[-66,-17],[-51,-11],[-12,0],[-32,-1],[-37,3],[-59,13],[-58,15],[-70,23],[-64,30],[-88,64],[-371,310],[-176,-266],[-368,-587],[-140,-231],[-561,264],[-1415,680],[-186,98],[-26,31],[-135,238],[-25,32],[-25,45],[-14,52],[-15,67],[-8,77],[-5,91],[11,293],[-76,36],[-569,270],[-26,-47],[-363,177],[25,60],[-368,190],[99,201],[-207,103],[-5,2],[-198,90],[-85,-176],[-284,318],[177,371],[-474,224],[480,750],[-34,148],[-2,164]]],"transform":{"scale":[0.000006186618661865768,0.000004542054205420843],"translate":[-71.1345882,42.3727247]}}
 
 /***/ },
-/* 558 */
+/* 573 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = {"type":"Topology","objects":{"contour":{"type":"GeometryCollection","crs":{"type":"name","properties":{"name":"urn:ogc:def:crs:OGC:1.3:CRS84"}},"geometries":[{"type":"LineString","arcs":[0]},{"type":"LineString","arcs":[1]},{"type":"LineString","arcs":[2]},{"type":"LineString","arcs":[3]},{"type":"LineString","arcs":[4]},{"type":"LineString","arcs":[5]},{"type":"LineString","arcs":[6]},{"type":"LineString","arcs":[7]},{"type":"LineString","arcs":[8]},{"type":"LineString","arcs":[9]},{"type":"LineString","arcs":[10]},{"type":"LineString","arcs":[11]},{"type":"LineString","arcs":[12]},{"type":"LineString","arcs":[13]},{"type":"LineString","arcs":[14]},{"type":"LineString","arcs":[15]},{"type":"LineString","arcs":[16]},{"type":"LineString","arcs":[17]},{"type":"LineString","arcs":[18]},{"type":"LineString","arcs":[19]},{"type":"LineString","arcs":[20]},{"type":"LineString","arcs":[21]},{"type":"LineString","arcs":[22]},{"type":"LineString","arcs":[23]},{"type":"LineString","arcs":[24]},{"type":"LineString","arcs":[25]},{"type":"LineString","arcs":[26]},{"type":"LineString","arcs":[27]},{"type":"LineString","arcs":[28]},{"type":"LineString","arcs":[29]},{"type":"LineString","arcs":[30]},{"type":"LineString","arcs":[31]},{"type":"LineString","arcs":[32]},{"type":"LineString","arcs":[33]},{"type":"LineString","arcs":[34]},{"type":"LineString","arcs":[35]},{"type":"LineString","arcs":[36]},{"type":"LineString","arcs":[37]},{"type":"LineString","arcs":[38]},{"type":"LineString","arcs":[39]},{"type":"LineString","arcs":[40]},{"type":"LineString","arcs":[41]},{"type":"LineString","arcs":[42]},{"type":"LineString","arcs":[43]},{"type":"LineString","arcs":[44]},{"type":"LineString","arcs":[45]},{"type":"LineString","arcs":[46]},{"type":"LineString","arcs":[47]},{"type":"LineString","arcs":[48]},{"type":"LineString","arcs":[49]},{"type":"LineString","arcs":[50]},{"type":"LineString","arcs":[51]},{"type":"LineString","arcs":[52]},{"type":"LineString","arcs":[53]},{"type":"LineString","arcs":[54]},{"type":"LineString","arcs":[55]},{"type":"LineString","arcs":[56]},{"type":"LineString","arcs":[57]},{"type":"LineString","arcs":[58]},{"type":"LineString","arcs":[59]},{"type":"LineString","arcs":[60]},{"type":"LineString","arcs":[61]},{"type":"LineString","arcs":[62]},{"type":"LineString","arcs":[63]},{"type":"LineString","arcs":[64]},{"type":"LineString","arcs":[65]},{"type":"LineString","arcs":[66]},{"type":"LineString","arcs":[67]},{"type":"LineString","arcs":[68]},{"type":"LineString","arcs":[69]},{"type":"LineString","arcs":[70]},{"type":"LineString","arcs":[71]},{"type":"LineString","arcs":[72]},{"type":"LineString","arcs":[73]},{"type":"LineString","arcs":[74]},{"type":"LineString","arcs":[75]},{"type":"LineString","arcs":[76]},{"type":"LineString","arcs":[77]},{"type":"LineString","arcs":[78]},{"type":"LineString","arcs":[79]},{"type":"LineString","arcs":[80]},{"type":"LineString","arcs":[81]},{"type":"LineString","arcs":[82]},{"type":"LineString","arcs":[83]},{"type":"LineString","arcs":[84]},{"type":"LineString","arcs":[85]},{"type":"LineString","arcs":[86]},{"type":"LineString","arcs":[87]},{"type":"LineString","arcs":[88]},{"type":"LineString","arcs":[89]},{"type":"LineString","arcs":[90]},{"type":"LineString","arcs":[91]},{"type":"LineString","arcs":[92]},{"type":"LineString","arcs":[93]},{"type":"LineString","arcs":[94]},{"type":"LineString","arcs":[95]},{"type":"LineString","arcs":[96]},{"type":"LineString","arcs":[97]},{"type":"LineString","arcs":[98]},{"type":"LineString","arcs":[99]},{"type":"LineString","arcs":[100]},{"type":"LineString","arcs":[101]},{"type":"LineString","arcs":[102]},{"type":"LineString","arcs":[103]},{"type":"LineString","arcs":[104]},{"type":"LineString","arcs":[105]},{"type":"LineString","arcs":[106]},{"type":"LineString","arcs":[107]},{"type":"LineString","arcs":[108]},{"type":"LineString","arcs":[109]},{"type":"LineString","arcs":[110]},{"type":"LineString","arcs":[111]},{"type":"LineString","arcs":[112]},{"type":"LineString","arcs":[113]},{"type":"LineString","arcs":[114]},{"type":"LineString","arcs":[115]},{"type":"LineString","arcs":[116]},{"type":"LineString","arcs":[117]},{"type":"LineString","arcs":[118]},{"type":"LineString","arcs":[119]},{"type":"LineString","arcs":[120]},{"type":"LineString","arcs":[121]},{"type":"LineString","arcs":[122]},{"type":"LineString","arcs":[123]},{"type":"LineString","arcs":[124]},{"type":"LineString","arcs":[125]},{"type":"LineString","arcs":[126]},{"type":"LineString","arcs":[127]},{"type":"LineString","arcs":[128]},{"type":"LineString","arcs":[129]},{"type":"LineString","arcs":[130]},{"type":"LineString","arcs":[131]},{"type":"LineString","arcs":[132]},{"type":"LineString","arcs":[133]},{"type":"LineString","arcs":[134]},{"type":"LineString","arcs":[135]},{"type":"LineString","arcs":[136]},{"type":"LineString","arcs":[137]},{"type":"LineString","arcs":[138]},{"type":"LineString","arcs":[139]},{"type":"LineString","arcs":[140]},{"type":"LineString","arcs":[141]},{"type":"LineString","arcs":[142]},{"type":"LineString","arcs":[143]},{"type":"LineString","arcs":[144]},{"type":"LineString","arcs":[145]},{"type":"LineString","arcs":[146]},{"type":"LineString","arcs":[147]},{"type":"LineString","arcs":[148]},{"type":"LineString","arcs":[149]},{"type":"LineString","arcs":[150]},{"type":"LineString","arcs":[151]},{"type":"LineString","arcs":[152]},{"type":"LineString","arcs":[153]},{"type":"LineString","arcs":[154]},{"type":"LineString","arcs":[155]},{"type":"LineString","arcs":[156]},{"type":"LineString","arcs":[157]},{"type":"LineString","arcs":[158]},{"type":"LineString","arcs":[159]}]}},"arcs":[[[985,9987,5],[1,-1,5],[4,-5,5],[9,11,5],[1,1,5],[0,6,5]],[[1011,9999,5],[0,-6,5],[3,-13,5],[4,-4,5],[9,-6,5],[5,-3,5],[5,-5,5],[9,-8,5],[10,-9,5],[3,-4,5],[-3,-7,5],[-4,-6,5],[-6,-4,5],[-9,-6,5],[-6,-3,5],[-4,-1,5],[-2,1,5],[-7,4,5],[-9,7,5],[-3,2,5],[-7,8,5],[-4,5,5],[-5,11,5],[-1,2,5],[-8,7,5],[-5,2,5]],[[836,9065,10],[-5,0,10],[-9,-1,10],[-5,2,10],[-2,13,10],[3,13,10],[4,10,10],[0,3,10],[6,12,10],[3,8,10],[3,5,10],[6,13,10],[3,13,10],[3,13,10],[1,13,10],[3,4,10],[9,8,10],[9,0,10],[10,-1,10],[9,-1,10],[10,1,10],[6,2,10],[3,0,10],[9,6,10],[9,7,10],[1,1,10],[4,0,10]],[[1837,7909,35],[-5,0,35],[-7,12,35],[-2,9,35],[-1,4,35],[1,2,35],[2,10,35],[3,13,35],[4,9,35],[1,4,35],[0,13,35],[-1,7,35],[-9,2,35],[-10,1,35],[-9,3,35],[-1,0,35],[-9,4,35],[-9,7,35],[-2,2,35],[-7,6,35],[-9,7,35],[-1,1,35],[-9,9,35],[-2,3,35],[0,6,35]],[[2136,7548,35],[-5,0,35],[-9,6,35],[-1,6,35],[1,4,35],[4,9,35],[3,13,35],[0,7,35]],[[2463,7349,30],[-2,-1,30],[-2,-1,30],[-10,6,30],[-2,1,30],[-2,4,30],[-5,2,30],[-9,7,30],[-10,-5,30],[-9,2,30],[-3,3,30],[-2,2,30],[-5,1,30],[-9,-3,30],[-1,0,30],[-8,-1,30],[-10,-1,30],[-9,-2,30],[-9,-1,30],[-10,-2,30],[-9,-1,30],[-9,-1,30],[-10,0,30],[-9,0,30],[-9,3,30],[-10,1,30],[-9,2,30],[-9,3,30],[-9,0,30],[-1,0,30],[-9,-7,30],[-3,-6,30],[-7,-3,30],[-9,-3,30],[-9,-1,30],[-10,3,30],[-9,3,30],[-9,1,30],[-4,0,30],[-6,1,30],[-9,1,30],[-9,1,30],[-10,1,30],[-9,1,30],[-9,2,30],[-10,3,30],[-6,3,30],[-3,2,30],[-10,5,30],[-9,5,30],[-1,1,30],[-8,4,30],[-10,4,30],[-9,4,30],[-2,1,30],[-7,3,30],[-10,4,30],[-9,5,30],[-2,1,30],[-7,3,30],[-10,-1,30],[-9,-2,30],[-3,0,30],[-6,-1,30],[-10,-1,30],[-9,-2,30],[-9,-7,30],[-2,-2,30],[-8,-9,30],[-9,-3,30],[-10,1,30],[-9,1,30],[-9,2,30],[-10,3,30],[-9,3,30],[-7,2,30],[-2,1,30],[-10,5,30],[-9,6,30],[-2,1,30],[-7,4,30],[-10,6,30],[-5,3,30],[-4,2,30],[-9,2,30],[-10,1,30],[-9,1,30],[-9,1,30],[-10,2,30],[-8,4,30],[-1,0,30],[-10,4,30],[-9,2,30],[-9,1,30],[-10,1,30],[-9,2,30],[-9,1,30],[-1,2,30],[-9,11,30],[0,1,30],[-9,10,30],[-3,3,30],[-6,7,30],[-10,0,30],[-9,1,30],[-8,5,30],[-1,1,30],[-10,8,30],[-4,4,30],[-5,8,30],[-3,5,30],[-2,13,30],[-1,13,30],[-2,13,30],[-1,3,30],[-10,9,30],[-9,5,30],[-5,8,30],[4,13,30],[-9,7,30],[-9,5,30],[-2,1,30],[-7,5,30],[-4,8,30],[-4,13,30],[5,13,30],[1,12,30],[-2,13,30],[1,13,30],[2,13,30],[1,2,30],[7,11,30],[2,3,30],[6,10,30],[3,8,30],[2,5,30],[6,13,30],[2,2,30],[5,10,30],[4,10,30],[1,3,30],[9,3,30],[9,1,30],[9,2,30],[7,7,30],[3,4,30],[6,9,30],[3,4,30],[6,9,30],[3,6,30],[4,7,30],[3,13,30],[2,12,30],[1,4,30],[2,9,30],[4,13,30],[3,6,30],[3,7,30],[4,13,30],[1,13,30],[1,13,30],[0,13,30],[-5,12,30],[-4,6,30],[-5,7,30],[-4,7,30],[-4,6,30],[-6,9,30],[-2,4,30],[-6,13,30],[1,13,30],[1,13,30],[-3,5,30],[-4,8,30],[-5,12,30],[0,3,30],[-5,10,30],[-5,13,30],[0,7,30]],[[2617,7335,30],[-4,-5,30],[-5,0,30],[-9,5,30],[-9,6,30],[-1,1,30],[-9,3,30],[-9,1,30],[-10,0,30],[-9,1,30],[-9,0,30],[-10,0,30],[-9,1,30],[-9,0,30],[-10,0,30],[-9,1,30],[-5,0,30]],[[3,7225,0],[5,1,0],[4,13,0],[0,13,0],[5,6,0],[4,6,0],[1,13,0],[2,13,0],[3,5,0],[4,8,0],[1,13,0],[1,13,0],[3,6,0],[3,7,0],[3,12,0],[2,13,0],[1,3,0],[5,10,0],[5,13,0],[4,13,0],[5,9,0],[1,4,0],[7,13,0],[1,2,0],[6,11,0],[4,5,0],[3,7,0],[6,10,0],[2,3,0],[7,12,0],[1,1,0],[8,13,0],[1,1,0],[6,12,0],[3,4,0],[6,9,0],[3,6,0],[6,7,0],[4,5,0],[5,8,0],[4,8,0],[2,4,0],[7,13,0],[1,2,0],[4,11,0],[5,8,0],[3,5,0],[6,10,0],[2,3,0],[8,12,0],[1,1,0],[8,13,0],[7,12,0],[2,4,0],[6,9,0],[4,7,0],[3,6,0],[6,13,0],[9,13,0],[0,1,0],[8,12,0],[2,4,0],[6,9,0],[3,4,0],[5,9,0],[4,7,0],[6,5,0],[4,4,0],[9,6,0],[5,3,0],[5,6,0],[6,7,0],[3,5,0],[4,8,0],[2,13,0],[2,13,0],[1,2,0],[4,11,0],[4,12,0],[2,2,0],[6,11,0],[3,5,0],[5,8,0],[3,13,0],[1,3,0],[4,10,0],[5,13,0],[1,0,0],[7,13,0],[2,2,0],[6,11,0],[3,10,0],[1,2,0],[5,13,0],[3,13,0],[1,2,0],[3,11,0],[4,13,0],[2,10,0],[1,3,0],[2,13,0],[4,13,0],[2,12,0],[0,2,0],[2,11,0],[1,13,0],[2,13,0],[3,13,0],[1,13,0],[0,13,0],[0,12,0],[-1,13,0],[-1,13,0],[0,13,0],[-2,13,0],[-2,13,0],[-1,13,0],[-1,13,0],[-1,3,0],[-1,9,0],[-1,13,0],[-1,13,0],[-2,13,0],[-4,13,0],[0,1,0],[-1,12,0],[-2,13,0],[-6,13,0],[0,1,0],[-2,11,0],[-4,13,0],[-4,9,0],[-1,4,0],[-3,13,0],[-5,10,0],[-1,3,0],[-3,13,0],[-5,10,0],[-2,3,0],[-3,12,0],[-5,8,0],[-3,5,0],[-2,13,0],[-4,13,0],[0,1,0],[-6,12,0],[0,13,0],[-3,8,0],[-4,5,0],[-3,13,0],[-1,12,0],[-2,6,0],[-4,7,0],[-4,13,0],[-1,13,0],[0,3,0],[-4,10,0],[-3,13,0],[-1,13,0],[-1,12,0],[0,10,0],[-1,3,0],[-1,13,0],[0,13,0],[0,13,0],[0,13,0],[-1,13,0],[1,13,0],[2,11,0],[0,1,0],[1,13,0],[1,13,0],[4,13,0],[3,8,0],[0,5,0],[0,13,0],[1,13,0],[1,13,0],[4,12,0],[3,6,0],[1,7,0],[1,13,0],[1,13,0],[7,12,0],[0,1,0],[1,13,0],[1,13,0],[4,12,0],[3,6,0],[1,7,0],[1,13,0],[0,13,0],[2,13,0],[3,13,0],[2,3,0],[2,10,0],[0,13,0],[1,12,0],[1,13,0],[1,13,0],[3,13,0],[2,4,0],[1,9,0],[2,13,0],[1,13,0],[2,12,0],[0,13,0],[-1,13,0],[0,13,0],[0,13,0],[-1,13,0],[0,13,0],[0,13,0],[1,12,0],[1,13,0],[1,13,0],[2,13,0],[2,13,0],[2,13,0],[5,12,0],[0,1,0],[10,13,0],[9,11,0],[1,1,0],[0,7,0]],[[2744,7272,25],[-1,-1,25],[-4,-5,25],[-5,-2,25],[-4,-1,25],[-10,-2,25],[-9,-5,25],[-9,-4,25],[-10,-4,25],[-9,-1,25],[-9,0,25],[-10,0,25],[-9,-2,25],[-9,-4,25],[-5,-2,25],[-5,-3,25],[-9,-4,25],[-9,-5,25],[-5,-1,25],[-5,-1,25],[-9,0,25],[-9,1,25],[-10,4,25],[-9,4,25],[-10,4,25],[-1,1,25],[-8,4,25],[-9,9,25],[-10,6,25],[-9,6,25],[-9,4,25],[-10,-1,25],[-3,-3,25],[3,-5,25],[6,-7,25],[4,-5,25],[9,-4,25],[9,-3,25],[3,-1,25],[-3,-3,25],[-9,-10,25],[-9,-4,25],[-10,1,25],[-9,2,25],[-1,1,25],[-8,2,25],[-10,1,25],[-9,2,25],[-9,2,25],[-10,2,25],[-9,1,25],[-9,1,25],[-10,0,25],[-9,-2,25],[-10,2,25],[-3,2,25],[-6,2,25],[-9,0,25],[-7,-2,25],[-3,-2,25],[-9,-4,25],[-9,-4,25],[-10,-3,25],[-9,-3,25],[-9,-2,25],[-10,-2,25],[-9,0,25],[-9,5,25],[-4,2,25],[-6,3,25],[-9,3,25],[-9,-1,25],[-10,-1,25],[-9,-1,25],[-10,0,25],[-9,2,25],[-9,2,25],[-10,1,25],[-9,3,25],[-4,2,25],[-5,2,25],[-10,6,25],[-9,5,25],[-9,4,25],[-10,1,25],[-9,0,25],[-9,0,25],[-10,-1,25],[-9,-1,25],[-10,0,25],[-9,2,25],[-9,1,25],[-10,1,25],[-9,1,25],[-9,-2,25],[-9,-6,25],[-1,-1,25],[-9,-3,25],[-9,-1,25],[-10,1,25],[-8,4,25],[-1,0,25],[-9,6,25],[-10,5,25],[-2,1,25],[-7,5,25],[-9,6,25],[-6,2,25],[-4,2,25],[-9,1,25],[-10,0,25],[-9,0,25],[-9,-1,25],[-10,0,25],[-9,-1,25],[-9,1,25],[-10,3,25],[-9,0,25],[-9,0,25],[-10,0,25],[-9,0,25],[-9,1,25],[-10,2,25],[-9,2,25],[-9,2,25],[-3,1,25],[-7,2,25],[-9,2,25],[-10,2,25],[-9,3,25],[-7,4,25],[-2,2,25],[-10,3,25],[-9,4,25],[-9,4,25],[-10,4,25],[-9,2,25],[-9,5,25],[-2,2,25],[-8,5,25],[-8,8,25],[-1,1,25],[-9,8,25],[-5,3,25],[-5,5,25],[-9,8,25],[-9,13,25],[-1,0,25],[-9,12,25],[-1,1,25],[-8,6,25],[-10,5,25],[-2,2,25],[-7,3,25],[-9,5,25],[-10,5,25],[-9,4,25],[-9,5,25],[-5,4,25],[-5,3,25],[-9,6,25],[-9,4,25],[-10,3,25],[-9,5,25],[-9,4,25],[-2,0,25],[-8,4,25],[-9,7,25],[-3,2,25],[-7,7,25],[-6,6,25],[-3,2,25],[-9,4,25],[-10,1,25],[-9,2,25],[-9,4,25],[-1,0,25],[-9,8,25],[-5,5,25],[-4,3,25],[-9,5,25],[-10,0,25],[-9,5,25],[0,1,25],[-1,12,25],[-1,13,25],[0,12,25],[2,7,25],[2,6,25],[-2,7,25],[-2,6,25],[-7,13,25],[-9,13,25],[-1,2,25],[-7,11,25],[-2,3,25],[-7,10,25],[-2,4,25],[-6,8,25],[-4,6,25],[-4,7,25],[-5,9,25],[-2,4,25],[2,6,25],[2,7,25],[7,13,25],[0,1,25],[7,12,25],[3,5,25],[3,8,25],[6,13,25],[3,12,25],[1,13,25],[2,13,25],[3,8,25],[3,5,25],[7,5,25],[9,4,25],[9,2,25],[10,1,25],[3,1,25],[6,1,25],[9,7,25],[4,5,25],[6,7,25],[4,6,25],[5,8,25],[3,4,25],[5,13,25],[1,4,25],[4,9,25],[5,13,25],[1,5,25],[2,8,25],[3,13,25],[4,6,25],[4,7,25],[5,7,25],[7,6,25],[3,2,25],[9,4,25],[10,5,25],[1,1,25],[4,13,25],[1,13,25],[-4,13,25],[-2,5,25],[-3,8,25],[-3,13,25],[-2,13,25],[-1,13,25],[0,12,25],[-1,2,25],[-2,11,25],[-7,10,25],[-3,3,25],[-7,10,25],[-2,3,25],[-4,13,25],[2,13,25],[-4,13,25],[-1,2,25],[-6,10,25],[-3,7,25],[-3,6,25],[-4,13,25],[0,7,25]],[[2791,7258,20],[-4,-6,20],[-1,-3,20],[-4,-10,20],[-5,-13,20],[0,-1,20],[-7,-12,20],[-2,-13,20],[-1,0,20],[-9,-12,20],[0,-1,20],[-9,-6,20],[-5,-7,20],[-1,-13,20],[1,-12,20],[0,-13,20],[-4,-13,20],[-1,-1,20],[-9,-3,20],[-10,-2,20],[-9,1,20],[-9,3,20],[-6,2,20],[-4,2,20],[-9,1,20],[-9,-1,20],[-10,-1,20],[-8,-1,20],[-1,0,20],[-9,-1,20],[-10,-1,20],[-9,0,20],[-9,2,20],[-1,0,20],[-9,3,20],[-9,8,20],[-2,2,20],[-7,3,20],[-10,3,20],[-9,4,20],[-10,2,20],[-5,1,20],[-4,0,20],[-9,1,20],[-10,2,20],[-9,1,20],[-9,2,20],[-10,3,20],[-7,3,20],[-2,1,20],[-9,4,20],[-10,3,20],[-9,4,20],[-5,1,20],[-4,1,20],[-10,0,20],[-3,-1,20],[-6,-4,20],[-9,-5,20],[-6,-4,20],[-4,-2,20],[-9,-5,20],[-9,-5,20],[-1,-1,20],[-9,-5,20],[-9,-6,20],[-4,-1,20],[-6,-3,20],[-9,-1,20],[-9,-1,20],[-10,-2,20],[-9,-4,20],[-3,-2,20],[-6,-7,20],[-6,-6,20],[-4,-2,20],[-9,-2,20],[-9,-1,20],[-10,-1,20],[-9,-1,20],[-9,2,20],[-10,2,20],[-9,3,20],[-1,0,20],[-9,3,20],[-9,6,20],[-6,4,20],[-3,2,20],[-10,3,20],[-9,-1,20],[-9,-1,20],[-10,0,20],[-9,1,20],[-9,0,20],[-10,1,20],[-9,1,20],[-9,0,20],[-10,1,20],[-9,1,20],[-10,0,20],[-9,1,20],[-9,0,20],[-10,2,20],[-9,2,20],[-9,2,20],[-10,3,20],[-9,2,20],[-9,5,20],[-2,1,20],[-8,2,20],[-9,1,20],[-9,3,20],[-10,5,20],[-9,0,20],[-4,-11,20],[-5,-6,20],[-10,-6,20],[-4,-1,20],[-5,-2,20],[-10,-2,20],[-9,-2,20],[-9,-1,20],[-10,3,20],[-9,3,20],[-9,1,20],[-1,0,20],[-9,2,20],[-9,4,20],[-9,4,20],[-6,3,20],[-4,1,20],[-9,3,20],[-9,1,20],[-10,0,20],[-9,-1,20],[-9,-1,20],[-10,-1,20],[-9,-1,20],[-10,-1,20],[-2,0,20],[-7,-3,20],[-9,-8,20],[-2,-2,20],[-8,-4,20],[-9,0,20],[-9,3,20],[-3,1,20],[-7,7,20],[-9,5,20],[0,1,20],[-9,11,20],[-4,1,20],[-1,13,20],[-5,3,20],[-9,8,20],[-9,0,20],[-10,-2,20],[-9,1,20],[-9,1,20],[-6,2,20],[-4,2,20],[-9,4,20],[-10,3,20],[-9,2,20],[-4,2,20],[-5,3,20],[-10,3,20],[-9,3,20],[-9,3,20],[-10,1,20],[-9,-1,20],[-9,-2,20],[-10,-1,20],[-9,0,20],[-9,-1,20],[-10,-1,20],[-9,-1,20],[-10,0,20],[-9,0,20],[-9,0,20],[-10,0,20],[-9,1,20],[-9,3,20],[-8,3,20],[-2,3,20],[-3,10,20],[-2,13,20],[0,13,20],[-2,12,20],[-2,10,20],[0,3,20],[-9,7,20],[-7,6,20],[-3,1,20],[-9,2,20],[-9,3,20],[-10,6,20],[-9,1,20],[-9,-6,20],[-8,-7,20],[-2,-1,20],[-9,1,20],[-1,0,20],[-9,2,20],[-9,4,20],[-9,7,20],[-10,7,20],[-8,6,20],[-1,0,20],[-9,8,20],[-5,5,20],[-5,5,20],[-5,8,20],[0,12,20],[5,11,20],[1,2,20],[7,13,20],[2,3,20],[9,7,20],[9,-2,20],[10,-6,20],[4,-2,20],[5,-1,20],[1,1,20],[3,13,20],[5,8,20],[3,5,20],[-3,6,20],[-5,7,20],[-4,5,20],[-9,1,20],[-6,7,20],[-4,5,20],[-9,3,20],[-5,5,20],[-4,10,20],[-3,2,20],[2,13,20],[1,9,20],[0,4,20],[0,13,20],[1,13,20],[0,13,20],[-1,13,20],[0,1,20],[-4,12,20],[-6,10,20],[-1,2,20],[-7,13,20],[-1,1,20],[-6,12,20],[-3,7,20],[-3,6,20],[-6,13,20],[-1,1,20],[-6,12,20],[-3,10,20],[-1,3,20],[1,3,20],[3,9,20],[1,13,20],[-2,13,20],[-2,13,20],[1,13,20],[2,13,20],[1,13,20],[1,13,20],[1,12,20],[-5,13,20],[-1,2,20],[-7,11,20],[2,13,20],[2,13,20],[1,13,20],[-2,13,20],[-3,12,20],[-2,13,20],[0,4,20],[-1,9,20],[1,6,20],[1,7,20],[7,13,20],[1,2,20],[6,11,20],[3,7,20],[4,6,20],[5,13,20],[1,1,20],[3,11,20],[2,13,20],[-2,13,20],[-3,13,20],[0,2,20],[-3,11,20],[-2,13,20],[-2,13,20],[1,13,20],[0,12,20],[-4,12,20],[0,1,20],[-4,13,20],[-5,10,20],[-3,3,20],[-6,4,20],[-10,5,20],[-8,4,20],[-1,1,20],[-9,5,20],[-10,5,20],[-3,2,20],[-6,4,20],[-10,6,20],[-3,3,20],[-6,8,20],[-1,4,20],[-5,13,20],[-3,9,20],[-2,4,20],[-5,13,20],[-2,13,20],[2,13,20],[0,13,20],[-1,6,20],[-2,4,20],[-6,3,20],[-3,1,20],[-4,11,20],[2,13,20],[0,7,20]],[[1,6885,0],[1,6,0],[-1,13,0],[0,13,0],[0,13,0],[0,13,0],[0,13,0],[0,12,0],[0,13,0],[0,13,0],[0,13,0],[0,13,0],[0,13,0],[0,13,0],[0,13,0],[0,12,0],[0,13,0],[0,13,0],[0,13,0],[0,13,0],[0,13,0],[0,13,0],[-1,12,0],[1,13,0],[1,13,0],[0,13,0],[0,13,0],[0,6,0]],[[1271,6852,25],[-4,1,25],[-6,1,25],[-9,1,25],[-9,1,25],[-10,2,25],[-9,2,25],[-9,2,25],[-10,2,25],[-6,1,25],[-3,1,25],[-10,2,25],[-9,-1,25],[-4,-2,25],[-5,-2,25],[-10,-2,25],[-9,2,25],[-9,2,25],[-4,0,25],[-6,2,25],[-9,4,25],[-9,5,25],[-4,2,25],[-6,7,25],[-2,6,25],[-6,13,25],[-1,2,25],[-5,11,25],[-4,9,25],[-2,4,25],[-6,13,25],[-2,4,25],[-4,9,25],[-5,11,25],[-1,1,25],[-8,11,25],[-10,0,25],[-5,2,25],[-4,4,25],[-5,9,25],[-5,9,25],[-2,4,25],[-7,7,25],[-6,6,25],[-3,4,25],[-10,9,25],[-9,11,25],[-1,2,25],[1,5,25],[3,8,25],[1,12,25],[1,13,25],[0,13,25],[4,5,25],[6,-5,25],[4,-2,25],[9,-5,25],[9,3,25],[8,4,25],[2,1,25],[9,6,25],[10,6,25],[9,5,25],[8,8,25],[1,1,25],[4,12,25],[5,13,25],[1,1,25],[7,11,25],[2,2,25],[9,2,25],[10,1,25],[9,-2,25],[9,-2,25],[1,-1,25],[9,-4,25],[9,-6,25],[3,-2,25],[6,-6,25],[9,-7,25],[1,-1,25],[8,-12,25],[-8,-9,25],[-4,-4,25],[-5,-13,25],[6,-13,25],[3,-4,25],[9,-7,25],[2,-2,25],[7,-4,25],[10,-6,25],[3,-2,25],[6,-6,25],[7,-7,25],[3,-3,25],[8,-10,25],[1,-1,25],[7,-12,25],[2,-3,25],[6,-10,25],[4,-6,25],[4,-7,25],[5,-13,25],[0,-1,25],[3,-12,25],[3,-12,25],[3,-12,25],[1,-1,25],[3,-13,25],[4,-13,25],[2,-8,25],[1,-5,25],[3,-13,25],[0,-13,25],[-1,-13,25],[-3,-12,25],[0,-1,25]],[[228,6614,5],[1,1,5],[3,6,5],[1,13,5],[3,13,5],[4,13,5],[2,6,5],[2,6,5],[-1,13,5],[-1,1,5],[-10,4,5],[-9,2,5],[-9,3,5],[-9,3,5],[-1,0,5],[-9,3,5],[-9,3,5],[-10,3,5],[-9,3,5],[-4,1,5],[-5,2,5],[-10,11,5],[-9,3,5],[-3,3,5],[-1,7,5],[2,13,5],[2,7,5],[1,6,5],[1,12,5],[-2,5,5],[-4,8,5],[-6,7,5],[-4,6,5],[-5,6,5],[-5,7,5],[-4,5,5],[-7,8,5],[-1,13,5],[8,3,5],[9,4,5],[5,6,5],[-5,8,5],[-2,4,5],[-2,13,5],[1,13,5],[2,13,5],[1,8,5],[1,5,5],[1,13,5],[-2,13,5],[-6,13,5],[-3,5,5],[-6,7,5],[-4,6,5],[-6,7,5],[-3,4,5],[-8,9,5],[-1,4,5],[-3,9,5],[-7,6,5],[-3,7,5],[-4,13,5],[-2,3,5],[-7,10,5],[-1,13,5],[-1,10,5],[-1,2,5],[-2,13,5],[-1,13,5],[0,13,5],[0,13,5],[0,13,5],[0,13,5],[2,12,5],[2,5,5],[5,8,5],[4,10,5],[1,3,5],[4,13,5],[2,13,5],[2,8,5],[1,5,5],[2,13,5],[0,13,5],[-2,12,5],[1,13,5],[3,13,5],[3,13,5],[2,6,5],[2,7,5],[4,13,5],[3,10,5],[1,3,5],[7,12,5],[1,5,5],[5,8,5],[5,11,5],[1,2,5],[6,13,5],[2,5,5],[9,8,5],[0,1,5],[10,8,5],[3,4,5],[-3,10,5],[-1,3,5],[-9,7,5],[-9,-1,5],[-9,-3,5],[-3,10,5],[2,12,5],[1,2,5],[8,11,5],[1,3,5],[6,10,5],[3,7,5],[5,6,5],[5,11,5],[1,2,5],[8,7,5],[6,6,5],[4,3,5],[9,6,5],[9,1,5],[10,-5,5],[9,4,5],[9,4,5],[10,6,5],[8,7,5],[1,0,5],[9,8,5],[6,4,5],[4,3,5],[9,7,5],[5,3,5],[4,3,5],[10,3,5],[9,1,5],[8,6,5],[2,1,5],[9,10,5],[1,2,5],[-1,3,5],[-2,10,5],[2,4,5],[5,9,5],[4,3,5],[10,7,5],[3,3,5],[6,4,5],[9,8,5],[10,-4,5],[9,-1,5],[9,1,5],[10,2,5],[4,2,5],[5,4,5],[9,9,5],[1,0,5],[9,7,5],[9,4,5],[7,2,5],[2,1,5],[10,4,5],[9,5,5],[8,3,5],[2,1,5],[9,1,5],[9,2,5],[10,-1,5],[9,-2,5],[9,1,5],[10,1,5],[9,3,5],[9,5,5],[2,2,5],[8,13,5],[7,13,5],[2,2,5],[7,11,5],[2,1,5],[10,4,5],[9,2,5],[9,1,5],[10,0,5],[9,-1,5],[10,0,5],[9,-1,5],[9,1,5],[10,1,5],[9,1,5],[7,3,5],[2,4,5],[5,9,5],[3,13,5],[2,5,5],[1,8,5],[8,11,5],[2,2,5],[7,11,5],[2,2,5],[8,12,5],[0,1,5],[5,12,5],[4,13,5],[0,1,5],[4,12,5],[3,13,5],[2,8,5],[2,5,5],[4,13,5],[2,13,5],[-1,13,5],[-2,12,5],[1,13,5],[0,13,5],[1,13,5],[0,13,5],[2,13,5],[1,2,5],[5,11,5],[4,6,5],[4,7,5],[5,5,5],[6,7,5],[3,13,5],[-1,13,5],[-2,13,5],[-1,13,5],[-1,13,5],[-2,13,5],[-2,8,5],[-1,4,5],[-2,13,5],[2,13,5],[1,9,5],[1,4,5],[2,13,5],[2,13,5],[0,13,5],[-1,13,5],[1,12,5],[5,9,5],[4,4,5],[5,7,5],[2,6,5],[-1,13,5],[-1,11,5],[0,2,5],[-1,13,5],[-2,13,5],[-1,13,5],[-3,12,5],[-2,9,5],[-1,4,5],[-2,13,5],[-1,13,5],[4,8,5],[3,5,5],[6,11,5],[1,2,5],[1,13,5],[0,12,5],[6,13,5],[2,6,5],[0,7,5],[0,2,5],[-5,11,5],[-5,10,5],[-2,3,5],[-7,11,5],[-2,2,5],[-8,10,5],[-1,3,5],[-8,10,5],[-2,3,5],[-7,9,5],[-3,3,5],[-7,11,5],[-1,2,5],[-6,13,5],[-2,4,5],[-4,9,5],[-5,12,5],[-1,1,5],[-5,13,5],[-4,10,5],[0,3,5],[-4,12,5],[-3,13,5],[-2,7,5],[-1,6,5],[-3,13,5],[-2,13,5],[5,13,5],[1,1,5],[4,12,5],[-2,13,5],[-2,4,5],[-4,8,5],[-5,12,5],[-1,1,5],[-2,13,5],[-1,13,5],[-2,13,5],[-1,13,5],[-1,13,5],[-2,8,5],[-1,5,5],[-3,12,5],[-5,13,5],[0,7,5],[0,6,5],[0,1,5],[8,12,5],[1,3,5],[3,10,5],[1,13,5],[1,13,5],[0,12,5],[2,13,5],[1,13,5],[-2,13,5],[-2,13,5],[-4,12,5],[0,1,5],[-6,13,5],[-3,6,5],[-4,7,5],[-5,11,5],[-1,1,5],[1,5,5],[2,8,5],[7,9,5],[3,4,5],[3,13,5],[0,13,5],[1,13,5],[2,13,5],[0,4,5],[0,8,5],[0,2,5],[0,11,5],[-1,13,5],[-1,13,5],[-1,13,5],[-1,13,5],[2,13,5],[2,9,5],[1,4,5],[3,12,5],[-3,13,5],[-1,2,5],[-9,10,5],[-1,1,5],[1,2,5],[4,11,5],[5,4,5],[8,9,5],[2,2,5],[7,11,5],[2,2,5],[6,11,5],[3,4,5],[7,9,5],[3,4,5],[9,8,5],[0,1,5],[8,12,5],[1,3,5],[5,10,5],[5,11,5],[1,2,5],[5,13,5],[-4,13,5],[3,13,5],[4,7,5],[3,5,5],[6,6,5],[7,7,5],[3,3,5],[9,8,5],[2,2,5],[8,7,5],[4,6,5],[5,9,5],[2,4,5],[6,13,5],[1,2,5],[5,11,5],[5,9,5],[2,4,5],[7,12,5],[0,1,5],[9,12,5],[1,0,5],[9,11,5],[2,2,5],[7,9,5],[4,4,5],[5,6,5],[10,5,5],[5,2,5],[4,1,5],[9,1,5],[10,1,5],[9,1,5],[10,0,5],[9,1,5],[9,0,5],[10,1,5],[9,1,5],[9,2,5],[8,4,5],[2,1,5],[9,10,5],[2,2,5],[7,4,5],[10,3,5],[9,3,5],[6,3,5],[3,1,5],[10,3,5],[9,4,5],[9,4,5],[3,0,5],[7,3,5],[9,3,5],[10,2,5],[9,2,5],[9,2,5],[4,1,5],[6,1,5],[9,5,5],[6,7,5],[3,3,5],[10,9,5],[1,1,5],[8,7,5],[4,6,5],[5,4,5],[8,9,5],[2,1,5],[9,8,5],[3,4,5],[6,5,5],[7,7,5],[3,3,5],[8,10,5],[1,1,5],[6,12,5],[-6,7,5],[-4,6,5],[-5,6,5],[-5,7,5],[-5,5,5],[-5,8,5],[-4,4,5],[-7,9,5],[-2,2,5],[-9,11,5],[-1,1,5],[-9,10,5],[-1,1,5],[-8,9,5],[-3,4,5],[-7,7,5],[-4,6,5],[-5,6,5],[-5,7,5],[-4,5,5],[-6,8,5],[2,13,5],[4,3,5],[9,5,5],[9,0,5],[10,-7,5],[1,-1,5],[8,-9,5],[4,-4,5],[5,-7,5],[6,-6,5],[4,-4,5],[8,-9,5],[1,-1,5],[9,-10,5],[2,-2,5],[8,-8,5],[4,-5,5],[5,-5,5],[7,-7,5],[2,-4,5],[9,-9,5],[1,-1,5],[9,-10,5],[2,-2,5],[8,-9,5],[3,-4,5],[6,-6,5],[6,-7,5],[3,-3,5],[9,-10,5],[1,0,5],[9,-12,5],[5,0,5]],[[1823,6556,20],[-5,1,20],[5,1,20],[3,-1,20],[-3,-1,20]],[[909,6544,20],[-3,1,20],[-9,6,20],[-10,6,20],[-9,8,20],[-9,4,20],[-1,1,20],[-9,9,20],[-7,3,20],[-2,2,20],[-10,8,20],[-7,3,20],[-2,2,20],[-9,10,20],[-2,1,20],[-8,11,20],[-3,2,20],[-6,8,20],[-9,5,20],[-10,9,20],[-6,4,20],[3,13,20],[3,8,20],[3,4,20],[4,13,20],[3,12,20],[0,1,20],[8,13,20],[1,2,20],[7,11,20],[2,3,20],[7,10,20],[3,3,20],[6,10,20],[3,4,20],[6,9,20],[3,4,20],[6,8,20],[4,5,20],[5,8,20],[4,5,20],[7,8,20],[2,3,20],[9,10,20],[1,1,20],[9,9,20],[6,3,20],[4,1,20],[9,0,20],[6,-1,20],[3,-1,20],[10,-5,20],[9,-4,20],[9,-3,20],[5,0,20],[5,0,20],[9,1,20],[9,7,20],[6,5,20],[3,13,20],[-1,13,20],[-8,8,20],[-5,4,20],[-4,6,20],[-3,7,20],[-6,13,20],[0,2,20],[-5,11,20],[-5,10,20],[-1,3,20],[-1,13,20],[1,13,20],[-8,11,20],[-2,2,20],[-7,4,20],[-10,5,20],[-5,3,20],[-4,3,20],[-9,7,20],[-5,3,20],[-5,4,20],[-9,6,20],[-4,3,20],[-6,6,20],[-4,7,20],[-4,13,20],[0,13,20],[-1,13,20],[0,1,20],[-1,12,20],[-3,12,20],[-5,8,20],[-10,5,20],[-6,13,20],[-3,8,20],[-2,5,20],[-5,13,20],[1,13,20],[6,12,20],[0,1,20],[6,12,20],[3,10,20],[1,3,20],[2,13,20],[5,13,20],[2,3,20],[7,10,20],[2,2,20],[9,11,20],[10,9,20],[4,4,20],[5,3,20],[10,7,20],[3,3,20],[6,4,20],[9,6,20],[3,2,20],[7,5,20],[9,3,20],[9,-2,20],[10,-3,20],[9,0,20],[9,3,20],[10,1,20],[9,1,20],[9,1,20],[10,0,20],[9,0,20],[9,1,20],[10,0,20],[9,0,20],[10,-3,20],[9,-3,20],[7,-4,20],[2,-1,20],[10,-4,20],[9,-2,20],[9,0,20],[10,0,20],[9,0,20],[9,1,20],[10,2,20],[9,1,20],[9,0,20],[10,-2,20],[9,-3,20],[9,-3,20],[3,-1,20],[7,-3,20],[9,-4,20],[10,-3,20],[8,-3,20],[1,-1,20],[9,-1,20],[10,-5,20],[9,-4,20],[9,-2,20],[2,0,20],[8,-5,20],[9,-7,20],[2,-1,20],[7,-4,20],[10,-6,20],[6,-3,20],[3,-2,20],[9,-6,20],[5,-5,20],[5,-5,20],[7,-8,20],[2,-2,20],[6,-11,20],[3,-12,20],[0,-2,20],[3,-11,20],[4,-13,20],[3,-11,20],[1,-2,20],[3,-13,20],[4,-13,20],[1,-4,20],[3,-9,20],[6,-12,20],[1,-2,20],[9,-7,20],[4,-4,20],[4,-13,20],[-8,-9,20],[-4,-4,20],[4,-4,20],[5,-9,20],[4,-5,20],[4,-8,20],[6,-10,20],[1,-3,20],[8,-11,20],[1,-2,20],[8,-10,20],[2,-2,20],[8,-10,20],[3,-3,20],[6,-8,20],[9,-5,20],[10,1,20],[3,-1,20],[6,-3,20],[9,-9,20],[1,-1,20],[9,-10,20],[3,-3,20],[6,-6,20],[9,-6,20],[2,-1,20],[4,-13,20],[1,-13,20],[0,-12,20],[1,-13,20],[0,-13,20],[0,-13,20],[-6,-13,20],[-2,-2,20],[-7,-11,20],[-1,-13,20],[1,-12,20],[0,-13,20],[0,-13,20],[1,-13,20],[2,-13,20],[3,-13,20],[1,-7,20],[2,-6,20],[3,-13,20],[3,-12,20],[2,-3,20],[9,-7,20],[3,-3,20],[4,-13,20],[3,-7,20],[3,-6,20],[0,-13,20],[-3,-4,20],[-10,-5,20],[-8,-4,20],[-1,-1,20],[-10,-2,20],[-9,3,20],[-1,0,20],[-8,4,20],[-10,0,20],[-9,-2,20],[-4,-2,20],[-5,-1,20],[-10,-3,20],[-9,-3,20],[-9,-1,20],[-10,1,20],[-9,3,20],[-9,3,20],[-6,1,20],[-4,2,20],[-9,2,20],[-9,3,20],[-10,3,20],[-9,3,20],[-10,4,20],[-9,2,20],[-9,2,20],[-10,3,20],[-7,2,20],[-2,0,20],[-9,2,20],[-10,2,20],[-9,1,20],[-9,-2,20],[-8,-3,20],[-2,-1,20],[0,1,20],[-9,5,20],[-9,4,20],[-10,0,20],[-9,1,20],[-9,-2,20],[-10,-3,20],[-9,-3,20],[-4,-2,20],[-6,-3,20],[-9,-4,20],[-9,-6,20],[-1,0,20],[-9,-10,20],[-2,-3,20],[-7,-5,20],[-9,-4,20],[-10,-3,20],[-4,-1,20],[-5,-1,20],[-4,1,20],[-5,2,20],[-10,3,20],[-9,-3,20],[-2,-2,20],[-7,-8,20],[-8,-5,20],[-2,-1,20],[-9,-6,20],[-7,-5,20],[-2,-2,20],[-10,-7,20],[-6,-4,20],[-3,-2,20],[-10,-3,20],[-9,0,20],[-9,0,20],[-10,2,20],[-4,3,20],[-5,3,20],[-9,2,20],[-10,-1,20],[-9,-1,20],[-9,-3,20],[-3,0,20],[-7,-3,20],[-9,-1,20],[-9,0,20],[-10,2,20],[-6,2,20]],[[1969,6531,20],[-6,-6,20],[-10,-2,20],[-9,-1,20],[-9,-1,20],[-10,3,20],[-9,-3,20],[-3,-3,20],[-6,-8,20],[-10,1,20],[-9,4,20],[-9,2,20],[-3,1,20],[-7,9,20],[-9,3,20],[-4,1,20],[-5,7,20],[-10,4,20],[-6,2,20],[0,13,20],[6,2,20],[10,6,20],[8,4,20],[1,1,20],[9,8,20],[4,4,20],[6,8,20],[4,5,20],[5,4,20],[9,-1,20],[3,-3,20],[7,-5,20],[9,-2,20],[9,0,20],[10,-1,20],[9,-1,20],[9,-1,20],[10,0,20],[9,-3,20],[2,-13,20],[-1,-12,20],[-1,-13,20],[0,-2,20],[-3,-11,20]],[[999,6431,20],[-5,-3,20],[-4,-2,20],[-4,2,20],[0,13,20],[3,13,20],[1,7,20],[1,6,20],[8,11,20],[10,-9,20],[3,-2,20],[6,-7,20],[5,-6,20],[-4,-13,20],[-1,-1,20],[-9,-5,20],[-10,-4,20]],[[2941,7181,15],[-1,-3,15],[-2,-4,15],[-2,-5,15],[-4,-8,15],[-6,-5,15],[-9,-5,15],[-4,-2,15],[-5,-3,15],[-10,-4,15],[-9,-3,15],[-9,-2,15],[-10,0,15],[-9,-1,15],[-10,3,15],[-6,-3,15],[-3,-2,15],[-9,-5,15],[-10,-2,15],[-6,-4,15],[-3,-3,15],[-9,-10,15],[0,-1,15],[-10,-7,15],[-9,-2,15],[-9,-1,15],[-10,-2,15],[-1,0,15],[-8,-3,15],[-9,-4,15],[-10,0,15],[-9,0,15],[-10,1,15],[-9,0,15],[-9,-1,15],[-10,0,15],[-4,-6,15],[-5,-7,15],[-7,-6,15],[-2,-1,15],[-10,-5,15],[-8,-6,15],[-1,-1,15],[-9,-4,15],[-10,0,15],[-7,5,15],[-2,2,15],[-6,10,15],[-3,12,15],[-1,1,15],[-9,4,15],[-9,1,15],[-9,4,15],[-10,-1,15],[-9,-6,15],[-3,-2,15],[-7,-5,15],[-9,-5,15],[-4,-3,15],[-5,-4,15],[-10,-5,15],[-6,-3,15],[-3,-4,15],[-9,-7,15],[-5,-2,15],[-1,-13,15],[4,-13,15],[-7,-13,15],[-1,0,15],[-4,0,15],[-5,1,15],[-9,0,15],[-10,0,15],[-9,1,15],[-9,1,15],[-10,0,15],[-9,0,15],[-5,-3,15],[-4,-4,15],[-9,-9,15],[-1,-1,15],[-9,-8,15],[-3,-4,15],[-7,-10,15],[-1,-3,15],[-1,-12,15],[2,-8,15],[2,-5,15],[-1,-13,15],[-1,-3,15],[-3,-10,15],[-6,-9,15],[-2,-4,15],[-7,-9,15],[-4,-4,15],[-6,-4,15],[-9,1,15],[-9,1,15],[-10,2,15],[-2,0,15],[-7,3,15],[-9,3,15],[-10,-2,15],[-9,0,15],[-9,3,15],[-10,6,15],[-3,0,15],[-6,1,15],[-5,-1,15],[-4,0,15],[-10,-1,15],[-9,0,15],[-10,1,15],[0,2,15],[8,11,15],[-5,13,15],[-3,0,15],[-9,2,15],[-9,3,15],[-9,8,15],[-1,0,15],[-9,6,15],[-7,7,15],[-2,2,15],[-6,10,15],[-4,9,15],[-2,4,15],[-7,11,15],[-1,2,15],[-8,12,15],[-10,0,15],[-9,-1,15],[-9,0,15],[-10,1,15],[-9,-2,15],[-10,-3,15],[-9,-2,15],[-9,-1,15],[-10,1,15],[-9,6,15],[-3,2,15],[-6,5,15],[-10,6,15],[-2,2,15],[-7,5,15],[-9,4,15],[-10,-4,15],[-5,-5,15],[-4,-3,15],[-9,-9,15],[-1,-1,15],[-9,-9,15],[-3,-4,15],[-6,-6,15],[-6,-7,15],[-3,-3,15],[-10,-10,15],[-9,-8,15],[-5,-4,15],[-5,-5,15],[-9,-8,15],[-1,0,15],[-8,-4,15],[-10,-2,15],[-9,-1,15],[-9,-1,15],[-10,0,15],[-9,0,15],[-9,-1,15],[-10,-2,15],[-3,-2,15],[-3,-13,15],[-1,-13,15],[-2,-6,15],[-3,-7,15],[-6,-9,15],[-6,-4,15],[-4,-2,15],[-9,-5,15],[-9,-6,15],[0,-1,15],[-4,-11,15],[-1,-13,15],[-1,-13,15],[-2,-13,15],[6,-13,15],[2,-1,15],[9,-5,15],[9,-5,15],[4,-2,15],[6,-3,15],[9,-5,15],[6,-5,15],[3,-2,15],[10,-10,15],[9,-10,15],[4,-3,15],[5,-7,15],[8,-6,15],[2,-3,15],[9,-4,15],[9,-2,15],[10,-2,15],[9,-2,15],[3,0,15],[6,-1,15],[10,-2,15],[9,-2,15],[10,-1,15],[9,-1,15],[9,-2,15],[10,-4,15],[9,-4,15],[9,-4,15],[10,-4,15],[1,-1,15],[8,-3,15],[9,-5,15],[10,-4,15],[1,-1,15],[8,-3,15],[9,-10,15],[10,-11,15],[1,-1,15],[8,-12,15],[1,-1,15],[8,-11,15],[2,-2,15],[8,-10,15],[5,-3,15],[4,-1,15],[10,-2,15],[9,-4,15],[9,-6,15],[10,-7,15],[7,-6,15],[2,-1,15],[7,-12,15],[1,-13,15],[1,-12,15],[0,-3,15],[1,-10,15],[0,-13,15],[-1,-8,15],[0,-5,15],[-6,-13,15],[-3,-4,15],[-7,-9,15],[-2,-3,15],[-10,-6,15],[-9,1,15],[-9,3,15],[-10,2,15],[-9,0,15],[-10,2,15],[-3,1,15],[-6,4,15],[-9,9,15],[0,1,15],[-10,8,15],[-5,4,15],[-4,2,15],[-9,1,15],[-10,-2,15],[-2,-1,15],[-7,-4,15],[-8,-9,15],[-1,-2,15],[-7,-11,15],[-3,-2,15],[-9,-5,15],[-9,-5,15],[-1,-1,15],[-9,-5,15],[-9,-3,15],[-9,-1,15],[-10,0,15],[-9,-1,15],[-10,0,15],[-9,1,15],[-9,-1,15],[-10,0,15],[-9,2,15],[-9,3,15],[-10,4,15],[-7,1,15],[-2,1,15],[-9,3,15],[-10,3,15],[-9,4,15],[-9,2,15],[0,1,15],[-10,3,15],[-9,4,15],[-9,4,15],[-4,1,15],[-6,2,15],[-9,5,15],[-10,5,15],[-1,1,15],[-8,5,15],[-9,7,15],[-1,1,15],[-9,7,15],[-6,6,15],[-3,2,15],[-8,11,15],[-1,1,15],[-9,11,15],[-1,1,15],[-9,8,15],[-9,3,15],[-7,1,15],[-3,1,15],[-9,6,15],[-7,6,15],[-2,13,15],[6,13,15],[3,5,15],[1,8,15],[0,13,15],[3,13,15],[5,8,15],[2,4,15],[4,13,15],[4,9,15],[2,4,15],[7,6,15],[6,7,15],[3,5,15],[5,8,15],[5,8,15],[3,5,15],[6,11,15],[1,2,15],[7,13,15],[1,2,15],[5,10,15],[3,13,15],[-2,13,15],[-1,13,15],[-5,13,15],[-2,13,15],[-1,13,15],[1,12,15],[2,13,15],[0,1,15],[3,12,15],[1,13,15],[0,13,15],[-2,13,15],[-2,2,15],[-9,7,15],[-7,4,15],[-2,1,15],[-10,5,15],[-9,5,15],[-9,-3,15],[-6,-8,15],[-4,-6,15],[-4,-7,15],[-5,-11,15],[-1,-2,15],[-7,-13,15],[-1,-8,15],[-2,-5,15],[2,-3,15],[6,-10,15],[3,-3,15],[8,-10,15],[1,-1,15],[10,-10,15],[1,-1,15],[8,-12,15],[2,-1,15],[2,-13,15],[-4,-13,15],[-4,-13,15],[-5,-13,15],[0,-1,15],[-5,-12,15],[-5,-9,15],[-1,-3,15],[-6,-13,15],[-2,-4,15],[-4,-9,15],[-5,-7,15],[-10,-5,15],[-2,-1,15],[-7,-5,15],[-6,-8,15],[-3,-6,15],[-4,-7,15],[-4,-13,15],[2,-13,15],[-4,-8,15],[-2,-4,15],[-6,-13,15],[-1,-3,15],[-5,-10,15],[-4,-13,15],[-1,-12,15],[0,-1,15],[-5,-13,15],[-4,-7,15],[-8,-6,15],[-1,-1,15],[-4,-12,15],[-4,-12,15],[-2,-3,15],[-6,-10,15],[-3,-4,15],[-5,-9,15],[-4,-6,15],[-4,-7,15],[-6,-10,15],[-1,-3,15],[-2,-13,15],[-3,-13,15],[-3,-3,15],[-9,-3,15],[-10,5,15],[-2,1,15],[-7,2,15],[-9,0,15],[-5,-2,15],[-3,-12,15],[3,-13,15],[-5,-3,15],[-9,-1,15],[-10,-1,15],[-9,-6,15],[-2,-2,15],[-7,-9,15],[-3,-4,15],[-7,-10,15],[-2,-3,15],[-7,-11,15],[-1,-2,15],[-8,-11,15],[-2,-2,15],[-8,-10,15],[-2,-3,15],[-1,-12,15],[3,-9,15],[5,-4,15],[5,-4,15],[9,-7,15],[3,-2,15],[1,-13,15],[-4,-2,15],[-6,2,15],[-3,6,15],[-10,4,15],[-9,1,15],[-3,2,15],[-6,6,15],[-10,-4,15],[-1,-2,15],[-3,-13,15],[-5,-6,15],[-5,-7,15],[-4,-6,15],[-10,-5,15],[-3,-2,15],[-6,-5,15],[-9,-4,15],[-10,-1,15],[-9,0,15],[-10,1,15],[-9,-1,15],[-9,0,15],[-10,1,15],[-9,4,15],[-8,5,15],[-1,1,15],[-10,7,15],[-9,4,15],[-2,1,15],[-7,3,15],[-10,3,15],[-9,0,15],[-9,-1,15],[-10,-1,15],[-9,-1,15],[-9,-1,15],[-10,0,15],[-9,1,15],[-10,0,15],[-9,1,15],[-9,6,15],[-2,3,15],[-8,9,15],[-6,4,15],[-3,1,15],[-9,0,15],[-6,-1,15],[-4,-1,15],[-9,-1,15],[-9,-2,15],[-10,-2,15],[-9,-1,15],[-9,-1,15],[-10,0,15],[-9,-1,15],[-9,0,15],[-10,-1,15],[-9,-1,15],[-10,-2,15],[-1,0,15],[-8,-2,15],[-9,-4,15],[-10,-3,15],[-9,4,15],[-7,5,15],[-2,2,15],[-10,4,15],[-9,-1,15],[-9,-3,15],[-6,-2,15],[-4,-2,15],[-9,-2,15],[-9,-2,15],[-10,0,15],[-9,2,15],[-7,4,15],[-2,1,15],[-10,7,15],[-6,5,15],[-3,4,15],[-8,9,15],[-2,10,15],[0,3,15],[0,4,15],[1,8,15],[-1,11,15],[-9,0,15],[-6,2,15],[-3,4,15],[-10,8,15],[-1,1,15],[-8,7,15],[-8,6,15],[-1,1,15],[-5,12,15],[5,6,15],[3,7,15],[6,7,15],[4,6,15],[5,5,15],[6,8,15],[4,4,15],[7,8,15],[2,3,15],[9,10,15],[1,0,15],[9,9,15],[5,4,15],[4,6,15],[3,7,15],[-3,4,15],[-6,9,15],[-3,2,15],[-10,8,15],[-2,3,15],[-7,6,15],[-8,7,15],[-1,1,15],[-10,6,15],[-5,5,15],[-4,4,15],[-9,9,15],[-10,7,15],[-6,6,15],[-3,2,15],[-9,6,15],[-6,5,15],[-4,3,15],[-9,7,15],[-3,3,15],[-6,4,15],[-10,8,15],[-1,1,15],[-8,7,15],[-6,6,15],[-4,3,15],[-9,7,15],[-2,3,15],[-7,5,15],[-10,6,15],[-9,-8,15],[-4,-3,15],[-5,-6,15],[-9,-7,15],[-1,-1,15],[-9,-7,15],[-8,-5,15],[-1,-2,15],[-10,-4,15],[-9,0,15],[-8,6,15],[-1,1,15],[-6,12,15],[-4,10,15],[-1,3,15],[-5,12,15],[-3,10,15],[-2,3,15],[-5,13,15],[-2,8,15],[-3,5,15],[-4,13,15],[-3,6,15],[-3,7,15],[-3,13,15],[-1,13,15],[-2,3,15],[-6,9,15],[-4,4,15],[-8,9,15],[-1,2,15],[-4,11,15],[-5,13,15],[0,1,15],[-3,12,15],[-2,13,15],[-3,13,15],[-2,9,15],[0,3,15],[0,13,15],[0,1,15],[7,12,15],[3,5,15],[8,8,15],[1,1,15],[9,7,15],[9,5,15],[1,0,15],[9,6,15],[10,6,15],[1,1,15],[8,6,15],[9,7,15],[10,8,15],[6,5,15],[3,2,15],[9,7,15],[4,3,15],[6,5,15],[9,8,15],[0,1,15],[1,12,15],[-1,8,15],[-1,5,15],[-3,13,15],[-4,13,15],[-1,5,15],[-3,8,15],[-5,13,15],[-2,2,15],[-8,10,15],[-1,3,15],[-3,10,15],[-3,13,15],[-3,11,15],[-1,2,15],[-5,13,15],[-4,11,15],[0,2,15],[-5,13,15],[-4,12,15],[0,1,15],[1,12,15],[1,13,15],[0,13,15],[0,13,15],[-2,2,15],[-9,10,15],[-1,1,15],[-7,13,15],[-2,4,15],[-4,9,15],[-5,12,15],[-1,13,15],[1,2,15],[2,11,15],[3,13,15],[3,13,15],[1,3,15],[3,10,15],[7,11,15],[1,2,15],[8,10,15],[2,2,15],[7,10,15],[2,3,15],[8,10,15],[3,3,15],[6,5,15],[9,7,15],[2,1,15],[8,6,15],[9,6,15],[2,1,15],[7,4,15],[10,7,15],[2,2,15],[7,10,15],[2,3,15],[6,13,15],[1,1,15],[10,6,15],[9,4,15],[9,0,15],[10,-1,15],[9,-1,15],[10,-1,15],[9,-1,15],[9,-2,15],[10,-1,15],[9,-2,15],[9,-1,15],[10,0,15],[9,0,15],[9,-1,15],[10,0,15],[5,0,15],[4,-1,15],[9,-2,15],[10,-5,15],[9,-5,15],[10,-5,15],[9,-4,15],[9,-2,15],[10,1,15],[9,2,15],[9,2,15],[10,3,15],[9,-2,15],[9,-3,15],[10,-2,15],[7,-3,15],[2,-1,15],[9,-1,15],[10,-1,15],[9,1,15],[4,2,15],[5,10,15],[2,3,15],[4,13,15],[-6,12,15],[-9,13,15],[-9,13,15],[-6,13,15],[-4,12,15],[0,1,15],[-4,13,15],[-2,13,15],[3,13,15],[3,12,15],[0,1,15],[5,12,15],[5,8,15],[2,5,15],[6,13,15],[1,4,15],[1,9,15],[-1,3,15],[-3,10,15],[-5,13,15],[-1,2,15],[-4,10,15],[-5,13,15],[-1,1,15],[-4,12,15],[-2,13,15],[2,13,15],[2,13,15],[2,13,15],[0,1,15],[2,12,15],[2,12,15],[4,13,15],[2,4,15],[3,9,15],[1,13,15],[0,13,15],[0,13,15],[1,13,15],[-4,12,15],[-1,1,15],[-10,4,15],[-9,2,15],[-9,4,15],[-6,2,15],[-4,2,15],[-9,7,15],[-3,4,15],[-6,13,15],[-7,13,15],[-3,6,15],[-3,7,15],[-4,13,15],[2,13,15],[1,12,15],[2,13,15],[1,13,15],[1,9,15],[1,4,15],[3,13,15],[6,12,15],[0,1,15],[5,13,15],[4,8,15],[2,5,15],[7,12,15],[0,1,15],[4,12,15],[1,13,15],[0,13,15],[1,13,15],[2,13,15],[2,6,15],[2,7,15],[1,12,15],[1,13,15],[1,13,15],[2,13,15],[-1,13,15],[-6,7,15],[-4,6,15],[-2,13,15],[0,13,15],[-1,12,15],[3,13,15],[4,6,15],[5,7,15],[4,7,15],[2,6,15],[3,13,15],[1,13,15],[0,13,15],[0,13,15],[-2,12,15],[-2,13,15],[0,13,15],[0,13,15],[2,13,15],[5,12,15],[1,1,15],[8,13,15],[1,4,15],[1,8,15],[6,13,15],[2,11,15],[1,2,15],[1,13,15],[1,13,15],[1,13,15],[2,13,15],[3,13,15],[0,3,15],[4,9,15],[6,9,15],[3,4,15],[6,7,15],[5,6,15],[5,5,15],[6,8,15],[3,3,15],[8,10,15],[1,1,15],[4,12,15],[1,13,15],[1,12,15],[1,13,15],[2,13,15],[1,1,15],[8,12,15],[1,1,15],[9,5,15],[10,3,15],[7,4,15],[2,1,15],[9,6,15],[10,5,15],[0,1,15],[9,5,15],[9,6,15],[3,2,15],[7,6,15],[6,7,15],[3,3,15],[9,9,15],[0,2,15],[10,4,15],[8,-6,15],[1,0,15],[8,-12,15],[2,-2,15],[2,2,15],[7,7,15],[9,5,15],[5,0,15]],[[3207,6197,15],[-6,12,15],[-3,11,15],[-1,2,15],[-5,13,15],[6,3,15],[6,-3,15],[3,-2,15],[9,-6,15],[4,-5,15],[-1,-13,15],[-3,-4,15],[-9,-8,15]],[[6429,6087,5],[0,-7,5],[-4,-12,5],[-1,0,5],[-6,12,5],[0,7,5]],[[6467,6037,5],[-5,3,5],[-1,2,5],[0,6,5]],[[3174,7036,10],[-5,0,10],[-9,3,10],[-9,-1,10],[-10,-3,10],[-4,-2,10],[-5,-2,10],[-9,-4,10],[-10,-5,10],[-6,-2,10],[-3,-2,10],[-9,-6,10],[-10,-4,10],[-2,-1,10],[-7,-4,10],[-9,-6,10],[-4,-3,10],[-6,-4,10],[-9,-8,10],[-1,-1,10],[-7,-13,10],[-1,-2,10],[-7,-10,10],[-3,-6,10],[-4,-7,10],[-5,-11,10],[-1,-2,10],[-5,-13,10],[-4,-7,10],[-3,-6,10],[-6,-10,10],[-1,-3,10],[-6,-13,10],[-2,-6,10],[-6,-7,10],[-4,-1,10],[-9,-1,10],[-9,-1,10],[-10,-1,10],[-9,-2,10],[-9,-1,10],[-10,-1,10],[-9,-1,10],[-9,0,10],[-10,0,10],[-9,1,10],[-9,1,10],[-10,2,10],[-9,-2,10],[-10,-2,10],[-9,5,10],[-7,4,10],[-2,2,10],[-10,5,10],[-9,3,10],[-9,3,10],[-1,0,10],[-9,8,10],[-4,5,10],[-5,3,10],[-9,4,10],[-10,2,10],[-6,4,10],[-3,3,10],[-5,10,10],[-4,6,10],[-5,7,10],[-2,13,10],[0,13,10],[-3,8,10],[-9,-7,10],[-6,-1,10],[-1,-13,10],[7,-11,10],[0,-2,10],[0,-2,10],[-5,-11,10],[-5,-5,10],[-9,-5,10],[-7,10,10],[-2,10,10],[-1,3,10],[1,6,10],[1,7,10],[-1,1,10],[-10,7,10],[-9,0,10],[-9,-3,10],[-9,-5,10],[-1,-1,10],[-9,-8,10],[-5,-4,10],[-4,-7,10],[-3,-6,10],[-1,-13,10],[0,-13,10],[-6,-13,10],[-9,-10,10],[-4,-3,10],[-5,-4,10],[-10,-7,10],[-1,-1,10],[-8,-7,10],[-9,-6,10],[0,-1,10],[-10,-8,10],[-7,-4,10],[-2,-2,10],[-10,-6,10],[-8,-5,10],[-1,-1,10],[-9,-6,10],[-10,-4,10],[-4,-2,10],[-5,-2,10],[-9,-5,10],[-10,-3,10],[-7,-3,10],[-2,-1,10],[-9,-3,10],[-4,-9,10],[-6,-7,10],[-3,-5,10],[-3,-13,10],[-3,-5,10],[-6,-8,10],[-3,-9,10],[-3,-4,10],[-5,-13,10],[-2,-3,10],[-7,-10,10],[-2,-6,10],[-4,-7,10],[-5,-10,10],[-2,-3,10],[-7,-12,10],[-1,-2,10],[-5,-11,10],[-4,-9,10],[-3,-4,10],[-4,-13,10],[-3,-4,10],[-4,-9,10],[-5,-13,10],[-6,-13,10],[-3,-3,10],[-10,0,10],[-8,3,10],[-1,1,10],[-9,3,10],[-10,5,10],[-9,0,10],[-5,4,10],[-4,4,10],[-10,0,10],[-9,-2,10],[-2,-2,10],[-7,-11,10],[-5,-2,10],[-5,-1,10],[-9,-1,10],[-9,-1,10],[-10,0,10],[-3,-10,10],[-6,-8,10],[-1,-4,10],[-7,-13,10],[-2,-2,10],[-9,-9,10],[-3,-2,10],[-6,-7,10],[-7,-6,10],[-3,-3,10],[-9,-8,10],[0,-2,10],[-9,-13,10],[-7,-13,10],[-3,-3,10],[-9,-8,10],[-4,-1,10],[-5,-4,10],[-10,-2,10],[-9,2,10],[-9,-5,10],[-5,-4,10],[-2,-13,10],[1,-13,10],[-4,-1,10],[-9,-2,10],[-10,-1,10],[-9,-6,10],[-5,-3,10],[-4,-2,10],[-10,-6,10],[-9,-4,10],[-9,2,10],[-10,2,10],[-9,2,10],[-9,3,10],[-6,3,10],[-4,2,10],[-9,0,10],[-9,-2,10],[-10,-2,10],[-9,-2,10],[-9,-2,10],[-9,-7,10],[-1,-1,10],[-7,-12,10],[-2,-2,10],[-10,-5,10],[-9,-5,10],[0,-1,10],[-9,-5,10],[-10,-5,10],[-5,-2,10],[-4,-3,10],[-9,-5,10],[-10,-3,10],[-9,-2,10],[-9,-5,10],[-10,-3,10],[-9,-3,10],[-9,-2,10],[-10,3,10],[-9,4,10],[-9,5,10],[-2,1,10],[-8,3,10],[-9,5,10],[-10,4,10],[0,1,10],[-9,4,10],[-9,4,10],[-10,3,10],[-7,1,10],[-2,1,10],[-9,0,10],[-1,-1,10],[-9,-11,10],[0,-1,10],[-6,-13,10],[-3,-5,10],[-6,-8,10],[-3,-3,10],[-9,-10,10],[-1,-1,10],[-9,-12,10],[-9,-11,10],[-2,-2,10],[-8,-9,10],[-3,-4,10],[-6,-7,10],[-5,-5,10],[-4,-7,10],[-6,-6,10],[-4,-6,10],[-4,-7,10],[-4,-13,10],[-1,-5,10],[-2,-8,10],[-3,-13,10],[-3,-13,10],[-2,-6,10],[-2,-7,10],[-7,-9,10],[-3,-3,10],[-6,-9,10],[-4,-4,10],[-6,-10,10],[-1,-3,10],[-8,-10,10],[-2,-3,10],[-7,-10,10],[-2,-3,10],[-8,-13,10],[-4,-13,10],[-5,-10,10],[-2,-3,10],[-5,-12,10],[-2,-8,10],[-2,-5,10],[-4,-13,10],[-4,-7,10],[-2,-6,10],[-7,-13,10],[0,-1,10],[-4,-12,10],[-5,-13,10],[-6,-12,10],[-4,-9,10],[-9,-4,10],[-10,1,10],[-5,-1,10],[-4,-2,10],[-9,-8,10],[-10,0,10],[-9,5,10],[-8,5,10],[-1,0,10],[-10,5,10],[-9,4,10],[-7,4,10],[-2,1,10],[-10,8,10],[-4,3,10],[-5,3,10],[-9,5,10],[-10,5,10],[-1,0,10],[-8,7,10],[-9,5,10],[-3,1,10],[-7,2,10],[-9,5,10],[-10,4,10],[-4,2,10],[-5,3,10],[-9,4,10],[-10,5,10],[-2,1,10],[-7,3,10],[-9,5,10],[-9,5,10],[-1,0,10],[-9,6,10],[-6,7,10],[-3,12,10],[-4,13,10],[-4,13,10],[-2,2,10],[-5,11,10],[-4,7,10],[-3,6,10],[-6,7,10],[-10,4,10],[-9,0,10],[-9,-1,10],[-10,-1,10],[-9,-1,10],[-10,-4,10],[-3,-4,10],[-4,-13,10],[-1,-13,10],[-1,-13,10],[0,-13,10],[1,-12,10],[0,-13,10],[0,-13,10],[-1,-4,10],[-2,-9,10],[-6,-13,10],[-1,-3,10],[-4,-10,10],[-6,-12,10],[0,-1,10],[-6,-12,10],[-3,-4,10],[-9,-3,10],[-10,-1,10],[-8,-5,10],[-1,-1,10],[-9,-7,10],[-7,-5,10],[-3,-3,10],[-9,-6,10],[-9,1,10],[-10,4,10],[-8,4,10],[-1,1,10],[-9,6,10],[-9,6,10],[-1,0,10],[-9,7,10],[-8,6,10],[-2,1,10],[-9,10,10],[-1,1,10],[-8,11,10],[-3,2,10],[-7,8,10],[-4,5,10],[-5,6,10],[-6,7,10],[-3,5,10],[-6,8,10],[-4,6,10],[-5,7,10],[-4,9,10],[-2,4,10],[2,12,10],[-7,13,10],[-2,13,10],[0,1,10],[-5,12,10],[-5,7,10],[-4,6,10],[-5,11,10],[-1,2,10],[-6,13,10],[-2,4,10],[-7,9,10],[-3,3,10],[-7,9,10],[-2,4,10],[-7,9,10],[-2,5,10],[-5,8,10],[-5,5,10],[-9,7,10],[-2,1,10],[-8,3,10],[-9,1,10],[-9,2,10],[-10,2,10],[-9,1,10],[-9,-2,10],[-10,-3,10],[-9,-3,10],[-3,-1,10],[-6,-2,10],[-10,-4,10],[-9,-3,10],[-9,-2,10],[-8,-2,10],[-2,0,10],[-9,-2,10],[-10,-2,10],[-9,-2,10],[-9,-2,10],[-10,-2,10],[-9,-2,10],[-6,-1,10],[-3,0,10],[-1,0,10],[-9,5,10],[-9,8,10],[-9,4,10],[-10,5,10],[-6,4,10],[-3,1,10],[-9,3,10],[-10,3,10],[-6,6,10],[4,13,10],[2,4,10],[6,9,10],[4,6,10],[4,7,10],[5,8,10],[2,4,10],[0,13,10],[-2,6,10],[-3,7,10],[-6,12,10],[-1,1,10],[-9,12,10],[0,1,10],[-9,12,10],[-1,1,10],[-8,10,10],[-2,3,10],[-8,8,10],[-4,4,10],[-5,6,10],[-6,7,10],[-4,4,10],[-8,9,10],[-1,2,10],[-9,10,10],[-1,1,10],[-9,9,10],[-6,4,10],[-3,3,10],[-9,4,10],[-10,0,10],[-9,0,10],[-9,0,10],[-9,6,10],[-1,1,10],[-9,9,10],[-3,3,10],[-6,5,10],[-10,6,10],[-2,2,10],[-7,6,10],[-7,6,10],[-2,3,10],[-10,9,10],[-1,1,10],[1,12,10],[0,1,10],[3,13,10],[5,13,10],[2,2,10],[9,8,10],[1,3,10],[-1,7,10],[-1,6,10],[-2,12,10],[-1,13,10],[-2,13,10],[-2,13,10],[-1,8,10],[-1,5,10],[-9,13,10],[-6,13,10],[0,13,10],[1,12,10],[2,13,10],[1,13,10],[2,12,10],[0,1,10],[3,13,10],[3,13,10],[3,13,10],[-1,13,10],[-2,12,10],[-4,13,10],[-2,8,10],[-1,5,10],[-3,13,10],[-4,13,10],[-1,1,10],[-10,11,10],[-1,1,10],[-8,7,10],[-6,6,10],[-3,3,10],[-10,9,10],[-9,9,10],[-4,4,10],[-5,6,10],[-8,7,10],[-2,2,10],[-9,10,10],[-2,1,10],[-7,6,10],[-10,4,10],[-4,3,10],[-5,4,10],[-7,9,10],[-2,3,10],[-7,10,10],[-3,9,10],[-1,4,10],[-2,12,10],[0,13,10],[1,13,10],[0,13,10],[-1,13,10],[-1,13,10],[0,13,10],[4,9,10],[1,4,10],[5,12,10],[0,13,10],[1,13,10],[2,13,10],[1,5,10],[0,8,10],[4,13,10],[3,13,10],[2,12,10],[-1,13,10],[-2,13,10],[2,13,10],[1,6,10],[2,7,10],[6,13,10],[1,1,10],[8,12,10],[1,13,10],[-9,6,10],[-9,3,10],[-3,3,10],[-6,7,10],[-7,6,10],[-3,3,10],[-9,5,10],[-9,5,10],[-1,0,10],[-7,13,10],[0,13,10],[0,13,10],[3,13,10],[4,12,10],[1,2,10],[2,11,10],[5,13,10],[2,3,10],[8,10,10],[1,2,10],[10,5,10],[9,1,10],[9,-2,10],[10,-1,10],[9,7,10],[0,1,10],[5,13,10],[4,9,10],[2,4,10],[6,13,10],[2,4,10],[3,8,10],[6,13,10],[0,1,10],[5,12,10],[4,13,10],[3,13,10],[7,9,10],[5,4,10],[4,3,10],[9,5,10],[10,4,10],[1,1,10],[8,2,10],[10,4,10],[9,3,10],[9,3,10],[1,1,10],[9,2,10],[9,3,10],[9,0,10],[10,-2,10],[9,-1,10],[9,-1,10],[6,-1,10],[4,-4,10],[9,-9,10],[1,0,10],[8,-9,10],[10,-3,10],[9,10,10],[2,2,10],[7,9,10],[3,4,10],[7,7,10],[8,5,10],[1,1,10],[10,2,10],[9,4,10],[9,3,10],[8,3,10],[2,1,10],[9,5,10],[9,5,10],[4,2,10],[6,3,10],[8,-3,10],[1,0,10],[9,11,10],[2,2,10],[8,9,10],[4,4,10],[5,3,10],[9,2,10],[10,3,10],[9,2,10],[5,3,10],[4,2,10],[10,9,10],[2,2,10],[7,12,10],[0,2,10],[5,11,10],[5,9,10],[2,4,10],[7,6,10],[9,6,10],[1,1,10],[6,13,10],[3,6,10],[3,7,10],[5,13,10],[-1,13,10],[-3,12,10],[-2,13,10],[3,13,10],[4,10,10],[1,3,10],[2,13,10],[0,13,10],[-3,6,10],[-1,7,10],[0,12,10],[0,13,10],[1,10,10],[0,3,10],[1,13,10],[1,13,10],[0,13,10],[-2,5,10],[-2,8,10],[-5,13,10],[-2,8,10],[-2,4,10],[-8,13,10],[-9,7,10],[-7,6,10],[-2,2,10],[-4,11,10],[-3,13,10],[0,13,10],[1,13,10],[0,13,10],[6,12,10],[8,13,10],[1,3,10],[9,7,10],[8,3,10],[2,2,10],[8,11,10],[1,2,10],[8,11,10],[1,1,10],[10,9,10],[3,3,10],[6,7,10],[5,6,10],[4,7,10],[5,5,10],[5,5,10],[4,8,10],[3,13,10],[2,13,10],[2,13,10],[3,13,10],[4,11,10],[1,2,10],[5,13,10],[4,8,10],[1,4,10],[3,13,10],[2,13,10],[2,13,10],[1,3,10],[3,10,10],[4,13,10],[3,9,10],[1,4,10],[8,11,10],[1,2,10],[5,12,10],[-1,13,10],[-3,13,10],[-2,13,10],[0,4,10],[-1,9,10],[0,13,10],[-1,13,10],[-2,12,10],[-5,11,10],[-2,2,10],[-8,10,10],[-2,3,10],[-6,13,10],[-1,3,10],[-3,10,10],[-4,13,10],[-2,13,10],[9,12,10],[0,1,10],[0,2,10],[-1,10,10],[-6,13,10],[-3,6,10],[-2,7,10],[-4,13,10],[1,13,10],[1,13,10],[1,13,10],[-5,12,10],[-1,3,10],[-4,10,10],[-5,13,10],[0,1,10],[1,12,10],[5,13,10],[3,5,10],[6,8,10],[3,8,10],[2,5,10],[2,13,10],[2,12,10],[2,13,10],[-2,13,10],[-6,8,10],[-4,5,10],[-5,7,10],[-4,6,10],[-5,7,10],[-4,6,10],[-6,10,10],[-1,3,10],[-1,13,10],[0,12,10],[1,13,10],[-2,13,10],[-3,13,10],[-3,4,10],[-4,9,10],[4,7,10],[3,6,10],[-1,13,10],[0,6,10]],[[3939,5855,10],[0,-6,10],[4,-13,10],[3,-3,10],[9,1,10],[6,2,10],[0,6,10]],[[6111,5820,15],[5,0,15],[6,3,15],[0,7,15]],[[3946,5746,15],[-10,6,15],[-9,2,15],[-7,5,15],[-2,5,15],[-10,4,15],[-9,1,15],[-3,3,15],[3,4,15],[9,6,15],[3,2,15],[-3,4,15],[-5,9,15],[-4,7,15],[-3,6,15],[-5,13,15],[8,2,15],[9,-1,15],[3,-1,15],[7,-4,15],[6,-9,15],[3,-4,15],[9,-5,15],[5,-4,15],[4,-13,15],[1,-1,15],[4,-11,15],[5,-8,15],[5,-5,15],[2,-13,15],[-7,-6,15],[-9,6,15]],[[2903,5746,20],[5,7,20],[3,6,20],[6,11,20],[1,2,20],[8,12,20],[1,0,20],[9,9,20],[4,4,20],[5,5,20],[7,8,20],[2,4,20],[5,9,20],[5,12,20],[0,1,20],[7,13,20],[2,3,20],[7,10,20],[2,8,20],[2,5,20],[1,12,20],[3,13,20],[-5,13,20],[-1,1,20],[-4,12,20],[-5,9,20],[-2,4,20],[-5,13,20],[0,13,20],[4,13,20],[3,9,20],[2,3,20],[6,13,20],[1,2,20],[9,11,20],[1,1,20],[9,10,20],[2,2,20],[7,9,20],[4,4,20],[6,7,20],[7,6,20],[2,1,20],[10,3,20],[9,-2,20],[2,-2,20],[4,-13,20],[1,-13,20],[1,-13,20],[1,-4,20],[2,-9,20],[3,-13,20],[2,-12,20],[2,-13,20],[1,-9,20],[0,-4,20],[1,-13,20],[1,-13,20],[4,-13,20],[1,-13,20],[-2,-13,20],[-3,-12,20],[-2,-13,20],[-1,0,20],[-3,-13,20],[-2,-13,20],[-4,-8,20],[-4,-5,20],[-5,-4,20],[-9,-5,20],[-8,-4,20],[-2,-1,20],[-9,-9,20],[-3,-3,20],[-7,-7,20],[-4,-6,20],[-5,-8,20],[-3,-4,20],[-6,-13,20],[0,-1,20],[-9,-12,20],[-1,0,20],[-9,-9,20],[-5,-4,20],[-4,-4,20],[-10,-8,20],[-1,-1,20],[-8,-6,20],[-9,-7,20],[-2,0,20],[-8,0,20],[-9,1,20],[-9,2,20],[-10,7,20],[-2,3,20],[0,13,20],[2,4,20],[5,9,20]],[[6667,5881,5],[0,-6,5],[1,-1,5],[8,-12,5],[1,-2,5],[9,-11,5],[0,-1,5],[10,-11,5],[0,-1,5],[9,-11,5],[2,-2,5],[8,-11,5],[1,-2,5],[8,-11,5],[1,-2,5],[8,-11,5],[2,-2,5],[8,-9,5],[2,-3,5],[7,-9,5],[4,-4,5],[5,-7,5],[5,-6,5],[5,-7,5],[4,-6,5],[5,-7,5],[5,-6,5],[4,-5,5],[10,-7,5],[0,-1,5],[9,-10,5],[7,-3,5],[-7,0,5],[-9,0,5],[-2,0,5],[-8,7,5],[-9,4,5],[-3,2,5],[-6,7,5],[-10,5,5],[-2,1,5],[-7,6,5],[-9,7,5],[-1,0,5],[-9,7,5],[-8,6,5],[-1,1,5],[-9,8,5],[-6,4,5],[-4,4,5],[-9,9,5],[-10,7,5],[-7,5,5],[-2,2,5],[-9,9,5],[-3,2,5],[-7,6,5],[-9,6,5],[-1,1,5],[-8,6,5],[-9,7,5],[-1,1,5],[-9,12,5],[-9,10,5],[-4,3,5],[-6,5,5],[-9,7,5],[0,1,5],[-9,8,5],[-5,5,5],[-5,6,5],[-5,6,5],[-4,6,5],[-9,7,5],[0,1,5],[-10,8,5],[-5,4,5],[-4,5,5],[-8,8,5],[-2,2,5],[-8,11,5],[-1,1,5],[-9,12,5],[-10,11,5],[-1,2,5],[-8,10,5],[-2,3,5],[-7,12,5],[0,1,5],[-5,12,5],[-4,13,5],[-1,2,5],[-3,11,5],[-1,6,5]],[[1177,5707,5],[0,1,5],[9,12,5],[0,1,5],[9,12,5],[1,9,5],[0,4,5],[-10,12,5],[0,1,5],[-9,10,5],[-2,3,5],[-7,7,5],[-10,-1,5],[-9,-3,5],[-8,-3,5],[-1,-1,5],[-10,-3,5],[-9,-3,5],[-9,-3,5],[-8,-3,5],[-2,-2,5],[-9,-8,5],[-4,-3,5],[-5,-6,5],[-9,-7,5],[9,-12,5],[0,-1,5],[9,-8,5],[5,-5,5],[4,-3,5],[10,-7,5],[3,-3,5],[6,-3,5],[9,-5,5],[10,-2,5],[9,3,5],[9,3,5],[9,4,5],[1,1,5],[9,12,5]],[[4095,5679,15],[-2,3,15],[-7,1,15],[-9,2,15],[-9,9,15],[-1,1,15],[-9,5,15],[-9,2,15],[-10,2,15],[-9,2,15],[-2,1,15],[-7,5,15],[-5,8,15],[-5,6,15],[-9,7,15],[0,1,15],[-4,12,15],[-5,7,15],[-3,6,15],[-3,13,15],[-4,5,15],[-3,7,15],[3,5,15],[10,2,15],[9,0,15],[9,3,15],[10,-5,15],[7,-5,15],[2,-1,15],[9,-7,15],[8,-4,15],[2,-3,15],[9,-7,15],[9,-1,15],[10,-1,15],[2,-1,15],[-2,-10,15],[-4,-3,15],[-1,-13,15],[5,-6,15],[5,-7,15],[4,-4,15],[8,-9,15],[1,-2,15],[10,-11,15],[1,-12,15],[-1,-3,15],[-10,0,15]],[[1308,5628,5],[1,2,5],[0,13,5],[-1,6,5],[-2,7,5],[-4,13,5],[-3,12,5],[-1,1,5],[-3,12,5],[-4,13,5],[-2,5,5],[-2,8,5],[2,3,5],[7,10,5],[3,3,5],[7,10,5],[-6,13,5],[-1,1,5],[-9,12,5],[-1,0,5],[-9,9,5],[-9,-1,5],[-10,-6,5],[-3,-2,5],[-6,-8,5],[-7,-5,5],[-2,-4,5],[-9,-9,5],[-1,-2,5],[-9,-11,5],[-1,0,5],[-8,-9,5],[-3,-4,5],[-7,-7,5],[-5,-6,5],[-4,-5,5],[-6,-8,5],[-4,-4,5],[-6,-8,5],[-3,-10,5],[-1,-3,5],[1,-3,5],[9,-5,5],[10,1,5],[9,3,5],[6,4,5],[4,3,5],[9,10,5],[9,2,5],[6,-2,5],[4,-2,5],[9,-7,5],[6,-4,5],[3,-3,5],[10,-6,5],[5,-4,5],[4,-3,5],[9,-6,5],[6,-4,5],[4,-4,5],[8,-9,5],[1,-2,5]],[[6312,5627,15],[3,3,15],[-3,3,15],[-2,-3,15],[2,-3,15]],[[6093,5784,20],[4,0,20],[10,-12,20],[9,-13,20],[5,-13,20],[-5,-10,20],[-2,-3,20],[-7,-12,20],[-1,-1,20],[-9,-6,20],[-6,-7,20],[-3,-5,20],[-5,-8,20],[-4,-8,20],[-3,-4,20],[-7,-10,20],[-2,-3,20],[-7,-11,20],[-2,-2,20],[-7,-13,20],[-1,-1,20],[-9,-9,20],[-9,-3,20],[-10,-2,20],[-9,-2,20],[-9,-3,20],[-5,0,20]],[[952,5611,5],[0,6,5],[1,1,5],[5,12,5],[3,13,5],[-1,13,5],[-1,13,5],[3,10,5],[1,3,5],[8,12,5],[0,1,5],[7,12,5],[3,6,5],[3,7,5],[6,11,5],[1,2,5],[6,13,5],[2,7,5],[3,6,5],[7,4,5],[9,6,5],[3,3,5],[6,12,5],[1,0,5],[5,13,5],[3,13,5],[-1,13,5],[-3,13,5],[-3,13,5],[-2,4,5],[-4,9,5],[-5,7,5],[-4,6,5],[-5,7,5],[-4,5,5],[-6,8,5],[-3,5,5],[-6,8,5],[-4,5,5],[-5,7,5],[-5,6,5],[-5,5,5],[-6,8,5],[-3,2,5],[-9,11,5],[-1,0,5],[-9,7,5],[-4,6,5],[-5,4,5],[-7,9,5],[-2,2,5],[-10,8,5],[-2,2,5],[-7,6,5],[-9,6,5],[-2,1,5],[-8,3,5],[-7,-3,5],[-2,-1,5],[-10,-5,5],[-9,-6,5],[-2,-1,5],[-7,-2,5],[-10,-4,5],[-9,-4,5],[-6,-2,5],[-3,-2,5],[-10,-7,5],[-3,-4,5],[-6,-8,5],[-5,-5,5],[-4,-4,5],[-10,-6,5],[-3,-3,5],[-6,-5,5],[-8,-8,5],[-1,-2,5],[-7,-11,5],[-1,-6,5]],[[2328,5497,10],[9,-7,10],[1,11,10],[2,13,10],[-3,11,10],[-6,2,10],[-3,1,10],[-2,-1,10],[-8,-11,10],[-1,-2,10],[1,-8,10],[1,-5,10],[9,-4,10]],[[1299,5441,5],[9,1,5],[9,1,5],[10,2,5],[9,2,5],[9,3,5],[2,0,5],[7,13,5],[-2,13,5],[-2,13,5],[-3,12,5],[-2,13,5],[-2,13,5],[-7,5,5],[-4,-5,5],[-5,-6,5],[-5,-7,5],[-5,-7,5],[-2,-6,5],[-7,-12,5],[-8,-13,5],[-1,-3,5],[-5,-10,5],[-4,-13,5],[9,-9,5]],[[6789,5397,5],[10,-2,5],[9,0,5],[9,-1,5],[10,0,5],[9,1,5],[4,3,5],[-4,5,5],[-9,5,5],[-10,-3,5],[-9,-3,5],[-9,0,5],[-10,-2,5],[-1,-2,5],[1,-1,5]],[[1261,5378,5],[-2,-5,5],[2,-2,5],[10,-4,5],[9,-1,5],[9,-1,5],[10,-1,5],[9,-1,5],[9,0,5],[10,-1,5],[9,-1,5],[9,0,5],[10,2,5],[9,3,5],[10,3,5],[7,4,5],[2,2,5],[9,6,5],[10,2,5],[9,3,5],[-3,12,5],[-6,8,5],[-10,4,5],[-8,1,5],[-1,1,5],[-9,1,5],[-10,5,5],[-9,5,5],[-10,1,5],[-9,3,5],[-9,2,5],[-10,2,5],[-9,2,5],[-9,1,5],[-10,0,5],[-5,-10,5],[-4,-13,5],[-9,-12,5],[-1,-1,5],[-6,-12,5],[-3,-8,5]],[[2510,5386,15],[-5,-5,15],[-6,-8,15],[-3,-3,15],[-9,-3,15],[-10,2,15],[-8,4,15],[-1,0,15],[-9,6,15],[-10,5,15],[-3,2,15],[-6,3,15],[-9,6,15],[-5,3,15],[-5,5,15],[-8,8,15],[-1,3,15],[-3,10,15],[-1,13,15],[4,10,15],[9,3,15],[10,-3,15],[9,-2,15],[9,-3,15],[10,-4,15],[1,-1,15],[8,-5,15],[9,-4,15],[6,-4,15],[4,-3,15],[9,-6,15],[6,-4,15],[3,-4,15],[10,-8,15],[2,-1,15],[-2,-4,15],[-5,-8,15]],[[6924,5714,5],[0,-7,5],[6,-5,5],[9,-8,5],[9,-10,5],[3,-2,5],[7,-8,5],[6,-5,5],[3,-4,5],[9,-8,5],[2,-1,5],[8,-8,5],[5,-5,5],[4,-5,5],[8,-8,5],[2,-2,5],[9,-8,5],[3,-3,5],[6,-7,5],[6,-6,5],[4,-4,5],[9,-9,5],[9,-9,5],[4,-3,5],[6,-6,5],[7,-7,5],[2,-2,5],[9,-6,5],[8,-5,5],[2,-1,5],[9,-8,5],[6,-4,5],[3,-3,5],[10,-6,5],[9,0,5],[9,1,5],[10,0,5],[9,-3,5],[10,-2,5],[9,-4,5],[9,-6,5],[3,-3,5],[7,-4,5],[9,-7,5],[3,-2,5],[6,-2,5],[8,-10,5],[2,-4,5],[2,-9,5],[4,-13,5],[3,-13,5],[3,-13,5],[2,-13,5],[1,-13,5],[-6,-6,5],[-5,-7,5],[-4,-3,5],[-10,-8,5],[-1,-1,5],[-8,-9,5],[-6,-4,5],[-3,-4,5],[-10,-8,5],[-1,-1,5],[-8,-8,5],[-5,-5,5],[-4,-4,5],[-10,-6,5],[-9,2,5],[-10,5,5],[-2,3,5],[-7,7,5],[-5,6,5],[-4,4,5],[-8,9,5],[-2,1,5],[-9,9,5],[-2,3,5],[-7,7,5],[-6,5,5],[-4,5,5],[-8,8,5],[-1,1,5],[-9,10,5],[-2,2,5],[-8,8,5],[-4,5,5],[-5,5,5],[-7,8,5],[-2,3,5],[-10,10,5],[-9,9,5],[-3,4,5],[-6,6,5],[-6,7,5],[-4,4,5],[-8,8,5],[-1,2,5],[-10,10,5],[-1,1,5],[-8,9,5],[-4,4,5],[-5,6,5],[-6,7,5],[-4,4,5],[-8,9,5],[-1,1,5],[-9,10,5],[-1,2,5],[-9,9,5],[-4,4,5],[-5,6,5],[-5,6,5],[-4,6,5],[-7,7,5],[-3,5,5],[-7,8,5],[-2,3,5],[-9,8,5],[-2,2,5],[-8,9,5],[-4,4,5],[-5,10,5],[-2,3,5],[-7,13,5],[0,2,5],[-4,11,5],[4,9,5],[3,3,5],[6,6,5],[8,7,5],[1,2,5],[10,9,5],[2,2,5],[7,7,5],[5,3,5]],[[4255,5302,15],[-5,6,15],[0,13,15],[4,13,15],[1,0,15],[9,6,15],[6,-6,15],[-2,-13,15],[-3,-13,15],[-1,-2,15],[-9,-4,15]],[[4208,5241,15],[-2,3,15],[2,2,15],[3,11,15],[6,13,15],[9,-10,15],[2,-3,15],[0,-13,15],[-2,-6,15],[-9,-5,15],[-9,8,15]],[[5817,5227,30],[-3,4,30],[3,2,30],[2,-2,30],[-2,-4,30]],[[3123,5178,15],[-9,2,15],[-1,0,15],[-9,2,15],[-9,2,15],[-10,5,15],[-7,4,15],[-2,1,15],[-9,6,15],[-8,5,15],[-2,1,15],[-9,6,15],[-9,6,15],[0,1,15],[-10,5,15],[-9,4,15],[-9,3,15],[-1,0,15],[-9,4,15],[-9,3,15],[-10,4,15],[-4,2,15],[-5,1,15],[-9,0,15],[-4,-1,15],[-6,-1,15],[-9,-1,15],[-4,2,15],[-5,2,15],[-10,4,15],[-9,3,15],[-9,3,15],[-3,1,15],[-7,2,15],[-9,4,15],[-9,5,15],[-4,2,15],[-6,3,15],[-9,4,15],[-10,5,15],[-1,1,15],[-8,3,15],[-9,5,15],[-8,4,15],[-2,2,15],[-7,11,15],[-2,3,15],[-9,5,15],[-9,5,15],[-1,1,15],[-9,9,15],[-3,3,15],[-6,6,15],[-8,7,15],[-2,2,15],[-9,7,15],[-6,4,15],[-2,13,15],[1,13,15],[7,9,15],[2,3,15],[7,10,15],[3,3,15],[7,9,15],[3,4,15],[6,8,15],[4,5,15],[5,7,15],[4,6,15],[6,7,15],[4,6,15],[5,6,15],[5,7,15],[4,6,15],[10,4,15],[9,1,15],[9,0,15],[10,-1,15],[9,-3,15],[5,6,15],[2,12,15],[-7,5,15],[-9,4,15],[-10,3,15],[-2,1,15],[-7,4,15],[-9,9,15],[0,1,15],[-10,9,15],[-2,3,15],[-3,13,15],[1,13,15],[1,13,15],[-1,12,15],[-5,8,15],[-9,-3,15],[-10,-4,15],[-2,-1,15],[-7,-2,15],[-9,0,15],[-3,2,15],[-7,4,15],[-9,2,15],[-9,-1,15],[-10,-1,15],[-9,-1,15],[-10,-1,15],[-9,2,15],[-9,3,15],[-10,1,15],[-9,2,15],[-8,3,15],[-1,1,15],[-10,3,15],[-9,3,15],[-9,4,15],[-7,2,15],[-3,1,15],[-9,2,15],[-9,2,15],[-10,-1,15],[-4,-4,15],[-5,-10,15],[-3,-3,15],[-6,-2,15],[-10,-1,15],[-9,-2,15],[-10,-1,15],[-9,-2,15],[-9,-2,15],[-10,-2,15],[-4,-1,15],[-5,0,15],[-9,-2,15],[-10,1,15],[-1,1,15],[-8,8,15],[-4,5,15],[-5,8,15],[-4,5,15],[-6,6,15],[-9,6,15],[-1,1,15],[-8,8,15],[-4,5,15],[-6,10,15],[-5,3,15],[-4,2,15],[-9,2,15],[-10,4,15],[-6,5,15],[-3,4,15],[-4,9,15],[-4,12,15],[-2,3,15],[-9,4,15],[-9,2,15],[-10,2,15],[-9,2,15],[-9,3,15],[-10,2,15],[-9,2,15],[-9,2,15],[-10,2,15],[-9,1,15],[-3,1,15],[-6,2,15],[-10,1,15],[-9,0,15],[-9,0,15],[-10,0,15],[-9,0,15],[-10,0,15],[-9,-1,15],[-9,0,15],[-10,1,15],[-9,1,15],[-9,-1,15],[-9,-3,15],[-1,0,15],[-9,-4,15],[-9,0,15],[-10,1,15],[-9,1,15],[-9,1,15],[-5,1,15],[-5,3,15],[-9,8,15],[-4,2,15],[-6,2,15],[-9,2,15],[-9,2,15],[-10,3,15],[-9,3,15],[-1,1,15],[-4,13,15],[5,13,15],[9,12,15],[1,0,15],[6,13,15],[3,5,15],[4,8,15],[5,7,15],[6,6,15],[3,5,15],[5,8,15],[5,6,15],[5,7,15],[4,6,15],[6,7,15],[4,5,15],[5,8,15],[4,6,15],[4,6,15],[5,7,15],[5,6,15],[5,8,15],[3,5,15],[0,13,15],[6,13,15],[0,2,15],[1,11,15],[3,13,15],[4,13,15],[1,1,15],[7,11,15],[3,5,15],[6,8,15],[3,5,15],[7,8,15],[2,2,15],[10,11,15],[9,13,15],[9,12,15],[1,1,15],[9,6,15],[9,3,15],[10,3,15],[0,1,15],[9,5,15],[9,7,15],[0,1,15],[10,6,15],[8,6,15],[1,1,15],[9,7,15],[10,-4,15],[2,-4,15],[7,-7,15],[5,-6,15],[4,-4,15],[8,-8,15],[2,-1,15],[9,-4,15],[9,-2,15],[10,-4,15],[3,-2,15],[6,-4,15],[9,-5,15],[7,-4,15],[3,-2,15],[9,-9,15],[2,-2,15],[5,-13,15],[3,-5,15],[4,-8,15],[5,-10,15],[2,-3,15],[7,-10,15],[2,-2,15],[5,-13,15],[3,-11,15],[0,-2,15],[9,-9,15],[5,-4,15],[4,-5,15],[8,-8,15],[2,-1,15],[9,-7,15],[9,-4,15],[3,-1,15],[7,-2,15],[9,-4,15],[9,-4,15],[7,-3,15],[3,-1,15],[9,-3,15],[9,-5,15],[7,-4,15],[3,-1,15],[9,-7,15],[6,-4,15],[4,-3,15],[9,-7,15],[4,-3,15],[5,-4,15],[10,-6,15],[9,-1,15],[5,-2,15],[4,-5,15],[5,-8,15],[5,-3,15],[9,-4,15],[9,2,15],[10,3,15],[9,-4,15],[9,-5,15],[4,-2,15],[6,-3,15],[9,-5,15],[9,-5,15],[10,-5,15],[9,-5,15],[4,-3,15],[6,-2,15],[9,-6,15],[9,-5,15],[10,-5,15],[9,-5,15],[4,-2,15],[5,-5,15],[8,-8,15],[-2,-13,15],[-5,-13,15],[-1,-2,15],[-4,-11,15],[-5,-11,15],[-1,-2,15],[-8,-5,15],[-10,-3,15],[-9,-1,15],[-9,0,15],[-10,0,15],[-9,-2,15],[-3,-2,15],[3,-6,15],[2,-6,15],[7,-11,15],[2,-2,15],[7,-13,15],[1,-1,15],[7,-12,15],[2,-4,15],[6,-9,15],[3,-5,15],[10,-7,15],[9,5,15],[9,6,15],[1,1,15],[9,5,15],[9,6,15],[3,2,15],[6,6,15],[7,7,15],[3,9,15],[1,4,15],[1,13,15],[1,12,15],[2,13,15],[1,13,15],[2,13,15],[1,3,15],[2,10,15],[4,13,15],[3,9,15],[2,4,15],[4,12,15],[4,7,15],[3,6,15],[6,13,15],[0,1,15],[5,12,15],[4,13,15],[-9,13,15],[-7,13,15],[2,13,15],[1,12,15],[-1,13,15],[-3,13,15],[-1,5,15],[-3,8,15],[-3,13,15],[-2,13,15],[2,13,15],[5,13,15],[1,0,15],[9,2,15],[10,1,15],[9,1,15],[9,0,15],[10,0,15],[9,0,15],[9,-1,15],[10,0,15],[9,0,15],[9,6,15],[2,3,15],[3,13,15],[5,6,15],[4,7,15],[5,8,15],[5,5,15],[4,6,15],[7,7,15],[3,4,15],[6,9,15],[3,5,15],[5,8,15],[4,8,15],[5,4,15],[5,5,15],[7,8,15],[2,2,15],[10,6,15],[9,4,15],[2,1,15],[7,3,15],[10,2,15],[9,2,15],[9,1,15],[10,1,15],[9,4,15],[1,0,15],[8,6,15],[10,1,15],[9,1,15],[9,-3,15],[5,-5,15],[2,-13,15],[0,-13,15],[3,-7,15],[9,-1,15],[9,0,15],[10,0,15],[2,-5,15],[3,-12,15],[0,-13,15],[4,-13,15],[9,-13,15],[0,-13,15],[1,-3,15],[1,-10,15],[3,-13,15],[2,-12,15],[-2,-13,15],[-4,-13,15],[0,-2,15],[-4,-11,15],[1,-13,15],[3,-11,15],[0,-2,15],[3,-13,15],[2,-13,15],[-5,-9,15],[-2,-3,15],[-8,-12,15],[-1,-1,15],[1,-4,15],[2,-9,15],[2,-13,15],[-4,-10,15],[-1,-3,15],[-6,-13,15],[-2,-4,15],[-4,-9,15],[-6,-12,15],[0,-1,15],[-5,-12,15],[-4,-8,15],[-3,-5,15],[-6,-12,15],[-1,-1,15],[-3,-13,15],[-3,-13,15],[-3,-12,15],[0,-1,15],[-2,-13,15],[-7,-10,15],[-2,-2,15],[-7,-7,15],[-6,-6,15],[-4,-4,15],[-9,-9,15],[-9,-5,15],[-10,-4,15],[-9,-4,15],[-9,-7,15],[-9,-6,15],[-1,-1,15],[-9,-6,15],[-9,-3,15],[-10,-2,15],[-5,-1,15],[-4,-1,15],[-10,-1,15],[-9,-2,15],[-9,-3,15],[-10,-3,15],[-5,-3,15],[-4,-2,15],[-9,-8,15],[-3,-3,15],[-7,-5,15],[-9,-7,15],[0,-2,15],[4,-11,15],[5,-4,15],[10,-6,15],[4,-3,15],[5,-5,15],[7,-8,15],[2,-7,15],[2,-6,15],[5,-13,15],[3,-10,15],[1,-3,15],[4,-12,15],[4,-13,15],[7,-13,15],[2,-4,15],[8,-9,15],[2,-1,15],[9,-1,15],[6,2,15],[4,2,15],[9,4,15],[5,-6,15],[4,-5,15],[4,-8,15],[6,-5,15],[6,-8,15],[3,-2,15],[9,-9,15],[2,-2,15],[8,-7,15],[6,-6,15],[3,-3,15],[9,-9,15],[1,0,15],[9,-9,15],[5,-4,15],[4,-4,15],[9,-9,15],[10,-10,15],[3,-3,15],[6,-6,15],[9,-7,15],[0,-1,15],[10,-7,15],[5,-5,15],[4,-4,15],[10,-8,15],[0,-1,15],[9,-11,15],[1,-2,15],[8,-12,15],[0,-2,15],[6,-11,15],[-2,-13,15],[-4,-13,15],[-9,-13,15],[-6,-13,15],[-3,-6,15],[-4,-7,15],[-6,-10,15],[-1,-2,15],[-7,-13,15],[-1,-2,15],[-10,-8,15],[-9,0,15],[-9,2,15],[-10,2,15],[-9,2,15],[-9,2,15]],[[8024,5102,15],[-9,8,15],[-10,3,15],[-2,2,15],[-7,9,15],[-4,4,15],[-5,6,15],[-9,7,15],[-1,0,15],[-9,7,15],[-7,6,15],[-2,2,15],[-10,6,15],[-8,5,15],[-1,1,15],[-9,3,15],[-10,8,15],[-1,1,15],[-8,6,15],[-8,7,15],[-2,0,15],[-9,10,15],[-2,2,15],[-7,12,15],[-1,1,15],[-8,13,15],[-1,1,15],[-6,12,15],[0,13,15],[2,13,15],[-5,1,15],[-9,9,15],[-1,3,15],[-2,12,15],[-1,13,15],[-2,13,15],[-3,13,15],[-1,2,15],[-4,11,15],[0,13,15],[1,13,15],[-3,13,15],[-2,12,15],[8,9,15],[10,1,15],[9,1,15],[9,2,15],[2,0,15],[8,3,15],[9,1,15],[9,-1,15],[6,-3,15],[4,-2,15],[9,-6,15],[8,-5,15],[2,-1,15],[9,-6,15],[6,-5,15],[3,-13,15],[-6,-13,15],[-3,-13,15],[6,-13,15],[3,-5,15],[5,-8,15],[5,-12,15],[0,-1,15],[5,-13,15],[4,-8,15],[2,-4,15],[5,-13,15],[2,-7,15],[3,-6,15],[3,-13,15],[3,-13,15],[1,-1,15],[3,-12,15],[5,-13,15],[1,-3,15],[3,-9,15],[2,-13,15],[1,-13,15],[3,-12,15],[1,-1,15],[6,-13,15],[3,-5,15],[3,-8,15],[4,-13,15],[2,-12,15],[0,-1,15]],[[8071,5051,10],[-9,-6,10],[-10,-4,10],[-9,-1,10],[-10,1,10],[-9,3,10],[-9,4,10],[-10,3,10],[-9,4,10],[-9,3,10],[-10,1,10],[-5,-8,10],[-4,-9,10],[-4,-4,10],[-5,-3,10],[-10,0,10],[-9,3,10],[-9,6,10],[-10,6,10],[-2,1,10],[-7,3,10],[-10,4,10],[-9,3,10],[-6,3,10],[-3,2,10],[-10,6,10],[-9,4,10],[-3,1,10],[-6,2,10],[-10,10,10],[0,1,10],[-9,11,10],[-3,1,10],[-6,8,10],[-10,5,10],[-2,0,10],[-7,11,10],[-1,2,10],[-4,13,10],[-4,13,10],[-4,13,10],[-6,9,10],[-7,4,10],[-2,0,10],[-9,1,10],[-10,1,10],[-9,7,10],[-4,4,10],[-6,7,10],[-4,5,10],[-5,7,10],[-4,6,10],[-5,9,10],[-3,4,10],[-7,11,10],[-1,2,10],[-8,10,10],[-3,3,10],[-6,4,10],[-10,8,10],[-1,1,10],[-6,13,10],[-2,3,10],[-9,1,10],[-10,6,10],[-1,2,10],[1,2,10],[6,11,10],[4,6,10],[4,7,10],[3,13,10],[-2,13,10],[-5,8,10],[-6,5,10],[-4,8,10],[-5,5,10],[1,13,10],[1,12,10],[-2,13,10],[-4,5,10],[-5,8,10],[-4,10,10],[-2,3,10],[-4,13,10],[-4,12,10],[0,1,10],[-4,13,10],[0,13,10],[4,11,10],[1,1,10],[9,8,10],[6,5,10],[3,4,10],[8,9,10],[1,2,10],[6,11,10],[4,5,10],[5,8,10],[4,5,10],[7,8,10],[2,1,10],[10,7,10],[6,5,10],[3,2,10],[9,7,10],[6,3,10],[4,2,10],[9,0,10],[9,-1,10],[2,-1,10],[8,-2,10],[9,-3,10],[10,-4,10],[7,-3,10],[2,-2,10],[9,-5,10],[10,-6,10],[9,-5,10],[9,-5,10],[4,-3,10],[6,-4,10],[9,-8,10],[2,-1,10],[7,-6,10],[9,-7,10],[1,-1,10],[9,-7,10],[6,-5,10],[3,-2,10],[10,-7,10],[6,-4,10],[3,-2,10],[9,-6,10],[7,-4,10],[3,-3,10],[9,-3,10],[10,2,10],[2,4,10],[7,8,10],[4,-8,10],[5,-13,10],[0,-1,10],[10,-9,10],[3,-3,10],[6,-4,10],[9,-9,10],[10,-7,10],[6,-6,10],[3,-3,10],[9,-6,10],[7,-4,10],[3,-1,10],[9,-7,10],[3,-5,10],[6,-10,10],[2,-3,10],[8,-8,10],[4,-4,10],[5,-6,10],[10,-7,10],[1,0,10],[8,-5,10],[9,-8,10],[8,-13,10],[2,-3,10],[3,-10,10],[6,-9,10],[2,-4,10],[7,-10,10],[2,-3,10],[-2,-7,10],[-7,-6,10],[6,-12,10],[1,-2,10],[7,-11,10],[3,-11,10],[0,-2,10],[4,-13,10],[2,-13,10],[-1,-13,10],[-1,-13,10],[-2,-12,10],[-2,-13,10],[0,-4,10],[-2,-9,10],[-1,-13,10],[-2,-13,10],[-2,-13,10],[-3,-5,10],[-4,-8,10],[-5,-9,10],[-1,-4,10],[1,-4,10],[1,-8,10],[-1,-5,10],[-4,-8,10],[-5,-8,10],[-5,-5,10],[-5,-5,10],[-9,-8,10]],[[4357,5037,10],[4,1,10],[-1,13,10],[-3,8,10],[-1,5,10],[-7,13,10],[-1,2,10],[-6,11,10],[-3,8,10],[-3,4,10],[-5,13,10],[-2,4,10],[-4,9,10],[-5,10,10],[-2,3,10],[-6,13,10],[-1,4,10],[-7,9,10],[-3,6,10],[-3,7,10],[-5,13,10],[-1,2,10],[-6,10,10],[-3,13,10],[0,1,10],[-8,12,10],[-2,5,10],[-3,8,10],[-6,11,10],[-1,2,10],[-8,13,10],[0,1,10],[-9,12,10],[-1,0,10],[-8,12,10],[-1,4,10],[-7,9,10],[-2,13,10],[-1,1,10],[-7,12,10],[-2,5,10],[-5,8,10],[-4,13,10],[0,1,10],[-7,12,10],[-3,8,10],[-2,5,10],[-6,12,10],[-1,2,10],[-6,11,10],[-3,7,10],[-4,6,10],[-6,11,10],[-1,2,10],[-7,13,10],[-1,2,10],[-6,11,10],[-3,6,10],[-5,7,10],[-5,10,10],[-2,3,10],[-5,12,10],[-2,3,10],[-7,10,10],[-2,5,10],[-6,8,10],[-4,8,10],[-3,5,10],[-6,9,10],[-3,4,10],[-6,13,10],[-1,0,10],[-8,13,10],[-1,2,10],[-7,10,10],[-2,5,10],[-6,8,10],[-4,7,10],[-5,6,10],[-4,6,10],[-7,7,10],[-2,13,10],[0,1,10],[-7,-1,10],[-3,-13,10],[1,-13,10],[5,-13,10],[4,-7,10],[2,-6,10],[7,-12,10],[1,0,10],[6,-13,10],[2,-4,10],[6,-9,10],[4,-8,10],[3,-5,10],[6,-13,10],[6,-13,10],[3,-4,10],[7,-9,10],[3,-5,10],[5,-7,10],[4,-8,10],[4,-5,10],[4,-13,10],[2,-3,10],[7,-10,10],[2,-5,10],[5,-8,10],[4,-12,10],[1,-1,10],[6,-13,10],[3,-4,10],[6,-9,10],[3,-7,10],[4,-5,10],[5,-13,10],[0,-2,10],[8,-11,10],[2,-4,10],[7,-9,10],[2,-3,10],[8,-10,10],[1,-3,10],[7,-10,10],[3,-4,10],[6,-9,10],[3,-4,10],[7,-9,10],[2,-3,10],[7,-9,10],[3,-5,10],[5,-8,10],[3,-13,10],[1,-4,10],[6,-9,10],[3,-13,10],[1,0,10],[6,-13,10],[3,-5,10],[5,-8,10],[4,-9,10],[3,-3,10],[6,-13,10],[1,-2,10],[6,-11,10],[3,-7,10],[5,-6,10],[4,-13,10],[0,-2,10],[7,-11,10],[3,-6,10],[3,-7,10],[6,-13,10],[6,-12,10],[3,-6,10],[6,-7,10],[4,-9,10],[3,-4,10],[5,-13,10],[1,-1,10],[9,-12,10],[0,-1,10]],[[7551,4987,10],[-4,-4,10],[-8,-9,10],[-1,-2,10],[-10,-6,10],[-9,-1,10],[-9,7,10],[-2,2,10],[-8,9,10],[-3,4,10],[-6,7,10],[-6,6,10],[-3,4,10],[-10,8,10],[-9,10,10],[-3,3,10],[-6,8,10],[-5,5,10],[-5,7,10],[-6,6,10],[-3,4,10],[-10,8,10],[0,1,10],[-9,10,10],[-3,3,10],[-6,8,10],[-5,5,10],[-5,5,10],[-7,7,10],[-2,3,10],[-9,9,10],[-2,1,10],[-8,10,10],[-4,3,10],[-5,7,10],[-7,6,10],[-2,3,10],[-10,10,10],[-9,12,10],[-1,1,10],[-8,11,10],[-5,2,10],[-5,11,10],[-2,2,10],[2,4,10],[5,8,10],[5,10,10],[1,3,10],[7,13,10],[1,2,10],[6,11,10],[3,7,10],[10,-4,10],[8,-3,10],[1,0,10],[9,-10,10],[6,-3,10],[4,-4,10],[9,-8,10],[1,-1,10],[8,-10,10],[4,-3,10],[6,-6,10],[9,-6,10],[9,-10,10],[5,-3,10],[5,-6,10],[9,-7,10],[0,-1,10],[10,-10,10],[2,-2,10],[7,-8,10],[6,-5,10],[3,-3,10],[10,-8,10],[1,-2,10],[8,-9,10],[4,-4,10],[5,-6,10],[8,-7,10],[2,-1,10],[9,-9,10],[3,-2,10],[6,-7,10],[7,-6,10],[3,-3,10],[9,-9,10],[1,-1,10],[8,-9,10],[5,-4,10],[5,-5,10],[9,-8,10],[9,-9,10],[2,-4,10],[-2,-4,10],[-6,-9,10],[-3,-3,10],[-9,-9,10],[-1,0,10],[-9,-7,10],[-5,-6,10]],[[5708,5147,40],[1,-1,40],[5,-2,40],[4,-3,40],[5,-5,40],[9,-6,40],[3,-2,40],[6,-13,40],[1,-1,40],[9,-10,40],[2,-2,40],[7,-8,40],[6,-4,40],[4,-4,40],[9,-9,40],[10,-10,40],[3,-3,40],[6,-6,40],[7,-7,40],[2,-2,40],[10,-9,40],[2,-2,40],[7,-6,40],[7,-7,40],[2,-2,40],[10,-5,40],[9,-4,40],[4,-2,40],[5,-2,40],[10,-4,40],[8,-6,40],[1,-1,40],[8,-12,40],[1,-2,40],[8,-11,40],[2,-2,40],[7,-11,40],[2,-6,40],[2,-7,40],[3,-13,40],[1,-13,40],[0,-13,40],[0,-12,40],[-1,-13,40],[-5,-1,40],[0,1,40],[-9,5,40],[-10,2,40],[-9,2,40],[-8,4,40],[-1,0,40],[-10,5,40],[-9,3,40],[-5,4,40],[-4,3,40],[-10,3,40],[-8,7,40],[-1,1,40],[-9,2,40],[-10,3,40],[-8,7,40],[-1,1,40],[-9,2,40],[-10,6,40],[-5,4,40],[-4,1,40],[-10,2,40],[-8,10,40],[-1,0,40],[-9,3,40],[-10,7,40],[-2,3,40],[-7,2,40],[-9,3,40],[-7,8,40],[-3,1,40],[-9,3,40],[-9,9,40],[-10,2,40],[-4,10,40],[-5,3,40],[-9,6,40],[-5,4,40],[-5,3,40],[-9,5,40],[-5,5,40],[0,7,40]],[[2459,4831,10],[-5,1,10],[-5,2,10],[-9,6,10],[-9,5,10],[0,1,10],[-10,7,10],[-6,5,10],[-3,3,10],[-10,6,10],[-4,4,10],[-5,6,10],[-9,6,10],[-2,1,10],[-8,8,10],[-8,5,10],[8,1,10],[4,-1,10],[6,-11,10],[9,0,10],[6,-2,10],[3,-6,10],[10,-3,10],[9,-4,10],[2,0,10],[8,-6,10],[9,-4,10],[9,-3,10],[10,-7,10],[9,-4,10],[3,-2,10],[6,-8,10],[2,-5,10],[-2,-4,10],[-9,-5,10],[-9,8,10]],[[5527,4819,35],[-2,0,35],[2,6,35],[2,-6,35],[-2,0,35]],[[7846,4732,5],[-3,-3,5],[-6,-6,5],[-7,-7,5],[-2,-2,5],[-10,-5,5],[-9,1,5],[-9,4,5],[-7,2,5],[-3,1,5],[0,-1,5],[-9,-6,5],[-9,-4,5],[-10,0,5],[-7,10,5],[-2,3,5],[-10,1,5],[-8,9,5],[-1,1,5],[-9,5,5],[-7,7,5],[-3,2,5],[-9,10,5],[-1,1,5],[-8,6,5],[-5,7,5],[-5,3,5],[-8,10,5],[-1,1,5],[-9,7,5],[-4,5,5],[-6,4,5],[-7,8,5],[-2,2,5],[-9,8,5],[-3,3,5],[-7,5,5],[-8,8,5],[-1,1,5],[-9,9,5],[-3,3,5],[-7,7,5],[-4,6,5],[-5,5,5],[-6,8,5],[-4,3,5],[-8,10,5],[-1,1,5],[-9,9,5],[-2,3,5],[-8,6,5],[-5,6,5],[-4,7,5],[-4,6,5],[4,7,5],[3,6,5],[6,9,5],[5,4,5],[5,8,5],[7,5,5],[2,8,5],[9,5,5],[2,0,5],[-2,2,5],[-9,0,5],[-9,-2,5],[-10,0,5],[-9,-12,5],[-1,-1,5],[-8,-10,5],[-8,-3,5],[-2,-2,5],[-9,-4,5],[-9,6,5],[-10,7,5],[-4,6,5],[-5,5,5],[-6,8,5],[-3,4,5],[-8,9,5],[-2,1,5],[-9,8,5],[-3,4,5],[-6,5,5],[-6,7,5],[-4,4,5],[-7,9,5],[-2,2,5],[-10,9,5],[-1,2,5],[-8,6,5],[-6,7,5],[-3,3,5],[-9,10,5],[-1,1,5],[-9,9,5],[-2,3,5],[-7,6,5],[-6,7,5],[-4,3,5],[-8,9,5],[-1,2,5],[-9,9,5],[-2,2,5],[-8,8,5],[-3,5,5],[-6,6,5],[-6,7,5],[-3,4,5],[-9,9,5],[-1,1,5],[-9,9,5],[-2,3,5],[-8,7,5],[-4,6,5],[-5,5,5],[-7,8,5],[-2,2,5],[-10,10,5],[-9,9,5],[-4,4,5],[-5,6,5],[-6,7,5],[-4,4,5],[-8,9,5],[-1,1,5],[-9,10,5],[-2,2,5],[-8,8,5],[-4,5,5],[-5,5,5],[-7,8,5],[-2,2,5],[-9,10,5],[-1,10,5],[0,3,5],[0,1,5],[10,11,5],[1,1,5],[8,8,5],[5,5,5],[4,5,5],[9,8,5],[1,1,5],[9,9,5],[3,3,5],[6,6,5],[10,5,5],[9,1,5],[9,-5,5],[7,-7,5],[3,-3,5],[9,-8,5],[2,-2,5],[7,-7,5],[6,-6,5],[4,-3,5],[9,-9,5],[1,-1,5],[9,-6,5],[6,-7,5],[3,-2,5],[9,-11,5],[10,-7,5],[4,-5,5],[5,-4,5],[9,-9,5],[0,-1,5],[10,-4,5],[6,-8,5],[3,-2,5],[8,-11,5],[1,-1,5],[9,-12,5],[1,0,5],[9,-6,5],[6,-7,5],[3,-3,5],[8,-10,5],[2,-1,5],[8,-11,5],[1,-1,5],[10,-10,5],[1,-2,5],[8,-3,5],[9,-10,5],[10,-1,5],[0,1,5],[0,1,5],[-7,12,5],[-3,5,5],[-5,8,5],[-4,10,5],[-3,2,5],[-6,8,5],[-10,5,5],[-9,9,5],[-5,4,5],[-5,7,5],[-5,6,5],[-4,5,5],[-9,7,5],[-1,1,5],[-9,9,5],[-4,4,5],[-5,8,5],[-3,5,5],[3,2,5],[9,0,5],[8,-2,5],[2,-2,5],[8,-11,5],[1,-1,5],[9,-12,5],[0,-1,5],[10,-7,5],[9,1,5],[10,-1,5],[8,-5,5],[1,-2,5],[3,-11,5],[6,-10,5],[10,7,5],[3,3,5],[6,6,5],[7,7,5],[2,2,5],[10,9,5],[2,2,5],[7,8,5],[5,5,5],[4,5,5],[7,8,5],[0,12,5],[-6,13,5],[-1,1,5],[-6,12,5],[-3,5,5],[-5,8,5],[-4,5,5],[-8,8,5],[-2,2,5],[-8,11,5],[-1,4,5],[-6,9,5],[-3,6,5],[-8,7,5],[-2,3,5],[-7,9,5],[-2,7,5],[-5,6,5],[-4,13,5],[-1,0,5],[0,13,5],[-1,13,5],[2,1,5],[9,6,5],[5,6,5],[4,3,5],[9,10,5],[1,0,5],[9,8,5],[9,1,5],[10,-3,5],[9,-3,5],[9,-2,5],[10,2,5],[3,10,5],[1,12,5],[3,13,5],[2,4,5],[9,9,5],[1,0,5],[7,13,5],[2,6,5],[3,7,5],[6,13,5],[4,13,5],[5,11,5],[1,1,5],[9,9,5],[9,3,5],[2,1,5],[8,7,5],[6,6,5],[3,3,5],[8,10,5],[1,1,5],[10,9,5],[4,3,5],[5,3,5],[9,5,5],[10,4,5],[2,1,5],[7,6,5],[9,3,5],[10,2,5],[4,2,5],[5,4,5],[9,3,5],[10,0,5],[9,-2,5],[9,-2,5],[10,-2,5],[9,-1,5],[10,1,5],[9,3,5],[9,2,5],[10,-1,5],[9,-1,5],[9,-1,5],[10,-1,5],[9,-1,5],[9,-1,5],[10,-7,5],[5,-6,5],[4,-4,5],[9,-9,5],[0,-1,5],[10,-6,5],[9,-5,5],[2,-1,5],[7,-3,5],[10,-3,5],[9,-4,5],[9,-3,5],[1,0,5],[9,-3,5],[9,-3,5],[10,-3,5],[9,-3,5],[7,-1,5],[2,0,5],[10,-5,5],[9,-6,5],[2,-2,5],[7,-4,5],[10,-5,5],[9,-3,5],[9,-5,5],[10,-5,5],[6,-3,5],[3,-2,5],[10,-5,5],[9,-4,5],[3,-2,5],[6,-3,5],[10,-5,5],[6,-5,5],[3,-2,5],[9,-8,5],[2,-3,5],[1,-13,5],[3,-13,5],[4,-2,5],[9,-4,5],[9,-3,5],[10,-1,5],[9,-1,5],[9,-1,5],[10,0,5],[9,0,5],[1,0,5],[8,-2,5],[10,-3,5],[9,-5,5],[2,-3,5],[2,-13,5],[1,-13,5],[-2,-13,5],[-3,-10,5],[-1,-3,5],[-3,-13,5],[-4,-13,5],[-1,-7,5],[-2,-5,5],[-4,-13,5],[-4,-9,5],[-1,-4,5],[1,-12,5],[1,-1,5],[2,-13,5],[-3,-12,5],[0,-1,5],[-1,-13,5],[1,-8,5],[1,-5,5],[2,-12,5],[0,-13,5],[-2,-13,5],[-1,-1,5],[-2,-12,5],[-3,-13,5],[-2,-13,5],[-2,-7,5],[-1,-6,5],[-3,-12,5],[-2,-13,5],[-3,-13,5],[-3,-13,5],[-3,-13,5],[-1,-13,5],[-2,-13,5],[-1,-1,5],[-2,-12,5],[-4,-12,5],[-3,-13,5],[0,-1,5],[-3,-12,5],[-4,-13,5],[-2,-9,5],[-1,-4,5],[-3,-13,5],[-4,-13,5],[-2,-3,5],[-5,-9,5],[-4,-13,5],[0,-2,5],[-7,-11,5],[-2,-2,5],[-10,-8,5],[-7,-3,5],[-2,-2,5],[-9,1,5],[-10,0,5],[-9,-4,5],[-9,-6,5],[-3,-2,5],[-7,-3,5],[-9,-2,5],[-10,-2,5],[-9,-2,5],[-9,-3,5],[-3,-1,5],[-7,-2,5],[-9,-5,5],[-9,-4,5],[-3,-2,5],[-7,-3,5],[-9,-3,5],[-9,0,5],[-10,2,5],[-8,4,5],[-1,1,5],[-9,6,5],[-10,5,5],[-2,1,5],[-7,5,5],[-10,5,5],[-4,3,5],[-5,3,5],[-9,4,5],[-10,3,5],[-9,2,5],[-9,-3,5],[-10,-3,5],[-9,-3,5],[-8,-3,5],[-1,-1,5],[-10,-3,5],[-9,-3,5],[-9,-3,5],[-10,-3,5],[-9,-3,5],[-9,-3,5],[-10,-2,5],[-9,-2,5],[-10,1,5],[-9,1,5],[-2,-5,5],[2,-2,5],[7,-11,5],[2,-4,5],[5,-8,5],[5,-7,5],[3,-6,5],[6,-9,5],[3,-4,5],[7,-7,5],[4,-6,5],[5,-5,5],[6,-8,5],[3,-4,5],[7,-9,5],[3,-3,5],[7,-10,5],[2,-1,5],[9,-12,5],[10,-8,5],[3,-4,5],[6,-6,5],[5,-7,5],[4,-4,5],[6,-9,5],[4,-5,5],[5,-8,5],[-5,-13,5],[-10,-10,5]],[[7790,4732,10],[-2,-3,10],[-7,-6,10],[-6,-7,10],[-3,-3,10],[-10,1,10],[-1,2,10],[-8,9,10],[-6,4,10],[-4,4,10],[-9,9,10],[-9,9,10],[-5,4,10],[-5,5,10],[-9,8,10],[-9,11,10],[-2,2,10],[-8,8,10],[-4,5,10],[-5,5,10],[-8,7,10],[-1,2,10],[-10,9,10],[-2,2,10],[-7,8,10],[-6,5,10],[-3,5,10],[-9,8,10],[-1,1,10],[-9,10,10],[-2,2,10],[-7,8,10],[-5,5,10],[-5,5,10],[-7,8,10],[-2,3,10],[-10,9,10],[0,1,10],[-9,9,10],[-3,3,10],[-6,8,10],[-6,5,10],[5,13,10],[1,1,10],[9,7,10],[4,5,10],[5,5,10],[6,8,10],[4,3,10],[7,10,10],[2,3,10],[10,7,10],[8,3,10],[1,0,10],[9,-8,10],[6,-5,10],[4,-4,10],[9,-9,10],[9,-10,10],[3,-3,10],[7,-7,10],[6,-6,10],[3,-3,10],[9,-8,10],[2,-2,10],[8,-9,10],[4,-4,10],[5,-5,10],[8,-7,10],[1,-2,10],[10,-9,10],[1,-2,10],[8,-8,10],[5,-5,10],[4,-6,10],[7,-7,10],[3,-4,10],[9,-9,10],[1,0,10],[9,-10,10],[3,-3,10],[6,-7,10],[5,-6,10],[4,-5,10],[8,-8,10],[2,-1,10],[9,-10,10],[1,-1,10],[8,-9,10],[5,-4,10],[5,-6,10],[8,-7,10],[-8,-13,10],[-1,0,10],[-9,-5,10],[-9,-4,10],[-4,-4,10],[-5,-3,10],[-10,-7,10]],[[9474,4599,5],[-5,2,5],[-4,1,5],[-2,11,5],[-2,13,5],[-2,13,5],[-2,13,5],[-2,13,5],[-1,13,5],[-1,13,5],[-1,13,5],[-1,12,5],[0,13,5],[-1,13,5],[0,13,5],[0,13,5],[-1,13,5],[0,13,5],[0,12,5],[0,13,5],[1,13,5],[5,4,5],[10,-2,5],[9,3,5],[9,3,5],[10,0,5],[9,-6,5],[2,-2,5],[4,-13,5],[2,-13,5],[-1,-12,5],[-2,-13,5],[2,-13,5],[2,-10,5],[1,-3,5],[1,-13,5],[-2,-12,5],[0,-1,5],[-2,-13,5],[-3,-12,5],[-1,-13,5],[-3,-7,5],[-2,-6,5],[-4,-13,5],[-3,-13,5],[0,-6,5],[-3,-7,5],[-2,-13,5],[-1,-13,5],[-3,-12,5],[-1,-3,5],[-9,1,5]],[[8099,4546,0],[9,-1,0],[10,1,0],[6,3,0],[1,13,0],[-1,13,0],[-1,13,0],[0,13,0],[1,12,0],[0,13,0],[3,13,0],[0,13,0],[-2,13,0],[-4,13,0],[-3,5,0],[-2,-5,0],[-2,-13,0],[-4,-13,0],[-2,-3,0],[-3,-10,0],[-3,-13,0],[-2,-13,0],[-1,-3,0],[-2,-9,0],[-3,-13,0],[-3,-13,0],[-1,-10,0],[-1,-3,0],[1,-2,0],[4,-11,0],[5,-3,0]],[[5718,5175,35],[5,0,35],[9,-1,35],[10,-2,35],[9,-5,35],[9,-6,35],[10,-7,35],[1,0,35],[8,-6,35],[10,-6,35],[0,-1,35],[9,-6,35],[8,-7,35],[1,-1,35],[10,-8,35],[4,-4,35],[5,-4,35],[9,-7,35],[2,-2,35],[8,-6,35],[9,-6,35],[0,-1,35],[9,-7,35],[8,-5,35],[2,-2,35],[9,-7,35],[6,-4,35],[3,-2,35],[10,-6,35],[7,-5,35],[2,-1,35],[9,-6,35],[8,-6,35],[2,-2,35],[9,-8,35],[2,-3,35],[8,-7,35],[5,-6,35],[4,-4,35],[8,-8,35],[1,-2,35],[10,-8,35],[4,-3,35],[5,-8,35],[7,-5,35],[2,-2,35],[2,2,35],[0,13,35],[8,1,35],[2,-1,35],[7,-10,35],[2,-3,35],[7,-12,35],[1,-1,35],[8,-13,35],[1,-1,35],[9,-12,35],[9,-10,35],[3,-3,35],[7,-9,35],[3,-4,35],[6,-9,35],[3,-3,35],[7,-12,35],[0,-1,35],[3,-13,35],[-3,-13,35],[0,-2,35],[-5,-11,35],[1,-13,35],[2,-13,35],[2,-3,35],[3,-10,35],[6,-12,35],[0,-1,35],[6,-12,35],[0,-13,35],[1,-13,35],[0,-13,35],[2,-13,35],[0,-5,35],[1,-8,35],[-1,-1,35],[-9,-7,35],[-9,-4,35],[-3,0,35],[-7,-3,35],[-9,-2,35],[-10,-2,35],[-9,-2,35],[-9,-2,35],[-10,-2,35],[-1,0,35],[-8,-2,35],[-9,-2,35],[-10,-2,35],[-9,-2,35],[-9,-2,35],[-10,-3,35],[-2,0,35],[-7,-3,35],[-9,-3,35],[-10,-4,35],[-3,-3,35],[-6,-9,35],[-2,-4,35],[-7,-13,35],[-1,0,35],[-9,-11,35],[-1,-2,35],[-5,-13,35],[-3,-12,35],[0,-1,35],[-7,-12,35],[-3,-9,35],[-1,-4,35],[-3,-13,35],[-5,-11,35],[-1,-2,35],[-7,-13,35],[-1,-2,35],[-6,-11,35],[-4,-6,35],[-3,-7,35],[-6,-7,35],[-7,-5,35],[-2,-1,35],[-10,-3,35],[-9,-3,35],[-9,-4,35],[-5,-2,35],[-5,-2,35],[-9,-5,35],[-9,-5,35],[-4,-1,35],[-6,-3,35],[-9,-5,35],[-10,-5,35],[-9,-5,35],[-9,-6,35],[-5,11,35],[-4,13,35],[-1,0,35],[-9,5,35],[-9,5,35],[-4,3,35],[-6,2,35],[-9,3,35],[-9,5,35],[-6,3,35],[-4,1,35],[-9,4,35],[-9,4,35],[-4,3,35],[-6,7,35],[-4,6,35],[-5,7,35],[-4,6,35],[-5,11,35],[-1,2,35],[-5,13,35],[-4,11,35],[-1,2,35],[-8,8,35],[-10,3,35],[-1,2,35],[-6,13,35],[-2,5,35],[-3,7,35],[-3,13,35],[-3,12,35],[-1,1,35],[-3,13,35],[-3,13,35],[-3,10,35],[0,3,35],[-5,13,35],[-4,9,35],[-2,4,35],[-5,12,35],[-2,13,35],[0,4,35],[-1,9,35],[-2,13,35],[-1,13,35],[1,13,35],[0,13,35],[-1,12,35],[-4,13,35],[-2,2,35],[-9,1,35],[-8,10,35],[0,13,35],[-1,11,35],[-1,2,35],[-2,13,35],[-2,13,35],[-3,13,35],[-2,7,35],[-1,5,35],[-2,13,35],[0,13,35],[0,13,35],[-3,13,35],[-3,9,35],[-2,4,35],[-5,13,35],[-2,5,35],[-4,8,35],[-4,12,35],[-2,2,35],[-9,4,35],[-9,1,35],[-7,6,35],[-3,5,35],[-4,8,35],[-5,12,35],[-1,1,35],[-6,13,35],[-3,5,35],[-3,8,35],[-6,12,35],[0,1,35],[-5,12,35],[0,13,35],[4,13,35],[1,7,35]],[[4750,4389,15],[-5,6,15],[-4,9,15],[-2,4,15],[-3,12,15],[-4,13,15],[9,8,15],[9,4,15],[3,1,15],[7,4,15],[4,-4,15],[5,-5,15],[5,-8,15],[4,-6,15],[5,-7,15],[5,-3,15],[7,-9,15],[2,-13,15],[-9,-8,15],[-10,-2,15],[-9,-2,15],[-9,-1,15],[-10,7,15]],[[3553,4380,15],[7,2,15],[-7,2,15],[-3,-2,15],[3,-2,15]],[[4778,4356,15],[0,1,15],[2,-1,15],[-2,0,15]],[[4255,4306,15],[-6,-1,15],[-4,-1,15],[-2,1,15],[-7,2,15],[-10,4,15],[-9,3,15],[-9,3,15],[0,1,15],[-10,1,15],[-3,-2,15],[-6,-2,15],[-9,-6,15],[-7,-4,15],[-3,-2,15],[-9,-4,15],[-9,-3,15],[-10,-1,15],[-9,-2,15],[-9,7,15],[-2,5,15],[-2,12,15],[-3,13,15],[-2,13,15],[-1,2,15],[-2,11,15],[-2,13,15],[-5,1,15],[-9,12,15],[-1,0,15],[-9,4,15],[-8,9,15],[-1,0,15],[-10,5,15],[-9,8,15],[-9,9,15],[-4,3,15],[-6,8,15],[-5,5,15],[-4,5,15],[-9,7,15],[-2,1,15],[-8,6,15],[-9,6,15],[-2,1,15],[-7,6,15],[-5,7,15],[0,13,15],[2,13,15],[3,0,15],[9,1,15],[9,-1,15],[1,0,15],[9,-7,15],[9,-2,15],[9,-1,15],[10,-1,15],[8,-2,15],[1,-1,15],[9,-4,15],[10,-2,15],[9,-1,15],[9,-2,15],[10,-3,15],[2,0,15],[7,-2,15],[10,-5,15],[9,-2,15],[9,-2,15],[6,-2,15],[4,-3,15],[9,-5,15],[9,-1,15],[10,-2,15],[2,-2,15],[7,-6,15],[9,-3,15],[10,-1,15],[6,-3,15],[3,-4,15],[9,-4,15],[10,-2,15],[7,-3,15],[2,-4,15],[10,-7,15],[5,-1,15],[3,-13,15],[0,-13,15],[-1,-13,15],[-1,-13,15],[0,-13,15],[3,-6,15],[3,-7,15],[-3,-13,15],[0,-1,15],[-9,-10,15]],[[4684,4317,15],[1,2,15],[6,11,15],[3,7,15],[4,6,15],[5,13,15],[10,2,15],[1,-2,15],[7,-13,15],[1,-2,15],[8,-11,15],[-3,-13,15],[-5,-12,15],[-5,-13,15],[-4,-6,15],[-6,-7,15],[-4,-2,15],[-9,1,15],[0,1,15],[-9,7,15],[-10,3,15],[-1,3,15],[1,5,15],[5,8,15],[4,12,15]],[[5756,5228,30],[4,0,30],[10,-5,30],[6,-5,30],[3,-2,30],[10,-6,30],[6,-5,30],[3,-2,30],[9,-6,30],[6,-4,30],[4,-4,30],[9,-3,30],[9,7,30],[-9,10,30],[-1,2,30],[1,13,30],[4,-13,30],[5,-10,30],[1,-2,30],[9,-9,30],[9,5,30],[9,2,30],[10,1,30],[8,1,30],[1,0,30],[9,-4,30],[10,-8,30],[1,-1,30],[8,-8,30],[5,-5,30],[4,-4,30],[9,-9,30],[1,-1,30],[9,-8,30],[6,-4,30],[4,-2,30],[9,-4,30],[9,-4,30],[4,-3,30],[6,-7,30],[2,-6,30],[7,-10,30],[2,-3,30],[7,-9,30],[3,-3,30],[7,-8,30],[4,-5,30],[5,-6,30],[6,-7,30],[3,-3,30],[10,-9,30],[1,-1,30],[8,-8,30],[4,-5,30],[5,-5,30],[8,-8,30],[2,-2,30],[7,-11,30],[2,-3,30],[6,-9,30],[4,-6,30],[6,-7,30],[3,-4,30],[8,-9,30],[1,-2,30],[9,-11,30],[1,0,30],[9,-11,30],[1,-2,30],[8,-13,30],[0,-3,30],[7,-10,30],[-1,-13,30],[4,-1,30],[9,-7,30],[6,-4,30],[3,-2,30],[10,-4,30],[9,-3,30],[9,-3,30],[4,-1,30],[6,-2,30],[9,-3,30],[9,-3,30],[10,-4,30],[1,-1,30],[8,-7,30],[6,-6,30],[4,-5,30],[7,-8,30],[2,-4,30],[4,-9,30],[5,-10,30],[1,-3,30],[6,-13,30],[3,-2,30],[6,-10,30],[3,-4,30],[6,-9,30],[3,-4,30],[7,-9,30],[3,-3,30],[9,-10,30],[1,0,30],[8,-6,30],[9,-7,30],[1,-1,30],[9,-1,30],[9,-4,30],[10,-3,30],[8,-4,30],[1,0,30],[9,-4,30],[10,-4,30],[8,-5,30],[1,-2,30],[3,-10,30],[2,-13,30],[-1,-13,30],[-4,-6,30],[-6,-7,30],[-3,-3,30],[-7,-10,30],[-3,-2,30],[-9,-2,30],[-9,-2,30],[-10,-1,30],[-9,-1,30],[-9,-3,30],[-7,-2,30],[-3,-1,30],[-9,-10,30],[-2,-2,30],[-7,-12,30],[-1,-1,30],[-9,-2,30],[-9,-2,30],[-9,-4,30],[-9,-4,30],[-1,-1,30],[-9,-2,30],[-9,-3,30],[-10,-2,30],[-9,-3,30],[-9,-2,30],[-1,0,30],[-9,-3,30],[-9,-1,30],[-10,-1,30],[-9,0,30],[-9,-1,30],[-10,-2,30],[-7,-5,30],[-2,-2,30],[-9,-7,30],[-5,-4,30],[-5,-3,30],[-9,-7,30],[-5,-3,30],[-4,-3,30],[-10,-8,30],[-3,-2,30],[-6,-4,30],[-9,-3,30],[-10,-1,30],[-9,0,30],[-10,1,30],[-9,1,30],[-9,0,30],[-10,-1,30],[-9,-2,30],[-4,-4,30],[-5,-3,30],[-10,-7,30],[-3,-3,30],[-6,-7,30],[-3,-5,30],[-6,-8,30],[-4,-5,30],[-6,-7,30],[-5,-6,30],[-4,-6,30],[-4,-7,30],[-5,-12,30],[-1,-1,30],[-6,-13,30],[-3,-4,30],[-4,-9,30],[-5,-10,30],[-2,-2,30],[-6,-13,30],[-2,-3,30],[-4,-10,30],[-5,-11,30],[-1,-2,30],[-5,-13,30],[-3,-9,30],[-2,-4,30],[-8,-9,30],[-3,-4,30],[-6,-6,30],[-9,-7,30],[-10,-8,30],[-3,-4,30],[-6,-6,30],[-8,-7,30],[-1,-1,30],[-9,-12,30],[-1,-2,30],[-6,-11,30],[-3,-3,30],[-9,-3,30],[-10,1,30],[-9,0,30],[-9,-4,30],[-10,-3,30],[-1,-1,30],[-8,-1,30],[-10,-1,30],[-9,-1,30],[-9,0,30],[-10,0,30],[-9,1,30],[-8,2,30],[-1,1,30],[-7,12,30],[-3,6,30],[-2,7,30],[-5,13,30],[-2,6,30],[-2,7,30],[-5,12,30],[-2,7,30],[-3,6,30],[-7,8,30],[-6,5,30],[-3,3,30],[-9,6,30],[-7,4,30],[-3,2,30],[-9,5,30],[-9,5,30],[-2,1,30],[-8,4,30],[-9,6,30],[-2,3,30],[-8,8,30],[-3,5,30],[-6,11,30],[-1,2,30],[-3,12,30],[-3,13,30],[-2,11,30],[-1,2,30],[-2,13,30],[-2,13,30],[-5,12,30],[0,1,30],[-9,4,30],[-9,5,30],[-4,4,30],[-6,5,30],[-6,7,30],[-3,6,30],[-5,7,30],[-4,8,30],[-3,5,30],[-3,13,30],[-2,13,30],[-2,6,30],[-2,7,30],[-5,13,30],[-2,4,30],[-4,9,30],[-5,12,30],[0,1,30],[-6,12,30],[-4,10,30],[-1,3,30],[-6,13,30],[-2,6,30],[-3,7,30],[-6,13,30],[0,1,30],[-10,10,30],[-3,2,30],[-6,4,30],[-5,9,30],[-5,12,30],[-5,13,30],[-4,6,30],[-4,7,30],[-5,9,30],[-3,4,30],[-2,13,30],[-3,13,30],[-2,10,30],[0,3,30],[-3,12,30],[-2,13,30],[-2,13,30],[-2,13,30],[0,1,30],[-4,12,30],[-5,7,30],[-4,6,30],[-6,11,30],[0,2,30],[-7,13,30],[-2,5,30],[-4,7,30],[-5,12,30],[-1,1,30],[-6,13,30],[-3,6,30],[-3,7,30],[-6,13,30],[-5,13,30],[-2,13,30],[0,13,30],[1,12,30],[0,13,30],[-1,13,30],[-2,12,30],[-1,1,30],[-3,13,30],[-4,13,30],[-2,5,30],[-2,8,30],[-4,12,30],[-3,8,30],[-2,5,30],[-7,13,30],[-1,1,30],[-7,12,30],[-2,2,30],[-9,7,30],[-4,4,30],[-6,10,30],[-1,3,30],[-6,13,30],[-2,4,30],[-4,9,30],[-4,12,30],[0,7,30]],[[8052,4176,0],[6,13,0],[4,7,0],[2,6,0],[6,13,0],[1,1,0],[4,11,0],[-2,13,0],[-2,13,0],[0,13,0],[-9,8,0],[-10,0,0],[-4,-8,0],[0,-13,0],[-1,-13,0],[-4,-10,0],[-2,-3,0],[-2,-12,0],[1,-13,0],[0,-13,0],[-3,-13,0],[6,-10,0],[9,10,0]],[[8033,4160,0],[5,3,0],[-5,5,0],[0,-5,0],[0,-3,0]],[[5856,5392,25],[3,-3,25],[4,-2,25],[10,0,25],[9,0,25],[9,-1,25],[10,0,25],[9,0,25],[1,0,25],[8,-1,25],[10,0,25],[9,-2,25],[5,-10,25],[3,-13,25],[2,-5,25],[4,-8,25],[5,-11,25],[1,-2,25],[0,-13,25],[-1,-8,25],[-1,-5,25],[-3,-13,25],[4,-7,25],[1,-5,25],[8,-9,25],[3,-4,25],[7,-7,25],[5,-6,25],[4,-4,25],[9,-9,25],[0,-1,25],[10,-9,25],[2,-3,25],[7,-7,25],[5,-6,25],[4,-4,25],[7,-9,25],[3,-4,25],[3,-8,25],[6,-13,25],[0,-1,25],[5,-12,25],[4,-13,25],[0,-1,25],[6,-12,25],[4,-5,25],[7,-8,25],[2,-3,25],[8,-10,25],[2,-1,25],[9,-10,25],[1,-2,25],[8,-10,25],[3,-2,25],[7,-10,25],[4,-3,25],[1,-13,25],[4,-5,25],[3,-8,25],[6,-8,25],[3,-5,25],[7,-11,25],[1,-2,25],[8,-13,25],[8,-12,25],[1,-2,25],[10,-6,25],[9,0,25],[9,-2,25],[9,-3,25],[1,-1,25],[9,-10,25],[1,-2,25],[8,-8,25],[4,-5,25],[6,-4,25],[9,-8,25],[1,-1,25],[9,-5,25],[9,-7,25],[1,-1,25],[8,-7,25],[6,-6,25],[4,-3,25],[9,-8,25],[2,-2,25],[7,-7,25],[7,-5,25],[3,-3,25],[9,-6,25],[7,-4,25],[2,-2,25],[10,-4,25],[9,-3,25],[9,-4,25],[10,-4,25],[9,-2,25],[9,-2,25],[7,-5,25],[3,-4,25],[9,-8,25],[2,-1,25],[8,-3,25],[9,-5,25],[6,-5,25],[3,-2,25],[10,-5,25],[8,-6,25],[1,0,25],[9,-6,25],[10,-6,25],[0,-1,25],[9,-5,25],[9,-6,25],[2,-1,25],[8,-5,25],[9,-6,25],[3,-2,25],[6,-9,25],[3,-4,25],[7,-7,25],[6,-6,25],[3,-2,25],[9,-11,25],[10,-8,25],[4,-5,25],[5,-4,25],[9,-9,25],[1,-2,25],[4,-10,25],[-4,-13,25],[0,-3,25],[-4,-10,25],[-4,-13,25],[-2,-6,25],[-2,-7,25],[-4,-13,25],[-2,-13,25],[1,-13,25],[-1,-12,25],[-1,-4,25],[-3,-9,25],[-5,-13,25],[-2,-5,25],[-2,-8,25],[-5,-13,25],[-2,-4,25],[-6,-9,25],[-3,-5,25],[-10,-7,25],[-1,-1,25],[-8,-3,25],[-9,-2,25],[-10,0,25],[-9,1,25],[-8,-9,25],[0,-12,25],[-1,-4,25],[-5,-9,25],[-5,-9,25],[-5,-4,25],[-4,-3,25],[-9,-2,25],[-10,0,25],[-9,0,25],[-9,-1,25],[-10,0,25],[-9,0,25],[-10,-1,25],[-9,0,25],[-9,0,25],[-10,0,25],[-9,0,25],[-9,-1,25],[-10,-1,25],[-9,-2,25],[-5,-2,25],[-4,-1,25],[-10,-4,25],[-9,-3,25],[-9,-3,25],[-6,-2,25],[-4,-1,25],[-9,-1,25],[-9,0,25],[-10,0,25],[-9,-1,25],[-10,0,25],[-9,-1,25],[-9,-2,25],[-10,-5,25],[-2,-2,25],[-7,-4,25],[-9,-7,25],[-3,-2,25],[-7,-4,25],[-9,-8,25],[-1,0,25],[-8,-10,25],[-3,-3,25],[-7,-12,25],[0,-1,25],[-7,-13,25],[-2,-4,25],[-5,-9,25],[-4,-5,25],[-8,-8,25],[-2,-1,25],[-9,-6,25],[-6,-6,25],[-3,-7,25],[-4,-6,25],[-6,-12,25],[-6,-13,25],[-3,-7,25],[-3,-6,25],[-7,-12,25],[0,-1,25],[-9,-13,25],[-8,-13,25],[-1,-2,25],[-7,-11,25],[-3,-4,25],[-5,-8,25],[-4,-7,25],[-6,-6,25],[-3,-4,25],[-10,-7,25],[-2,-2,25],[-2,-13,25],[4,-3,25],[7,-10,25],[3,-2,25],[9,-7,25],[4,-4,25],[5,-5,25],[10,-7,25],[1,-1,25],[-1,-10,25],[-1,-3,25],[-9,-12,25],[-9,-13,25],[0,-1,25],[-9,-6,25],[-10,-2,25],[-9,0,25],[-9,5,25],[-10,3,25],[0,1,25],[-9,5,25],[-9,5,25],[-5,3,25],[-5,2,25],[-9,6,25],[-6,4,25],[-4,5,25],[-9,0,25],[-9,-3,25],[-6,-2,25],[-4,-1,25],[-9,-11,25],[-8,-13,25],[-1,-2,25],[-6,-11,25],[-4,-4,25],[-9,-2,25],[-9,0,25],[-10,1,25],[-9,3,25],[-3,2,25],[-6,3,25],[-10,6,25],[-3,4,25],[-6,7,25],[-4,6,25],[-5,9,25],[-3,3,25],[-7,11,25],[-2,2,25],[-7,10,25],[-2,3,25],[-8,7,25],[-9,0,25],[-9,1,25],[-10,1,25],[-9,3,25],[-2,1,25],[-7,4,25],[-10,6,25],[-5,3,25],[-4,2,25],[-9,6,25],[-8,5,25],[-2,1,25],[-9,8,25],[-4,4,25],[-5,6,25],[-6,7,25],[-4,5,25],[-6,7,25],[-3,6,25],[-5,7,25],[-4,9,25],[-3,4,25],[-7,12,25],[-1,1,25],[-8,11,25],[-1,2,25],[-9,10,25],[-1,3,25],[-8,8,25],[-4,5,25],[-5,4,25],[-9,8,25],[-1,1,25],[-9,11,25],[-1,1,25],[-8,10,25],[-4,3,25],[-6,6,25],[-8,7,25],[-1,1,25],[-9,5,25],[-10,1,25],[-9,2,25],[-9,3,25],[-2,1,25],[-8,8,25],[-2,5,25],[-7,11,25],[-1,2,25],[-8,12,25],[-1,1,25],[-9,12,25],[0,1,25],[-9,12,25],[0,1,25],[-9,12,25],[-1,1,25],[-8,12,25],[-1,2,25],[-6,11,25],[-3,5,25],[-4,8,25],[-6,9,25],[-2,4,25],[-7,12,25],[0,1,25],[-7,12,25],[-2,4,25],[-6,9,25],[-4,9,25],[-1,4,25],[-3,13,25],[-3,13,25],[-2,2,25],[-9,10,25],[-1,1,25],[-7,13,25],[-2,4,25],[-2,8,25],[-5,13,25],[-2,8,25],[-2,5,25],[-3,13,25],[-3,13,25],[-1,7,25],[-2,6,25],[1,13,25],[-1,13,25],[-2,12,25],[-4,13,25],[-2,4,25],[-9,3,25],[-4,6,25],[-3,13,25],[-3,6,25],[-2,7,25],[-5,13,25],[-2,4,25],[-4,9,25],[-5,12,25],[-1,0,25],[-5,13,25],[-4,8,25],[-2,5,25],[-5,13,25],[-2,6,25],[-3,7,25],[-4,13,25],[-2,6,25],[-2,7,25],[-5,13,25],[-3,7,25],[-2,5,25],[-6,13,25],[-1,3,25],[-4,10,25],[-2,13,25],[-2,13,25],[-1,12,25],[-1,1,25],[-5,13,25],[-4,2,25],[-9,3,25],[-4,8,25],[-4,12,25],[-1,8,25],[-2,5,25],[-3,13,25],[-3,13,25],[-2,6,25],[-2,7,25],[-3,13,25],[-3,13,25],[-1,2,25],[-4,10,25],[-5,13,25],[0,1,25],[-6,12,25],[-4,6,25],[-5,7,25],[-4,7,25],[-4,6,25],[-6,8,25],[-3,5,25],[-6,9,25],[-2,4,25],[-7,10,25],[-2,3,25],[-8,12,25],[-8,13,25],[-1,2,25],[-7,11,25],[-2,4,25],[-7,9,25],[-3,5,25],[-4,8,25],[-4,13,25],[-1,6,25],[-1,7,25],[-2,12,25],[1,7,25]],[[9708,4073,10],[9,6,10],[9,-1,10],[10,-5,10],[0,-1,10],[-10,-11,10],[-4,-1,10],[-5,-1,10],[-9,-3,10],[-2,4,10],[2,13,10]],[[2629,4021,10],[-2,-6,10],[-7,6,10],[5,13,10],[2,5,10],[3,8,10],[6,13,10],[0,1,10],[5,12,10],[5,10,10],[1,3,10],[6,13,10],[2,2,10],[8,11,10],[1,1,10],[10,5,10],[1,-6,10],[-1,-4,10],[-5,-9,10],[-5,-11,10],[-2,-2,10],[-5,-13,10],[-2,-4,10],[-6,-9,10],[-3,-8,10],[-5,-5,10],[-3,-13,10],[-2,-3,10],[-7,-10,10]],[[2618,4005,10],[-3,4,10],[3,6,10],[2,-6,10],[-2,-4,10]],[[2547,4003,10],[5,0,10],[9,-3,10],[5,-4,10],[5,-6,10],[9,-7,10],[0,-3,10],[4,-10,10],[0,-6,10]],[[3188,3907,20],[10,10,20],[1,2,20],[8,6,20],[7,6,20],[2,2,20],[3,-2,20],[1,-12,20],[-4,-7,20],[-4,-6,20],[-5,-9,20],[-3,-4,20],[-6,-11,20],[-2,-2,20],[-8,-12,20],[-9,0,20],[-3,12,20],[1,13,20],[2,3,20],[8,10,20],[1,1,20]],[[2656,3861,10],[0,6,10],[8,5,10],[10,2,10],[9,5,10],[0,1,10],[0,12,10],[0,1,10],[-1,13,10],[1,5,10],[2,8,10],[4,12,10],[3,13,10],[2,13,10],[1,13,10],[-1,13,10],[-2,5,10],[-2,8,10],[-2,13,10],[4,10,10],[1,2,10],[6,13,10],[3,8,10],[2,5,10],[6,13,10],[1,4,10],[3,9,10],[2,13,10],[4,13,10],[0,1,10],[8,12,10],[2,12,10],[0,13,10],[1,13,10],[0,13,10],[2,13,10],[1,13,10],[4,13,10],[1,1,10],[10,8,10],[8,4,10],[1,0,10],[9,2,10],[10,1,10],[9,2,10],[9,2,10],[10,3,10],[9,2,10],[9,3,10],[10,3,10],[9,3,10],[7,4,10],[2,4,10],[4,9,10],[-4,6,10],[-3,7,10],[-6,9,10],[-2,4,10],[-7,8,10],[-4,5,10],[-6,5,10],[-8,8,10],[-1,0,10],[-9,8,10],[-7,4,10],[-3,2,10],[-9,0,10],[-9,1,10],[-10,9,10],[-1,1,10],[-8,8,10],[-7,5,10],[-2,2,10],[-10,8,10],[-4,3,10],[-5,5,10],[-10,7,10],[0,1,10],[-9,9,10],[-3,4,10],[-6,7,10],[-3,6,10],[-3,13,10],[-3,12,10],[-1,3,10],[-9,10,10],[-1,0,10],[1,8,10],[0,5,10],[7,13,10],[2,5,10],[4,8,10],[6,10,10],[3,3,10],[6,5,10],[9,4,10],[8,4,10],[2,0,10],[9,8,10],[7,4,10],[3,3,10],[9,8,10],[2,2,10],[7,13,10],[4,13,10],[3,13,10],[3,10,10],[0,3,10],[3,13,10],[3,13,10],[2,12,10],[1,12,10],[0,1,10],[0,2,10],[-1,11,10],[-3,13,10],[-5,12,10],[-1,1,10],[-2,13,10],[-6,13,10],[9,9,10],[9,1,10],[9,0,10],[8,3,10],[2,0,10],[9,5,10],[9,4,10],[10,2,10],[8,1,10],[1,1,10],[9,1,10],[10,2,10],[9,1,10],[10,1,10],[9,2,10],[9,2,10],[5,3,10],[-3,13,10],[2,13,10],[6,5,10],[6,8,10],[3,3,10],[8,10,10],[1,2,10],[9,11,10],[1,0,10],[9,12,10],[9,11,10],[2,2,10],[8,10,10],[2,3,10],[2,13,10],[-4,4,10],[-7,9,10],[-3,2,10],[-9,10,10],[-1,1,10],[-8,5,10],[-10,2,10],[-9,4,10],[-3,2,10],[-6,7,10],[-10,1,10],[-9,1,10],[-9,-4,10],[-6,-5,10],[-4,-2,10],[-5,2,10],[-4,4,10],[-10,5,10],[-9,2,10],[-6,2,10],[-3,4,10],[-10,5,10],[-9,1,10],[-6,2,10],[-3,6,10],[-10,5,10],[-9,2,10],[-2,0,10],[2,8,10],[9,0,10],[10,-3,10],[9,0,10],[9,2,10],[10,-2,10],[9,-3,10],[5,-2,10],[4,-2,10],[10,-5,10],[9,-3,10],[8,-3,10],[2,-1,10],[9,-6,10],[9,-2,10],[10,-2,10],[5,-1,10],[4,-7,10],[9,0,10],[10,-1,10],[9,-3,10],[9,1,10],[10,4,10],[9,6,10],[9,7,10],[10,5,10],[9,-1,10],[3,1,10],[6,4,10],[10,5,10],[7,4,10],[2,2,10],[10,5,10],[8,6,10],[1,1,10],[9,8,10],[3,4,10],[-1,13,10],[-2,1,10],[-9,10,10],[-2,2,10],[-7,7,10],[-8,6,10],[-2,3,10],[-9,8,10],[-2,2,10],[-8,10,10],[-2,2,10],[-5,13,10],[-2,6,10],[-3,7,10],[-5,13,10],[-1,4,10],[-5,9,10],[-5,9,10],[-1,4,10],[-4,13,10],[-4,3,10],[-9,5,10],[-10,3,10],[-9,1,10],[-9,2,10],[-10,1,10],[-9,1,10],[-9,2,10],[-10,2,10],[-9,4,10],[-3,1,10],[-6,4,10],[-10,6,10],[-4,3,10],[-5,4,10],[-10,8,10],[-1,1,10],[-8,5,10],[-9,0,10],[-10,-2,10],[-9,4,10],[-9,5,10],[-2,1,10],[-8,4,10],[-9,6,10],[-4,3,10],[-5,4,10],[-10,8,10],[0,1,10],[-9,12,10],[-1,1,10],[-8,11,10],[-6,1,10],[-4,2,10],[-9,4,10],[-10,5,10],[-3,2,10],[-6,3,10],[-9,5,10],[-7,5,10],[-3,1,10],[-9,2,10],[-9,2,10],[-10,1,10],[-9,1,10],[-9,1,10],[-10,1,10],[-9,3,10],[-1,1,10],[-8,4,10],[-10,7,10],[-3,2,10],[-6,4,10],[-9,2,10],[-10,2,10],[-9,4,10],[-1,1,10],[-9,4,10],[-9,4,10],[-9,5,10],[-10,7,10],[-7,5,10],[-2,2,10],[-9,4,10],[-10,2,10],[-9,2,10],[-9,2,10],[-4,1,10],[-6,2,10],[-9,3,10],[-9,5,10],[-7,3,10],[-3,2,10],[-9,5,10],[-9,5,10],[-3,1,10],[-7,4,10],[-9,5,10],[-5,4,10],[-5,3,10],[-9,6,10],[-7,4,10],[-2,1,10],[-10,5,10],[-9,4,10],[-4,3,10],[-5,6,10],[-4,7,10],[4,11,10],[0,1,10],[0,7,10],[-2,6,10],[-8,8,10],[-7,5,10],[-2,1,10],[-9,9,10],[-3,3,10],[-7,10,10],[-2,3,10],[-7,10,10],[-3,3,10],[-6,7,10],[-10,6,10],[-9,-6,10],[-9,-7,10],[0,-1,10],[-10,-8,10],[-5,-4,10],[-4,-3,10],[-8,3,10],[-2,0,10],[-9,6,10],[-9,5,10],[-3,2,10],[-7,6,10],[-6,7,10],[-3,7,10],[-2,6,10],[-7,11,10],[-10,-5,10],[-6,-6,10],[-3,-4,10],[-7,-9,10],[-2,-3,10],[-9,-10,10],[-1,-1,10],[-7,-12,10],[7,-7,10],[10,-3,10],[4,-3,10],[2,-13,10],[-6,-13,10],[0,-1,10],[-6,-12,10],[-4,-6,10],[-3,-6,10],[-6,-12,10],[-1,-1,10],[-6,-13,10],[-2,-2,10],[-10,-2,10],[-4,4,10],[4,6,10],[4,7,10],[4,13,10],[2,5,10],[2,7,10],[3,13,10],[-5,10,10],[-4,3,10],[-6,12,10],[0,1,10],[-9,12,10],[-1,1,10],[-9,7,10],[-6,6,10],[-3,2,10],[-9,8,10],[-3,3,10],[-7,10,10],[0,3,10],[0,2,10],[5,10,10],[5,13,10],[0,1,10],[6,12,10],[3,7,10],[3,6,10],[2,13,10],[-5,6,10],[-5,7,10],[-4,5,10],[-6,8,10],[-4,4,10],[-6,8,10],[-3,4,10],[-7,9,10],[-2,2,10],[-10,3,10],[-9,3,10],[-9,2,10],[-10,-3,10],[-9,-5,10],[-2,-2,10],[-7,-3,10],[-10,-5,10],[-9,-4,10],[-1,-1,10],[-8,-4,10],[-10,-3,10],[-9,0,10],[-9,7,10],[-1,1,10],[-2,12,10],[-1,13,10],[-1,13,10],[-1,13,10],[-1,13,10],[-1,13,10],[1,13,10],[3,12,10],[3,10,10],[2,3,10],[1,13,10],[-3,5,10],[-9,3,10],[-9,0,10],[-10,0,10],[-9,1,10],[-9,1,10],[-8,3,10],[5,13,10],[3,3,10],[9,9,10],[1,1,10],[8,7,10],[6,6,10],[4,9,10],[1,3,10],[0,13,10],[0,13,10],[1,13,10],[6,13,10],[1,3,10],[6,10,10],[3,5,10],[5,8,10],[5,11,10],[0,2,10],[5,12,10],[2,13,10],[1,13,10],[1,13,10],[-9,3,10],[-3,-3,10],[-7,-5,10],[-8,-8,10],[-1,-1,10],[-9,-9,10],[-3,-3,10],[-7,-6,10],[-6,-7,10],[-3,-2,10],[-6,2,10],[6,13,10],[5,13,10],[4,12,10],[1,1,10],[5,13,10],[4,10,10],[1,3,10],[5,13,10],[3,9,10],[1,4,10],[4,12,10],[4,13,10],[0,1,10],[6,12,10],[4,3,10],[9,5,10],[5,5,10],[5,7,10],[2,6,10],[4,13,10],[3,3,10],[6,10,10],[3,2,10],[10,8,10],[2,2,10],[7,8,10],[4,5,10],[5,10,10],[2,3,10],[7,13,10],[1,1,10],[7,12,10],[2,4,10],[8,9,10],[1,1,10],[10,7,10],[7,5,10],[2,1,10],[9,6,10],[9,6,10],[1,0,10],[9,5,10],[9,5,10],[5,2,10],[5,3,10],[9,-2,10],[1,-1,10],[9,-9,10],[9,-3,10],[9,1,10],[10,1,10],[9,1,10],[9,1,10],[10,3,10],[9,3,10],[9,2,10],[10,3,10],[9,3,10],[9,2,10],[10,-1,10],[9,-3,10],[8,-4,10],[2,-1,10],[9,-3,10],[9,-1,10],[10,-2,10],[9,-3,10],[9,-1,10],[10,0,10],[9,-1,10],[9,0,10],[3,0,10],[7,-1,10],[9,-1,10],[9,-1,10],[10,-1,10],[9,-1,10],[9,0,10],[10,3,10],[3,2,10],[6,3,10],[10,5,10],[7,4,10],[2,1,10],[9,5,10],[10,5,10],[6,2,10],[3,1,10],[5,-1,10],[4,0,10],[10,-2,10],[9,0,10],[9,-1,10],[10,-3,10],[9,-3,10],[9,-1,10],[10,0,10],[9,-1,10],[9,0,10],[10,0,10],[9,0,10],[10,2,10],[9,1,10],[9,2,10],[10,2,10],[9,1,10],[5,3,10],[4,2,10],[10,3,10],[9,0,10],[8,-5,10],[1,0,10],[10,-3,10],[9,-3,10],[9,4,10],[3,2,10],[7,8,10],[4,5,10],[5,6,10],[6,7,10],[3,4,10],[8,9,10],[2,2,10],[9,10,10],[1,1,10],[9,8,10],[9,-1,10],[9,0,10],[10,4,10],[9,0,10],[7,2,10],[2,1,10],[10,7,10],[7,5,10],[2,0,10],[9,3,10],[10,2,10],[9,4,10],[6,3,10],[3,3,10],[10,6,10],[7,4,10],[2,2,10],[10,9,10],[2,2,10],[3,13,10],[4,11,10],[0,2,10],[1,13,10],[5,13,10],[3,1,10],[7,11,10],[3,4,10],[8,9,10],[1,2,10],[9,5,10],[10,2,10],[9,1,10],[9,2,10],[3,1,10],[7,9,10],[2,-9,10],[7,-4,10],[6,-9,10],[3,-2,10],[10,-6,10],[6,-5,10],[3,-1,10],[9,-7,10],[7,-4,10],[3,-2,10],[9,-6,10],[10,-3,10],[9,2,10],[9,6,10],[5,3,10],[5,4,10],[9,7,10],[4,1,10],[5,2,10],[10,4,10],[9,3,10],[9,4,10],[1,0,10],[9,7,10],[5,6,10],[0,13,10],[-1,13,10],[5,2,10],[9,6,10],[4,5,10],[6,3,10],[9,3,10],[9,3,10],[10,-1,10],[9,-2,10],[7,-6,10],[3,-11,10],[0,-2,10],[5,-13,10],[2,-13,10],[1,-13,10],[1,-5,10],[2,-8,10],[7,-8,10],[5,-4,10],[5,-5,10],[9,-7,10],[5,-1,10],[4,-2,10],[10,-2,10],[9,-1,10],[9,-1,10],[10,-1,10],[4,2,10]],[[2698,3809,10],[0,7,10],[-6,12,10],[-9,12,10],[-1,1,10],[-8,5,10],[-5,0,10]],[[2735,3769,10],[1,2,10],[2,6,10],[-8,12,10],[-1,1,10],[-9,6,10],[-4,0,10]],[[5952,5549,20],[4,-3,20],[1,0,20],[5,-6,20],[4,-5,20],[7,-8,20],[3,-3,20],[8,-10,20],[1,-1,20],[9,-11,20],[1,-1,20],[9,-10,20],[3,-2,20],[6,-3,20],[9,-1,20],[10,-3,20],[9,-3,20],[9,-3,20],[2,0,20],[8,-3,20],[9,-4,20],[10,-6,20],[9,-9,20],[4,-4,20],[5,-5,20],[8,-8,20],[2,-1,20],[9,-9,20],[2,-3,20],[7,-11,20],[2,-2,20],[8,-13,20],[8,-12,20],[1,-2,20],[5,-11,20],[-2,-13,20],[-3,-8,20],[-2,-5,20],[-1,-13,20],[1,-13,20],[2,-13,20],[0,-2,20],[2,-11,20],[1,-12,20],[2,-13,20],[1,-13,20],[-5,-13,20],[-1,-2,20],[-4,-11,20],[-4,-13,20],[-1,-6,20],[-2,-7,20],[-1,-12,20],[0,-13,20],[2,-13,20],[1,-3,20],[4,-10,20],[5,-5,20],[9,-8,20],[10,-9,20],[5,-4,20],[4,-3,20],[9,-6,20],[6,-4,20],[4,-2,20],[9,-6,20],[7,-5,20],[2,-2,20],[10,-7,20],[3,-3,20],[6,-8,20],[4,-5,20],[6,-3,20],[4,3,20],[5,3,20],[9,8,20],[6,2,20],[4,1,20],[9,0,20],[5,-1,20],[4,-2,20],[10,-5,20],[8,-6,20],[1,-2,20],[9,-9,20],[2,-2,20],[8,-7,20],[9,-6,20],[1,0,20],[8,-3,20],[10,-4,20],[7,-6,20],[1,-13,20],[-2,-13,20],[-2,-12,20],[1,-13,20],[4,-6,20],[9,-4,20],[10,0,20],[9,0,20],[10,2,20],[9,3,20],[9,1,20],[10,-1,20],[9,1,20],[9,2,20],[10,0,20],[9,-4,20],[7,-7,20],[2,-4,20],[10,-6,20],[9,-1,20],[9,0,20],[10,-2,20],[9,-7,20],[8,-6,20],[1,-1,20],[10,-3,20],[9,-9,20],[10,-12,20],[0,-1,20],[6,-13,20],[-2,-12,20],[-2,-13,20],[-2,-11,20],[-1,-2,20],[1,-1,20],[9,0,20],[2,1,20],[7,5,20],[10,2,20],[9,-7,20],[9,-13,20],[0,-1,20],[10,-9,20],[2,-3,20],[7,-7,20],[6,-6,20],[3,-3,20],[10,-10,20],[9,-10,20],[2,-3,20],[7,-7,20],[5,-5,20],[5,-6,20],[7,-7,20],[2,-6,20],[2,-7,20],[-1,-13,20],[-1,-10,20],[0,-3,20],[-1,-13,20],[-2,-13,20],[-1,-12,20],[1,-13,20],[2,-13,20],[-1,-13,20],[2,-8,20],[1,-5,20],[6,-13,20],[2,-4,20],[5,-9,20],[4,-13,20],[-5,-12,20],[-4,-8,20],[-2,-5,20],[-2,-13,20],[0,-13,20],[-1,-13,20],[-1,-13,20],[-1,-13,20],[-1,-13,20],[0,-12,20],[-1,-8,20],[0,-5,20],[-1,-13,20],[-1,-13,20],[-3,-13,20],[-4,-13,20],[-8,-13,20],[-2,-3,20],[-9,-7,20],[-9,1,20],[-10,3,20],[-9,1,20],[-9,-4,20],[-7,-3,20],[3,-13,20],[-2,-13,20],[-4,-6,20],[-8,-7,20],[-1,-1,20],[-9,-10,20],[-5,-2,20],[-5,-2,20],[-9,-4,20],[-9,-3,20],[-10,-3,20],[-4,-1,20],[-5,-2,20],[-10,-2,20],[-9,-2,20],[-9,0,20],[-10,0,20],[-9,1,20],[-9,1,20],[-10,0,20],[-9,1,20],[-9,1,20],[-10,0,20],[-9,-2,20],[-9,-4,20],[-10,-4,20],[-7,-1,20],[-2,0,20],[-9,-1,20],[-10,0,20],[-9,-1,20],[-10,-1,20],[-9,-1,20],[-9,-2,20],[-10,-5,20],[-3,-2,20],[-6,-3,20],[-9,-6,20],[-7,-3,20],[-3,-2,20],[-9,-4,20],[-9,-4,20],[-7,-3,20],[-3,-2,20],[-9,-5,20],[-7,-6,20],[-2,-2,20],[-10,-9,20],[-2,-2,20],[-7,-7,20],[-7,-6,20],[-2,-2,20],[-10,-9,20],[-2,-2,20],[-7,-5,20],[-10,-6,20],[-2,-2,20],[-7,-5,20],[-6,-7,20],[-3,-4,20],[-7,-9,20],[-3,-4,20],[-6,-9,20],[-3,-5,20],[-5,-8,20],[-4,-7,20],[-4,-6,20],[-6,-9,20],[-2,-4,20],[-7,-12,20],[-1,-1,20],[-8,-13,20],[-10,-8,20],[-9,-4,20],[0,-1,20],[-9,-12,20],[0,-1,20],[-10,-6,20],[-9,-3,20],[-7,-3,20],[-2,-1,20],[-9,-12,20],[-1,-6,20],[-1,-7,20],[-6,-13,20],[-2,-4,20],[-5,-9,20],[-5,-4,20],[-9,-7,20],[-2,-2,20],[-7,-5,20],[-10,-6,20],[-1,-1,20],[-8,-5,20],[-9,-4,20],[-10,-1,20],[-9,2,20],[-9,2,20],[-10,3,20],[-8,3,20],[-1,0,20],[-9,-10,20],[-4,-3,20],[-6,-5,20],[-9,-2,20],[-10,2,20],[-9,2,20],[-9,1,20],[-7,2,20],[-3,0,20],[-3,0,20],[-6,-3,20],[-9,-4,20],[-10,-3,20],[-9,-2,20],[-4,-1,20],[-5,-2,20],[-10,0,20],[-6,2,20],[-3,1,20],[-9,7,20],[-7,5,20],[-3,1,20],[-9,8,20],[-5,4,20],[-4,3,20],[-10,7,20],[-3,2,20],[-6,5,20],[-10,8,20],[-1,0,20],[-8,4,20],[-9,4,20],[-10,-2,20],[-9,-3,20],[-5,-3,20],[-4,-2,20],[-10,-8,20],[-2,-3,20],[-7,-5,20],[-9,-7,20],[0,-1,20],[-9,-12,20],[-1,-1,20],[-9,-12,20],[-9,-12,20],[-1,-1,20],[-7,-13,20],[-2,-2,20],[-6,-11,20],[-3,-4,20],[-3,-9,20],[-4,-12,20],[7,-11,20],[2,-2,20],[7,-10,20],[3,-3,20],[7,-8,20],[4,-5,20],[5,-7,20],[5,-6,20],[4,-6,20],[6,-7,20],[4,-5,20],[5,-8,20],[4,-5,20],[5,-8,20],[4,-12,20],[1,0,20],[0,-13,20],[2,-13,20],[7,-10,20],[9,-3,20],[-9,-4,20],[-6,-9,20],[-4,-3,20],[-9,-10,20],[-1,0,20],[-8,-3,20],[-10,-3,20],[-9,-4,20],[-5,-3,20],[-4,-2,20],[-10,-2,20],[-9,3,20],[-3,1,20],[-6,3,20],[-10,4,20],[-9,4,20],[-6,2,20],[-4,2,20],[-9,6,20],[-8,5,20],[-1,1,20],[-10,6,20],[-9,6,20],[-9,6,20],[-10,6,20],[-1,1,20],[-8,5,20],[-9,7,20],[-2,1,20],[-8,5,20],[-9,6,20],[-3,2,20],[-6,2,20],[-10,0,20],[-9,1,20],[-9,1,20],[-10,1,20],[-9,3,20],[-8,4,20],[-2,2,20],[-9,8,20],[-9,1,20],[-10,-1,20],[-8,3,20],[-1,1,20],[-4,12,20],[-5,12,20],[-1,1,20],[-5,13,20],[-4,9,20],[-1,4,20],[-4,13,20],[-4,8,20],[-1,5,20],[-4,12,20],[-4,7,20],[-5,6,20],[-5,5,20],[-8,8,20],[-1,2,20],[-9,10,20],[-1,1,20],[-9,10,20],[-2,3,20],[-6,13,20],[-1,7,20],[-1,6,20],[-2,12,20],[-2,13,20],[-2,13,20],[-2,13,20],[-1,2,20],[-2,11,20],[-3,13,20],[-2,13,20],[4,13,20],[3,9,20],[2,3,20],[5,13,20],[3,6,20],[4,7,20],[5,13,20],[0,1,20],[10,10,20],[0,2,20],[9,13,20],[4,13,20],[-3,13,20],[-1,5,20],[-1,7,20],[0,13,20],[-1,13,20],[-4,13,20],[-3,9,20],[-2,4,20],[-5,13,20],[-3,9,20],[-1,4,20],[-5,12,20],[-3,11,20],[-1,2,20],[-1,13,20],[0,13,20],[0,13,20],[0,13,20],[0,13,20],[0,13,20],[-8,7,20],[-6,5,20],[-3,3,20],[-5,10,20],[-4,11,20],[-1,2,20],[-4,13,20],[-5,12,20],[0,1,20],[-5,13,20],[-4,10,20],[-1,3,20],[-5,12,20],[-3,12,20],[-1,1,20],[-2,13,20],[-1,13,20],[-4,13,20],[-2,2,20],[-9,3,20],[-8,8,20],[-1,1,20],[-8,12,20],[-2,3,20],[-5,10,20],[-4,6,20],[-4,6,20],[-5,10,20],[-2,3,20],[-7,13,20],[-1,2,20],[-5,11,20],[-4,9,20],[-2,4,20],[-2,13,20],[0,13,20],[-5,13,20],[-10,11,20],[-1,1,20],[-8,10,20],[-3,3,20],[-7,8,20],[-3,5,20],[-6,7,20],[-5,6,20],[-4,5,20],[-6,8,20],[-4,4,20],[-7,9,20],[-2,3,20],[-6,10,20],[-3,6,20],[-7,6,20],[-3,6,20],[-4,7,20],[-5,10,20],[-2,3,20],[-6,13,20],[-1,3,20],[-5,10,20],[-5,11,20],[-1,2,20],[-6,13,20],[-2,4,20],[-4,9,20],[-5,11,20],[-1,1,20],[-6,13,20],[-3,5,20],[-4,8,20],[-4,13,20],[-1,6,20],[-1,7,20],[-1,13,20],[-2,13,20],[-4,13,20],[-1,2,20],[-4,10,20],[-3,13,20],[-3,8,20],[-1,5,20],[-4,13,20],[-4,12,20],[-1,1,20],[-9,13,20],[-9,9,20],[-3,4,20],[-6,5,20],[-10,7,20],[-9,6,20],[-8,7,20],[-1,2,20],[-10,6,20],[-5,5,20],[-4,3,20],[-9,8,20],[-3,2,20],[-7,9,20],[-4,4,20],[-5,4,20],[-9,8,20],[-2,1,20],[-8,7,20],[-6,6,20],[-3,3,20],[-9,10,20],[0,2,20],[-3,10,20],[-2,13,20],[1,13,20],[4,12,20],[0,1,20],[4,13,20],[5,13,20],[4,13,20],[0,12,20],[-3,13,20],[-1,4,20],[-4,9,20],[-5,7,20],[-10,0,20],[-9,6,20],[-10,9,20],[-4,4,20],[-5,5,20],[-8,8,20],[-1,3,20],[-6,10,20],[-4,9,20],[-1,4,20],[-3,12,20],[-4,13,20],[1,13,20],[7,4,20],[4,3,20],[1,0,20]],[[2753,3747,10],[5,0,10],[6,-9,10],[3,-4,10],[9,-8,10],[1,-2,10],[9,-9,10],[4,-2,10],[1,-1,10],[4,-4,10],[5,-8,10],[5,-4,10],[9,-1,10],[3,5,10],[-3,9,10],[-1,4,10],[-1,13,10],[2,9,10],[1,3,10],[3,13,10],[4,13,10],[1,2,10],[6,11,10],[4,5,10],[9,8,10],[9,5,10],[10,5,10],[4,3,10],[2,13,10],[-6,12,10],[-10,11,10],[-2,2,10],[-7,5,10],[-9,4,10],[-10,4,10],[-1,0,10],[-8,3,10],[-9,4,10],[-10,4,10],[-5,2,10],[-4,2,10],[-9,3,10],[-10,2,10],[-8,-7,10],[-1,-13,10],[0,-1,10],[-1,-12,10],[-1,-13,10],[-2,-12,10],[-1,-13,10],[-1,-13,10],[1,-13,10],[0,-13,10],[-1,-6,10]],[[7538,3685,5],[-9,2,5],[9,2,5],[2,-2,5],[-2,-2,5]],[[6139,5844,15],[5,-2,15],[9,1,15],[10,-2,15],[9,-2,15],[9,-3,15],[1,0,15],[9,-4,15],[9,-4,15],[9,-4,15],[3,-1,15],[7,-3,15],[9,-5,15],[10,-3,15],[9,-2,15],[1,0,15],[8,-4,15],[10,-5,15],[9,-2,15],[4,-2,15],[5,-6,15],[10,-4,15],[5,-3,15],[4,-3,15],[9,-5,15],[10,-4,15],[1,0,15],[8,-7,15],[9,-3,15],[7,-3,15],[3,-3,15],[9,-5,15],[7,-5,15],[0,-13,15],[-5,-13,15],[-2,-4,15],[-5,-9,15],[-4,-6,15],[-4,-7,15],[-6,-9,15],[-2,-3,15],[-7,-10,15],[-2,-3,15],[-7,-12,15],[-1,-1,15],[-2,-13,15],[3,-5,15],[3,5,15],[6,10,15],[2,3,15],[7,8,15],[5,5,15],[5,6,15],[9,5,15],[9,-5,15],[6,-6,15],[4,-8,15],[3,-5,15],[-3,-11,15],[-1,-2,15],[-4,-13,15],[-4,-13,15],[9,-4,15],[9,2,15],[2,2,15],[8,10,15],[2,3,15],[7,8,15],[6,5,15],[3,2,15],[10,5,15],[7,-7,15],[2,-7,15],[2,-6,15],[2,-13,15],[3,-13,15],[2,-7,15],[10,1,15],[7,6,15],[2,2,15],[9,6,15],[10,-3,15],[1,-5,15],[2,-13,15],[2,-12,15],[1,-13,15],[2,-13,15],[1,-7,15],[1,-6,15],[1,-13,15],[5,-13,15],[2,-5,15],[5,-8,15],[5,-6,15],[9,-5,15],[4,-1,15],[5,-2,15],[3,2,15],[7,3,15],[8,9,15],[1,2,15],[8,11,15],[2,2,15],[9,-1,15],[0,-1,15],[9,-10,15],[2,-3,15],[8,-6,15],[9,-6,15],[9,-7,15],[10,-4,15],[9,-1,15],[9,8,15],[3,4,15],[7,9,15],[3,3,15],[6,10,15],[3,3,15],[6,8,15],[10,2,15],[8,-10,15],[1,-2,15],[6,-11,15],[3,-5,15],[5,-7,15],[5,-10,15],[2,-3,15],[6,-13,15],[1,-2,15],[5,-11,15],[-4,-13,15],[-1,-4,15],[-4,-9,15],[-5,-8,15],[-3,-5,15],[-7,-6,15],[-3,-7,15],[-6,-5,15],[-6,-7,15],[-3,-4,15],[-8,-9,15],[-2,-3,15],[-8,-10,15],[-1,-1,15],[-9,-10,15],[-1,-2,15],[-9,-9,15],[-3,-4,15],[-6,-7,15],[-5,-6,15],[-4,-4,15],[-10,-7,15],[-1,-2,15],[-8,-8,15],[-4,-5,15],[-5,-6,15],[-6,-6,15],[-4,-6,15],[-6,-7,15],[-3,-5,15],[-6,-8,15],[-3,-5,15],[-7,-8,15],[-3,-4,15],[-6,-9,15],[-3,-4,15],[-7,-9,15],[-3,-9,15],[-1,-4,15],[0,-12,15],[1,-3,15],[4,-10,15],[6,-13,15],[7,-13,15],[2,-5,15],[4,-8,15],[6,-11,15],[0,-2,15],[6,-13,15],[3,-5,15],[4,-8,15],[5,-8,15],[2,-4,15],[8,-12,15],[0,-1,15],[8,-13,15],[1,-1,15],[9,-10,15],[3,-2,15],[7,-8,15],[7,-5,15],[2,-3,15],[9,-8,15],[3,-2,15],[7,-8,15],[6,-5,15],[3,-4,15],[9,-6,15],[7,-2,15],[3,-4,15],[9,-8,15],[3,-1,15],[6,-7,15],[10,-5,15],[3,-1,15],[6,-7,15],[10,-5,15],[2,-1,15],[7,-8,15],[9,-5,15],[1,0,15],[9,-13,15],[7,-13,15],[2,-3,15],[5,-10,15],[4,-6,15],[4,-6,15],[6,-6,15],[9,-6,15],[2,-1,15],[7,-5,15],[10,-7,15],[2,-1,15],[7,-6,15],[9,-7,15],[10,-9,15],[4,-4,15],[5,-4,15],[9,-9,15],[1,0,15],[9,-10,15],[3,-3,15],[6,-6,15],[8,-7,15],[2,-1,15],[9,-9,15],[3,-2,15],[6,-6,15],[8,-7,15],[2,-2,15],[9,-8,15],[4,-3,15],[5,-4,15],[9,-9,15],[1,-2,15],[6,-11,15],[3,-5,15],[4,-8,15],[5,-9,15],[3,-4,15],[7,-12,15],[-8,-13,15],[-2,0,15],[-9,-1,15],[-9,-3,15],[-7,-9,15],[-3,-4,15],[-4,-9,15],[-5,-9,15],[-2,-4,15],[-7,-13,15],[0,-1,15],[-6,-12,15],[-4,-8,15],[-2,-5,15],[-6,-12,15],[-1,-2,15],[-5,-11,15],[-4,-9,15],[-3,-4,15],[-6,-13,15],[-1,-2,15],[-5,-11,15],[-4,-6,15],[-8,-7,15],[8,-7,15],[2,-6,15],[7,-7,15],[4,-6,15],[6,-5,15],[3,-7,15],[6,-12,15],[1,-1,15],[-1,-2,15],[-9,-3,15],[-10,-2,15],[-9,-1,15],[-9,-2,15],[-10,-1,15],[-9,-2,15],[-2,0,15],[-8,-5,15],[-4,-8,15],[-2,-13,15],[-3,-13,15],[0,-2,15],[-2,-11,15],[-1,-12,15],[-2,-13,15],[-4,-10,15],[-1,-3,15],[-3,-13,15],[-4,-13,15],[-2,-10,15],[0,-3,15],[-3,-13,15],[-2,-13,15],[-1,-12,15],[-2,-13,15],[4,-13,15],[4,-12,15],[1,-1,15],[-1,-1,15],[-8,-12,15],[-1,-1,15],[-9,-5,15],[-10,-2,15],[-9,-3,15],[-2,-2,15],[-7,-8,15],[-5,-5,15],[-5,-3,15],[-9,-7,15],[-2,-2,15],[-7,-9,15],[-5,-4,15],[-5,-4,15],[-9,-2,15],[-10,-7,15],[-1,0,15],[-8,-3,15],[-9,-2,15],[-10,1,15],[-9,4,15],[-9,2,15],[-10,2,15],[-9,1,15],[-9,1,15],[-10,1,15],[-9,0,15],[-9,-1,15],[-10,-2,15],[-9,-3,15],[-5,-1,15],[-4,-2,15],[-10,-2,15],[-6,4,15],[-3,4,15],[-10,5,15],[-9,-3,15],[-9,-5,15],[-4,-1,15],[-6,-3,15],[-9,-5,15],[-9,-3,15],[-10,-1,15],[-9,0,15],[-9,1,15],[-10,0,15],[-9,1,15],[-9,0,15],[-10,1,15],[-9,0,15],[-9,1,15],[-10,0,15],[-9,0,15],[-10,-1,15],[-6,-4,15],[-3,-3,15],[-7,-10,15],[-2,-2,15],[-8,-11,15],[-2,-3,15],[-5,-10,15],[-4,-6,15],[-3,-7,15],[-6,-9,15],[-2,-3,15],[-5,-13,15],[-3,-8,15],[-1,-5,15],[1,-13,15],[0,-1,15],[8,-12,15],[2,-3,15],[5,-10,15],[4,-10,15],[2,-3,15],[-2,-5,15],[-6,-8,15],[-3,-1,15],[-10,-8,15],[-1,-3,15],[-1,-13,15],[1,-13,15],[0,-13,15],[-2,-13,15],[-3,-13,15],[-3,-13,15],[0,-1,15],[-4,-11,15],[-5,-8,15],[-4,-5,15],[-6,-7,15],[-9,-4,15],[-9,-1,15],[-10,-1,15],[-2,0,15],[-7,-1,15],[-9,-1,15],[-10,-1,15],[-9,-3,15],[-10,-5,15],[-2,-2,15],[-7,-7,15],[-5,-6,15],[-4,-6,15],[-6,-7,15],[-4,-5,15],[-5,-8,15],[-4,-5,15],[-7,-8,15],[-2,-3,15],[-9,-9,15],[-1,-1,15],[-9,-10,15],[-2,-2,15],[-7,-6,15],[-10,-7,15],[-1,0,15],[-8,-8,15],[-6,-5,15],[-3,-3,15],[-10,-5,15],[-9,-5,15],[-1,0,15],[-8,-4,15],[-10,-3,15],[-9,-3,15],[-10,0,15],[-9,8,15],[-4,2,15],[-5,4,15],[-10,6,15],[-5,3,15],[-4,2,15],[-9,5,15],[-10,4,15],[-6,2,15],[-3,0,15],[-9,2,15],[-10,2,15],[-9,4,15],[-9,3,15],[-4,2,15],[-6,2,15],[-9,1,15],[-2,-3,15],[2,-13,15],[0,-2,15],[2,-11,15],[0,-13,15],[-2,-6,15],[-3,-7,15],[-7,-9,15],[-2,-4,15],[-7,-5,15],[-8,-7,15],[-1,-1,15],[-10,-8,15],[-5,-4,15],[-4,-4,15],[-9,-9,15],[-9,-13,15],[-1,-1,15],[-9,-7,15],[-6,-5,15],[-3,-2,15],[-10,-6,15],[-8,-5,15],[-1,0,15],[-9,-7,15],[-9,-6,15],[-1,0,15],[-9,-6,15],[-9,-5,15],[-3,-2,15],[-7,-4,15],[-9,-8,15],[-10,6,15],[-9,-1,15],[-9,-5,15],[-10,-11,15],[-5,-2,15],[-4,-2,15],[-9,-4,15],[-10,-3,15],[-9,-4,15],[-1,0,15],[-8,-4,15],[-10,-3,15],[-9,2,15],[-9,3,15],[-6,2,15],[-4,3,15],[-9,4,15],[-9,2,15],[-10,3,15],[-1,1,15],[-8,8,15],[-9,5,15],[-1,0,15],[-9,9,15],[-9,3,15],[0,1,15],[-10,8,15],[-9,4,15],[-9,8,15],[-10,4,15],[-3,1,15],[-6,6,15],[-9,5,15],[-5,2,15],[-5,5,15],[-9,5,15],[-4,3,15],[-5,6,15],[-10,5,15],[-4,2,15],[-5,4,15],[-9,6,15],[-8,3,15],[-2,1,15],[-9,7,15],[-10,4,15],[0,1,15],[-9,7,15],[-9,4,15],[-2,1,15],[-8,6,15],[-9,3,15],[-9,2,15],[-10,2,15],[-1,0,15],[-8,2,15],[-9,8,15],[-7,3,15],[-3,3,15],[-9,9,15],[-1,1,15],[-8,9,15],[-6,4,15],[-4,7,15],[-9,5,15],[-1,1,15],[-9,12,15],[0,1,15],[-3,12,15],[-5,13,15],[-1,3,15],[-4,10,15],[-5,13,15],[-7,13,15],[-3,3,15],[-3,10,15],[-1,13,15],[-1,13,15],[0,12,15],[-1,13,15],[0,13,15],[-1,13,15],[-2,6,15],[-2,7,15],[-7,5,15],[-10,6,15],[-5,2,15],[-4,2,15],[-9,3,15],[-10,3,15],[-9,2,15],[-9,2,15],[-10,1,15],[-9,7,15],[-9,4,15],[-6,1,15],[-4,2,15],[-9,5,15],[-10,5,15],[-3,1,15],[-6,3,15],[-9,4,15],[-10,3,15],[-9,0,15],[-9,-1,15],[-10,1,15],[-8,3,15],[-1,1,15],[-9,6,15],[-7,6,15],[-2,13,15],[1,13,15],[1,13,15],[-1,13,15],[-2,9,15],[-1,3,15],[-8,13,15],[-8,13,15],[-1,3,15],[-6,10,15],[-4,6,15],[-4,7,15],[-5,8,15],[-4,5,15],[-5,9,15],[-4,4,15],[-6,10,15],[-1,3,15],[-8,10,15],[-2,2,15],[-8,9,15],[-4,4,15],[-5,5,15],[-8,8,15],[-1,2,15],[-5,11,15],[3,13,15],[-1,13,15],[-7,10,15],[-2,3,15],[-7,6,15],[-7,6,15],[-2,2,15],[-10,6,15],[-9,5,15],[-9,5,15],[-9,8,15],[-1,1,15],[-9,10,15],[-1,2,15],[-3,13,15],[1,13,15],[2,13,15],[1,2,15],[3,11,15],[3,12,15],[3,13,15],[-9,6,15],[-9,3,15],[-10,4,15],[-1,0,15],[-8,3,15],[-9,2,15],[-10,3,15],[-9,3,15],[-6,2,15],[-4,1,15],[-9,3,15],[-9,2,15],[-10,2,15],[-9,3,15],[-4,2,15],[-5,2,15],[-6,-2,15],[-4,-1,15],[-1,1,15],[-5,13,15],[1,13,15],[0,12,15],[2,13,15],[-3,13,15],[-3,4,15],[-7,9,15],[-2,3,15],[-8,10,15],[-2,1,15],[-9,12,15],[-9,9,15],[-4,4,15],[-6,6,15],[-7,7,15],[-2,2,15],[-10,9,15],[-1,1,15],[-8,8,15],[-4,5,15],[-5,7,15],[-4,6,15],[-6,12,15],[-1,1,15],[-8,9,15],[-4,4,15],[-5,4,15],[-9,9,15],[-1,0,15],[-9,10,15],[-2,3,15],[-7,11,15],[-1,2,15],[-9,9,15],[-3,3,15],[-6,7,15],[-7,6,15],[-2,5,15],[-5,8,15],[-5,10,15],[-1,3,15],[-5,13,15],[-3,6,15],[-8,7,15],[-1,2,15],[-6,11,15],[-4,4,15],[-5,8,15],[-4,6,15],[-4,7,15],[-6,11,15],[-1,2,15],[-6,13,15],[-2,4,15],[-3,9,15],[-4,13,15],[-2,8,15],[-2,5,15],[-3,13,15],[-3,12,15],[-2,4,15],[-9,9,15],[-1,0,15],[-8,6,15],[-7,7,15],[3,13,15],[4,11,15],[1,2,15],[5,13,15],[3,6,15],[3,7,15],[6,13,15],[0,1,15],[5,11,15],[5,10,15],[1,3,15],[6,13,15],[2,5,15],[3,8,15],[6,13,15],[0,1,15],[6,12,15],[4,8,15],[2,5,15],[7,12,15],[6,13,15],[4,8,15],[2,5,15],[5,13,15],[2,3,15],[5,10,15],[4,13,15],[-9,10,15],[-2,3,15],[-7,7,15],[-6,6,15],[-4,2,15],[-9,8,15],[-4,2,15],[-6,3,15],[-9,7,15],[-3,3,15],[-6,3,15],[-10,7,15],[-3,3,15],[-6,4,15],[-9,5,15],[-4,4,15],[-6,3,15],[-9,6,15],[-5,4,15],[-4,3,15],[-10,6,15],[-5,4,15],[-4,3,15],[-9,5,15],[-8,5,15],[-2,1,15],[-9,7,15],[-7,4,15],[-2,3,15],[-10,8,15],[-2,2,15],[-7,9,15],[-4,4,15],[-6,10,15],[-1,3,15],[-2,13,15],[3,11,15],[1,2,15],[4,13,15],[4,13,15],[1,5,15],[1,7,15],[3,13,15],[4,13,15],[-2,13,15],[-5,13,15],[-1,2,15],[-6,11,15],[-4,6,15],[-4,7,15],[-5,9,15],[-2,4,15],[-7,5,15],[-10,4,15],[-9,0,15],[-9,0,15],[-4,3,15],[-6,6,15],[-6,7,15],[-3,4,15],[-9,9,15],[0,1,15],[-10,10,15],[-2,2,15],[-7,7,15],[-6,6,15],[-3,3,15],[-10,9,15],[0,1,15],[-7,13,15],[-2,10,15],[-1,2,15],[-5,13,15],[-1,13,15],[-2,12,15],[-1,1,15],[-3,13,15],[-4,13,15],[8,9,15],[3,4,15],[6,3,15],[9,7,15],[4,3,15],[0,6,15]],[[7575,3494,5],[1,0,5],[-1,3,5],[0,-3,5]],[[9549,3442,5],[-3,13,5],[-2,13,5],[-2,13,5],[0,13,5],[0,13,5],[1,13,5],[0,12,5],[1,13,5],[1,13,5],[1,13,5],[1,13,5],[1,13,5],[1,11,5],[0,2,5],[1,13,5],[1,12,5],[2,13,5],[1,13,5],[2,13,5],[1,13,5],[1,9,5],[0,4,5],[2,13,5],[1,13,5],[0,12,5],[-1,13,5],[0,13,5],[0,13,5],[1,13,5],[0,13,5],[0,13,5],[1,12,5],[1,13,5],[1,13,5],[1,13,5],[1,13,5],[1,8,5],[2,5,5],[3,13,5],[4,13,5],[1,1,5],[7,11,5],[2,4,5],[6,9,5],[4,6,5],[4,7,5],[5,8,5],[3,5,5],[6,13,5],[0,1,5],[6,12,5],[4,5,5],[3,8,5],[6,11,5],[1,1,5],[3,13,5],[5,11,5],[2,2,5],[8,12,5],[0,1,5],[8,13,5],[1,1,5],[6,12,5],[3,5,5],[6,8,5],[4,4,5],[9,4,5],[9,3,5],[10,1,5],[9,-1,5],[9,-4,5],[10,-6,5],[2,-1,5],[7,-5,5],[9,-8,5],[1,0,5],[4,-13,5],[-4,-11,5],[-1,-2,5],[-9,-13,5],[-7,-13,5],[-2,-2,5],[-6,-11,5],[-4,-5,5],[-4,-7,5],[-5,-8,5],[-3,-5,5],[-6,-13,5],[0,-1,5],[-6,-12,5],[-4,-8,5],[-2,-5,5],[-6,-13,5],[-1,-2,5],[-6,-11,5],[-3,-7,5],[-3,-5,5],[-7,-13,5],[0,-1,5],[-5,-12,5],[-4,-8,5],[-3,-5,5],[-6,-13,5],[0,-1,5],[-5,-12,5],[-5,-12,5],[0,-1,5],[-5,-13,5],[-4,-12,5],[-5,-13,5],[-4,-13,5],[-6,-13,5],[-3,-13,5],[-1,-1,5],[-4,-12,5],[-3,-13,5],[-2,-6,5],[-2,-6,5],[-4,-13,5],[-3,-13,5],[0,-1,5],[-4,-12,5],[-2,-13,5],[-2,-13,5],[-2,-9,5],[-1,-4,5],[-2,-13,5],[-2,-12,5],[-1,-13,5],[-2,-13,5],[-1,-7,5],[-2,-6,5],[-2,-13,5],[-1,-13,5],[0,-13,5],[-1,-13,5],[-1,-12,5],[-1,-13,5],[-1,-13,5],[-1,-8,5],[-1,-5,5],[-4,-13,5],[-4,-9,5],[-2,-4,5],[-7,-13,5]],[[7060,3211,15],[-9,-9,15],[-6,-4,15],[-3,-2,15],[-9,-5,15],[-10,3,15],[-9,0,15],[-5,4,15],[-4,4,15],[-8,9,15],[-2,2,15],[-7,11,15],[-2,5,15],[-3,7,15],[-3,13,15],[1,13,15],[2,13,15],[3,3,15],[6,10,15],[3,3,15],[7,10,15],[3,12,15],[0,1,15],[7,13,15],[2,1,15],[9,8,15],[5,3,15],[5,4,15],[9,0,15],[9,0,15],[10,0,15],[9,-1,15],[4,-3,15],[5,-4,15],[8,-8,15],[2,-4,15],[6,-9,15],[-2,-13,15],[-4,-11,15],[-1,-2,15],[-6,-13,15],[-1,-13,15],[-1,-13,15],[-1,0,15],[-4,-13,15],[-5,-8,15],[-2,-4,15],[-7,-13,15],[-1,0,15]],[[4208,3209,40],[-2,2,40],[-8,7,40],[-5,6,40],[-4,7,40],[-3,5,40],[-6,11,40],[-9,2,40],[-1,0,40],[-9,-2,40],[-5,2,40],[-4,3,40],[-10,7,40],[-3,3,40],[-6,6,40],[-9,7,40],[0,1,40],[-10,7,40],[-5,5,40],[-4,3,40],[-10,8,40],[-2,2,40],[-7,5,40],[-9,8,40],[-10,8,40],[-5,5,40],[-4,4,40],[-7,8,40],[-2,3,40],[-8,10,40],[-2,2,40],[-9,10,40],[-2,1,40],[-4,13,40],[0,13,40],[-1,13,40],[-2,2,40],[-8,11,40],[-2,2,40],[-9,9,40],[-1,2,40],[-8,8,40],[-4,4,40],[-6,8,40],[-5,5,40],[2,13,40],[3,5,40],[10,-3,40],[9,-1,40],[7,-1,40],[2,0,40],[2,0,40],[8,1,40],[7,12,40],[-6,13,40],[-1,4,40],[-5,9,40],[5,2,40],[3,-2,40],[6,-6,40],[9,-4,40],[5,-3,40],[5,-4,40],[9,-7,40],[2,-2,40],[7,-7,40],[10,-3,40],[9,-2,40],[9,0,40],[7,-1,40],[3,-1,40],[9,-12,40],[0,-1,40],[10,-9,40],[6,-3,40],[3,-1,40],[9,-3,40],[10,-6,40],[2,-2,40],[7,-8,40],[5,-5,40],[4,-5,40],[9,-8,40],[1,-1,40],[9,-5,40],[9,-5,40],[5,-2,40],[5,-2,40],[9,-4,40],[9,-5,40],[3,-2,40],[7,-9,40],[3,-4,40],[6,-11,40],[1,-2,40],[7,-13,40],[2,-4,40],[4,-8,40],[4,-13,40],[1,-4,40],[3,-9,40],[4,-13,40],[2,-7,40],[2,-6,40],[5,-13,40],[2,-13,40],[1,-13,40],[4,-12,40],[5,-3,40],[5,-10,40],[-5,-9,40],[-7,-4,40],[-2,-1,40],[-10,-2,40],[-9,-2,40],[-9,-1,40],[-10,-2,40],[-9,2,40],[-10,4,40],[-3,2,40],[-6,4,40],[-9,7,40]],[[6584,3159,10],[-1,0,10],[1,1,10],[0,-1,10]],[[2791,3353,10],[4,0,10],[1,-1,10],[9,-9,10],[2,-4,10],[7,-5,10],[9,-7,10],[1,0,10],[9,-8,10],[5,-5,10],[4,-3,10],[9,-2,10],[10,-1,10],[9,-1,10],[10,-1,10],[9,-2,10],[9,-2,10],[3,-1,10],[7,-4,10],[6,-9,10],[3,-4,10],[6,-9,10],[3,-5,10],[5,-8,10],[5,-8,10],[3,-5,10],[6,-8,10],[3,-5,10],[6,-9,10],[3,-3,10],[4,-13,10],[0,-13,10],[-4,-13,10],[-3,-3,10],[-7,-10,10],[-2,-2,10],[-9,-11,10],[-10,-12,10],[-1,-1,10],[-8,-10,10],[-2,-2,10],[-7,-10,10],[-3,-3,10],[3,-12,10],[9,8,10],[6,4,10],[3,3,10],[10,7,10],[2,3,10],[7,7,10],[7,5,10],[2,3,10],[10,7,10],[3,3,10],[6,6,10],[8,7,10],[1,1,10],[10,10,10],[1,2,10],[3,13,10],[-4,3,10],[-6,10,10],[-3,13,10],[-1,0,10],[-5,12,10],[-4,9,10],[-2,4,10],[-5,13,10],[-2,4,10],[-5,9,10],[-5,11,10],[0,2,10],[-7,13,10],[-2,5,10],[-4,8,10],[-5,6,10],[-10,6,10],[0,1,10],[-9,1,10],[-9,2,10],[-5,9,10],[-3,13,10],[5,13,10],[3,5,10],[7,8,10],[-7,10,10],[-3,3,10],[-7,8,10],[-4,5,10],[-5,5,10],[-9,7,10],[-1,1,10],[-9,6,10],[-5,7,10],[-4,12,10],[0,2,10],[-1,11,10],[-2,13,10],[-7,5,10],[-9,2,10],[-9,1,10],[-10,0,10],[-9,1,10],[-9,-2,10],[-10,-6,10],[-2,-1,10],[-7,-4,10],[-9,-5,10],[-4,-4,10],[-5,-13,10],[-1,-12,10],[0,-2,10],[-1,-11,10],[-1,-7,10],[-2,-2,10]],[[6415,3120,15],[-1,1,15],[-2,13,15],[3,4,15],[10,-3,15],[1,-1,15],[4,-13,15],[-5,-1,15],[-10,0,15]],[[8875,3115,20],[0,6,20],[0,12,20],[0,1,20],[5,12,20],[2,13,20],[1,13,20],[2,13,20],[5,-13,20],[2,-13,20],[1,-13,20],[1,-12,20],[-2,-13,20],[-7,-13,20],[-10,7,20]],[[2898,3105,10],[9,3,10],[-9,3,10],[-2,-3,10],[2,-3,10]],[[2889,3095,10],[-2,0,10],[2,0,10]],[[4348,3094,40],[-2,1,40],[-7,5,40],[-10,3,40],[-9,4,40],[-3,1,40],[-6,3,40],[-10,4,40],[-9,4,40],[-5,2,40],[-4,2,40],[-6,11,40],[2,12,40],[4,10,40],[1,3,40],[3,13,40],[5,8,40],[9,5,40],[1,0,40],[9,-2,40],[9,-9,40],[2,-2,40],[7,-7,40],[8,-6,40],[2,-2,40],[9,-7,40],[7,-4,40],[2,-4,40],[6,-8,40],[4,-9,40],[1,-4,40],[1,-13,40],[-1,-13,40],[-1,-1,40],[-10,-3,40],[-9,3,40]],[[7042,3072,10],[-7,-3,10],[-2,-2,10],[-10,-5,10],[-9,-5,10],[-1,-1,10],[-8,-5,10],[-10,-3,10],[-9,-1,10],[-10,5,10],[-3,4,10],[-6,5,10],[-9,5,10],[-7,3,10],[-3,1,10],[-9,4,10],[-9,3,10],[-9,5,10],[-1,0,10],[-9,1,10],[-9,2,10],[-10,2,10],[-9,2,10],[-9,1,10],[-10,2,10],[-3,3,10],[-6,8,10],[-6,5,10],[-3,4,10],[-7,9,10],[-3,2,10],[-9,11,10],[-10,8,10],[-4,4,10],[-5,5,10],[-9,8,10],[0,1,10],[-10,8,10],[-4,4,10],[-5,7,10],[-6,6,10],[-3,8,10],[-2,5,10],[2,5,10],[1,8,10],[5,13,10],[3,7,10],[2,5,10],[5,13,10],[2,6,10],[3,7,10],[5,13,10],[2,5,10],[3,8,10],[5,13,10],[1,3,10],[2,10,10],[2,13,10],[1,12,10],[0,13,10],[-2,13,10],[-3,12,10],[0,1,10],[0,1,10],[3,12,10],[6,8,10],[5,5,10],[5,5,10],[7,8,10],[2,1,10],[10,9,10],[3,3,10],[6,5,10],[8,7,10],[1,1,10],[10,8,10],[5,4,10],[4,3,10],[9,4,10],[10,4,10],[4,2,10],[5,2,10],[9,5,10],[5,6,10],[-1,13,10],[-1,13,10],[-1,13,10],[-1,12,10],[-1,3,10],[-5,10,10],[-4,4,10],[-8,9,10],[-1,2,10],[-10,10,10],[0,1,10],[-9,8,10],[-5,5,10],[-4,4,10],[-9,9,10],[-1,1,10],[-9,11,10],[-1,1,10],[-8,9,10],[-4,4,10],[-6,6,10],[-6,6,10],[-3,3,10],[-10,10,10],[-9,10,10],[-3,3,10],[-6,6,10],[-8,7,10],[-2,2,10],[-9,10,10],[-1,1,10],[-3,13,10],[-2,13,10],[-3,10,10],[-2,3,10],[-8,7,10],[-6,5,10],[-3,3,10],[-9,9,10],[-2,1,10],[-8,10,10],[-3,3,10],[0,13,10],[2,13,10],[1,2,10],[7,11,10],[2,13,10],[1,3,10],[1,9,10],[8,9,10],[9,-2,10],[10,-2,10],[9,-3,10],[4,-2,10],[5,-1,10],[10,-3,10],[9,-3,10],[9,-3,10],[8,-2,10],[2,-1,10],[9,-3,10],[10,-4,10],[9,-4,10],[3,-1,10],[6,-3,10],[10,-5,10],[9,-5,10],[9,-3,10],[10,-5,10],[8,-5,10],[1,0,10],[9,-4,10],[10,-5,10],[5,-4,10],[4,-1,10],[9,-4,10],[10,-6,10],[3,-2,10],[6,-4,10],[9,-8,10],[1,-1,10],[9,-9,10],[2,-3,10],[7,-8,10],[5,-5,10],[5,-6,10],[6,-7,10],[3,-3,10],[8,-10,10],[1,-2,10],[6,-11,10],[4,-6,10],[4,-7,10],[5,-6,10],[5,-7,10],[4,-5,10],[5,-8,10],[5,-8,10],[2,-4,10],[5,-13,10],[1,-13,10],[-1,-13,10],[-1,-13,10],[3,-10,10],[2,-3,10],[7,-7,10],[10,-4,10],[3,-2,10],[6,-3,10],[9,-4,10],[9,-6,10],[1,0,10],[9,-7,10],[7,-5,10],[2,-2,10],[10,-8,10],[4,-3,10],[5,-5,10],[10,-6,10],[2,-2,10],[7,-4,10],[9,-6,10],[4,-3,10],[6,-4,10],[9,-6,10],[4,-3,10],[5,-4,10],[10,-6,10],[4,-3,10],[5,-3,10],[9,-7,10],[5,-3,10],[5,-4,10],[9,-8,10],[9,-9,10],[6,-4,10],[4,-4,10],[9,-5,10],[8,-4,10],[1,-3,10],[10,-10,10],[-4,-13,10],[-6,-9,10],[-1,-4,10],[-1,-13,10],[-1,-13,10],[2,-12,10],[1,-8,10],[1,-5,10],[1,-13,10],[3,-13,10],[5,-8,10],[3,-5,10],[6,-10,10],[3,-3,10],[7,-5,10],[9,-4,10],[9,-3,10],[1,-1,10],[9,-5,10],[7,-8,10],[-7,-12,10],[-1,0,10],[-9,-8,10],[-9,-5,10],[-2,0,10],[-7,-6,10],[-6,-7,10],[-3,-13,10],[-1,-1,10],[-9,-1,10],[-10,0,10],[-9,-1,10],[-9,0,10],[-10,1,10],[-9,1,10],[-3,1,10],[-6,2,10],[-10,5,10],[-9,-3,10],[-4,-4,10],[-5,-4,10],[-8,-9,10],[-2,-1,10],[-9,-10,10],[-2,-2,10],[-7,-6,10],[-10,-6,10],[-1,-1,10],[-8,-9,10],[-2,-3,10],[-7,-13,10],[0,-1,10],[-10,-6,10],[-9,-1,10],[-10,0,10],[-9,-2,10],[-8,-3,10],[-1,-1,10],[-10,-9,10],[-3,-3,10],[-6,-6,10],[-9,-2,10],[-4,8,10],[-6,9,10],[-9,-6,10],[-3,-3,10],[-6,-8,10],[-4,-5,10],[-6,-5,10],[-9,-5,10]],[[2842,3030,5],[9,0,5],[3,1,5],[-3,0,5],[-9,5,5],[-3,-5,5],[3,-1,5]],[[7313,3022,10],[-3,-4,10],[-6,-10,10],[-8,10,10],[-1,13,10],[5,12,10],[3,13,10],[1,11,10],[0,2,10],[2,13,10],[1,13,10],[6,10,10],[7,3,10],[3,1,10],[9,6,10],[9,2,10],[10,1,10],[1,3,10],[6,13,10],[2,2,10],[5,10,10],[4,8,10],[2,5,10],[6,13,10],[2,3,10],[4,10,10],[5,10,10],[1,3,10],[6,13,10],[2,3,10],[8,10,10],[2,4,10],[6,8,10],[3,11,10],[1,-11,10],[1,-12,10],[-2,-6,10],[-5,-7,10],[-1,-13,10],[-3,-10,10],[-2,-3,10],[0,-13,10],[-3,-13,10],[-5,-6,10],[-2,-7,10],[-2,-12,10],[-4,-13,10],[-1,-5,10],[-2,-8,10],[-3,-13,10],[-4,-8,10],[-3,-5,10],[-6,-13,10],[-1,-3,10],[-5,-10,10],[0,-13,10],[-1,-12,10],[-3,-4,10],[-9,1,10],[-4,3,10],[-6,9,10],[-3,3,10],[-6,5,10],[-2,-5,10],[-7,-10,10],[-2,-2,10],[-8,-9,10]],[[7294,3000,10],[-1,5,10],[1,6,10],[4,-6,10],[-4,-5,10]],[[9246,3005,15],[3,6,15],[4,7,15],[6,9,15],[2,4,15],[7,12,15],[1,0,15],[8,4,15],[10,-3,15],[0,-1,15],[9,-9,15],[4,-3,15],[-4,-6,15],[-9,-7,15],[0,-1,15],[-10,-3,15],[-9,-5,15],[-5,-4,15],[-4,-2,15],[-10,-1,15],[-3,3,15]],[[8623,2990,10],[-2,2,10],[-5,13,10],[7,7,10],[9,-1,10],[8,-6,10],[-5,-13,10],[-3,-4,10],[-9,2,10]],[[9240,2991,15],[-2,1,15],[2,3,15],[1,-3,15],[-1,-1,15]],[[9100,2940,15],[-2,1,15],[-8,1,15],[-9,2,15],[-9,1,15],[-10,1,15],[-9,2,15],[-9,1,15],[-10,2,15],[-9,0,15],[-9,1,15],[-10,0,15],[-9,1,15],[-2,0,15],[-7,3,15],[-10,6,15],[-6,4,15],[-3,2,15],[-10,6,15],[-7,5,15],[-2,1,15],[-9,6,15],[-10,2,15],[-9,-1,15],[-9,-3,15],[-10,-3,15],[-6,-2,15],[-3,-1,15],[-9,-1,15],[-10,2,15],[-9,7,15],[-3,6,15],[-2,13,15],[-1,13,15],[-2,13,15],[-1,12,15],[0,3,15],[-2,10,15],[-1,13,15],[-2,13,15],[-1,13,15],[1,13,15],[0,13,15],[0,13,15],[1,12,15],[1,13,15],[1,13,15],[2,7,15],[1,6,15],[2,13,15],[4,13,15],[2,4,15],[4,9,15],[5,8,15],[4,4,15],[6,8,15],[8,5,15],[1,1,15],[1,-1,15],[8,-4,15],[10,-5,15],[7,-4,15],[2,-1,15],[9,-6,15],[8,-5,15],[2,-3,15],[9,-4,15],[9,0,15],[5,7,15],[5,1,15],[2,-1,15],[7,-7,15],[5,-6,15],[5,-5,15],[6,-8,15],[3,-3,15],[8,-10,15],[1,-1,15],[9,-12,15],[1,0,15],[9,-13,15],[9,-13,15],[8,-12,15],[2,-3,15],[6,-10,15],[3,-5,15],[5,-8,15],[4,-7,15],[4,-6,15],[6,-10,15],[2,-3,15],[7,-11,15],[1,-2,15],[7,-13,15],[1,-2,15],[8,-11,15],[2,-2,15],[7,-10,15],[2,-4,15],[7,-9,15],[2,-6,15],[4,-7,15],[-1,-13,15],[-3,-11,15],[0,-2,15],[0,-3,15],[3,-10,15],[3,-13,15],[3,-12,15],[-9,-7,15],[-9,0,15],[-9,6,15]],[[4535,2942,35],[-3,-1,35],[-6,-4,35],[-10,-2,35],[-9,-2,35],[-9,-2,35],[-10,-3,35],[-9,-7,35],[-9,-3,35],[-10,2,35],[-9,1,35],[-9,2,35],[-10,2,35],[-9,2,35],[-2,1,35],[-7,1,35],[-10,2,35],[-9,3,35],[-10,4,35],[-4,3,35],[-5,2,35],[-9,4,35],[-10,3,35],[-8,3,35],[-1,1,35],[-9,4,35],[-10,5,35],[-6,3,35],[-3,2,35],[-9,4,35],[-10,5,35],[-5,2,35],[-4,2,35],[-9,5,35],[-10,4,35],[-3,2,35],[-6,4,35],[-9,5,35],[-6,4,35],[-4,2,35],[-9,4,35],[-10,5,35],[-2,2,35],[-7,3,35],[-9,9,35],[-1,1,35],[-8,12,35],[-1,2,35],[-9,10,35],[-1,1,35],[-8,10,35],[-4,3,35],[-6,7,35],[-6,6,35],[-3,4,35],[-9,8,35],[-2,1,35],[-8,7,35],[-6,6,35],[-3,3,35],[-9,8,35],[-3,2,35],[-7,12,35],[0,1,35],[-7,12,35],[-2,4,35],[-6,9,35],[-4,7,35],[-2,6,35],[-7,13,35],[-8,13,35],[-1,1,35],[-9,12,35],[-1,0,35],[-9,11,35],[-2,2,35],[-7,6,35],[-6,6,35],[-4,4,35],[-9,9,35],[-9,8,35],[-6,5,35],[-4,4,35],[-8,9,35],[-1,1,35],[-9,9,35],[-3,3,35],[-7,7,35],[-4,6,35],[-5,7,35],[-4,6,35],[-5,7,35],[-5,6,35],[-5,7,35],[-4,5,35],[-5,9,35],[-4,4,35],[-6,10,35],[-2,3,35],[-7,12,35],[-1,1,35],[-8,13,35],[-9,13,35],[-1,1,35],[-8,12,35],[-1,2,35],[-6,11,35],[-3,4,35],[-7,8,35],[-3,4,35],[-9,9,35],[-8,13,35],[-1,4,35],[-5,9,35],[-4,13,35],[-1,1,35],[-4,12,35],[-3,13,35],[-2,12,35],[0,12,35],[0,1,35],[-5,13,35],[-4,11,35],[-1,2,35],[-7,13,35],[-2,2,35],[-6,11,35],[-3,4,35],[-9,7,35],[-4,2,35],[-6,7,35],[-9,6,35],[-10,10,35],[-4,2,35],[-4,13,35],[0,13,35],[1,13,35],[1,13,35],[2,13,35],[1,13,35],[2,13,35],[1,2,35],[6,10,35],[4,9,35],[2,4,35],[6,13,35],[1,3,35],[10,9,35],[6,1,35],[3,1,35],[9,2,35],[10,2,35],[9,1,35],[9,-6,35],[10,-12,35],[0,-1,35],[9,-11,35],[2,-2,35],[7,-10,35],[2,-3,35],[8,-10,35],[2,-2,35],[7,-8,35],[9,0,35],[10,4,35],[9,2,35],[9,-5,35],[8,-6,35],[2,-2,35],[9,-7,35],[6,-4,35],[4,-4,35],[9,-7,35],[3,-2,35],[6,-6,35],[9,-7,35],[1,0,35],[9,-9,35],[5,-4,35],[4,-3,35],[10,-9,35],[1,-1,35],[8,-5,35],[9,-5,35],[10,-1,35],[9,-1,35],[2,-1,35],[7,-3,35],[10,-6,35],[6,-3,35],[3,-2,35],[9,-6,35],[8,-5,35],[2,-1,35],[9,-7,35],[7,-5,35],[3,-2,35],[9,-8,35],[2,-3,35],[1,-13,35],[6,-9,35],[3,-4,35],[7,-10,35],[7,-3,35],[2,-1,35],[9,-8,35],[4,-4,35],[6,-6,35],[6,-6,35],[3,-4,35],[9,-9,35],[10,-10,35],[2,-3,35],[7,-7,35],[6,-6,35],[3,-3,35],[10,-10,35],[9,-8,35],[5,-5,35],[5,-4,35],[9,-6,35],[9,0,35],[7,-3,35],[3,-1,35],[9,-9,35],[2,-2,35],[7,-7,35],[6,-6,35],[4,-3,35],[9,-9,35],[1,-1,35],[8,-9,35],[5,-4,35],[5,-5,35],[8,-8,35],[1,-2,35],[9,-10,35],[1,-1,35],[9,-5,35],[9,-4,35],[4,-4,35],[5,-6,35],[6,-7,35],[4,-5,35],[5,-7,35],[4,-7,35],[5,-6,35],[5,-8,35],[3,-5,35],[6,-9,35],[3,-4,35],[6,-7,35],[7,-6,35],[3,-3,35],[6,-10,35],[3,-5,35],[4,-8,35],[5,-7,35],[6,-6,35],[4,-2,35],[9,-7,35],[4,-3,35],[5,-5,35],[10,-8,35],[9,-10,35],[3,-3,35],[6,-10,35],[2,-3,35],[8,-12,35],[0,-1,35],[9,-6,35],[5,-7,35],[4,-3,35],[10,-8,35],[1,-2,35],[8,-8,35],[7,-4,35],[1,-13,35],[0,-13,35],[2,-7,35],[1,-6,35],[3,-13,35],[2,-13,35],[2,-13,35],[1,-13,35],[0,-1,35],[1,-11,35],[0,-13,35],[-1,-4,35],[-3,-9,35],[-6,-13,35],[0,-1,35],[-6,-12,35],[-4,-5,35],[-6,-8,35],[-3,-3,35],[-8,-10,35],[-2,-1,35],[-9,-10,35]],[[6223,5986,5],[4,-2,5],[1,-1,5],[8,-5,5],[2,-2,5],[9,-3,5],[9,-3,5],[6,-5,5],[4,-3,5],[9,-2,5],[9,-2,5],[10,-4,5],[4,-2,5],[5,-2,5],[9,2,5],[10,-3,5],[9,-2,5],[9,-7,5],[2,-1,5],[8,-8,5],[4,-5,5],[5,-13,5],[9,-10,5],[3,-3,5],[7,-6,5],[9,-6,5],[0,-1,5],[10,-6,5],[8,-6,5],[1,-1,5],[9,-9,5],[3,-3,5],[7,-6,5],[7,-7,5],[2,-2,5],[9,-6,5],[10,-1,5],[9,1,5],[4,-5,5],[2,-13,5],[3,-3,5],[7,-10,5],[3,-3,5],[9,-10,5],[9,-4,5],[10,-5,5],[4,-4,5],[5,-2,5],[9,-4,5],[8,-6,5],[2,-2,5],[9,-5,5],[8,-6,5],[2,-2,5],[9,-5,5],[6,-6,5],[3,-3,5],[10,-4,5],[7,-6,5],[2,-1,5],[9,-5,5],[7,-7,5],[3,-1,5],[9,-5,5],[6,-7,5],[3,-1,5],[10,-5,5],[9,-4,5],[6,-3,5],[3,-12,5],[0,-3,5],[8,-10,5],[2,-2,5],[9,-6,5],[7,-5,5],[2,-2,5],[10,-6,5],[7,-5,5],[2,-1,5],[10,-8,5],[4,-4,5],[5,-4,5],[9,-8,5],[2,-1,5],[8,-5,5],[9,-7,5],[1,-1,5],[8,-6,5],[7,-7,5],[3,-3,5],[9,-4,5],[9,2,5],[10,3,5],[9,-3,5],[5,-7,5],[2,-13,5],[-4,-13,5],[-3,-13,5],[0,-13,5],[-1,-13,5],[0,-13,5],[1,-12,5],[0,-1,5],[9,-8,5],[10,-3,5],[4,-1,5],[5,-2,5],[10,-3,5],[9,-5,5],[5,-3,5],[4,-4,5],[8,-9,5],[2,-1,5],[9,-1,5],[9,0,5],[10,1,5],[9,1,5],[9,4,5],[10,4,5],[9,-4,5],[5,-4,5],[4,-6,5],[7,-7,5],[3,-6,5],[5,-7,5],[-1,-13,5],[-3,-13,5],[-1,-2,5],[-10,-6,5],[-7,-4,5],[-2,-3,5],[-9,-10,5],[0,-1,5],[-10,-4,5],[-9,-4,5],[-9,-4,5],[-10,-4,5],[-9,-4,5],[-5,-5,5],[-3,-13,5],[-1,-6,5],[-1,-7,5],[-2,-13,5],[0,-13,5],[2,-12,5],[-2,-13,5],[-5,-13,5],[-2,-3,5],[-9,-9,5],[-1,-1,5],[-8,-8,5],[-10,-2,5],[-9,4,5],[-8,6,5],[-2,1,5],[-9,6,5],[-9,6,5],[0,-13,5],[8,-13,5],[1,-1,5],[8,-12,5],[1,-2,5],[10,-7,5],[9,-3,5],[3,-1,5],[7,0,5],[3,0,5],[6,3,5],[9,5,5],[10,4,5],[9,0,5],[9,0,5],[10,1,5],[8,0,5],[1,0,5],[9,1,5],[10,1,5],[9,0,5],[9,1,5],[10,1,5],[9,0,5],[9,-3,5],[1,-1,5],[9,-8,5],[4,-5,5],[5,-5,5],[8,-7,5],[2,-3,5],[9,-9,5],[1,-1,5],[8,-9,5],[4,-4,5],[6,-6,5],[6,-7,5],[3,-1,5],[9,-3,5],[10,-3,5],[9,-4,5],[4,-2,5],[5,-2,5],[10,-3,5],[9,-4,5],[9,-3,5],[2,-1,5],[8,-3,5],[9,-4,5],[9,-5,5],[2,-1,5],[8,-5,5],[9,-6,5],[2,-2,5],[8,-5,5],[9,-6,5],[2,-1,5],[7,-6,5],[5,-7,5],[5,-10,5],[1,-3,5],[4,-13,5],[-5,-10,5],[-2,-3,5],[2,-4,5],[9,4,5],[9,-11,5],[1,-2,5],[9,-12,5],[0,-1,5],[8,-12,5],[1,-2,5],[9,-7,5],[4,-4,5],[6,-4,5],[9,-3,5],[9,2,5],[10,3,5],[3,2,5],[6,2,5],[4,-2,5],[0,-13,5],[-1,-13,5],[-1,-13,5],[-1,-13,5],[0,-13,5],[1,-13,5],[0,-12,5],[1,-13,5],[-2,-13,5],[3,-13,5],[0,-13,5],[-4,-4,5],[-2,-9,5],[2,-7,5],[2,-6,5],[5,-13,5],[2,-12,5],[0,-5,5],[2,-8,5],[2,-13,5],[2,-13,5],[2,-13,5],[2,-8,5],[1,-5,5],[3,-13,5],[2,-12,5],[3,-13,5],[0,-3,5],[2,-10,5],[5,-13,5],[3,-8,5],[1,-5,5],[5,-13,5],[3,-6,5],[5,-7,5],[4,-4,5],[10,-8,5],[0,-1,5],[3,-12,5],[2,-13,5],[2,-13,5],[2,-10,5],[1,-3,5],[1,-13,5],[0,-13,5],[-2,-12,5],[0,-1,5],[0,-13,5],[0,-5,5],[1,-7,5],[3,-13,5],[4,-13,5],[1,-8,5],[1,-5,5],[-1,-7,5],[0,-6,5],[-3,-13,5],[-5,-13,5],[-1,-3,5],[-5,-9,5],[-4,-3,5],[-10,-4,5],[-9,-3,5],[-9,-3,5],[-2,0,5],[-8,-3,5],[-9,-3,5],[-10,-3,5],[-5,-4,5],[0,-13,5],[3,-13,5],[-4,-13,5],[-3,-2,5],[-9,-7,5],[-6,-4,5],[-4,-3,5],[-9,-6,5],[-5,-4,5],[-4,-3,5],[-10,-7,5],[-4,-2,5],[-5,-5,5],[-9,-6,5],[-3,-2,5],[-7,-5,5],[-9,-7,5],[-2,-1,5],[-7,-7,5],[-10,-6,5],[-9,-8,5],[-8,-5,5],[-1,-5,5],[-1,-8,5],[1,-5,5],[1,-8,5],[4,-12,5],[4,-13,5],[4,-13,5],[3,-13,5],[2,-13,5],[2,-13,5],[-2,-7,5],[-1,-6,5],[-6,-13,5],[-1,-12,5],[8,-13,5],[0,-1,5],[8,-12,5],[2,-3,5],[4,-10,5],[5,-11,5],[1,-2,5],[4,-13,5],[4,-12,5],[1,-1,5],[4,-13,5],[4,-12,5],[1,-1,5],[4,-12,5],[5,-11,5],[1,-2,5],[8,-6,5],[10,2,5],[6,4,5],[3,1,5],[4,-1,5],[5,-8,5],[4,-5,5],[6,-7,5],[4,-6,5],[5,-7,5],[5,-6,5],[4,-5,5],[10,-4,5],[9,-2,5],[6,-2,5],[4,-1,5],[9,-4,5],[7,-7,5],[-7,-9,5],[-3,-4,5],[-5,-13,5],[7,-13,5],[1,-2,5],[5,-11,5],[4,-12,5],[1,-1,5],[9,-5,5],[7,-8,5],[2,-1,5],[9,-9,5],[4,-3,5],[6,-6,5],[7,-6,5],[2,-3,5],[9,-7,5],[4,-3,5],[6,-5,5],[9,-7,5],[1,-1,5],[8,-7,5],[9,-6,5],[1,-1,5],[9,-9,5],[4,-3,5],[6,-4,5],[9,-6,5],[4,-3,5],[5,-3,5],[10,-7,5],[4,-3,5],[5,-4,5],[9,-7,5],[3,-1,5],[7,-7,5],[6,-6,5],[3,-5,5],[9,-8,5],[-9,-6,5],[-9,1,5],[-10,5,5],[-9,4,5],[-9,4,5],[-6,5,5],[-4,2,5],[-9,5,5],[-6,6,5],[-3,2,5],[-10,5,5],[-9,5,5],[-2,0,5],[-8,1,5],[-1,-1,5],[1,-1,5],[4,-11,5],[-4,-3,5],[-9,0,5],[-5,3,5],[-4,5,5],[-10,3,5],[-7,4,5],[-2,2,5],[-9,7,5],[-7,4,5],[-3,4,5],[-9,8,5],[-3,1,5],[-6,8,5],[-10,2,5],[-9,3,5],[-9,11,5],[-8,2,5],[-2,0,5],[-1,0,5],[-8,-3,5],[-10,-2,5],[-9,4,5],[-2,1,5],[-7,2,5],[-10,-2,5],[0,-1,5],[7,-12,5],[3,-3,5],[7,-10,5],[2,-3,5],[6,-10,5],[-4,-13,5],[-2,-1,5],[-5,-11,5],[-3,-13,5],[-1,-3,5],[-7,-10,5],[-3,-5,5],[-3,-8,5],[-3,-13,5],[-3,-11,5],[0,-2,5],[-4,-13,5],[-3,-13,5],[-2,-12,5],[-1,0,5],[0,-13,5],[-2,-13,5],[-7,-7,5],[-8,-6,5],[8,-5,5],[8,-8,5],[2,-1,5],[9,-6,5],[7,-6,5],[2,-2,5],[10,-6,5],[5,-5,5],[4,-2,5],[9,-6,5],[6,-5,5],[4,-2,5],[9,-6,5],[6,-4,5],[4,-3,5],[9,-5,5],[9,-5,5],[2,0,5],[8,-3,5],[9,-2,5],[9,-2,5],[10,-2,5],[9,-3,5],[9,0,5],[10,-1,5],[1,0,5],[8,-1,5],[9,-1,5],[10,-1,5],[9,-1,5],[10,-1,5],[9,-2,5],[9,-1,5],[10,-2,5],[9,-2,5],[3,-1,5],[6,-2,5],[10,-7,5],[7,-4,5],[2,0,5],[1,0,5],[8,5,5],[10,6,5],[2,2,5],[7,10,5],[4,3,5],[5,7,5],[5,6,5],[5,6,5],[6,7,5],[3,2,5],[5,-2,5],[-3,-13,5],[7,-8,5],[10,0,5],[3,-5,5],[0,-13,5],[1,-13,5],[5,-9,5],[6,-4,5],[4,-2,5],[9,-3,5],[9,-3,5],[10,-2,5],[9,-2,5],[9,0,5],[10,0,5],[1,-1,5],[8,-9,5],[3,-3,5],[6,-6,5],[10,-5,5],[7,-2,5],[2,-1,5],[9,-3,5],[10,-4,5],[9,-4,5],[1,-1,5],[8,-9,5],[5,9,5],[4,13,5],[1,0,5],[9,6,5],[10,-2,5],[9,-4,5],[9,9,5],[5,4,5],[5,2,5],[9,5,5],[9,4,5],[2,1,5],[5,13,5],[-2,13,5],[-5,8,5],[-9,4,5],[-1,1,5],[-8,10,5],[-3,3,5],[3,1,5],[9,-1,5],[9,-9,5],[10,-3,5],[9,4,5],[9,3,5],[10,4,5],[3,1,5],[6,2,5],[9,3,5],[10,3,5],[9,3,5],[5,2,5],[4,1,5],[10,3,5],[9,1,5],[10,-2,5],[6,-3,5],[3,-1,5],[9,-3,5],[10,2,5],[1,2,5],[8,8,5],[4,5,5],[5,6,5],[7,6,5],[3,4,5],[9,8,5],[4,1,5],[5,3,5],[5,-3,5],[5,-3,5],[9,-6,5],[5,-4,5],[4,-4,5],[10,-8,5],[9,-6,5],[10,2,5],[3,4,5],[6,6,5],[7,6,5],[2,3,5],[10,10,5],[9,11,5],[2,2,5],[7,9,5],[4,4,5],[6,12,5],[0,1,5],[3,13,5],[2,13,5],[1,13,5],[3,12,5],[9,10,5],[2,3,5],[3,13,5],[-5,7,5],[-5,6,5],[-4,11,5],[-2,2,5],[2,1,5],[9,2,5],[10,1,5],[9,0,5],[9,1,5],[10,-5,5],[4,-13,5],[5,-13,5],[9,-4,5],[10,-4,5],[9,-4,5],[1,-1,5],[9,-2,5],[9,-3,5],[9,0,5],[10,5,5],[1,0,5],[8,1,5],[2,-1,5],[7,-3,5],[10,-4,5],[9,-6,5],[9,-4,5],[10,-4,5],[7,-4,5],[2,-1,5],[9,-2,5],[10,-2,5],[9,0,5],[9,0,5],[10,1,5],[7,4,5],[2,1,5],[10,6,5],[8,5,5],[1,1,5],[9,5,5],[10,2,5],[9,0,5],[9,-3,5],[8,-5,5],[2,-1,5],[9,-4,5],[9,-2,5],[10,0,5],[9,1,5],[9,0,5],[5,-6,5],[5,-5,5],[5,-8,5],[3,-13,5],[0,-13,5],[1,-1,5],[9,-2,5],[10,-1,5],[9,0,5],[10,0,5],[9,1,5],[9,3,5],[1,0,5],[9,2,5],[6,11,5],[-6,9,5],[-2,4,5],[-8,9,5],[-2,4,5],[-7,9,5],[-3,3,5],[-6,9,5],[-4,4,5],[-6,10,5],[-3,3,5],[-6,8,5],[-4,5,5],[-6,7,5],[-4,6,5],[-5,6,5],[-5,7,5],[-4,5,5],[-6,8,5],[-4,5,5],[-7,8,5],[-2,3,5],[-9,9,5],[0,1,5],[-8,12,5],[-2,4,5],[-5,9,5],[-4,6,5],[-5,7,5],[-4,6,5],[-6,7,5],[-4,5,5],[-5,8,5],[-4,7,5],[-4,6,5],[-5,9,5],[-2,3,5],[2,3,5],[9,-1,5],[2,-2,5],[7,-9,5],[3,-3,5],[7,-7,5],[5,-6,5],[4,-5,5],[8,-8,5],[1,-2,5],[10,-9,5],[2,-2,5],[7,-6,5],[8,-7,5],[1,-1,5],[10,-8,5],[5,-4,5],[4,-2,5],[9,-5,5],[1,7,5],[-1,1,5],[-7,12,5],[-2,2,5],[-7,11,5],[-2,1,5],[-8,12,5],[-2,2,5],[-8,11,5],[-1,2,5],[-7,11,5],[-2,1,5],[-9,11,5],[-1,1,5],[-9,12,5],[-3,13,5],[3,5,5],[5,8,5],[4,5,5],[10,7,5],[1,1,5],[8,7,5],[7,6,5],[2,2,5],[10,6,5],[6,5,5],[3,2,5],[9,3,5],[6,-5,5],[4,-5,5],[6,-8,5],[3,-6,5],[4,-7,5],[6,-6,5],[5,-7,5],[4,-6,5],[4,-7,5],[5,-8,5],[3,-5,5],[7,-7,5],[4,-6,5],[5,-6,5],[6,-6,5],[3,-4,5],[8,-9,5],[2,-2,5],[7,-11,5],[2,-3,5],[8,-10,5],[1,-2,5],[10,-9,5],[1,-2,5],[8,-8,5],[4,-5,5],[5,-8,5],[5,-5,5],[5,-6,5],[6,-6,5],[3,-5,5],[8,-8,5],[2,-2,5],[9,-10,5],[1,-1,5],[8,-9,5],[4,-4,5],[6,-7,5],[6,-6,5],[3,-4,5],[9,-9,5],[10,-9,5],[3,-4,5],[6,-7,5],[5,-6,5],[4,-5,5],[8,-7,5],[2,-2,5],[9,-8,5],[2,-3,5],[7,-7,5],[5,-6,5],[5,-6,5],[6,-7,5],[3,-4,5],[9,-8,5],[1,-1,5],[9,-8,5],[4,-5,5],[5,-5,5],[7,-8,5],[3,-2,5],[9,-8,5],[3,-3,5],[6,-5,5],[9,-7,5],[1,-1,5],[9,-6,5],[6,-6,5],[3,-3,5],[9,-10,5],[1,-1,5],[9,-6,5],[6,-6,5],[3,-3,5],[9,-10,5],[1,0,5],[9,-8,5],[4,-5,5],[5,-4,5],[8,-9,5],[2,-1,5],[9,-8,5],[5,-3,5],[4,-3,5],[10,-8,5],[6,-2,5],[3,-2,5],[10,-3,5],[9,-2,5],[9,-3,5],[7,-3,5],[3,-1,5],[9,-5,5],[6,-7,5],[3,-2,5],[10,-5,5],[5,-6,5],[4,-4,5],[9,3,5],[1,1,5],[9,9,5],[9,1,5],[9,-1,5],[10,-9,5],[9,-5,5],[9,-5,5],[5,-3,5],[5,-3,5],[9,-7,5],[5,-3,5],[5,-3,5],[9,-6,5],[4,-4,5],[5,-3,5],[10,-6,5],[4,-3,5],[5,-4,5],[9,-6,5],[5,-3,5],[5,-5,5],[6,-8,5],[3,-3,5],[9,1,5],[4,2,5],[6,3,5],[9,4,5],[9,4,5],[10,-3,5],[9,-6,5],[2,-2,5],[7,-5,5],[10,-5,5],[9,-3,5],[1,0,5],[9,-4,5],[9,-4,5],[9,-4,5],[10,1,5],[7,11,5],[2,3,5],[9,3,5],[10,1,5],[5,6,5],[3,13,5],[1,5,5],[3,8,5],[6,4,5],[10,3,5],[9,-3,5],[9,-3,5],[1,-1,5],[5,-13,5],[2,-13,5],[2,-9,5],[0,-4,5],[2,-13,5],[2,-13,5],[3,-13,5],[2,-8,5],[2,-5,5],[7,-12,5],[1,-2,5],[9,-9,5],[2,-2,5],[7,-12,5],[1,-1,5],[8,-13,5],[1,-2,5],[3,-11,5],[6,-12,5],[0,-1,5],[2,-13,5],[1,-12,5],[2,-13,5],[1,-13,5],[0,-13,5],[-1,-13,5],[-1,-13,5],[-1,-13,5],[0,-13,5],[1,-12,5],[1,-13,5],[0,-13,5],[1,-13,5],[0,-13,5],[1,-13,5],[0,-13,5],[0,-12,5],[1,-13,5],[0,-13,5],[0,-13,5],[0,-13,5],[0,-13,5],[1,-13,5],[0,-13,5],[0,-6,5]],[[6904,2838,10],[-2,-5,10],[-6,-8,10],[-4,-2,10],[-9,0,10],[-9,0,10],[-10,0,10],[-9,1,10],[-8,1,10],[-1,0,10],[-1,0,10],[-9,-2,10],[-9,-4,10],[-10,0,10],[-9,5,10],[-1,1,10],[-8,3,10],[-10,0,10],[-7,10,10],[-2,3,10],[-8,9,10],[-1,4,10],[-10,8,10],[-1,1,10],[-8,7,10],[-5,6,10],[-4,5,10],[-9,8,10],[-1,1,10],[-9,8,10],[-5,4,10],[-4,4,10],[-10,7,10],[-2,2,10],[-7,6,10],[-8,7,10],[-2,1,10],[-9,7,10],[-3,5,10],[-6,7,10],[-6,5,10],[-4,5,10],[-9,6,10],[-9,2,10],[-1,0,10],[-9,9,10],[-5,4,10],[-4,5,10],[-9,2,10],[-7,6,10],[-3,5,10],[-9,6,10],[-4,2,10],[-5,5,10],[-10,6,10],[-2,2,10],[-7,9,10],[-9,2,10],[-3,2,10],[-7,9,10],[-4,3,10],[4,8,10],[7,5,10],[3,3,10],[1,-3,10],[1,-13,10],[7,-5,10],[9,-2,10],[10,-2,10],[4,-3,10],[5,-2,10],[9,-2,10],[10,-2,10],[9,-5,10],[3,-2,10],[6,-2,10],[10,-3,10],[9,-3,10],[9,-5,10],[10,-3,10],[9,-2,10],[9,-3,10],[10,5,10],[1,3,10],[8,12,10],[1,1,10],[6,13,10],[3,2,10],[9,10,10],[1,0,10],[8,8,10],[10,4,10],[9,-3,10],[9,-4,10],[10,-4,10],[2,-1,10],[7,-3,10],[9,-3,10],[10,-4,10],[3,-2,10],[6,-7,10],[7,-6,10],[2,-1,10],[3,1,10],[7,4,10],[9,7,10],[4,2,10],[6,0,10],[2,0,10],[7,-4,10],[9,-6,10],[6,-3,10],[4,-5,10],[9,-7,10],[3,-1,10],[6,-10,10],[3,-3,10],[6,-13,10],[1,0,10],[7,-13,10],[2,-1,10],[9,-5,10],[7,-7,10],[2,-12,10],[1,-1,10],[7,-12,10],[2,-4,10],[5,-9,10],[4,-8,10],[2,-5,10],[-2,-7,10],[-8,-6,10],[-1,-1,10],[-8,-12,10],[-1,-2,10],[-7,-11,10],[-3,-3,10],[-7,-10,10],[-2,-3,10],[-7,-9,10]],[[6340,2784,30],[-8,2,30],[-1,0,30],[-9,3,30],[-10,2,30],[-9,2,30],[-9,2,30],[-10,3,30],[-5,1,30],[-4,1,30],[-9,1,30],[-10,1,30],[-9,2,30],[-9,4,30],[-8,4,30],[-2,1,30],[-9,4,30],[-10,4,30],[-7,4,30],[-2,1,30],[-9,4,30],[-10,5,30],[-6,3,30],[-3,1,30],[-9,5,30],[-10,4,30],[-4,2,30],[-5,3,30],[-9,4,30],[-10,4,30],[-6,2,30],[-3,1,30],[-9,3,30],[-10,3,30],[-9,3,30],[-8,3,30],[-1,1,30],[-10,3,30],[-9,3,30],[-10,2,30],[-9,4,30],[-9,3,30],[-10,1,30],[-9,0,30],[-9,0,30],[-10,-1,30],[-9,0,30],[-9,-1,30],[-10,2,30],[-9,-1,30],[-9,2,30],[-10,1,30],[-9,1,30],[-10,4,30],[-9,1,30],[-9,-1,30],[-10,-1,30],[-9,-2,30],[-9,-1,30],[-10,-3,30],[-5,-4,30],[-4,-1,30],[-9,0,30],[-10,0,30],[-9,0,30],[-9,1,30],[-10,-1,30],[-1,1,30],[-8,7,30],[-9,2,30],[-10,1,30],[-9,3,30],[-3,0,30],[-7,3,30],[-9,7,30],[-8,3,30],[-1,2,30],[-8,11,30],[-2,2,30],[-5,11,30],[-4,8,30],[-5,4,30],[-4,2,30],[-10,3,30],[-9,3,30],[-9,3,30],[-7,2,30],[-3,1,30],[-9,3,30],[-9,3,30],[-10,3,30],[-9,3,30],[-1,0,30],[-8,2,30],[-10,3,30],[-9,2,30],[-10,4,30],[-6,2,30],[-3,1,30],[-9,4,30],[-10,3,30],[-9,-3,30],[-8,-5,30],[-1,-1,30],[-10,-3,30],[-9,3,30],[-3,1,30],[-6,5,30],[-10,5,30],[-6,3,30],[-3,2,30],[-9,5,30],[-7,6,30],[-3,2,30],[-9,5,30],[-9,4,30],[-4,2,30],[-6,3,30],[-9,7,30],[-4,2,30],[-6,4,30],[-9,6,30],[-5,3,30],[-4,3,30],[-10,6,30],[-7,4,30],[-2,1,30],[-9,6,30],[-10,5,30],[-1,1,30],[-8,5,30],[-9,7,30],[-2,1,30],[-8,8,30],[-4,5,30],[-5,5,30],[-9,7,30],[-2,1,30],[-8,4,30],[-9,9,30],[-10,9,30],[-3,3,30],[-6,7,30],[-6,6,30],[-3,3,30],[-10,10,30],[-9,9,30],[-4,4,30],[-5,6,30],[-7,7,30],[-3,2,30],[-9,10,30],[-1,1,30],[-8,6,30],[-8,7,30],[8,11,30],[4,1,30],[5,3,30],[9,4,30],[9,6,30],[1,1,30],[8,12,30],[1,1,30],[9,2,30],[2,10,30],[8,5,30],[5,8,30],[4,5,30],[6,8,30],[3,7,30],[4,6,30],[6,9,30],[9,-2,30],[10,-3,30],[9,-2,30],[9,-2,30],[0,-1,30],[10,-3,30],[9,-1,30],[9,0,30],[10,-2,30],[9,-1,30],[9,-2,30],[10,-2,30],[7,-1,30],[2,-1,30],[9,-1,30],[10,-1,30],[8,3,30],[1,0,30],[10,3,30],[9,0,30],[9,-3,30],[2,0,30],[8,-2,30],[9,-4,30],[9,-5,30],[4,-2,30],[6,-3,30],[9,-5,30],[9,0,30],[10,1,30],[9,1,30],[9,1,30],[10,-1,30],[9,-4,30],[5,-3,30],[4,-3,30],[10,-6,30],[7,-4,30],[2,-1,30],[10,-6,30],[9,-3,30],[2,-3,30],[1,-13,30],[0,-12,30],[-1,-13,30],[1,-13,30],[6,-4,30],[10,-6,30],[2,-3,30],[7,-4,30],[9,-4,30],[5,-5,30],[5,-2,30],[9,-4,30],[9,-7,30],[10,-4,30],[9,-4,30],[6,-5,30],[3,-1,30],[10,-4,30],[9,-4,30],[5,-3,30],[4,-3,30],[10,-3,30],[9,-5,30],[3,-2,30],[7,-3,30],[9,-5,30],[9,-4,30],[1,-1,30],[9,-5,30],[9,-3,30],[9,-4,30],[1,-1,30],[9,-4,30],[9,-3,30],[9,-6,30],[1,0,30],[9,-5,30],[9,-4,30],[5,-4,30],[4,-3,30],[10,-4,30],[7,-6,30],[2,-2,30],[9,-6,30],[7,-5,30],[3,-4,30],[9,-7,30],[1,-1,30],[-1,-3,30],[-5,-10,30],[-4,-10,30],[-1,-3,30],[-2,-13,30],[-2,-13,30],[-2,-13,30],[2,-13,30],[5,-2,30],[9,2,30],[10,0,30],[9,-3,30],[1,3,30],[8,9,30],[6,4,30],[4,2,30],[9,4,30],[9,7,30],[0,3,30],[1,10,30],[4,13,30],[5,4,30],[9,8,30],[1,1,30],[8,4,30],[10,2,30],[9,1,30],[9,1,30],[10,3,30],[9,1,30],[5,1,30],[5,0,30],[9,1,30],[9,0,30],[10,0,30],[5,-1,30],[4,-2,30],[9,-3,30],[10,-4,30],[9,-3,30],[2,-1,30],[7,-3,30],[10,-3,30],[9,-3,30],[9,-4,30],[1,0,30],[9,-7,30],[7,-6,30],[2,-1,30],[9,-8,30],[6,-4,30],[4,-3,30],[9,-7,30],[3,-3,30],[7,-5,30],[9,-7,30],[9,1,30],[10,0,30],[4,-2,30],[5,-2,30],[9,-7,30],[5,-3,30],[5,-4,30],[9,-5,30],[9,-3,30],[6,-1,30],[4,-1,30],[9,-6,30],[5,-6,30],[4,-10,30],[1,-3,30],[4,-13,30],[4,-13,30],[1,-1,30],[3,-12,30],[4,-13,30],[2,-5,30],[2,-7,30],[4,-13,30],[3,-10,30],[1,-3,30],[4,-13,30],[1,-13,30],[-6,-4,30],[-9,-2,30],[-9,2,30],[-10,2,30]],[[4690,2799,30],[-5,-11,30],[-2,-2,30],[-8,-5,30],[-9,0,30],[-9,2,30],[-9,3,30],[-1,0,30],[-9,3,30],[-9,2,30],[-10,-1,30],[-9,-1,30],[-9,-1,30],[-10,-1,30],[-9,-1,30],[-2,0,30],[-7,-1,30],[-10,1,30],[-1,0,30],[-8,3,30],[-10,3,30],[-9,1,30],[-9,0,30],[-10,0,30],[-9,-1,30],[-9,0,30],[-10,0,30],[-9,1,30],[-9,1,30],[-10,1,30],[-9,1,30],[-9,2,30],[-4,1,30],[-6,2,30],[-9,3,30],[-9,3,30],[-10,3,30],[-5,2,30],[-4,1,30],[-10,3,30],[-9,3,30],[-9,2,30],[-10,3,30],[-2,1,30],[-7,2,30],[-9,8,30],[-2,3,30],[-6,12,30],[-2,3,30],[-9,4,30],[-9,4,30],[-5,2,30],[-5,3,30],[-9,4,30],[-9,4,30],[-5,2,30],[-5,2,30],[-9,5,30],[-9,4,30],[-5,2,30],[-5,2,30],[-9,4,30],[-10,5,30],[-5,2,30],[-4,2,30],[-9,4,30],[-10,4,30],[-5,3,30],[-4,1,30],[-9,5,30],[-10,4,30],[-4,3,30],[-5,5,30],[-4,8,30],[-5,9,30],[-3,3,30],[-7,6,30],[-9,7,30],[-9,7,30],[-10,6,30],[-9,6,30],[-10,7,30],[-9,6,30],[-9,6,30],[-1,1,30],[-9,6,30],[-7,7,30],[-2,5,30],[-1,8,30],[-3,12,30],[-5,6,30],[-10,2,30],[-8,5,30],[-1,2,30],[-9,11,30],[-10,12,30],[-1,1,30],[-8,10,30],[-2,3,30],[-7,9,30],[-4,4,30],[-6,7,30],[-4,6,30],[-5,6,30],[-6,7,30],[-3,4,30],[-7,8,30],[-3,3,30],[-8,10,30],[-1,2,30],[-10,11,30],[-9,9,30],[-4,4,30],[-5,5,30],[-4,8,30],[-1,13,30],[1,13,30],[-2,12,30],[-4,10,30],[-1,3,30],[-7,13,30],[-1,2,30],[-6,11,30],[-3,6,30],[-7,7,30],[-3,4,30],[-9,1,30],[-9,-1,30],[-10,-1,30],[-9,2,30],[-2,8,30],[2,7,30],[1,6,30],[5,13,30],[3,11,30],[1,1,30],[3,13,30],[-2,13,30],[-2,4,30],[-4,9,30],[-5,12,30],[-1,1,30],[-4,13,30],[-2,13,30],[-1,13,30],[-1,2,30],[-4,10,30],[-2,13,30],[-4,4,30],[-9,6,30],[-6,3,30],[-3,2,30],[-10,6,30],[-4,5,30],[-5,5,30],[-8,8,30],[-2,1,30],[-9,12,30],[-9,13,30],[-6,12,30],[-4,10,30],[-1,3,30],[-4,13,30],[-3,13,30],[-1,2,30],[-5,11,30],[-4,9,30],[-2,4,30],[-2,13,30],[0,13,30],[0,12,30],[0,13,30],[-1,13,30],[-2,13,30],[-2,13,30],[-1,0,30],[-6,13,30],[-3,4,30],[-4,9,30],[-3,13,30],[2,12,30],[3,13,30],[2,5,30],[3,8,30],[1,13,30],[-1,13,30],[-3,10,30],[-1,3,30],[-8,13,30],[0,2,30],[-8,10,30],[0,13,30],[5,13,30],[3,6,30],[3,7,30],[5,13,30],[1,1,30],[5,12,30],[4,13,30],[0,3,30],[3,10,30],[7,12,30],[9,9,30],[5,4,30],[4,4,30],[10,8,30],[1,1,30],[8,2,30],[9,0,30],[10,0,30],[5,-2,30],[4,-2,30],[10,-6,30],[6,-5,30],[3,-2,30],[9,-10,30],[1,-1,30],[8,-12,30],[1,-2,30],[7,-11,30],[2,-4,30],[8,-9,30],[1,-2,30],[10,-7,30],[7,-4,30],[2,-1,30],[9,-6,30],[10,-5,30],[1,-1,30],[8,-4,30],[9,-6,30],[6,-3,30],[4,-2,30],[9,-5,30],[9,-6,30],[1,0,30],[9,-5,30],[9,-5,30],[6,-3,30],[4,-1,30],[9,0,30],[9,-4,30],[8,-7,30],[2,-2,30],[9,-9,30],[3,-2,30],[6,-7,30],[7,-6,30],[3,-3,30],[9,-9,30],[1,-1,30],[8,-8,30],[5,-5,30],[5,-5,30],[7,-8,30],[2,-2,30],[9,-11,30],[10,-10,30],[3,-2,30],[6,-5,30],[9,-5,30],[5,-3,30],[5,-5,30],[9,-8,30],[1,0,30],[9,-8,30],[5,-5,30],[4,-4,30],[9,-8,30],[1,-1,30],[9,-8,30],[5,-5,30],[4,-3,30],[9,-9,30],[2,-1,30],[8,-7,30],[9,-4,30],[1,-2,30],[7,-12,30],[1,-4,30],[8,-9,30],[2,-1,30],[9,-8,30],[5,-4,30],[4,-4,30],[10,-7,30],[2,-2,30],[7,-6,30],[9,-7,30],[1,0,30],[9,-8,30],[6,-5,30],[3,-2,30],[10,-9,30],[2,-2,30],[7,-8,30],[5,-5,30],[4,-3,30],[10,0,30],[9,-1,30],[9,-7,30],[2,-1,30],[8,-7,30],[7,-6,30],[2,-2,30],[9,-7,30],[7,-4,30],[3,-2,30],[9,-7,30],[7,-4,30],[2,-2,30],[10,-6,30],[7,-5,30],[2,-1,30],[10,-8,30],[2,-4,30],[7,-8,30],[5,-5,30],[4,-5,30],[7,-7,30],[3,-4,30],[7,-9,30],[2,-2,30],[9,-11,30],[0,-1,30],[10,-12,30],[9,-9,30],[9,-3,30],[2,-1,30],[8,-2,30],[9,-2,30],[9,-1,30],[10,-5,30],[3,-3,30],[6,-8,30],[4,-5,30],[5,-13,30],[0,-2,30],[4,-10,30],[5,-13,30],[1,-1,30],[8,-12,30],[1,-1,30],[10,-11,30],[0,-1,30],[9,-9,30],[3,-4,30],[1,-13,30],[-4,-10,30],[-1,-3,30],[-5,-13,30],[6,-11,30],[1,-1,30],[8,-6,30],[10,-5,30],[2,-2,30],[7,-10,30],[3,-3,30],[6,-13,30],[0,-1,30],[6,-12,30],[4,-6,30],[3,-7,30],[6,-11,30],[1,-2,30],[7,-12,30],[1,-3,30],[7,-10,30],[3,-4,30],[6,-9,30],[3,-7,30],[5,-6,30],[4,-4,30],[10,-8,30],[0,-1,30],[7,-13,30],[2,-5,30],[4,-8,30],[5,-11,30],[1,-2,30],[7,-12,30],[2,-11,30],[0,-2,30],[0,-5,30],[-1,-8,30],[-1,-13,30],[-1,-13,30],[-1,-13,30],[-2,-13,30],[-1,-12,30],[-1,-13,30],[-1,-13,30],[0,-13,30],[0,-13,30],[1,-13,30],[0,-13,30],[1,-13,30],[0,-12,30],[-1,-13,30],[-2,-2,30],[-8,-11,30],[-1,-3,30],[-4,-10,30]],[[3039,2758,10],[-3,2,10],[-7,6,10],[-6,7,10],[-3,6,10],[-7,7,10],[-3,8,10],[-1,5,10],[-6,13,10],[-2,3,10],[-5,10,10],[-4,6,10],[-4,7,10],[-6,7,10],[-3,5,10],[-6,7,10],[-5,6,10],[-4,6,10],[-6,7,10],[-4,6,10],[-4,7,10],[-3,13,10],[1,13,10],[6,8,10],[10,3,10],[9,-10,10],[1,-1,10],[8,-10,10],[3,-3,10],[7,-10,10],[9,-1,10],[8,-2,10],[1,-1,10],[10,-9,10],[3,-3,10],[6,-9,10],[10,-3,10],[1,-1,10],[7,-13,10],[1,-1,10],[3,-11,10],[2,-13,10],[3,-13,10],[1,-3,10],[6,-10,10],[4,-8,10],[2,-5,10],[5,-13,10],[0,-13,10],[-7,-3,10],[-10,-1,10],[-9,-1,10],[-9,3,10]],[[3254,2708,5],[9,-4,5],[1,5,5],[-1,2,5],[-7,11,5],[-2,4,5],[-5,9,5],[-5,3,5],[-6,9,5],[-3,1,5],[-9,6,5],[-5,6,5],[-5,3,5],[-8,10,5],[-1,1,5],[-9,3,5],[-10,9,5],[-9,5,5],[-6,8,5],[-4,2,5],[-9,11,5],[-9,2,5],[-9,11,5],[-1,0,5],[-9,3,5],[-8,10,5],[-1,0,5],[-10,3,5],[-7,9,5],[-2,2,5],[-9,11,5],[-10,3,5],[-9,7,5],[-4,3,5],[-5,2,5],[-10,6,5],[-4,5,5],[-5,2,5],[-9,6,5],[-5,5,5],[-5,2,5],[-8,11,5],[-1,0,5],[-10,4,5],[-9,7,5],[-2,2,5],[-7,1,5],[-9,12,5],[-1,0,5],[-9,3,5],[-8,9,5],[-1,1,5],[-10,8,5],[-4,4,5],[-5,2,5],[-9,9,5],[-3,2,5],[-7,1,5],[-9,6,5],[-5,6,5],[-4,2,5],[-10,9,5],[-2,2,5],[-7,2,5],[-9,11,5],[-10,4,5],[-9,-4,5],[9,-5,5],[5,-8,5],[5,-2,5],[9,-2,5],[5,-9,5],[4,-2,5],[8,-11,5],[2,-2,5],[9,-4,5],[9,-1,5],[4,-6,5],[6,-2,5],[7,-11,5],[2,-1,5],[8,-11,5],[1,-2,5],[10,1,5],[9,-12,5],[0,-1,5],[9,-2,5],[8,-10,5],[2,-1,5],[9,-2,5],[9,-5,5],[3,-5,5],[7,-3,5],[6,-10,5],[3,-2,5],[9,-11,5],[1,-1,5],[9,-1,5],[9,-11,5],[10,-5,5],[7,-8,5],[2,0,5],[9,-4,5],[7,-8,5],[3,-3,5],[7,-10,5],[2,-3,5],[9,-4,5],[8,-6,5],[2,-1,5],[9,-3,5],[8,-9,5],[1,-1,5],[10,-8,5],[2,-4,5],[7,-3,5],[9,-10,5],[10,-3,5],[8,-10,5],[1,0,5],[10,-5,5],[5,-8,5],[4,-2,5],[8,-10,5],[1,-1,5],[10,-3,5],[6,-9,5],[3,-2,5],[9,-3,5],[7,-8,5],[3,-1,5]],[[7151,2593,10],[-4,13,10],[7,13,10],[8,13,10],[2,1,10],[7,12,10],[2,3,10],[5,9,10],[4,8,10],[5,5,10],[5,11,10],[8,2,10],[1,0,10],[9,1,10],[10,1,10],[9,1,10],[9,2,10],[10,-1,10],[1,-4,10],[-1,-13,10],[0,-11,10],[0,-2,10],[0,-2,10],[0,-10,10],[1,-13,10],[-1,-10,10],[-1,-3,10],[-3,-13,10],[-2,-13,10],[-4,-8,10],[-1,-5,10],[-3,-13,10],[-5,-11,10],[-1,-2,10],[-8,-9,10],[-10,3,10],[-7,6,10],[-2,2,10],[-9,5,10],[-9,6,10],[-1,1,10],[-9,5,10],[-7,7,10],[-2,3,10],[-10,6,10],[-3,4,10]],[[4021,2476,15],[-10,1,15],[-9,0,15],[0,1,15],[9,4,15],[10,2,15],[9,5,15],[3,-12,15],[-3,-5,15],[-9,4,15]],[[7921,2449,15],[-2,2,15],[-7,13,15],[0,1,15],[9,7,15],[10,-2,15],[5,-6,15],[2,-13,15],[-7,-3,15],[-10,1,15]],[[6612,2413,25],[-6,0,25],[6,1,25],[0,-1,25]],[[3665,2387,5],[0,0,5]],[[9413,2734,10],[-5,0,10],[-3,1,10],[-6,3,10],[-9,1,10],[-10,0,10],[-9,2,10],[-9,0,10],[-10,2,10],[-9,3,10],[-4,1,10],[-5,2,10],[-10,3,10],[-9,1,10],[-9,2,10],[-10,2,10],[-9,3,10],[-3,0,10],[-7,2,10],[-9,2,10],[-9,2,10],[-10,1,10],[-9,2,10],[-6,-9,10],[-3,-4,10],[-6,-9,10],[-4,-3,10],[-6,-9,10],[-3,-3,10],[-9,-8,10],[-2,-2,10],[-8,-10,10],[-2,-3,10],[-6,-13,10],[-1,-1,10],[-6,-12,10],[-3,-5,10],[-4,-8,10],[-2,-13,10],[5,-12,10],[1,-2,10],[4,-11,10],[4,-13,10],[1,-4,10],[3,-9,10],[4,-13,10],[2,-8,10],[2,-5,10],[3,-13,10],[4,-13,10],[1,-3,10],[2,-9,10],[4,-13,10],[3,-13,10],[3,-13,10],[5,-13,10],[1,-3,10],[3,-10,10],[1,-13,10],[1,-13,10],[0,-12,10],[0,-13,10],[0,-13,10],[1,-13,10],[0,-13,10],[1,-13,10],[0,-13,10],[-2,-6,10]],[[8005,2381,15],[-8,6,15],[-1,4,15],[-1,9,15],[0,13,15],[1,13,15],[8,13,15],[1,1,15],[10,5,15],[9,1,15],[9,-2,15],[10,-2,15],[9,-2,15],[2,-1,15],[8,-5,15],[9,-7,15],[2,-1,15],[7,-5,15],[10,-6,15],[2,-2,15],[7,-12,15],[0,-1,15],[4,-13,15],[3,-13,15],[-7,-7,15],[-8,-6,15],[-1,0,15],[-10,-4,15],[-9,0,15],[-9,3,15],[-4,1,15],[-6,3,15],[-9,3,15],[-10,3,15],[-9,3,15],[-3,1,15],[-6,3,15],[-10,4,15]],[[7182,2360,15],[-1,1,15],[-8,8,15],[-3,5,15],[-6,10,15],[-2,3,15],[-8,12,15],[-1,1,15],[-8,12,15],[-1,1,15],[-9,12,15],[0,1,15],[-2,13,15],[2,6,15],[10,5,15],[9,-5,15],[10,-5,15],[2,-1,15],[7,-4,15],[9,-6,15],[2,-3,15],[1,-13,15],[-3,-8,15],[-1,-5,15],[-2,-13,15],[3,-6,15],[2,-7,15],[-1,-13,15],[-1,-1,15]],[[7556,2365,10],[-4,-4,10],[-5,-3,10],[-9,-9,10],[-1,0,10],[-9,-6,10],[-9,-3,10],[-7,9,10],[-2,2,10],[-6,10,10],[-4,9,10],[-4,4,10],[4,9,10],[4,4,10],[6,4,10],[9,5,10],[9,4,10],[1,0,10],[9,6,10],[6,7,10],[3,4,10],[6,9,10],[3,4,10],[6,9,10],[4,4,10],[5,8,10],[4,6,10],[6,7,10],[3,7,10],[6,6,10],[4,3,10],[9,4,10],[10,-1,10],[5,-6,10],[4,-5,10],[4,-8,10],[5,-5,10],[10,-3,10],[9,-3,10],[3,-2,10],[-3,-6,10],[-9,-4,10],[-10,-1,10],[-2,-1,10],[-7,-9,10],[-2,-4,10],[-7,-13,10],[0,-2,10],[-6,-11,10],[-4,-4,10],[-9,-9,10],[-10,-7,10],[-7,-6,10],[-2,-1,10],[-9,-4,10],[-10,-4,10]],[[9226,2355,10],[-5,-2,10],[-4,-4,10],[3,-7,10]],[[8295,2184,15],[-6,-3,15],[-3,-1,15],[-3,1,15],[-6,5,15],[-7,8,15],[-1,13,15],[5,13,15],[3,4,15],[4,9,15],[5,8,15],[2,5,15],[7,11,15],[1,1,15],[9,11,15],[1,2,15],[8,8,15],[7,5,15],[2,1,15],[10,5,15],[9,2,15],[6,-8,15],[3,-13,15],[-4,-13,15],[-5,-8,15],[-2,-4,15],[-7,-13,15],[-1,0,15],[-7,-13,15],[-2,-3,15],[-5,-10,15],[-4,-5,15],[-5,-8,15],[-4,-3,15],[-10,-7,15]],[[3792,2104,5],[-5,-5,5],[-10,-3,5],[-8,-5,5],[-1,0,5],[-9,-6,5],[-10,0,5],[-3,6,5],[-4,13,5],[-2,5,5],[-3,8,5],[-6,8,5],[-4,5,5],[-6,7,5],[-4,6,5],[-5,7,5],[-4,6,5],[-5,6,5],[-5,6,5],[-5,9,5],[-3,4,5],[-6,11,5],[-2,2,5],[2,3,5],[9,-3,5],[10,-5,5],[8,-8,5],[1,0,5],[9,-7,5],[6,-6,5],[4,-2,5],[9,-9,5],[2,-1,5],[7,-3,5],[10,-8,5],[2,-2,5],[7,-6,5],[7,-7,5],[2,-1,5],[10,-1,5],[9,-1,5],[3,-10,5],[-3,-6,5],[-4,-7,5]],[[8988,2117,15],[0,-2,15],[-3,-11,15],[-6,-13,15],[-1,-1,15],[-9,-4,15],[-10,-4,15],[-9,-2,15],[-6,-2,15],[-3,0,15],[-10,-3,15],[-9,-2,15],[-9,1,15],[-6,4,15],[-4,10,15],[-1,3,15],[-5,13,15],[-3,7,15],[-2,6,15],[-7,13,15],[-10,11,15],[0,2,15],[-7,13,15],[-2,2,15],[-2,-2,15],[-7,-5,15],[-9,-8,15],[-1,-1,15],[-9,-11,15],[-1,-1,15],[-8,-13,15],[-10,-13,15],[-9,-3,15],[-10,3,15],[-9,5,15],[-9,4,15],[-10,4,15],[-9,3,15],[-9,0,15],[-10,1,15],[-7,9,15],[-2,3,15],[-6,10,15],[-3,8,15],[-3,5,15],[1,12,15],[2,2,15],[9,7,15],[7,4,15],[2,2,15],[10,6,15],[8,5,15],[1,1,15],[9,6,15],[9,6,15],[1,0,15],[9,8,15],[7,5,15],[2,3,15],[10,10,15],[7,13,15],[2,4,15],[5,8,15],[5,10,15],[1,3,15],[6,13,15],[2,3,15],[5,10,15],[4,9,15],[2,4,15],[7,13,15],[1,1,15],[9,12,15],[9,2,15],[10,1,15],[9,2,15],[9,3,15],[7,5,15],[3,2,15],[9,8,15],[3,2,15],[6,7,15],[6,6,15],[4,6,15],[5,7,15],[4,5,15],[9,2,15],[10,-5,15],[3,-2,15],[6,-3,15],[10,-4,15],[5,-6,15],[4,-3,15],[9,-5,15],[9,-5,15],[1,0,15],[9,-4,15],[9,-4,15],[9,-4,15],[1,-1,15],[9,-9,15],[9,-3,15],[1,0,15],[-1,-1,15],[-9,-4,15],[-9,-4,15],[-10,-3,15],[-2,-1,15],[-7,-12,15],[0,-1,15],[-1,-13,15],[-1,-13,15],[0,-13,15],[0,-13,15],[0,-12,15],[0,-13,15],[0,-13,15],[0,-13,15],[0,-13,15],[0,-13,15],[-1,-13,15],[-4,-12,15],[-2,-3,15],[-7,-10,15],[-3,-3,15],[-8,-10,15],[-1,-2,15],[-9,-11,15]],[[4535,2022,5],[9,-6,5],[10,10,5],[0,1,5],[-10,6,5],[-9,4,5],[-1,-10,5],[1,-5,5]],[[3927,2022,5],[-6,5,5],[-3,9,5],[-2,4,5],[2,2,5],[9,1,5],[9,-2,5],[4,-1,5],[0,-13,5],[-4,-4,5],[-9,-1,5]],[[9030,1994,10],[-5,1,10],[-9,-3,10],[-10,-2,10],[-4,-2,10],[-5,0,10],[-9,-1,10],[-7,1,10],[-3,2,10],[-9,6,10],[-10,1,10],[-9,2,10],[-5,2,10],[-4,1,10],[-10,4,10],[-9,3,10],[-9,3,10],[-10,2,10],[-9,-1,10],[-9,0,10],[-8,1,10],[-2,0,10],[-9,2,10],[-9,2,10],[-10,3,10],[-9,4,10],[-5,2,10],[-4,1,10],[-10,5,10],[-5,7,10],[-4,4,10],[-10,4,10],[-9,-1,10],[-9,-2,10],[-10,1,10],[-9,1,10],[-9,-1,10],[-10,1,10],[-9,3,10],[-5,3,10],[-4,2,10],[-10,4,10],[-9,5,10],[-4,1,10],[-5,3,10],[-10,5,10],[-9,5,10],[-1,0,10],[-8,6,10],[-10,6,10],[-2,1,10],[-7,4,10],[-10,6,10],[-3,3,10],[-6,10,10],[-5,3,10],[-4,1,10],[-6,-1,10],[-4,-1,10],[-9,-3,10],[-9,-2,10],[-10,0,10],[-9,0,10],[-9,0,10],[-10,4,10],[-2,2,10],[-7,6,10],[-6,7,10],[-3,7,10],[-3,6,10],[-6,13,10],[-1,3,10],[-4,9,10],[-5,6,10],[-10,2,10],[-9,-6,10],[-3,-2,10],[-6,-4,10],[-10,0,10],[-9,-1,10],[-9,-1,10],[-10,-1,10],[-9,-1,10],[-9,-1,10],[-10,-1,10],[-9,0,10],[-9,1,10],[-10,1,10],[-9,1,10],[-9,0,10],[-10,2,10],[-9,1,10],[-10,1,10],[-9,-2,10],[-9,-4,10],[-7,-3,10],[-3,-2,10],[-9,-4,10],[-9,-3,10],[-10,-1,10],[-9,-1,10],[-9,0,10],[-10,4,10],[-9,5,10],[-2,2,10],[-7,8,10],[-6,4,10],[-4,5,10],[-8,8,10],[-1,3,10],[-4,10,10],[-4,13,10],[-1,6,10],[-9,-6,10],[-1,0,10],[-9,0,10],[-1,0,10],[-9,4,10],[-9,3,10],[-9,3,10],[-7,3,10],[-3,1,10],[-9,4,10],[-9,3,10],[-10,-1,10],[-9,-6,10],[-1,-1,10],[-8,-2,10],[-10,-2,10],[-7,-9,10],[-2,-1,10],[-9,-1,10],[-10,0,10],[-9,0,10],[-9,1,10],[-2,1,10],[-8,8,10],[-9,1,10],[-10,2,10],[-2,2,10],[-7,6,10],[-9,2,10],[-10,5,10],[-9,8,10],[-9,4,10],[-1,1,10],[-8,12,10],[0,13,10],[-1,2,10],[-9,10,10],[-3,1,10],[-6,2,10],[-10,3,10],[-9,2,10],[-9,3,10],[-10,3,10],[-9,6,10],[-10,5,10],[-9,-1,10],[-9,-1,10],[-10,0,10],[-9,1,10],[-9,3,10],[-1,0,10],[-9,4,10],[-9,6,10],[-3,3,10],[-6,6,10],[-10,7,10],[-9,4,10],[-9,4,10],[-10,4,10],[0,1,10],[-9,6,10],[-7,6,10],[-2,3,10],[-10,8,10],[-2,2,10],[-7,6,10],[-7,7,10],[-3,3,10],[-9,9,10],[-1,1,10],[-3,13,10],[4,13,10],[0,3,10],[4,10,10],[5,3,10],[10,6,10],[5,3,10],[4,3,10],[10,6,10],[6,4,10],[3,2,10],[4,11,10],[4,13,10],[-2,13,10],[-1,13,10],[-1,13,10],[5,6,10],[3,7,10],[3,12,10],[0,13,10],[2,13,10],[2,5,10],[9,7,10],[1,1,10],[8,12,10],[0,1,10],[1,13,10],[9,8,10],[9,1,10],[9,0,10],[10,1,10],[6,3,10],[3,1,10],[9,4,10],[10,2,10],[9,-1,10],[9,-1,10],[10,-1,10],[9,0,10],[10,1,10],[9,2,10],[9,1,10],[10,1,10],[9,1,10],[9,1,10],[10,1,10],[1,1,10],[8,0,10],[9,2,10],[10,1,10],[9,1,10],[9,1,10],[10,1,10],[9,1,10],[10,2,10],[9,1,10],[9,2,10],[1,0,10],[9,3,10],[9,5,10],[9,5,10],[2,0,10],[8,4,10],[9,5,10],[7,4,10],[-1,13,10],[-6,10,10],[-2,3,10],[2,12,10],[0,1,10],[9,4,10],[10,5,10],[8,4,10],[1,0,10],[9,5,10],[10,4,10],[6,3,10],[3,2,10],[9,1,10],[10,0,10],[9,-2,10],[7,-1,10],[3,0,10],[9,-1,10],[9,-1,10],[10,-2,10],[9,-1,10],[9,-1,10],[10,-2,10],[9,-1,10],[9,-1,10],[10,1,10],[9,3,10],[9,4,10],[6,2,10],[4,2,10],[9,1,10],[9,-1,10],[5,-2,10],[5,-1,10],[9,0,10],[3,1,10],[7,4,10],[9,8,10],[1,1,10],[8,8,10],[7,5,10],[3,3,10],[7,-3,10],[2,-1,10],[9,-3,10],[10,0,10],[9,1,10],[6,3,10],[3,2,10],[10,9,10],[2,2,10],[7,8,10],[5,5,10],[-5,9,10],[-2,4,10],[-7,8,10],[-4,5,10],[-6,7,10],[-5,6,10],[2,12,10],[3,4,10],[10,3,10],[9,1,10],[9,1,10],[10,1,10],[9,2,10],[7,1,10],[2,1,10],[10,2,10],[9,3,10],[10,3,10],[9,2,10],[9,0,10],[10,-6,10],[9,8,10],[9,10,10],[3,3,10],[7,8,10],[4,5,10],[5,6,10],[6,7,10],[3,3,10],[10,10,10],[9,9,10],[3,4,10],[6,6,10],[7,6,10],[3,4,10],[9,9,10],[1,0,10],[0,13,10],[-1,2,10],[-7,11,10],[-1,13,10],[8,12,10],[4,1,10],[6,1,10],[9,2,10],[9,5,10],[7,5,10],[-7,10,10],[-1,2,10],[-8,11,10],[-2,2,10],[-7,11,10],[-2,2,10],[-8,11,10],[-2,2,10],[-7,10,10],[-2,3,10],[-8,10,10],[-2,3,10],[-7,13,10],[1,13,10],[2,12,10],[-3,11,10],[-3,2,10],[-6,7,10],[-10,6,10],[-7,13,10],[1,13,10],[6,8,10],[5,5,10],[5,6,10],[5,7,10],[2,12,10],[1,13,10],[1,10,10],[0,3,10],[1,13,10],[2,13,10],[1,13,10],[2,13,10],[-6,5,10],[-6,-5,10],[-3,-3,10],[-10,-10,10],[-9,-10,10],[-2,-3,10],[-7,-7,10],[-5,-6,10],[-5,-5,10],[-7,-8,10],[-2,-2,10],[-9,-10,10],[-1,-1,10],[-9,-10,10],[-1,-3,10],[-8,-9,10],[-3,-3,10],[-6,-6,10],[-10,-4,10],[-9,8,10],[-1,2,10],[0,12,10],[1,2,10],[9,11,10],[10,12,10],[1,1,10],[8,9,10],[7,4,10],[2,1,10],[10,8,10],[3,4,10],[6,6,10],[5,7,10],[4,5,10],[6,8,10],[4,4,10],[7,9,10],[2,2,10],[8,10,10],[1,2,10],[10,4,10],[9,-3,10],[8,-3,10],[1,-12,10],[0,-2,10],[5,-11,10],[5,-4,10],[5,-9,10],[4,-7,10],[3,-6,10],[7,-10,10],[1,-3,10],[7,-13,10],[1,-1,10],[9,-11,10],[10,8,10],[3,4,10],[6,4,10],[9,5,10],[5,4,10],[-5,5,10],[-8,8,10],[-1,1,10],[-8,12,10],[-1,4,10],[-10,5,10],[-9,4,10],[9,5,10],[10,0,10],[9,-1,10],[9,-2,10],[9,-2,10],[1,0,10],[9,-1,10],[9,-7,10],[3,-5,10],[7,-10,10],[3,-3,10],[6,-4,10],[9,-7,10],[3,-2,10],[7,-4,10],[9,-2,10],[9,-1,10],[10,1,10],[9,2,10],[10,2,10],[7,2,10],[2,1,10],[9,2,10],[10,2,10],[9,3,10],[9,2,10],[10,2,10],[3,1,10],[6,2,10],[2,-2,10],[7,-3,10],[10,2,10],[0,1,10],[9,3,10],[3,-3,10],[6,-5,10],[10,-5,10],[3,-3,10],[6,-3,10],[9,-10,10],[10,-4,10],[9,-6,10],[10,5,10],[9,4,10],[5,1,10],[4,1,10],[10,2,10],[9,2,10],[9,2,10],[10,2,10],[9,2,10],[9,2,10],[3,0,10],[7,1,10],[9,-1,10],[9,-11,10],[3,-2,10],[7,-8,10],[8,-5,10],[1,-1,10],[9,-8,10],[4,-4,10],[6,-6,10],[7,-6,10],[2,-3,10],[10,-8,10],[2,-2,10],[7,-7,10],[7,-6,10],[2,-2,10],[10,-7,10],[2,-4,10],[7,-7,10],[5,-6,10],[4,-5,10],[8,-8,10],[2,-2,10],[9,-10,10],[1,-1,10],[8,-8,10],[4,-4,10],[6,-6,10],[7,-7,10],[2,-2,10],[9,-8,10],[3,-3,10],[7,-5,10],[8,-8,10],[1,-1,10],[9,-8,10],[4,-4,10],[6,-2,10],[9,-11,10],[10,-10,10],[2,-3,10],[7,-7,10],[5,-6,10],[4,-5,10],[6,-7,10],[4,-6,10],[5,-7,10],[-5,-6,10],[-4,-7,10],[-6,-8,10],[-3,-5,10],[-6,-5,10],[-9,-5,10],[-5,-3,10],[-5,-4,10],[-9,-5,10],[-5,-4,10],[-5,-3,10],[-9,-5,10],[-6,-5,10],[-3,-1,10],[-10,-4,10],[-9,-3,10],[-9,-1,10],[-10,0,10],[-9,2,10],[-8,7,10],[-1,1,10],[-10,10,10],[-2,2,10],[-7,6,10],[-9,3,10],[-3,-9,10],[3,-6,10],[2,-7,10],[6,-12,10],[1,-2,10],[6,-11,10],[3,-4,10],[10,-7,10],[1,-2,10],[8,-13,10],[0,-13,10],[0,-2,10],[2,-11,10],[1,-13,10],[-3,-12,10],[-1,-1,10],[-8,-6,10],[-10,-1,10],[-9,-2,10],[-2,-3,10],[2,-3,10],[8,-10,10],[1,-1,10],[10,-9,10],[2,-3,10],[5,-13,10],[2,-7,10],[5,-6,10],[4,-5,10],[10,-6,10],[9,2,10],[2,9,10],[7,8,10],[3,5,10],[5,13,10],[2,3,10],[3,10,10],[6,9,10],[2,4,10],[7,10,10],[3,2,10],[7,7,10],[6,6,10],[3,3,10],[10,10,10],[1,0,10],[8,6,10],[9,0,10],[10,4,10],[4,3,10],[5,3,10],[9,3,10],[10,-2,10],[9,-2,10],[9,-2,10],[1,0,10],[9,-2,10],[9,-3,10],[7,-8,10],[0,-13,10],[2,-10,10],[2,-3,10],[7,-12,10],[1,-2,10],[6,-11,10],[0,-13,10],[-6,-13,10],[-7,-13,10],[-3,-3,10],[-5,-10,10],[-3,-13,10],[8,-8,10],[8,-5,10],[0,-6,10]],[[7444,2001,10],[-9,-10,10],[-2,-3,10],[-8,-2,10],[-9,1,10],[-1,1,10],[-8,10,10],[-2,3,10],[-8,8,10],[-3,5,10],[-6,7,10],[-4,6,10],[-5,11,10],[-2,2,10],[-8,8,10],[-3,5,10],[-4,12,10],[-2,3,10],[-7,10,10],[-2,4,10],[-8,9,10],[-2,3,10],[-6,10,10],[-3,4,10],[-7,9,10],[-2,5,10],[-6,8,10],[-4,7,10],[-4,6,10],[-5,8,10],[-3,5,10],[-7,10,10],[-1,2,10],[-8,12,10],[-1,1,10],[-8,12,10],[-1,1,10],[-9,12,10],[0,1,10],[-9,11,10],[-2,2,10],[-6,13,10],[-1,1,10],[-8,12,10],[-2,2,10],[-7,10,10],[-2,3,10],[-5,10,10],[-4,5,10],[-7,8,10],[-3,5,10],[-5,8,10],[-4,5,10],[-6,8,10],[-3,5,10],[-6,8,10],[-4,7,10],[-3,6,10],[-6,6,10],[-5,7,10],[-4,7,10],[-4,5,10],[-6,12,10],[-1,1,10],[-8,11,10],[-2,2,10],[-8,12,10],[0,1,10],[-9,13,10],[-8,13,10],[-1,2,10],[-6,11,10],[-4,9,10],[-2,3,10],[-6,13,10],[-1,3,10],[-7,10,10],[-2,4,10],[-7,9,10],[-3,4,10],[-6,9,10],[-3,5,10],[-6,8,10],[-3,5,10],[-6,8,10],[-4,7,10],[-4,6,10],[-5,9,10],[-3,3,10],[-1,13,10],[4,4,10],[5,-4,10],[4,-3,10],[10,-7,10],[3,-3,10],[6,-3,10],[6,-9,10],[3,-4,10],[10,1,10],[9,-2,10],[4,5,10],[5,3,10],[10,5,10],[9,3,10],[9,1,10],[7,0,10],[3,1,10],[9,0,10],[1,-1,10],[9,-2,10],[9,-4,10],[8,-6,10],[1,-1,10],[10,-5,10],[7,-7,10],[2,-2,10],[9,-5,10],[7,-6,10],[3,-4,10],[8,-9,10],[1,-7,10],[5,-6,10],[4,-4,10],[9,-9,10],[1,-7,10],[0,-6,10],[1,-13,10],[2,-12,10],[2,-13,10],[2,-13,10],[2,-7,10],[5,-6,10],[4,-4,10],[10,-8,10],[1,-1,10],[5,-13,10],[3,-12,10],[0,-1,10],[3,-12,10],[3,-13,10],[-6,-10,10],[-4,-3,10],[0,-13,10],[4,-8,10],[3,-5,10],[6,-9,10],[4,-4,10],[6,-5,10],[7,-8,10],[2,-4,10],[6,-9,10],[4,-4,10],[8,-8,10],[1,-2,10],[6,-11,10],[3,-5,10],[6,-8,10],[4,-7,10],[3,-6,10],[6,-11,10],[1,-2,10],[6,-13,10],[2,-3,10],[5,-10,10],[5,-8,10],[2,-4,10],[7,-13,10],[0,-1,10],[9,-8,10],[8,-4,10],[2,-1,10],[9,-6,10],[4,-6,10],[5,-10,10],[2,-3,10],[4,-13,10],[2,-13,10],[2,-3,10],[3,-10,10],[6,-12,10],[-1,-13,10],[1,-11,10],[1,-2,10],[2,-13,10],[-3,-10,10],[0,-3,10]],[[3614,1952,5],[4,0,5],[10,6,5],[6,4,5],[3,1,5],[10,4,5],[9,3,5],[9,5,5],[10,-4,5],[2,-9,5],[0,-12,5],[-2,-7,5],[-4,-6,5],[-6,-8,5],[-6,-5,5],[-2,-7,5]],[[4058,1818,5],[9,-3,5],[10,-2,5],[9,3,5],[1,5,5],[-1,1,5],[-9,7,5],[-4,5,5],[-6,4,5],[-9,6,5],[-3,3,5],[-6,5,5],[-10,4,5],[-6,4,5],[-3,2,5],[-9,5,5],[-9,5,5],[-1,1,5],[-9,6,5],[-8,6,5],[-1,2,5],[-3,-2,5],[3,-5,5],[2,-8,5],[7,-4,5],[8,-8,5],[1,-2,5],[10,-7,5],[2,-4,5],[7,-7,5],[8,-6,5],[1,-2,5],[10,-7,5],[5,-4,5],[4,-3,5]],[[6796,1744,35],[-7,-2,35],[-7,2,35],[-2,1,35],[-8,12,35],[-1,5,35],[-2,7,35],[2,4,35],[9,4,35],[9,-6,35],[2,-2,35],[8,-10,35],[1,-2,35],[-1,-12,35],[-3,-1,35]],[[6883,1678,30],[-2,1,30],[-7,7,30],[-7,6,30],[-3,3,30],[-9,9,30],[-1,1,30],[-8,9,30],[-9,4,30],[-1,1,30],[-9,2,30],[-10,3,30],[-9,1,30],[-9,-4,30],[-10,-1,30],[-9,1,30],[-9,1,30],[-10,4,30],[-3,5,30],[-6,6,30],[-6,7,30],[-3,6,30],[-5,7,30],[-5,12,30],[-9,10,30],[-6,3,30],[-3,4,30],[-10,8,30],[-1,1,30],[-8,11,30],[-3,2,30],[-7,12,30],[-1,1,30],[-8,8,30],[-9,5,30],[-10,11,30],[-2,2,30],[-7,7,30],[-9,5,30],[0,1,30],[-10,9,30],[-5,3,30],[-4,5,30],[-9,6,30],[-4,2,30],[1,13,30],[1,13,30],[2,10,30],[3,3,30],[6,13,30],[-9,13,30],[0,1,30],[-7,11,30],[-3,5,30],[-5,8,30],[-4,8,30],[-3,5,30],[-6,12,30],[-1,1,30],[-7,13,30],[-2,4,30],[-4,9,30],[-5,11,30],[-1,2,30],[-4,13,30],[-4,12,30],[0,4,30],[-3,9,30],[-4,13,30],[-3,7,30],[-3,6,30],[-6,13,30],[-7,13,30],[-3,8,30],[-1,5,30],[1,3,30],[5,10,30],[-4,12,30],[-1,2,30],[-6,11,30],[0,13,30],[5,13,30],[1,3,30],[8,10,30],[2,1,30],[9,7,30],[10,-3,30],[9,-4,30],[7,-1,30],[2,0,30],[10,-2,30],[9,-2,30],[9,-6,30],[10,-2,30],[6,-1,30],[3,-2,30],[9,-6,30],[10,-3,30],[5,-2,30],[4,-3,30],[9,-6,30],[10,-3,30],[1,-1,30],[8,-8,30],[4,-5,30],[5,-5,30],[8,-7,30],[2,-2,30],[9,-11,30],[0,-1,30],[10,-7,30],[8,-5,30],[1,-1,30],[9,-8,30],[7,-4,30],[3,-3,30],[9,-7,30],[1,-3,30],[1,-13,30],[-2,-13,30],[-1,-13,30],[1,-3,30],[6,-9,30],[3,-4,30],[10,-9,30],[9,-11,30],[2,-2,30],[0,-13,30],[-2,-3,30],[-7,-10,30],[0,-13,30],[5,-13,30],[2,-3,30],[3,-10,30],[5,-12,30],[1,-4,30],[5,-9,30],[5,-10,30],[1,-3,30],[7,-13,30],[1,-2,30],[5,-11,30],[4,-7,30],[3,-6,30],[7,-12,30],[0,-1,30],[6,-12,30],[3,-6,30],[5,-7,30],[5,-6,30],[9,-1,30],[9,-1,30],[10,-5,30],[9,-6,30],[9,-4,30],[7,-3,30],[3,-2,30],[8,-11,30],[1,-2,30],[4,-11,30],[0,-13,30],[-3,-13,30],[-1,-5,30],[-2,-7,30],[-3,-13,30],[-2,-13,30],[-2,-11,30],[-1,-2,30],[-4,-13,30],[-1,-13,30],[2,-13,30],[-6,-7,30],[-9,6,30]],[[5003,1611,10],[-3,4,10],[3,5,10],[9,4,10],[3,-9,10],[-3,-5,10],[-9,1,10]],[[8211,1593,5],[10,0,5],[9,1,5],[9,2,5],[10,4,5],[4,2,5],[-4,3,5],[-10,2,5],[-9,2,5],[-9,3,5],[-10,-2,5],[-8,-8,5],[8,-9,5]],[[4984,1549,10],[-5,2,10],[-4,4,10],[-1,9,10],[1,0,10],[9,1,10],[2,-1,10],[0,-13,10],[-2,-2,10]],[[7687,1472,5],[1,1,5],[1,13,5],[0,13,5],[-2,2,5],[-8,11,5],[-1,2,5],[-9,11,5],[5,13,5],[4,5,5],[9,4,5],[10,3,5],[1,1,5],[8,6,5],[9,2,5],[10,2,5],[5,3,5],[4,5,5],[9,-3,5],[3,-2,5],[7,-4,5],[9,-6,5],[10,9,5],[0,1,5],[8,12,5],[1,2,5],[5,11,5],[-5,5,5],[-9,-1,5],[-10,0,5],[-9,2,5],[-10,3,5],[-9,-4,5],[-9,-4,5],[-3,-1,5],[-7,-3,5],[-9,-3,5],[-9,-2,5],[-10,2,5],[-9,-3,5],[-3,-4,5],[-6,-5,5],[-10,-3,5],[-9,-3,5],[-9,2,5],[-10,8,5],[-2,1,5],[-7,5,5],[-7,-5,5],[1,-12,5],[-3,-6,5],[-4,-7,5],[-6,-9,5],[-4,-4,5],[4,-8,5],[5,-5,5],[5,-6,5],[7,-7,5],[-5,-13,5],[6,-13,5],[1,0,5],[9,-2,5],[1,2,5],[-1,5,5],[-2,8,5],[-5,13,5],[7,2,5],[10,1,5],[9,0,5],[7,-3,5],[2,-3,5],[6,-10,5],[4,-5,5],[4,-8,5],[5,-7,5],[6,-6,5],[3,-1,5]],[[6941,1473,25],[-2,3,25],[-9,8,25],[-3,2,25],[-7,8,25],[-8,5,25],[-1,1,25],[-9,10,25],[-2,2,25],[2,8,25],[1,5,25],[-1,2,25],[-10,11,25],[-9,7,25],[-6,6,25],[-3,2,25],[-10,9,25],[-1,2,25],[-8,8,25],[-4,4,25],[-5,8,25],[-3,5,25],[-4,13,25],[-3,8,25],[-4,5,25],[-5,7,25],[-10,5,25],[0,1,25],[-9,12,25],[-1,1,25],[-1,13,25],[-3,13,25],[-4,9,25],[-2,3,25],[-8,6,25],[-7,7,25],[-2,2,25],[-9,7,25],[-4,4,25],[-6,4,25],[-8,9,25],[-1,1,25],[-9,10,25],[-2,2,25],[-8,8,25],[-5,5,25],[-4,4,25],[-9,8,25],[-2,1,25],[-8,6,25],[-7,6,25],[-2,2,25],[-10,7,25],[-5,4,25],[-4,4,25],[-9,8,25],[-1,1,25],[-9,9,25],[-4,4,25],[-5,6,25],[-7,7,25],[-2,2,25],[-10,8,25],[-2,3,25],[-7,6,25],[-7,7,25],[-2,2,25],[-10,7,25],[-6,4,25],[-3,1,25],[-9,4,25],[-10,7,25],[-9,10,25],[-4,3,25],[-5,6,25],[-9,7,25],[-1,1,25],[-9,6,25],[-10,5,25],[-1,1,25],[-8,4,25],[-9,5,25],[-7,4,25],[-3,2,25],[-9,10,25],[0,1,25],[-9,7,25],[-7,6,25],[-3,2,25],[-9,7,25],[-6,3,25],[-3,4,25],[-9,9,25],[2,13,25],[-2,13,25],[-1,6,25],[-1,7,25],[-2,13,25],[-2,13,25],[-3,13,25],[-1,4,25],[-3,8,25],[-6,9,25],[-10,4,25],[-9,4,25],[-9,4,25],[-10,4,25],[-2,1,25],[-7,4,25],[-10,4,25],[-9,4,25],[-3,1,25],[-6,3,25],[-10,4,25],[-9,5,25],[-1,1,25],[-8,6,25],[-8,7,25],[-2,1,25],[-9,9,25],[-3,3,25],[-6,6,25],[-6,7,25],[-4,4,25],[-7,8,25],[-2,3,25],[-9,10,25],[0,1,25],[-10,11,25],[-1,1,25],[-8,7,25],[-5,6,25],[-4,5,25],[-7,8,25],[-3,9,25],[-1,4,25],[-4,13,25],[-4,12,25],[0,3,25],[-3,10,25],[-4,13,25],[-3,8,25],[-1,5,25],[-5,13,25],[-3,9,25],[-1,4,25],[-3,13,25],[-1,13,25],[-4,10,25],[-10,2,25],[-5,0,25],[-4,1,25],[-9,0,25],[-10,1,25],[-9,1,25],[-4,10,25],[4,4,25],[6,9,25],[3,4,25],[8,9,25],[2,2,25],[9,10,25],[1,1,25],[8,11,25],[2,2,25],[0,13,25],[1,12,25],[3,13,25],[4,13,25],[3,13,25],[4,13,25],[2,13,25],[-2,13,25],[-4,13,25],[-3,12,25],[-4,13,25],[-3,13,25],[-3,8,25],[-1,5,25],[-3,13,25],[-3,13,25],[-2,6,25],[-1,7,25],[-7,13,25],[-1,3,25],[-3,9,25],[-6,13,25],[-1,1,25],[-9,7,25],[-8,5,25],[-1,1,25],[-10,7,25],[-7,5,25],[-2,1,25],[-9,7,25],[-8,5,25],[-2,1,25],[-9,7,25],[-7,5,25],[-2,1,25],[-10,7,25],[-6,5,25],[-3,2,25],[-10,7,25],[-3,3,25],[-6,5,25],[-9,7,25],[-3,1,25],[-7,4,25],[-9,3,25],[-9,1,25],[-10,0,25],[-9,0,25],[-9,1,25],[-10,1,25],[-7,3,25],[-2,1,25],[-9,5,25],[-10,4,25],[-5,3,25],[-4,2,25],[-10,5,25],[-9,4,25],[-5,2,25],[-4,1,25],[-10,5,25],[-7,7,25],[-2,3,25],[-9,8,25],[-10,1,25],[-9,0,25],[-9,-1,25],[-10,-1,25],[-9,1,25],[-5,2,25],[-4,1,25],[-10,4,25],[-9,3,25],[-9,4,25],[-1,1,25],[-9,4,25],[-9,5,25],[-6,3,25],[-4,3,25],[-9,4,25],[-9,3,25],[-9,3,25],[-1,0,25],[-9,4,25],[-9,3,25],[-10,5,25],[-3,1,25],[-6,2,25],[-9,3,25],[-10,2,25],[-9,2,25],[-9,1,25],[-10,2,25],[-5,1,25],[-4,1,25],[-9,4,25],[-10,3,25],[-9,0,25],[-10,0,25],[-9,0,25],[-9,-1,25],[-10,-2,25],[-9,-3,25],[-9,-2,25],[-10,2,25],[-9,4,25],[-9,5,25],[-4,2,25],[-6,2,25],[-9,3,25],[-9,3,25],[-10,3,25],[-7,2,25],[-2,1,25],[-9,3,25],[-10,3,25],[-9,2,25],[-9,4,25],[-1,0,25],[-9,9,25],[-6,4,25],[-3,1,25],[-10,3,25],[-9,4,25],[-9,4,25],[0,1,25],[-10,4,25],[-9,3,25],[-9,5,25],[-1,0,25],[-9,6,25],[-9,5,25],[-3,2,25],[-6,5,25],[-9,8,25],[-1,0,25],[-9,8,25],[-5,5,25],[-5,4,25],[-9,7,25],[-1,2,25],[-8,6,25],[-8,7,25],[-2,0,25],[-9,5,25],[-9,5,25],[-5,2,25],[-5,3,25],[-9,4,25],[-9,5,25],[-2,1,25],[-8,4,25],[-9,5,25],[-7,4,25],[-2,2,25],[-10,6,25],[-9,5,25],[-1,0,25],[-8,4,25],[-10,3,25],[-9,5,25],[-4,1,25],[-6,1,25],[-9,2,25],[-9,1,25],[-10,4,25],[-9,-1,25],[-9,-3,25],[-10,-3,25],[-2,-1,25],[-7,-2,25],[-9,-1,25],[-10,-2,25],[-9,-1,25],[-9,-2,25],[-10,-4,25],[-9,0,25],[-9,-1,25],[-10,1,25],[-9,1,25],[-10,1,25],[-9,1,25],[-9,1,25],[-10,0,25],[-9,1,25],[-9,-1,25],[-9,-5,25],[2,-13,25],[-1,-13,25],[-2,-9,25],[0,-4,25],[0,-12,25],[0,-13,25],[0,-13,25],[1,-13,25],[1,-13,25],[1,-13,25],[-1,-13,25],[-2,-4,25],[-3,-8,25],[-5,-13,25],[0,-13,25],[5,-13,25],[3,0,25],[1,0,25],[9,9,25],[3,4,25],[6,7,25],[7,6,25],[2,2,25],[1,-2,25],[3,-13,25],[0,-13,25],[0,-13,25],[-1,-13,25],[-3,-7,25],[-3,-6,25],[-6,-7,25],[-5,-6,25],[5,-4,25],[8,-8,25],[1,-2,25],[10,-9,25],[3,-2,25],[6,-6,25],[7,-7,25],[2,-2,25],[10,-11,25],[5,-13,25],[4,-9,25],[2,-4,25],[8,-11,25],[1,-2,25],[8,-12,25],[0,-1,25],[8,-12,25],[1,-2,25],[6,-11,25],[3,-13,25],[1,-2,25],[2,-11,25],[2,-13,25],[3,-13,25],[1,-13,25],[-3,-12,25],[-5,-3,25],[-10,-2,25],[-9,0,25],[-9,0,25],[-10,2,25],[-9,-4,25],[-4,-6,25],[-6,-11,25],[-1,-2,25],[-7,-13,25],[-1,-2,25],[-5,-11,25],[-4,-7,25],[-3,-6,25],[-7,-8,25],[-3,-5,25],[-6,-3,25],[-9,-3,25],[-10,1,25],[-9,2,25],[-9,3,25],[-1,0,25],[-7,13,25],[-2,1,25],[-9,6,25],[-8,6,25],[-1,1,25],[-10,6,25],[-9,6,25],[-9,6,25],[-10,6,25],[0,1,25],[-9,6,25],[-10,6,25],[-1,1,25],[-8,6,25],[-3,7,25],[-6,11,25],[-3,1,25],[-7,2,25],[-2,-2,25],[-7,-3,25],[-9,-2,25],[-10,-2,25],[-9,-1,25],[-9,-2,25],[-8,-2,25],[-2,-1,25],[-9,-4,25],[-9,-4,25],[-10,-3,25],[-3,-1,25],[-6,-2,25],[-10,-2,25],[-9,-2,25],[-9,-3,25],[-8,-4,25],[3,-13,25],[-5,-7,25],[-9,-1,25],[-9,3,25],[-10,4,25],[-3,1,25],[-6,3,25],[-9,4,25],[-10,4,25],[-4,2,25],[-5,2,25],[-9,8,25],[-2,3,25],[-8,8,25],[-9,4,25],[-4,1,25],[-5,2,25],[-10,5,25],[-9,5,25],[-10,7,25],[-9,5,25],[-3,1,25],[-6,7,25],[-10,4,25],[-3,2,25],[1,13,25],[-7,2,25],[-9,2,25],[-10,1,25],[-9,1,25],[-9,2,25],[-10,2,25],[-9,1,25],[-9,1,25],[-4,1,25],[-6,1,25],[-9,2,25],[-9,2,25],[-10,1,25],[-9,2,25],[-10,2,25],[-9,3,25],[-9,3,25],[-10,4,25],[-9,3,25],[-6,3,25],[-3,1,25],[-10,3,25],[-9,4,25],[-9,3,25],[-4,1,25],[-6,3,25],[-9,5,25],[-9,5,25],[0,1,25],[-10,5,25],[-9,3,25],[-9,4,25],[-2,0,25],[-8,2,25],[-9,2,25],[-10,1,25],[-9,2,25],[-9,2,25],[-10,2,25],[-9,1,25],[-3,1,25],[-6,2,25],[-10,2,25],[-9,2,25],[-9,2,25],[-10,2,25],[-9,2,25],[-2,1,25],[-7,2,25],[-10,3,25],[-9,3,25],[-8,5,25],[-2,1,25],[-9,10,25],[-2,2,25],[-7,3,25],[-10,6,25],[-7,4,25],[-2,1,25],[-9,5,25],[-10,5,25],[-3,1,25],[-6,5,25],[-9,5,25],[-5,3,25],[-5,3,25],[-9,6,25],[-7,4,25],[-2,3,25],[-4,10,25],[-2,13,25],[-4,12,25],[-1,1,25],[-8,1,25],[-9,0,25],[-10,2,25],[-9,4,25],[-10,3,25],[-7,3,25],[-2,0,25],[-9,4,25],[-10,3,25],[-8,6,25],[-1,0,25],[-7,12,25],[-2,5,25],[-4,8,25],[-6,11,25],[-1,2,25],[-6,13,25],[-2,3,25],[-5,10,25],[-4,8,25],[-3,5,25],[-7,12,25],[0,1,25],[-7,12,25],[-2,4,25],[-4,9,25],[-4,13,25],[-1,5,25],[-7,8,25],[-3,1,25],[-9,0,25],[-9,0,25],[-10,-1,25],[-9,-1,25],[-10,-3,25],[-9,-2,25],[-9,-2,25],[-10,6,25],[-2,2,25],[-7,5,25],[-9,5,25],[-5,3,25],[-5,5,25],[-2,8,25],[-3,13,25],[-4,13,25],[-6,12,25],[-3,7,25],[-4,6,25],[-6,11,25],[-1,2,25],[-7,13,25],[-1,2,25],[-6,11,25],[-3,7,25],[-4,6,25],[-5,13,25],[-1,2,25],[-1,10,25],[1,13,25],[0,13,25],[-4,13,25],[-3,13,25],[-2,8,25],[-1,5,25],[-1,13,25],[2,4,25],[2,9,25],[4,12,25],[3,11,25],[1,2,25],[2,13,25],[7,12,25],[0,1,25],[7,13,25],[2,6,25],[1,7,25],[2,13,25],[2,13,25],[2,12,25],[2,13,25],[0,1,25],[3,12,25],[4,13,25],[3,9,25],[1,4,25],[3,13,25],[-1,13,25],[-3,11,25],[-1,1,25],[-6,13,25],[-3,13,25],[8,13,25],[2,4,25],[3,9,25],[2,13,25],[-1,13,25],[-1,13,25],[1,12,25],[0,13,25],[1,13,25],[-3,13,25],[-2,11,25],[-1,2,25],[-7,13,25],[-2,6,25],[-3,7,25],[-2,13,25],[2,12,25],[2,13,25],[0,13,25],[-2,13,25],[-6,12,25],[0,1,25],[-9,9,25],[-3,4,25],[-6,13,25],[-1,3,25],[-1,9,25],[-7,13,25],[-1,3,25],[-4,10,25],[-2,13,25],[0,13,25],[0,13,25],[-3,11,25],[-1,2,25],[-5,13,25],[0,12,25],[1,13,25],[4,13,25],[1,4,25],[4,9,25],[5,13,25],[0,1,25],[9,9,25],[5,3,25],[5,4,25],[9,7,25],[1,2,25],[8,8,25],[10,1,25],[9,1,25],[9,0,25],[10,0,25],[9,0,25],[9,1,25],[10,0,25],[9,-1,25],[9,-3,25],[10,-4,25],[9,-3,25],[0,-1,25],[10,-3,25],[9,-3,25],[9,-3,25],[10,-2,25],[3,-1,25],[6,-5,25],[9,-7,25],[2,-1,25],[8,-6,25],[9,-5,25],[4,-2,25],[5,-3,25],[10,-8,25],[2,-2,25],[7,-5,25],[9,-5,25],[7,-3,25],[3,-1,25],[9,-5,25],[9,-5,25],[4,-2,25],[6,-3,25],[9,-5,25],[8,-4,25],[2,-1,25],[9,-6,25],[8,-6,25],[1,-1,25],[10,-7,25],[6,-5,25],[3,-2,25],[9,-5,25],[10,-4,25],[3,-2,25],[6,-2,25],[9,-4,25],[10,-4,25],[5,-3,25],[4,-2,25],[9,-5,25],[10,-6,25],[9,-8,25],[7,-5,25],[2,-2,25],[10,-5,25],[9,-4,25],[3,-2,25],[7,-2,25],[9,-6,25],[2,-4,25],[7,-8,25],[10,3,25],[9,-3,25],[9,-3,25],[3,-2,25],[7,-8,25],[7,-5,25],[2,-2,25],[9,-2,25],[10,-1,25],[9,-3,25],[9,-5,25],[10,-4,25],[9,-6,25],[9,-3,25],[1,0,25],[8,-13,25],[1,-1,25],[5,1,25],[4,3,25],[10,3,25],[9,0,25],[9,0,25],[10,-1,25],[9,-1,25],[9,-4,25],[10,-9,25],[4,-4,25],[5,-7,25],[9,-3,25],[10,1,25],[9,1,25],[9,0,25],[10,-1,25],[9,-2,25],[2,-1,25],[8,-5,25],[9,-6,25],[3,-2,25],[6,-5,25],[10,-7,25],[1,-1,25],[8,-6,25],[9,-7,25],[10,-7,25],[7,-6,25],[2,-2,25],[9,-6,25],[10,-2,25],[9,-2,25],[2,-1,25],[7,-2,25],[10,-4,25],[9,-3,25],[9,-3,25],[3,-1,25],[7,-2,25],[9,-3,25],[10,-3,25],[9,0,25],[9,0,25],[10,-3,25],[3,-2,25],[6,-3,25],[9,-6,25],[7,-3,25],[3,-2,25],[9,-6,25],[9,-5,25],[3,0,25],[7,-2,25],[9,-1,25],[9,-1,25],[10,0,25],[9,-2,25],[9,-2,25],[10,-3,25],[5,-2,25],[4,-2,25],[10,-3,25],[9,-3,25],[9,-3,25],[7,-2,25],[3,-1,25],[9,-2,25],[9,-3,25],[10,-2,25],[9,-2,25],[9,-2,25],[4,-1,25],[6,-1,25],[9,-3,25],[9,-3,25],[10,-4,25],[5,-2,25],[4,-1,25],[10,-4,25],[9,-3,25],[9,-1,25],[10,0,25],[9,2,25],[9,2,25],[10,-1,25],[9,-3,25],[9,-4,25],[10,-4,25],[9,-4,25],[9,-4,25],[2,-1,25],[8,-3,25],[9,-4,25],[9,-4,25],[5,-1,25],[5,-3,25],[9,-3,25],[10,-4,25],[6,-3,25],[3,-1,25],[9,-5,25],[10,-3,25],[9,0,25],[9,2,25],[10,-1,25],[9,0,25],[9,0,25],[10,1,25],[9,-1,25],[9,0,25],[10,-3,25],[3,-2,25],[6,-4,25],[9,-5,25],[7,-4,25],[3,-2,25],[9,-6,25],[6,-5,25],[4,-3,25],[5,-10,25],[4,-9,25],[2,-4,25],[5,-12,25],[2,-4,25],[10,-9,25],[9,-3,25],[9,-1,25],[10,-1,25],[9,3,25],[9,-1,25],[10,-1,25],[9,-1,25],[9,-3,25],[10,-5,25],[9,-3,25],[9,-2,25],[10,-3,25],[9,2,25],[8,6,25],[2,1,25],[9,6,25],[9,1,25],[10,-2,25],[9,-3,25],[9,0,25],[10,-1,25],[9,-1,25],[9,-1,25],[5,0,25],[5,-1,25],[9,-1,25],[9,-3,25],[10,-2,25],[9,-3,25],[10,-3,25],[1,0,25],[8,-2,25],[9,-2,25],[10,0,25],[9,-2,25],[9,-5,25],[7,-2,25],[3,-1,25],[9,-4,25],[9,-5,25],[5,-3,25],[5,-4,25],[9,-8,25],[1,-1,25],[8,-6,25],[10,-5,25],[6,-2,25],[3,0,25],[9,-3,25],[10,-5,25],[8,-4,25],[1,-1,25],[10,-6,25],[9,-5,25],[3,-1,25],[6,-4,25],[10,-5,25],[8,-4,25],[1,-1,25],[9,-5,25],[10,-5,25],[3,-2,25],[6,-3,25],[9,-5,25],[9,-5,25],[1,0,25],[9,-6,25],[9,-5,25],[4,-2,25],[6,-3,25],[9,-5,25],[8,-5,25],[1,-1,25],[10,-6,25],[9,-5,25],[2,-1,25],[8,-3,25],[9,-5,25],[9,-4,25],[1,0,25],[9,-5,25],[9,-4,25],[9,-4,25],[1,0,25],[9,-3,25],[9,-3,25],[9,-4,25],[10,-3,25],[9,-2,25],[9,-4,25],[10,-3,25],[9,-1,25],[9,-2,25],[7,-1,25],[3,-1,25],[9,1,25],[10,-1,25],[9,-11,25],[9,0,25],[2,-1,25],[8,-8,25],[9,-2,25],[9,-1,25],[10,-1,25],[0,-1,25],[2,-13,25],[-2,-4,25],[-7,-8,25],[-1,-13,25],[8,-12,25],[3,-1,25],[6,-2,25],[9,-7,25],[6,-4,25],[4,-1,25],[9,0,25],[5,1,25],[4,1,25],[10,3,25],[9,3,25],[10,3,25],[9,3,25],[9,6,25],[5,7,25],[1,13,25],[1,12,25],[3,1,25],[9,3,25],[9,-1,25],[10,-2,25],[2,-1,25],[7,-2,25],[9,-4,25],[10,-4,25],[6,-2,25],[3,-2,25],[9,-5,25],[10,-3,25],[6,-3,25],[3,-8,25],[1,-5,25],[-1,-3,25],[-4,-10,25],[-4,-13,25],[8,-13,25],[1,0,25],[8,-3,25],[10,-4,25],[9,-4,25],[5,-2,25],[5,-3,25],[9,-6,25],[5,-4,25],[4,-3,25],[10,-7,25],[2,-2,25],[7,-4,25],[9,1,25],[7,3,25],[3,0,25],[9,4,25],[9,1,25],[10,-2,25],[9,-2,25],[6,-1,25],[3,-2,25],[10,-4,25],[9,-3,25],[8,-4,25],[1,-1,25],[10,-9,25],[3,-3,25],[6,-8,25],[4,-5,25],[6,-8,25],[7,-5,25],[2,-2,25],[9,-7,25],[4,-4,25],[6,-6,25],[5,-7,25],[4,-4,25],[7,-8,25],[2,-4,25],[7,-9,25],[3,-4,25],[6,-9,25],[3,-6,25],[5,-7,25],[4,-7,25],[4,-6,25],[6,-9,25],[2,-4,25],[7,-11,25],[1,-2,25],[8,-7,25],[10,3,25],[9,-9,25],[5,-12,25],[4,-13,25],[1,0,25],[9,-5,25],[8,-8,25],[1,-2,25],[9,-11,25],[1,-1,25],[8,-12,25],[1,-1,25],[8,-12,25],[1,-2,25],[8,-11,25],[2,-2,25],[9,-6,25],[9,-3,25],[5,-2,25],[5,-1,25],[9,-5,25],[9,-2,25],[10,-2,25],[9,-1,25],[2,-1,25],[7,-10,25],[10,-3,25],[1,0,25],[8,-11,25],[2,-2,25],[3,-13,25],[-5,-6,25],[-7,-7,25],[-2,-3,25],[-8,-10,25],[-2,-5,25],[-2,-8,25],[-5,-12,25],[-2,-5,25],[-3,-8,25],[-4,-13,25],[3,-13,25],[4,-7,25],[4,-6,25],[5,-7,25],[4,-6,25],[6,-4,25],[9,-7,25],[2,-2,25],[7,-8,25],[4,-5,25],[2,-12,25],[-6,-10,25],[-2,-3,25],[-7,-9,25],[-7,-4,25],[-2,-2,25],[-10,2,25],[-9,-6,25],[-5,-7,25],[-4,-5,25],[-7,-8,25],[-3,-4,25],[-7,-9,25],[-2,-3,25],[-9,-7,25],[-10,-1,25],[-9,-1,25],[-2,-1,25],[-7,-1,25],[-10,-2,25],[-9,-3,25],[-9,-2,25],[-10,1,25],[-9,1,25],[-10,2,25],[-9,1,25],[-9,1,25],[-4,-11,25],[4,-9,25],[6,-3,25],[3,-1,25],[9,-7,25],[7,-5,25],[3,-3,25],[9,-8,25],[3,-2,25],[7,-6,25],[7,-7,25],[2,-1,25],[9,-8,25],[4,-4,25],[6,-7,25],[3,-6,25],[4,-13,25],[2,-11,25],[0,-1,25],[2,-13,25],[1,-13,25],[2,-13,25],[3,-13,25],[1,-3,25],[4,-10,25],[6,-9,25],[2,-4,25],[7,-11,25],[1,-2,25],[8,-12,25],[0,-1,25],[10,-9,25],[2,-3,25],[6,-13,25],[1,-1,25],[7,-12,25],[2,-1,25],[10,1,25],[9,-9,25],[6,-4,25],[3,0,25],[10,-4,25],[9,-6,25],[5,-3,25],[5,-1,25],[9,-4,25],[8,-8,25],[1,-1,25],[10,-6,25],[8,-5,25],[1,-1,25],[9,-6,25],[10,-6,25],[9,-11,25],[2,-2,25],[7,-9,25],[10,-2,25],[4,-2,25],[5,-2,25],[9,-5,25],[10,-1,25],[6,-5,25],[3,-3,25],[10,-1,25],[9,-6,25],[9,3,25],[10,-1,25],[6,-5,25],[3,-2,25],[9,-5,25],[10,-6,25],[9,-8,25],[9,-5,25],[0,-6,25],[0,-6,25],[0,-1,25],[5,-12,25],[3,-13,25],[2,-5,25],[2,-8,25],[4,-13,25],[3,-7,25],[3,-6,25],[6,-9,25],[3,-4,25],[7,-7,25],[5,-6,25],[4,-4,25],[8,-8,25],[1,-2,25],[10,-7,25],[5,-4,25],[4,-3,25],[10,-6,25],[4,-4,25],[5,-6,25],[6,-7,25],[3,-4,25],[7,-9,25],[3,-3,25],[6,-10,25],[3,-7,25],[2,-6,25],[0,-12,25],[-2,-2,25],[-9,0,25],[-5,2,25],[-5,1,25],[-2,-1,25],[2,-13,25],[0,-1,25],[7,-12,25],[3,-9,25],[1,-4,25],[4,-13,25],[4,-13,25],[4,-13,25],[2,-13,25],[0,-12,25],[1,-13,25],[0,-13,25],[2,-13,25],[0,-7,25],[1,-6,25],[3,-13,25],[6,-13,25],[0,-1,25],[1,-11,25],[1,-13,25],[2,-13,25],[2,-13,25],[3,-10,25],[1,-3,25],[3,-13,25],[4,-13,25],[1,-4,25],[3,-9,25],[4,-12,25],[3,-9,25],[1,-4,25],[4,-13,25],[0,-13,25],[-5,-7,25],[-5,-6,25],[-5,-5,25],[-9,-8,25],[-9,-5,25],[-10,-1,25],[-9,-1,25],[-9,-2,25],[-10,-1,25],[-9,0,25],[-9,-1,25],[-4,-2,25],[-6,-2,25],[-9,-1,25],[-10,-2,25],[-5,-8,25],[-4,-3,25],[-9,-7,25],[-10,3,25],[-7,7,25]],[[7715,1457,5],[1,4,5],[-1,1,5],[-2,-1,5],[2,-4,5]],[[7079,1463,20],[-4,-2,20],[-5,-6,20],[-9,-7,20],[-5,0,20],[-5,-1,20],[-9,-2,20],[-9,-3,20],[-10,-1,20],[-9,0,20],[-9,-3,20],[-10,-1,20],[-9,3,20],[-10,1,20],[-9,2,20],[-9,2,20],[-10,2,20],[0,1,20],[-9,4,20],[-9,9,20],[-10,8,20],[-4,4,20],[-5,6,20],[-6,7,20],[-3,4,20],[-9,9,20],[-1,1,20],[-7,12,20],[-2,11,20],[-1,2,20],[-8,8,20],[-5,5,20],[-5,4,20],[-7,9,20],[-2,2,20],[-9,11,20],[-10,10,20],[-1,2,20],[-6,13,20],[-2,4,20],[-7,9,20],[-3,3,20],[-9,9,20],[-1,1,20],[-8,9,20],[-4,4,20],[-6,7,20],[-5,6,20],[-4,4,20],[-9,9,20],[-10,9,20],[-3,4,20],[-6,7,20],[-4,5,20],[-5,7,20],[-6,6,20],[-4,7,20],[-5,6,20],[-4,9,20],[-3,4,20],[3,8,20],[0,5,20],[-9,2,20],[-10,10,20],[0,1,20],[-9,3,20],[-10,2,20],[-9,8,20],[-9,7,20],[-5,5,20],[-5,5,20],[-7,8,20],[-2,2,20],[-9,9,20],[-2,2,20],[-8,7,20],[-5,6,20],[-4,3,20],[-9,9,20],[-1,1,20],[-9,7,20],[-5,6,20],[-4,3,20],[-9,10,20],[-10,5,20],[-6,8,20],[-3,2,20],[-9,10,20],[-10,2,20],[-9,5,20],[-8,6,20],[-2,1,20],[-9,2,20],[-9,4,20],[-10,5,20],[-1,1,20],[-8,3,20],[-9,3,20],[-7,7,20],[-3,2,20],[-9,3,20],[-7,8,20],[-2,2,20],[-10,2,20],[-7,9,20],[-2,3,20],[-9,1,20],[-10,8,20],[0,1,20],[-9,4,20],[-9,6,20],[-3,2,20],[-7,11,20],[-9,1,20],[-10,-2,20],[-9,-2,20],[-9,-3,20],[-10,-4,20],[-9,0,20],[-9,3,20],[-10,3,20],[-9,3,20],[-9,3,20],[-1,0,20],[-3,13,20],[-6,13,20],[-6,13,20],[-3,7,20],[-4,6,20],[-5,7,20],[-5,6,20],[-5,5,20],[-8,8,20],[-1,1,20],[-9,8,20],[-4,3,20],[-6,6,20],[-9,5,20],[-6,2,20],[-4,3,20],[-9,6,20],[-5,4,20],[-4,4,20],[-8,9,20],[-2,2,20],[-4,11,20],[-5,13,20],[0,1,20],[-3,12,20],[-6,12,20],[-1,1,20],[-7,12,20],[-2,5,20],[-3,8,20],[-5,13,20],[-1,3,20],[-3,10,20],[-5,13,20],[-1,3,20],[-5,10,20],[-5,7,20],[-6,6,20],[-3,3,20],[-9,7,20],[-3,2,20],[-7,6,20],[-8,7,20],[-1,1,20],[-5,12,20],[-4,10,20],[-1,3,20],[1,3,20],[3,10,20],[0,13,20],[-1,13,20],[-2,12,20],[-1,1,20],[-9,7,20],[-3,5,20],[-4,13,20],[1,13,20],[2,13,20],[1,13,20],[1,13,20],[0,13,20],[-1,12,20],[-6,12,20],[-1,1,20],[-5,13,20],[-4,11,20],[0,2,20],[-4,13,20],[-2,13,20],[-1,13,20],[-2,9,20],[-1,4,20],[-5,12,20],[-3,6,20],[-4,7,20],[-6,13,20],[-6,13,20],[-3,6,20],[-3,7,20],[-6,13,20],[-7,13,20],[-3,6,20],[-3,7,20],[-6,11,20],[-3,1,20],[-6,2,20],[-10,2,20],[-9,6,20],[-4,3,20],[-5,4,20],[-10,8,20],[-2,1,20],[-7,6,20],[-9,7,20],[-1,0,20],[-9,6,20],[-9,5,20],[-4,2,20],[-6,2,20],[-9,4,20],[-9,4,20],[-6,3,20],[-4,1,20],[-9,4,20],[-9,4,20],[-9,4,20],[-1,0,20],[-8,0,20],[-1,0,20],[-9,1,20],[-10,5,20],[-9,6,20],[-1,0,20],[-8,7,20],[-10,6,20],[-9,7,20],[-10,3,20],[-9,-1,20],[-9,-1,20],[-10,-2,20],[-9,-1,20],[-9,-1,20],[-10,-1,20],[-9,-1,20],[-9,-1,20],[-10,-1,20],[-1,0,20],[-8,0,20],[-9,-1,20],[-10,-1,20],[-9,0,20],[-9,-1,20],[-10,0,20],[-9,-1,20],[-10,0,20],[-9,-1,20],[-9,-1,20],[-10,0,20],[-9,3,20],[-9,3,20],[-1,0,20],[-9,3,20],[-9,3,20],[-9,4,20],[-10,3,20],[-1,0,20],[-8,3,20],[-9,3,20],[-10,3,20],[-9,4,20],[-1,0,20],[-8,4,20],[-10,6,20],[-4,3,20],[-5,4,20],[-10,4,20],[-9,2,20],[-9,3,20],[-10,3,20],[-9,2,20],[-9,6,20],[-1,2,20],[-4,13,20],[-5,7,20],[-9,2,20],[-9,-3,20],[-10,0,20],[-9,2,20],[-9,2,20],[-7,2,20],[-3,1,20],[-9,0,20],[-10,0,20],[0,-1,20],[0,-1,20],[8,-11,20],[2,-3,20],[8,-10,20],[1,-1,20],[10,-9,20],[2,-3,20],[7,-11,20],[1,-2,20],[3,-13,20],[4,-13,20],[1,-3,20],[4,-10,20],[1,-13,20],[-1,-12,20],[-3,-13,20],[-1,-7,20],[0,-6,20],[-1,-13,20],[-2,-13,20],[-6,-12,20],[0,-1,20],[0,-1,20],[2,-12,20],[-2,-12,20],[0,-1,20],[-6,-12,20],[-3,-6,20],[-4,-7,20],[-6,-12,20],[0,-1,20],[-7,-13,20],[-2,-5,20],[-4,-8,20],[-5,-13,20],[-1,0,20],[-5,-13,20],[-4,-6,20],[-9,-5,20],[-3,-1,20],[-7,-4,20],[-9,-8,20],[-2,-1,20],[-7,-8,20],[-5,-5,20],[-5,-5,20],[-7,-8,20],[-2,-2,20],[-9,-11,20],[-10,-9,20],[-9,-3,20],[-9,0,20],[-10,1,20],[-9,0,20],[-9,0,20],[-10,-2,20],[-9,-4,20],[-10,-1,20],[-9,-1,20],[-9,-2,20],[-10,-1,20],[-9,-2,20],[-9,-2,20],[-10,-2,20],[-9,-3,20],[-9,-4,20],[-10,-3,20],[-3,-1,20],[-6,-1,20],[-9,-2,20],[-10,-3,20],[-9,-3,20],[-9,-2,20],[-10,11,20],[-9,5,20],[-10,-2,20],[-6,-3,20],[-3,0,20],[-9,-2,20],[-10,-2,20],[-9,-1,20],[-9,-2,20],[-10,-1,20],[-9,-2,20],[-9,-2,20],[0,-1,20],[-10,-2,20],[-9,-3,20],[-9,-2,20],[-10,-3,20],[-9,-2,20],[-9,-1,20],[-1,1,20],[-9,5,20],[-9,7,20],[-1,1,20],[-9,7,20],[-7,5,20],[-2,2,20],[-9,8,20],[-8,3,20],[-2,1,20],[-9,3,20],[-8,9,20],[-1,1,20],[-10,9,20],[-3,3,20],[-6,10,20],[-1,3,20],[-1,13,20],[2,13,20],[-7,13,20],[-2,0,20],[-4,0,20],[-6,-1,20],[-9,-3,20],[-9,-2,20],[-10,-3,20],[-9,-2,20],[-7,-2,20],[-3,-1,20],[-9,0,20],[-5,1,20],[-4,0,20],[-10,4,20],[-9,5,20],[-5,4,20],[-4,2,20],[-10,9,20],[-1,1,20],[-8,3,20],[-9,7,20],[-3,3,20],[-7,5,20],[-9,6,20],[-9,1,20],[-10,-1,20],[-9,-1,20],[-9,0,20],[-10,-1,20],[-9,0,20],[-10,1,20],[-9,1,20],[-9,0,20],[-10,1,20],[-3,1,20],[-6,2,20],[-9,3,20],[-10,2,20],[-9,1,20],[-9,0,20],[-10,0,20],[-6,5,20],[-3,8,20],[-3,5,20],[-6,5,20],[-10,3,20],[-9,2,20],[-9,3,20],[-1,0,20],[-9,2,20],[-9,1,20],[-10,1,20],[-9,2,20],[-9,4,20],[-6,3,20],[-4,1,20],[-9,2,20],[-9,1,20],[-10,2,20],[-9,1,20],[-9,1,20],[-10,1,20],[-9,1,20],[-9,2,20],[-7,1,20],[-3,0,20],[-9,1,20],[-9,4,20],[-6,7,20],[-4,6,20],[-9,6,20],[-10,0,20],[-9,0,20],[-9,0,20],[-10,-2,20],[-9,-2,20],[-9,-2,20],[-10,-2,20],[-9,3,20],[-9,4,20],[-6,2,20],[-4,2,20],[-9,4,20],[-9,3,20],[-10,4,20],[-9,3,20],[-10,4,20],[-9,3,20],[-7,3,20],[-2,1,20],[-10,3,20],[-9,4,20],[-9,2,20],[-10,0,20],[-4,3,20],[-5,4,20],[-9,7,20],[-2,2,20],[-8,6,20],[-8,7,20],[-1,0,20],[-9,8,20],[-6,4,20],[-4,3,20],[-9,7,20],[-4,3,20],[-5,4,20],[-10,7,20],[-3,2,20],[-6,5,20],[-10,7,20],[-1,1,20],[-8,7,20],[-8,6,20],[-1,1,20],[-10,7,20],[-4,5,20],[-5,5,20],[-9,8,20],[-10,8,20],[-5,5,20],[-4,5,20],[-6,7,20],[-3,5,20],[-5,8,20],[-5,3,20],[-9,8,20],[-2,2,20],[-7,3,20],[-10,5,20],[-5,5,20],[-4,3,20],[-9,3,20],[-8,7,20],[-2,2,20],[-9,4,20],[-7,7,20],[-1,13,20],[0,13,20],[-2,7,20],[-1,5,20],[-8,10,20],[-9,2,20],[-3,1,20],[-7,2,20],[-9,7,20],[-4,4,20],[-5,5,20],[-9,8,20],[-1,0,20],[-9,9,20],[-4,4,20],[-5,2,20],[-10,5,20],[-9,4,20],[-4,2,20],[-5,2,20],[-10,5,20],[-6,6,20],[-3,4,20],[-5,8,20],[-4,9,20],[-3,4,20],[-5,13,20],[-2,5,20],[-2,8,20],[-3,13,20],[-4,13,20],[0,1,20],[-3,12,20],[-4,13,20],[-3,5,20],[-3,7,20],[-5,13,20],[-1,2,20],[-8,11,20],[-1,2,20],[-8,11,20],[-2,2,20],[-7,11,20],[-2,2,20],[-7,11,20],[-2,2,20],[-8,11,20],[-2,3,20],[-5,9,20],[-4,12,20],[-1,1,20],[-3,13,20],[-3,13,20],[-2,9,20],[-1,4,20],[-3,13,20],[-4,13,20],[-2,8,20],[-1,5,20],[-3,12,20],[-3,13,20],[-2,13,20],[0,1,20],[2,12,20],[2,13,20],[5,12,20],[1,1,20],[8,13,20],[1,1,20],[6,12,20],[3,4,20],[5,8,20],[4,8,20],[4,5,20],[6,10,20],[1,3,20],[8,13,20],[5,13,20],[2,13,20],[1,13,20],[-1,12,20],[0,13,20],[1,13,20],[1,9,20],[1,4,20],[1,13,20],[0,13,20],[1,13,20],[5,13,20],[2,9,20],[0,3,20],[0,2,20],[-4,11,20],[-4,13,20],[-2,6,20],[-3,7,20],[-6,9,20],[-3,4,20],[-6,8,20],[-4,5,20],[-6,9,20],[-2,4,20],[2,4,20],[5,9,20],[5,9,20],[1,3,20],[7,13,20],[1,4,20],[4,9,20],[5,12,20],[1,1,20],[5,13,20],[4,7,20],[2,6,20],[5,13,20],[2,4,20],[5,8,20],[4,5,20],[10,7,20],[1,1,20],[2,13,20],[0,13,20],[1,13,20],[-3,13,20],[-1,5,20],[-3,8,20],[-1,13,20],[0,12,20],[0,13,20],[4,12,20],[0,1,20],[3,13,20],[-1,13,20],[-2,5,20],[-10,7,20],[-1,1,20],[-6,13,20],[-1,12,20],[-1,3,20],[-2,10,20],[-4,13,20],[-3,13,20],[-7,13,20],[-3,4,20],[-5,9,20],[-4,7,20],[-3,6,20],[-6,11,20],[-1,2,20],[1,3,20],[2,9,20],[5,13,20],[-1,13,20],[-6,12,20],[-1,1,20],[-7,13,20],[-2,2,20],[-6,11,20],[-3,10,20],[-1,3,20],[1,2,20],[3,11,20],[6,12,20],[1,0,20],[9,3,20],[9,3,20],[9,3,20],[10,3,20],[5,1,20],[4,1,20],[9,3,20],[10,2,20],[9,2,20],[10,2,20],[9,2,20],[8,1,20],[1,0,20],[10,2,20],[9,1,20],[9,0,20],[10,-2,20],[3,-1,20],[6,-1,20],[9,-3,20],[10,-4,20],[9,-4,20],[1,-1,20],[8,-2,20],[10,-3,20],[9,-2,20],[9,-5,20],[1,-1,20],[9,-3,20],[9,-4,20],[7,-5,20],[3,-2,20],[9,-4,20],[9,-5,20],[2,-2,20],[8,-4,20],[9,-1,20],[9,-8,20],[10,-4,20],[9,-6,20],[4,-3,20],[5,-3,20],[10,-5,20],[6,-5,20],[3,-2,20],[9,-4,20],[10,-7,20],[9,-4,20],[9,-6,20],[4,-3,20],[6,-3,20],[9,-5,20],[7,-5,20],[3,-1,20],[9,-5,20],[9,-6,20],[1,0,20],[9,-6,20],[8,-7,20],[1,-1,20],[9,-12,20],[0,-1,20],[10,-12,20],[9,-13,20],[9,-12,20],[1,-1,20],[9,-12,20],[0,-1,20],[9,-11,20],[2,-2,20],[7,-8,20],[7,-4,20],[3,-2,20],[9,-5,20],[9,-5,20],[2,-1,20],[8,-5,20],[9,-5,20],[7,-3,20],[3,-2,20],[9,-5,20],[9,-5,20],[2,-1,20],[8,-4,20],[9,-5,20],[7,-4,20],[2,-1,20],[10,-5,20],[9,-6,20],[1,-1,20],[8,-5,20],[10,-5,20],[4,-3,20],[5,-3,20],[9,-5,20],[8,-4,20],[2,-2,20],[9,-5,20],[10,-6,20],[1,0,20],[8,-5,20],[9,-6,20],[4,-2,20],[6,-3,20],[9,-4,20],[9,-3,20],[6,-3,20],[4,-2,20],[9,-4,20],[9,-4,20],[6,-3,20],[4,-2,20],[9,-5,20],[9,-5,20],[1,-1,20],[9,-5,20],[9,-4,20],[7,-4,20],[2,-1,20],[10,-4,20],[9,-6,20],[3,-2,20],[7,-3,20],[9,-6,20],[8,-3,20],[1,-1,20],[10,-3,20],[9,1,20],[7,3,20],[2,2,20],[10,5,20],[9,3,20],[8,2,20],[1,1,20],[10,0,20],[9,-1,20],[1,0,20],[8,0,20],[10,0,20],[9,0,20],[9,0,20],[3,0,20],[7,1,20],[9,0,20],[10,0,20],[3,-1,20],[6,0,20],[9,-1,20],[10,0,20],[9,-1,20],[9,-1,20],[10,-1,20],[9,-1,20],[9,-1,20],[10,-2,20],[9,-1,20],[9,-1,20],[10,-1,20],[9,0,20],[8,-1,20],[1,-1,20],[10,-1,20],[9,-1,20],[10,-1,20],[9,-2,20],[9,-1,20],[10,-3,20],[9,-3,20],[9,0,20],[2,0,20],[8,-1,20],[9,0,20],[2,1,20],[7,13,20],[10,5,20],[9,0,20],[9,0,20],[10,-1,20],[9,-1,20],[10,-1,20],[9,-2,20],[1,0,20],[8,-5,20],[10,-6,20],[3,-2,20],[6,-4,20],[9,-7,20],[3,-2,20],[7,-4,20],[9,-1,20],[8,5,20],[1,1,20],[10,4,20],[9,-1,20],[9,-3,20],[3,-1,20],[7,-3,20],[9,-3,20],[9,-3,20],[10,-3,20],[1,-1,20],[8,-3,20],[10,-3,20],[9,-3,20],[9,-3,20],[3,-1,20],[7,-2,20],[9,-5,20],[9,-4,20],[3,-2,20],[7,-4,20],[9,-5,20],[7,-4,20],[2,-1,20],[10,-6,20],[9,-5,20],[0,-1,20],[9,-4,20],[10,-5,20],[8,-3,20],[1,-1,20],[9,-4,20],[10,-5,20],[6,-3,20],[3,-2,20],[10,-6,20],[9,-5,20],[9,-6,20],[10,-7,20],[9,-7,20],[7,-6,20],[2,-2,20],[10,-8,20],[6,-3,20],[3,-1,20],[9,-2,20],[10,-3,20],[9,-5,20],[4,-2,20],[5,-5,20],[7,-7,20],[3,-4,20],[8,-9,20],[0,-13,20],[1,-7,20],[2,-6,20],[7,-6,20],[10,-3,20],[9,-3,20],[4,-1,20],[6,-1,20],[9,-3,20],[9,-5,20],[9,-4,20],[1,0,20],[9,-5,20],[9,-6,20],[4,-2,20],[6,-3,20],[9,-5,20],[9,-5,20],[10,-4,20],[9,-5,20],[5,-3,20],[4,-3,20],[10,-6,20],[5,-4,20],[4,-3,20],[10,-5,20],[9,-4,20],[1,-1,20],[8,-5,20],[10,-6,20],[2,-2,20],[7,-5,20],[9,-5,20],[5,-3,20],[5,-3,20],[9,-7,20],[2,-3,20],[7,-8,20],[5,-5,20],[5,-5,20],[7,-7,20],[2,-2,20],[9,1,20],[10,-1,20],[9,-7,20],[5,-4,20],[4,-5,20],[10,-7,20],[1,-1,20],[8,-8,20],[7,-5,20],[3,-2,20],[9,-5,20],[9,-4,20],[3,-2,20],[7,-3,20],[9,-5,20],[8,-5,20],[1,0,20],[10,-5,20],[9,-5,20],[6,-3,20],[3,-1,20],[10,-5,20],[9,-5,20],[4,-2,20],[5,-3,20],[10,-4,20],[9,-5,20],[1,0,20],[8,-5,20],[10,-5,20],[7,-3,20],[2,-1,20],[10,-5,20],[9,-4,20],[6,-3,20],[3,-2,20],[10,-4,20],[9,-5,20],[4,-2,20],[5,-3,20],[10,-4,20],[9,-5,20],[3,-1,20],[6,-3,20],[10,-3,20],[9,-4,20],[8,-3,20],[1,0,20],[10,-4,20],[9,-4,20],[9,-4,20],[2,-1,20],[8,-3,20],[9,-4,20],[10,-4,20],[2,-2,20],[7,-2,20],[9,-5,20],[10,-4,20],[3,-1,20],[6,-3,20],[9,-3,20],[10,-5,20],[5,-2,20],[4,-2,20],[9,-4,20],[9,-7,20],[1,-1,20],[9,-10,20],[9,5,20],[10,4,20],[9,1,20],[1,1,20],[9,4,20],[9,4,20],[9,-6,20],[4,-2,20],[6,-3,20],[9,-5,20],[9,-5,20],[10,-8,20],[6,-5,20],[3,-1,20],[9,-6,20],[8,-6,20],[2,-1,20],[9,-5,20],[9,-7,20],[10,-4,20],[9,-7,20],[2,-1,20],[7,-5,20],[10,-8,20],[9,-9,20],[10,-4,20],[9,-6,20],[9,-4,20],[10,-3,20],[9,-7,20],[8,-6,20],[1,-1,20],[10,-9,20],[3,-3,20],[6,-4,20],[9,-3,20],[10,-2,20],[9,-3,20],[1,-1,20],[8,-3,20],[10,-4,20],[9,-4,20],[4,-2,20],[5,-2,20],[10,-5,20],[7,-5,20],[2,-2,20],[10,-7,20],[8,-4,20],[1,-1,20],[9,-8,20],[7,-4,20],[3,-1,20],[9,-3,20],[9,-2,20],[10,-2,20],[9,-3,20],[3,-2,20],[6,-8,20],[4,-5,20],[6,-6,20],[5,-7,20],[4,-4,20],[8,-9,20],[1,-2,20],[10,-10,20],[9,-11,20],[2,-2,20],[7,-8,20],[10,4,20],[9,-5,20],[5,-4,20],[5,-6,20],[5,-7,20],[4,-5,20],[5,-8,20],[4,-5,20],[6,-8,20],[4,-4,20],[6,-9,20],[3,-3,20],[7,-10,20],[2,-2,20],[8,-10,20],[2,-3,20],[9,-10,20],[0,-1,20],[9,-12,20],[10,-12,20],[0,-1,20],[6,-13,20],[3,-10,20],[3,-3,20],[6,-8,20],[10,-5,20],[9,-2,20],[9,-2,20],[8,4,20],[2,1,20],[2,-1,20],[7,-2,20],[10,-6,20],[5,-5,20],[4,-3,20],[9,-9,20],[0,-1,20],[10,-8,20],[5,-4,20],[4,-4,20],[9,-6,20],[7,-3,20],[3,-1,20],[9,-4,20],[9,-3,20],[10,-2,20],[9,-1,20],[9,-2,20],[1,0,20],[9,-8,20],[4,-5,20],[5,-6,20],[7,-7,20],[3,-3,20],[8,-10,20],[1,-1,20],[9,-11,20],[1,0,20],[9,-10,20],[2,-3,20],[7,-10,20],[3,-3,20],[6,-10,20],[3,-3,20],[7,-9,20],[2,-4,20],[7,-9,20],[3,-4,20],[6,-10,20],[2,-3,20],[8,-10,20],[2,-3,20],[7,-9,20],[3,-3,20],[6,-10,20],[3,-3,20],[7,-11,20],[1,-2,20],[8,-11,20],[1,-2,20],[8,-12,20],[1,-1,20],[9,-13,20],[9,-12,20],[1,-1,20],[9,-12,20],[0,-1,20],[9,-12,20],[9,-12,20],[1,-1,20],[9,-13,20],[5,-13,20],[4,-11,20],[1,-2,20],[-1,-5,20],[-5,-8,20],[-4,-7,20],[-4,-6,20],[-4,-12,20],[-2,-4,20],[-4,-9,20],[-5,-7,20],[-6,-6,20],[-3,-6,20],[-4,-7,20],[-6,-5,20],[-9,-3,20],[-10,0,20],[-9,4,20],[-9,-1,20],[-4,-8,20],[-6,-6,20],[-4,-7,20],[-5,-7,20],[-5,-6,20],[-4,-7,20],[-6,-6,20],[-4,-5,20],[-9,-5,20],[-9,2,20],[-10,2,20],[-9,3,20],[-9,2,20],[-10,0,20],[-9,-3,20],[-9,-3,20],[-6,-5,20],[-4,-5,20],[-9,-8,20],[-1,-13,20],[1,0,20],[9,8,20],[10,4,20],[7,-12,20],[2,-6,20],[2,-7,20],[4,-13,20],[3,-8,20],[2,-5,20],[8,-4,20],[9,-4,20],[9,-2,20],[10,-2,20],[0,-1,20],[9,-2,20],[9,-2,20],[10,-3,20],[9,-2,20],[8,-3,20],[1,-1,20],[10,-8,20],[5,-4,20],[4,-4,20],[9,-8,20],[3,-1,20],[7,-5,20],[9,-5,20],[6,-3,20],[4,-2,20],[9,-5,20],[5,-6,20],[4,-3,20],[7,-10,20],[-1,-13,20],[4,-8,20],[3,-5,20],[6,-2,20],[9,-3,20],[10,-3,20],[7,-4,20],[2,-1,20],[8,-12,20],[1,-3,20],[5,-10,20],[5,-10,20],[1,-3,20],[5,-13,20],[2,-13,20],[1,-5,20],[1,-8,20],[2,-13,20],[5,-12,20],[1,-5,20],[4,-8,20],[6,-12,20],[1,-1,20],[8,-2,20],[7,2,20],[2,1,20],[10,1,20],[8,-2,20],[1,-8,20],[1,-5,20],[2,-13,20],[1,-13,20],[2,-13,20],[1,-12,20],[2,-13,20],[1,-9,20],[0,-4,20],[0,-12,20],[-1,-1,20],[-1,-13,20],[-1,-13,20],[2,-13,20],[0,-13,20],[-2,-12,20],[3,-6,20],[4,-7,20],[5,-5,20],[8,-8,20],[1,-2,20],[9,-11,20],[1,-1,20],[9,-11,20],[2,-1,20],[7,-3,20],[10,-3,20],[9,-5,20],[1,-2,20],[0,-13,20],[-1,-7,20],[-1,-5,20],[-2,-13,20],[-5,-13,20],[0,-13,20],[-1,-6,20],[-2,-7,20],[-8,-8,20],[-9,-3,20],[0,-2,20],[-1,-13,20],[-8,-13,20],[-9,-12,20],[-1,-2,20],[-7,-11,20],[-2,-4,20],[-4,-9,20],[-5,-10,20],[-2,-3,20],[-5,-13,20],[-3,-2,20],[-9,-11,20],[-10,-6,20],[-9,-6,20],[-1,-1,20],[-8,-8,20],[-8,-5,20],[-2,-1,20],[-9,-4,20],[-9,-2,20],[-10,-3,20]],[[6976,1405,15],[-9,1,15],[-9,2,15],[-8,1,15],[-2,0,15],[-9,2,15],[-9,7,15],[-3,4,15],[-7,8,15],[-3,5,15],[-6,11,15],[-9,1,15],[-7,1,15],[-3,0,15],[-9,8,15],[-4,5,15],[-5,12,15],[0,1,15],[-7,12,15],[-3,6,15],[-6,7,15],[-3,3,15],[-9,7,15],[-6,3,15],[-4,6,15],[-4,7,15],[-5,7,15],[-9,6,15],[-1,0,15],[-9,6,15],[-6,7,15],[-3,3,15],[-9,10,15],[-1,0,15],[-9,8,15],[-7,4,15],[-2,2,15],[-10,5,15],[-9,6,15],[-1,0,15],[-8,5,15],[-10,7,15],[-2,1,15],[-7,7,15],[-7,6,15],[-2,3,15],[-10,8,15],[-1,2,15],[-8,7,15],[-6,6,15],[-4,3,15],[-9,9,15],[0,1,15],[-9,8,15],[-8,5,15],[-2,1,15],[-9,10,15],[-9,1,15],[-2,0,15],[-8,11,15],[0,2,15],[-9,6,15],[-9,7,15],[-10,7,15],[-9,5,15],[-2,1,15],[-7,5,15],[-10,5,15],[-6,3,15],[-3,1,15],[-9,6,15],[-5,6,15],[0,13,15],[-5,6,15],[-4,6,15],[-5,4,15],[-10,6,15],[-4,3,15],[-5,3,15],[-9,6,15],[-8,4,15],[-2,2,15],[-9,6,15],[-9,5,15],[-1,0,15],[-9,5,15],[-9,4,15],[-7,4,15],[-2,1,15],[-10,6,15],[-9,5,15],[-1,1,15],[-8,3,15],[-10,3,15],[-9,4,15],[-9,3,15],[-10,3,15],[-9,5,15],[-10,4,15],[-1,1,15],[-8,3,15],[-9,4,15],[-10,4,15],[-1,1,15],[-8,5,15],[-9,7,15],[-2,1,15],[-8,3,15],[-9,5,15],[-9,5,15],[-10,4,15],[-9,4,15],[-9,5,15],[-10,4,15],[-9,4,15],[-9,5,15],[-10,2,15],[-9,11,15],[0,1,15],[-1,12,15],[-1,12,15],[-1,13,15],[0,13,15],[-2,13,15],[-5,7,15],[-4,6,15],[-5,3,15],[-7,10,15],[-2,2,15],[-9,11,15],[-1,1,15],[-6,12,15],[-3,3,15],[-9,6,15],[-9,3,15],[-1,1,15],[-9,4,15],[-9,5,15],[-5,3,15],[-5,6,15],[-4,7,15],[-5,12,15],[0,1,15],[-7,13,15],[-2,3,15],[-10,7,15],[-7,3,15],[-2,1,15],[-9,8,15],[-3,4,15],[-7,8,15],[-2,5,15],[-7,12,15],[-8,13,15],[-2,4,15],[-5,9,15],[-4,7,15],[-3,6,15],[-5,13,15],[-1,11,15],[0,2,15],[-3,13,15],[-2,12,15],[-2,13,15],[-3,13,15],[-2,13,15],[-3,13,15],[-4,13,15],[-9,9,15],[-10,3,15],[0,1,15],[-9,7,15],[-6,6,15],[-3,3,15],[-10,9,15],[-9,9,15],[-5,4,15],[-4,5,15],[-9,8,15],[-1,2,15],[-8,11,15],[-1,2,15],[-3,11,15],[-3,13,15],[-2,13,15],[-2,5,15],[-1,7,15],[-3,13,15],[-2,13,15],[-3,13,15],[-3,13,15],[-6,10,15],[-8,3,15],[-2,0,15],[-9,6,15],[-9,7,15],[-10,7,15],[-7,6,15],[-2,1,15],[-9,7,15],[-7,4,15],[-3,3,15],[-9,6,15],[-6,4,15],[-3,3,15],[-10,6,15],[-6,4,15],[-3,2,15],[-9,6,15],[-8,5,15],[-2,1,15],[-9,5,15],[-10,1,15],[-9,-4,15],[-4,-3,15],[-5,-3,15],[-10,-6,15],[-6,-4,15],[-3,-1,15],[-9,-4,15],[-10,-1,15],[-9,-1,15],[-9,-1,15],[-10,0,15],[-9,-1,15],[-9,-1,15],[-10,0,15],[-9,-1,15],[-9,0,15],[-10,1,15],[-9,2,15],[-10,2,15],[-9,1,15],[-9,2,15],[-10,2,15],[-9,-1,15],[-9,-4,15],[-10,-6,15],[0,-1,15],[-8,-13,15],[-1,0,15],[-9,-9,15],[-5,-3,15],[-5,-5,15],[-9,-8,15],[0,-1,15],[-9,-9,15],[-4,-3,15],[-6,-7,15],[-4,-6,15],[-5,-7,15],[-5,-6,15],[-4,-6,15],[-5,-7,15],[-5,-7,15],[-3,-6,15],[-2,-13,15],[-3,-12,15],[-1,-3,15],[-5,-10,15],[-5,-8,15],[-2,-5,15],[-7,-12,15],[0,-1,15],[-7,-13,15],[-2,-3,15],[-6,-10,15],[-4,-7,15],[-3,-6,15],[-6,-11,15],[-1,-1,15],[-8,-8,15],[-10,-2,15],[-9,-1,15],[-7,-2,15],[3,-13,15],[4,-7,15],[4,-6,15],[-1,-13,15],[-3,-7,15],[-3,-6,15],[-6,-13,15],[-4,-13,15],[-6,-5,15],[-9,2,15],[-9,1,15],[-10,2,15],[-2,0,15],[-7,11,15],[-10,1,15],[-9,-3,15],[-9,1,15],[-4,3,15],[-6,6,15],[-9,1,15],[-9,4,15],[-4,2,15],[-6,3,15],[-9,3,15],[-9,4,15],[-6,3,15],[-4,2,15],[-9,5,15],[-9,2,15],[-4,4,15],[-6,5,15],[-9,0,15],[-8,8,15],[-1,1,15],[-10,1,15],[-9,3,15],[-9,-5,15],[-1,-1,15],[-9,-10,15],[-9,3,15],[-10,3,15],[-9,4,15],[-2,1,15],[-7,3,15],[-10,2,15],[-9,2,15],[-9,2,15],[-10,1,15],[-9,0,15],[-9,1,15],[-10,1,15],[-2,1,15],[-7,1,15],[-9,2,15],[-10,1,15],[-9,2,15],[-10,1,15],[-9,2,15],[-9,2,15],[-7,2,15],[-3,0,15],[-9,2,15],[-4,-2,15],[-5,-3,15],[-10,-8,15],[-3,-2,15],[-6,-6,15],[-9,-2,15],[-10,2,15],[-9,2,15],[-9,2,15],[-10,1,15],[-9,0,15],[-1,1,15],[-8,6,15],[-10,3,15],[-9,1,15],[-5,3,15],[-5,3,15],[-9,1,15],[-5,-4,15],[-4,-4,15],[-10,-5,15],[-9,1,15],[-9,4,15],[-7,4,15],[-3,2,15],[-9,6,15],[-9,4,15],[0,1,15],[-10,9,15],[-7,3,15],[-2,4,15],[-7,9,15],[-2,9,15],[-2,4,15],[-2,13,15],[-2,13,15],[-4,8,15],[-9,3,15],[-10,1,15],[-8,1,15],[-1,0,15],[-9,1,15],[-10,2,15],[-9,2,15],[-9,1,15],[-10,2,15],[-9,1,15],[-9,1,15],[-10,1,15],[-9,0,15],[-9,1,15],[-10,0,15],[-1,0,15],[-8,1,15],[-9,2,15],[-10,-1,15],[-4,-2,15],[-5,-1,15],[-10,-3,15],[-9,-3,15],[-9,-2,15],[-10,-3,15],[-9,-3,15],[-9,0,15],[-10,-3,15],[-9,-4,15],[-9,-3,15],[-10,-3,15],[-9,-1,15],[-9,0,15],[-10,1,15],[-9,2,15],[-4,1,15],[-5,1,15],[-10,2,15],[-9,2,15],[-10,2,15],[-9,2,15],[-9,3,15],[-4,1,15],[-6,1,15],[-9,2,15],[-9,2,15],[-10,2,15],[-9,2,15],[-9,3,15],[0,1,15],[-10,3,15],[-9,4,15],[-9,3,15],[-6,2,15],[-4,2,15],[-9,3,15],[-9,4,15],[-7,4,15],[-3,2,15],[-9,8,15],[-10,0,15],[-4,3,15],[-5,3,15],[-5,-3,15],[-4,-3,15],[-8,-10,15],[-2,-1,15],[-9,-8,15],[-4,-4,15],[-5,-2,15],[-10,-2,15],[-9,3,15],[-1,1,15],[-8,12,15],[-1,1,15],[-9,8,15],[-9,3,15],[-8,2,15],[-1,1,15],[-10,5,15],[-9,1,15],[-6,-7,15],[-4,-3,15],[-6,-10,15],[-3,-4,15],[-9,0,15],[-10,2,15],[-5,2,15],[-4,6,15],[-9,4,15],[-10,-2,15],[-8,5,15],[-1,1,15],[-4,12,15],[-5,9,15],[-3,4,15],[-7,12,15],[0,1,15],[-6,13,15],[-3,5,15],[-4,7,15],[-5,10,15],[-2,3,15],[-7,13,15],[-1,2,15],[-9,11,15],[-9,1,15],[-10,1,15],[-9,0,15],[-10,-1,15],[-9,0,15],[-9,2,15],[-10,5,15],[-7,5,15],[-2,1,15],[-9,5,15],[-8,7,15],[-2,1,15],[-9,8,15],[-3,4,15],[-6,13,15],[0,1,15],[-4,11,15],[-5,13,15],[-1,2,15],[-5,11,15],[-4,7,15],[-4,6,15],[-5,8,15],[-3,5,15],[-7,10,15],[-2,3,15],[-7,12,15],[0,1,15],[-9,10,15],[-4,2,15],[-6,7,15],[-3,6,15],[-4,13,15],[-2,4,15],[-4,9,15],[-6,9,15],[-2,4,15],[-6,13,15],[-1,2,15],[-5,11,15],[-4,7,15],[-4,6,15],[-6,6,15],[-9,6,15],[-9,12,15],[-1,1,15],[-9,9,15],[-6,4,15],[-3,2,15],[-9,8,15],[-4,3,15],[-6,8,15],[-4,5,15],[-5,13,15],[-4,13,15],[-5,13,15],[0,1,15],[-6,11,15],[-4,4,15],[-9,9,15],[-9,12,15],[-2,1,15],[-8,4,15],[-9,6,15],[-4,3,15],[-6,12,15],[0,1,15],[-9,11,15],[-9,-4,15],[-6,6,15],[-2,13,15],[-2,4,15],[-2,8,15],[-7,12,15],[-1,1,15],[-8,13,15],[-10,6,15],[-9,3,15],[-9,4,15],[-1,0,15],[-9,2,15],[-9,3,15],[-9,2,15],[-10,3,15],[-9,2,15],[-9,0,15],[-5,1,15],[-5,3,15],[-9,8,15],[-4,2,15],[-6,3,15],[-9,6,15],[-5,4,15],[-4,2,15],[-10,5,15],[-8,6,15],[-1,0,15],[-9,5,15],[-10,6,15],[-2,1,15],[-7,4,15],[-9,2,15],[-10,-2,15],[-8,-4,15],[-1,0,15],[-1,0,15],[-8,8,15],[-6,5,15],[-4,2,15],[-9,3,15],[-10,3,15],[-9,4,15],[-4,1,15],[-5,2,15],[-10,4,15],[-9,3,15],[-9,4,15],[-1,0,15],[-9,5,15],[-9,6,15],[-2,2,15],[-7,8,15],[-7,5,15],[-3,10,15],[-3,3,15],[3,6,15],[2,6,15],[-2,2,15],[-9,6,15],[-3,5,15],[-6,5,15],[-8,8,15],[-2,2,15],[-9,7,15],[-7,4,15],[-2,1,15],[-10,11,15],[0,1,15],[-9,13,15],[-9,13,15],[-1,1,15],[-9,12,15],[-9,9,15],[-3,3,15],[-7,7,15],[-6,6,15],[-3,3,15],[-9,10,15],[0,1,15],[-8,12,15],[-2,2,15],[-5,11,15],[-2,13,15],[-1,13,15],[-1,12,15],[0,1,15],[-1,12,15],[-1,13,15],[2,13,15],[0,9,15],[0,4,15],[0,2,15],[-1,11,15],[-3,13,15],[-2,13,15],[-3,12,15],[0,2,15],[-3,11,15],[-1,13,15],[0,13,15],[1,13,15],[-3,13,15],[1,13,15],[5,8,15],[2,5,15],[-1,12,15],[-1,11,15],[-1,2,15],[-3,13,15],[-6,10,15],[-3,3,15],[-6,13,15],[0,1,15],[-2,12,15],[-3,13,15],[-3,13,15],[-1,6,15],[-2,6,15],[-4,13,15],[-4,12,15],[0,1,15],[-4,13,15],[-3,13,15],[0,13,15],[0,13,15],[0,12,15],[0,13,15],[0,13,15],[1,13,15],[0,13,15],[-1,13,15],[-2,13,15],[0,2,15],[-2,11,15],[-7,11,15],[-10,0,15],[-1,1,15],[-8,13,15],[-8,13,15],[-2,3,15],[-6,10,15],[-3,8,15],[-2,5,15],[-4,13,15],[1,13,15],[5,6,15],[6,6,15],[3,4,15],[10,7,15],[2,2,15],[7,9,15],[3,4,15],[6,13,15],[1,0,15],[9,12,15],[1,1,15],[8,9,15],[5,4,15],[5,3,15],[8,10,15],[-2,13,15],[-2,12,15],[-1,13,15],[-1,13,15],[-1,13,15],[-1,13,15],[0,1,15],[-1,12,15],[-1,13,15],[-3,13,15],[5,4,15],[9,3,15],[9,5,15],[1,0,15],[8,13,15],[1,4,15],[2,9,15],[4,13,15],[2,13,15],[1,3,15],[2,10,15],[3,13,15],[3,12,15],[1,5,15],[5,8,15],[5,6,15],[7,7,15],[2,2,15],[9,9,15],[3,2,15],[7,7,15],[8,6,15],[1,1,15],[9,0,15],[5,-1,15],[5,-1,15],[9,-2,15],[10,-1,15],[9,0,15],[9,2,15],[1,2,15],[9,12,15],[0,1,15],[2,13,15],[-2,4,15],[-9,9,15],[-1,0,15],[-9,6,15],[-9,6,15],[-1,0,15],[-9,6,15],[-9,5,15],[-3,2,15],[-7,6,15],[-6,7,15],[-3,9,15],[-1,4,15],[1,8,15],[2,5,15],[7,4,15],[10,5,15],[9,-2,15],[10,-6,15],[1,-1,15],[8,-6,15],[9,-6,15],[1,-1,15],[9,-6,15],[9,-6,15],[1,-1,15],[8,-5,15],[10,-6,15],[9,1,15],[9,3,15],[10,5,15],[2,2,15],[7,6,15],[6,7,15],[3,4,15],[8,9,15],[2,1,15],[9,11,15],[1,1,15],[8,7,15],[10,0,15],[9,-5,15],[5,-2,15],[5,-2,15],[9,-5,15],[9,-4,15],[3,-2,15],[7,-4,15],[9,-5,15],[5,-4,15],[4,-3,15],[10,-6,15],[6,-4,15],[3,-2,15],[9,-5,15],[8,-6,15],[2,-1,15],[9,-5,15],[9,-7,15],[10,-4,15],[9,-5,15],[8,-3,15],[2,-1,15],[9,-4,15],[9,-3,15],[10,-5,15],[9,-3,15],[9,0,15],[6,3,15],[-6,2,15],[-9,6,15],[-4,5,15],[-5,4,15],[-10,5,15],[-3,3,15],[-6,7,15],[-9,5,15],[-3,1,15],[-7,8,15],[-9,4,15],[-4,1,15],[-6,5,15],[-9,5,15],[-9,3,15],[-1,0,15],[-9,7,15],[-9,4,15],[-2,2,15],[-7,6,15],[-10,5,15],[-2,2,15],[-7,12,15],[-1,1,15],[1,1,15],[9,4,15],[10,-3,15],[3,-2,15],[6,-4,15],[9,-7,15],[4,-2,15],[6,-4,15],[9,-7,15],[4,-2,15],[5,-5,15],[10,-5,15],[4,-3,15],[5,-4,15],[10,-4,15],[9,-5,15],[9,-4,15],[10,-4,15],[9,-4,15],[1,-1,15],[8,-3,15],[10,-5,15],[9,-4,15],[2,-1,15],[7,-3,15],[10,-4,15],[3,7,15],[6,10,15],[2,3,15],[6,13,15],[1,4,15],[10,7,15],[9,-3,15],[9,-4,15],[7,-4,15],[3,-1,15],[9,-5,15],[10,-4,15],[4,-3,15],[5,-1,15],[9,-2,15],[10,0,15],[9,0,15],[9,-4,15],[10,-5,15],[1,-1,15],[8,-4,15],[9,-4,15],[9,-4,15],[1,-1,15],[9,-3,15],[9,-1,15],[10,-1,15],[9,-1,15],[9,-3,15],[10,-1,15],[4,11,15],[5,9,15],[10,2,15],[9,-6,15],[7,-5,15],[2,-3,15],[10,-8,15],[2,-2,15],[7,-6,15],[8,-7,15],[1,-1,15],[10,-8,15],[5,-4,15],[4,-4,15],[9,-7,15],[4,-2,15],[6,-8,15],[5,-5,15],[-5,-3,15],[-8,-10,15],[8,-3,15],[7,-10,15],[2,-1,15],[9,-4,15],[7,-7,15],[3,-2,15],[9,-5,15],[8,-6,15],[1,-1,15],[10,-6,15],[8,-6,15],[1,-1,15],[10,-7,15],[6,-5,15],[3,-2,15],[9,-6,15],[7,-5,15],[3,-1,15],[9,-7,15],[7,-5,15],[2,-1,15],[10,-6,15],[9,-5,15],[1,-1,15],[8,-4,15],[10,-5,15],[6,-3,15],[3,-2,15],[9,-4,15],[10,-4,15],[6,-3,15],[3,-2,15],[9,-5,15],[10,-5,15],[2,-1,15],[7,-5,15],[10,-6,15],[2,-2,15],[7,-5,15],[9,-7,15],[2,-1,15],[8,-7,15],[6,-6,15],[3,-3,15],[9,-9,15],[1,-1,15],[9,-6,15],[8,-7,15],[1,0,15],[9,-7,15],[8,-5,15],[2,-2,15],[9,-6,15],[9,-5,15],[10,-6,15],[9,-7,15],[1,0,15],[9,-6,15],[9,-6,15],[1,-1,15],[8,-6,15],[9,-7,15],[1,0,15],[9,-8,15],[7,-5,15],[2,-2,15],[10,-6,15],[7,-5,15],[2,-1,15],[9,-6,15],[10,-6,15],[9,-5,15],[9,-5,15],[6,-2,15],[4,-3,15],[9,-5,15],[9,-5,15],[1,0,15],[9,-5,15],[9,-5,15],[5,-3,15],[5,-3,15],[9,-6,15],[7,-4,15],[2,-1,15],[10,-5,15],[9,-4,15],[6,-3,15],[3,-2,15],[10,-4,15],[9,-5,15],[4,-2,15],[5,-3,15],[10,-4,15],[9,-2,15],[9,-1,15],[10,0,15],[9,1,15],[9,9,15],[-9,12,15],[-1,1,15],[1,4,15],[2,9,15],[7,9,15],[5,4,15],[5,6,15],[9,5,15],[5,2,15],[5,1,15],[9,1,15],[9,0,15],[10,-2,15],[9,-2,15],[9,-2,15],[10,-2,15],[9,-3,15],[9,-3,15],[3,-1,15],[7,-2,15],[9,-2,15],[9,-1,15],[10,-1,15],[9,0,15],[9,-3,15],[9,-4,15],[1,-1,15],[9,-4,15],[10,-5,15],[6,-3,15],[3,-1,15],[9,0,15],[4,1,15],[6,3,15],[9,6,15],[4,4,15],[5,8,15],[5,5,15],[-5,9,15],[-5,4,15],[-4,7,15],[-8,6,15],[7,12,15],[-8,7,15],[-9,6,15],[-1,1,15],[-9,8,15],[-5,4,15],[-4,5,15],[-10,6,15],[-4,2,15],[4,7,15],[4,6,15],[6,3,15],[9,10,15],[-9,10,15],[-2,3,15],[-8,3,15],[-9,4,15],[-7,6,15],[-3,1,15],[-9,5,15],[-8,6,15],[-1,2,15],[-10,6,15],[-8,5,15],[-1,1,15],[-9,9,15],[-2,3,15],[-8,10,15],[-2,3,15],[-4,13,15],[-3,12,15],[0,1,15],[-5,13,15],[-4,13,15],[0,1,15],[-6,11,15],[-3,13,15],[1,13,15],[-2,13,15],[-2,13,15],[2,1,15],[10,0,15],[4,-1,15],[5,-4,15],[9,-3,15],[10,-2,15],[9,-2,15],[4,-2,15],[5,-2,15],[10,-5,15],[6,-6,15],[3,-4,15],[9,-7,15],[4,-2,15],[6,-6,15],[9,-5,15],[2,-2,15],[8,-7,15],[9,-5,15],[1,0,15],[8,-9,15],[8,-4,15],[2,-3,15],[9,-7,15],[9,-2,15],[2,-1,15],[8,-9,15],[9,-4,15],[9,-9,15],[8,-4,15],[2,-2,15],[9,-8,15],[5,-3,15],[4,-4,15],[10,-7,15],[2,-2,15],[7,-7,15],[8,-6,15],[2,-1,15],[9,-9,15],[2,-2,15],[7,-8,15],[7,-5,15],[3,-3,15],[9,-8,15],[2,-2,15],[7,-8,15],[5,-5,15],[5,-6,15],[8,-7,15],[1,-2,15],[9,-10,15],[1,-1,15],[9,-10,15],[2,-3,15],[7,-9,15],[4,-4,15],[5,-7,15],[5,-5,15],[5,-6,15],[7,-7,15],[2,-2,15],[9,-10,15],[2,-1,15],[8,-11,15],[2,-2,15],[7,-10,15],[3,-3,15],[7,-8,15],[7,-5,15],[2,-1,15],[9,-8,15],[5,-4,15],[5,-4,15],[9,-8,15],[1,0,15],[8,-9,15],[5,-4,15],[5,-4,15],[9,-8,15],[2,-1,15],[7,-7,15],[7,-6,15],[3,-3,15],[9,-8,15],[3,-2,15],[6,-6,15],[9,-7,15],[1,-1,15],[9,-7,15],[6,-5,15],[3,-3,15],[10,-7,15],[3,-3,15],[6,-6,15],[9,-6,15],[1,-1,15],[9,-7,15],[8,-5,15],[1,-1,15],[10,-6,15],[9,-5,15],[1,-1,15],[8,-5,15],[10,-6,15],[3,-2,15],[6,-5,15],[9,-4,15],[8,-4,15],[2,-1,15],[9,-6,15],[9,-4,15],[4,-2,15],[6,-4,15],[9,-4,15],[9,-3,15],[3,-2,15],[7,-4,15],[9,-4,15],[8,-4,15],[2,-2,15],[9,-5,15],[9,-2,15],[5,-4,15],[5,-7,15],[7,-6,15],[2,-3,15],[9,-6,15],[6,-4,15],[4,-4,15],[9,-5,15],[5,-4,15],[4,-4,15],[10,-6,15],[3,-3,15],[6,-6,15],[9,-5,15],[3,-2,15],[7,-5,15],[9,-5,15],[6,-3,15],[4,-2,15],[9,-6,15],[9,-4,15],[10,-8,15],[9,-5,15],[1,0,15],[8,-7,15],[10,-5,15],[2,-1,15],[7,-6,15],[9,-5,15],[5,-2,15],[5,-5,15],[9,-4,15],[9,-4,15],[1,0,15],[9,-6,15],[9,-2,15],[9,-1,15],[9,-4,15],[1,-2,15],[5,-11,15],[4,-5,15],[10,-6,15],[2,-2,15],[7,-6,15],[9,-5,15],[4,-1,15],[6,-6,15],[9,-5,15],[3,-2,15],[6,-8,15],[10,-4,15],[2,-1,15],[7,-8,15],[9,-4,15],[2,-1,15],[8,-7,15],[9,-5,15],[3,-1,15],[6,-6,15],[10,-5,15],[3,-2,15],[6,-6,15],[9,-6,15],[3,-1,15],[7,-7,15],[9,-5,15],[2,0,15],[8,-8,15],[9,-5,15],[2,0,15],[7,-7,15],[10,-6,15],[1,0,15],[8,-9,15],[9,-4,15],[1,0,15],[9,-9,15],[9,-3,15],[1,-1,15],[8,-6,15],[10,-5,15],[8,-2,15],[1,0,15],[9,-7,15],[10,-4,15],[8,-2,15],[1,-1,15],[9,-8,15],[10,-2,15],[2,-2,15],[7,-7,15],[10,-3,15],[5,-2,15],[4,-3,15],[9,-6,15],[10,-3,15],[4,-1,15],[5,-5,15],[9,-4,15],[10,-4,15],[1,0,15],[8,-7,15],[9,-4,15],[5,-2,15],[5,-4,15],[9,-4,15],[9,-4,15],[2,-1,15],[8,-5,15],[9,-4,15],[10,2,15],[9,-4,15],[2,-2,15],[7,-10,15],[3,-3,15],[5,-13,15],[2,-3,15],[7,-9,15],[2,-2,15],[9,-6,15],[8,-5,15],[2,-2,15],[9,-7,15],[6,-4,15],[3,-3,15],[10,-6,15],[6,-4,15],[3,-2,15],[9,-6,15],[7,-5,15],[3,-2,15],[9,-5,15],[9,-6,15],[10,-6,15],[9,-6,15],[1,-1,15],[9,-9,15],[2,-3,15],[7,-9,15],[5,-4,15],[4,-2,15],[10,-5,15],[8,-6,15],[1,-1,15],[9,-6,15],[9,-6,15],[1,-1,15],[9,-7,15],[8,-5,15],[1,-1,15],[10,-1,15],[9,-1,15],[9,-3,15],[10,-5,15],[4,-2,15],[5,-2,15],[9,-4,15],[10,-5,15],[3,-2,15],[6,-3,15],[10,-6,15],[5,-4,15],[4,-2,15],[9,-4,15],[10,-4,15],[6,-2,15],[3,-2,15],[9,-4,15],[10,-1,15],[9,2,15],[9,-2,15],[10,-3,15],[3,-3,15],[6,-6,15],[9,-4,15],[4,-3,15],[6,-6,15],[9,-7,15],[9,-9,15],[7,-4,15],[3,-3,15],[9,-8,15],[2,-2,15],[8,-6,15],[8,-7,15],[1,-1,15],[9,-8,15],[4,-3,15],[6,-6,15],[9,-6,15],[3,-1,15],[6,-3,15],[10,-5,15],[6,-5,15],[3,-3,15],[9,-8,15],[3,-2,15],[7,-6,15],[8,-7,15],[1,-1,15],[9,-8,15],[5,-4,15],[5,-5,15],[9,-7,15],[1,-1,15],[8,-8,15],[6,-5,15],[4,-3,15],[9,-9,15],[1,0,15],[9,-8,15],[6,-5,15],[3,-3,15],[9,-8,15],[3,-2,15],[7,-6,15],[9,-4,15],[4,-3,15],[5,-5,15],[10,-6,15],[1,-2,15],[8,-11,15],[2,-2,15],[6,-13,15],[1,-2,15],[9,-11,15],[1,0,15],[9,-12,15],[9,-12,15],[1,-1,15],[9,-12,15],[1,-1,15],[8,-10,15],[3,-3,15],[7,-8,15],[3,-5,15],[6,-6,15],[5,-7,15],[4,-5,15],[6,-8,15],[4,-4,15],[7,-8,15],[2,-4,15],[7,-9,15],[2,-3,15],[8,-10,15],[2,-2,15],[7,-11,15],[2,-2,15],[7,-11,15],[2,-3,15],[8,-10,15],[2,-2,15],[8,-11,15],[1,-2,15],[8,-11,15],[1,-1,15],[9,-11,15],[1,-1,15],[9,-12,15],[0,-1,15],[9,-12,15],[0,-1,15],[9,-12,15],[1,-2,15],[8,-11,15],[1,-2,15],[8,-11,15],[2,-2,15],[7,-11,15],[2,-2,15],[8,-11,15],[1,-1,15],[8,-11,15],[2,-2,15],[7,-11,15],[2,-3,15],[7,-10,15],[2,-4,15],[6,-9,15],[4,-5,15],[5,-8,15],[4,-7,15],[4,-6,15],[5,-8,15],[4,-5,15],[6,-9,15],[2,-3,15],[7,-12,15],[1,-1,15],[7,-13,15],[1,-3,15],[6,-10,15],[4,-7,15],[4,-6,15],[5,-7,15],[5,-6,15],[4,-6,15],[5,-7,15],[5,-7,15],[4,-6,15],[5,-7,15],[4,-5,15],[6,-10,15],[1,-3,15],[8,-11,15],[1,-2,15],[6,-13,15],[2,-3,15],[6,-10,15],[4,-7,15],[2,-6,15],[1,-13,15],[6,-9,15],[2,-3,15],[7,-12,15],[1,-1,15],[-1,-4,15],[-1,-9,15],[-8,-11,15],[-3,-2,15],[-4,-13,15],[6,-13,15],[1,-2,15],[6,-11,15],[3,-8,15],[4,-5,15],[5,-12,15],[1,-2,15],[6,-11,15],[3,-7,15],[4,-6,15],[4,-13,15],[1,-2,15],[9,-11,15],[1,-2,15],[8,-11,15],[1,-2,15],[4,-11,15],[-1,-13,15],[6,-12,15],[0,-1,15],[10,-10,15],[2,-2,15],[-1,-13,15],[-1,-5,15],[-2,-8,15],[1,-13,15],[1,-6,15],[1,-7,15],[5,-13,15],[3,-4,15],[5,-8,15],[4,-7,15],[5,-6,15],[5,-8,15],[3,-5,15],[6,-10,15],[2,-3,15],[7,-13,15],[1,-1,15],[7,-12,15],[2,-2,15],[7,-11,15],[2,-6,15],[2,-7,15],[8,-11,15],[0,-1,15],[3,-13,15],[6,-11,15],[1,-2,15],[2,-13,15],[4,-13,15],[2,-4,15],[3,-9,15],[1,-13,15],[6,-11,15],[1,-1,15],[2,-13,15],[0,-13,15],[2,-13,15],[4,-7,15],[3,-6,15],[1,-13,15],[0,-13,15],[2,-13,15],[3,-5,15],[3,-7,15],[-1,-13,15],[-2,-3,15],[-9,-2,15],[-9,-2,15],[-10,-3,15],[-9,5,15],[-2,5,15],[-3,13,15],[-1,12,15],[-2,13,15],[-1,3,15],[-5,10,15],[-2,13,15],[-1,13,15],[-2,8,15],[-1,5,15],[-5,13,15],[-2,13,15],[-1,4,15],[-2,8,15],[-6,13,15],[-1,7,15],[-2,6,15],[-6,13,15],[-2,5,15],[-2,8,15],[-7,13,15],[0,1,15],[-5,12,15],[-5,8,15],[-3,4,15],[-6,13,15],[-9,11,15],[-3,2,15],[-7,4,15],[-5,-4,15],[1,-13,15],[4,-12,15],[1,-1,15],[5,-12,15],[4,-12,15],[0,-1,15],[1,-13,15],[0,-13,15],[2,-13,15],[3,-13,15],[3,-12,15],[0,-1,15],[2,-12,15],[5,-13,15],[1,-13,15],[0,-13,15],[-4,-13,15],[-4,-8,15],[-2,-5,15],[-6,-13,15],[-1,-4,15],[-3,-9,15],[-5,-12,15],[-2,-3,15],[-6,-10,15],[-3,-6,15],[-4,-7,15],[-5,-9,15],[-3,-4,15],[-7,-12,15],[0,-1,15],[-9,-8,15],[-9,-1,15],[-9,-4,15],[-1,0,15],[-9,-8,15],[-4,-5,15],[-5,-13,15],[-4,-12,15],[-6,-5,15],[-5,-8,15],[-4,-2,15],[-9,-4,15],[-6,-7,15],[-4,-2,15],[-9,-3,15],[-7,-8,15],[-3,-1,15],[-9,-2,15],[-9,-8,15],[-1,-2,15],[-9,-6,15],[-9,0,15],[-9,-3,15],[-5,-4,15],[-5,-2,15],[-9,-4,15],[-9,-6,15],[-10,7,15],[-9,4,15],[-4,1,15],[-5,3,15],[-10,3,15],[-9,3,15],[-9,2,15],[-10,2,15],[-9,-2,15],[-10,-2,15]],[[8258,1343,5],[2,2,5],[-2,0,5],[-1,0,5],[1,-2,5]],[[6167,5888,10],[5,0,10],[9,3,10],[8,9,10],[2,2,10],[9,9,10],[9,-3,10],[8,-8,10],[2,-2,10],[9,-9,10],[2,-2,10],[8,-8,10],[3,-4,10],[6,-12,10],[2,-1,10],[7,-6,10],[10,-5,10],[4,-2,10],[5,-5,10],[9,0,10],[10,-3,10],[7,-5,10],[2,-2,10],[9,-1,10],[10,-3,10],[7,-7,10],[2,-2,10],[9,-10,10],[2,-1,10],[8,-6,10],[9,-6,10],[1,-1,10],[8,-5,10],[10,-7,10],[0,-1,10],[9,-5,10],[10,-5,10],[4,-2,10],[5,-3,10],[9,-4,10],[10,-4,10],[3,-2,10],[6,-4,10],[9,-6,10],[6,-3,10],[4,-2,10],[9,-6,10],[8,-5,10],[1,-1,10],[10,-5,10],[9,-4,10],[6,-3,10],[3,-2,10],[10,-6,10],[8,-5,10],[1,0,10],[9,-4,10],[10,-4,10],[8,-5,10],[1,0,10],[10,-6,10],[9,-5,10],[2,-1,10],[7,-5,10],[10,-8,10],[6,-13,10],[3,-9,10],[2,-4,10],[4,-13,10],[3,-4,10],[6,-9,10],[4,-5,10],[6,-8,10],[3,-2,10],[9,-5,10],[9,-6,10],[1,0,10],[9,-7,10],[6,-5,10],[3,-4,10],[10,-9,10],[9,-8,10],[9,-5,10],[1,0,10],[9,-11,10],[1,-2,10],[7,-13,10],[1,-2,10],[5,-11,10],[5,-7,10],[3,-6,10],[6,-10,10],[2,-2,10],[7,-8,10],[6,-5,10],[4,-13,10],[0,-1,10],[1,-12,10],[-1,-13,10],[0,-1,10],[-8,-12,10],[-2,-4,10],[-4,-9,10],[-5,-7,10],[-5,-6,10],[-4,-4,10],[-9,-8,10],[-1,-1,10],[-9,-9,10],[-3,-3,10],[-7,-7,10],[-5,-6,10],[-4,-4,10],[-8,-9,10],[-1,-2,10],[-10,-10,10],[-1,-1,10],[-8,-8,10],[-4,-5,10],[-5,-4,10],[-8,-9,10],[-2,-1,10],[-9,-10,10],[-1,-2,10],[-8,-7,10],[-6,-5,10],[-4,-4,10],[-7,-9,10],[-2,-3,10],[-8,-10,10],[-1,-2,10],[-9,-11,10],[-1,-1,10],[-9,-12,10],[0,-1,10],[-8,-12,10],[-1,-4,10],[-4,-9,10],[-1,-12,10],[1,-13,10],[4,-11,10],[0,-2,10],[6,-13,10],[3,-5,10],[3,-8,10],[4,-13,10],[2,-5,10],[4,-8,10],[6,-9,10],[2,-4,10],[7,-11,10],[1,-1,10],[8,-13,10],[1,0,10],[9,-11,10],[1,-2,10],[8,-7,10],[8,-6,10],[1,-2,10],[10,-9,10],[1,-2,10],[8,-9,10],[3,-4,10],[6,-5,10],[8,-8,10],[2,-1,10],[9,-6,10],[9,-5,10],[0,-1,10],[10,-6,10],[9,-6,10],[10,-6,10],[9,-6,10],[1,-1,10],[8,-6,10],[10,-7,10],[9,-6,10],[8,-7,10],[1,-1,10],[10,-7,10],[7,-5,10],[2,-1,10],[9,-6,10],[8,-6,10],[2,-1,10],[9,-5,10],[9,-7,10],[10,-6,10],[8,-6,10],[1,-1,10],[10,-6,10],[9,-6,10],[9,-5,10],[10,-5,10],[5,-3,10],[4,-3,10],[9,-6,10],[6,-4,10],[4,-2,10],[9,-6,10],[9,-4,10],[3,-1,10],[7,-2,10],[9,-3,10],[9,-5,10],[5,-3,10],[5,-3,10],[9,-5,10],[8,-5,10],[1,0,10],[10,-4,10],[9,-4,10],[7,-5,10],[3,-1,10],[9,-4,10],[9,-1,10],[10,1,10],[9,1,10],[9,1,10],[10,1,10],[9,0,10],[9,1,10],[10,1,10],[9,-1,10],[9,-5,10],[9,-6,10],[1,-1,10],[9,-10,10],[1,-2,10],[6,-13,10],[2,-7,10],[3,-6,10],[6,-13,10],[1,-2,10],[5,-11,10],[4,-5,10],[5,-8,10],[5,-10,10],[0,-2,10],[5,-13,10],[4,-13,10],[0,-1,10],[2,-12,10],[-2,-12,10],[0,-1,10],[-3,-13,10],[-3,-13,10],[-2,-13,10],[-1,-11,10],[-1,-1,10],[-1,-13,10],[-1,-13,10],[-6,-13,10],[-1,-2,10],[-5,-11,10],[-4,-7,10],[-3,-6,10],[-4,-13,10],[-3,-12,10],[0,-1,10],[-9,-8,10],[-9,-4,10],[-10,-5,10],[-9,-4,10],[-9,-4,10],[-1,0,10],[-9,-5,10],[-9,-4,10],[-9,-4,10],[-10,-5,10],[-9,-4,10],[-9,-4,10],[-10,-5,10],[-9,-4,10],[-9,-4,10],[-10,-6,10],[-4,-7,10],[3,-13,10],[1,-4,10],[3,-8,10],[1,-13,10],[-4,-8,10],[-3,-5,10],[-6,-12,10],[-1,-1,10],[-7,-13,10],[1,-13,10],[7,-5,10],[5,-8,10],[4,-6,10],[4,-7,10],[6,-6,10],[4,-6,10],[5,-6,10],[5,-7,10],[4,-7,10],[6,-6,10],[4,-7,10],[4,-6,10],[5,-11,10],[2,-2,10],[-2,-3,10],[-9,-5,10],[-3,-5,10],[-2,-13,10],[-5,-8,10],[-2,-4,10],[-5,-13,10],[-2,-4,10],[-5,-9,10],[5,-9,10],[9,-3,10],[1,-1,10],[-1,-1,10],[-6,-12,10],[-3,-4,10],[-5,-9,10],[-4,-6,10],[-4,-7,10],[-6,-12,10],[0,-1,10],[-9,-12,10],[-3,0,10],[-7,-2,10],[-9,-4,10],[-9,-5,10],[-4,-2,10],[0,-13,10],[-4,-13,10],[-2,-6,10],[-2,-7,10],[-4,-13,10],[-3,-8,10],[-2,-5,10],[-4,-13,10],[-3,-7,10],[-3,-5,10],[-7,-13,10],[-9,-13,10],[-9,-13,10],[-1,0,10],[-9,-8,10],[-9,0,10],[-9,4,10],[-10,2,10],[-8,2,10],[-1,0,10],[-9,2,10],[-10,2,10],[-9,2,10],[-10,2,10],[-9,1,10],[-9,2,10],[-8,2,10],[-2,0,10],[-9,11,10],[-2,2,10],[-7,7,10],[-10,5,10],[-2,1,10],[-7,0,10],[-5,0,10],[-4,-1,10],[-10,-1,10],[-9,0,10],[-9,0,10],[-10,-2,10],[-9,-2,10],[-10,-7,10],[0,-13,10],[-2,-13,10],[-2,-13,10],[-3,-13,10],[-2,-11,10],[0,-2,10],[-3,-12,10],[-2,-13,10],[-4,-13,10],[0,-1,10],[-9,-12,10],[-1,0,10],[-9,-11,10],[-1,-2,10],[-8,-5,10],[-10,-6,10],[-1,-2,10],[-7,-13,10],[-1,-1,10],[-4,-12,10],[-5,-12,10],[-5,-13,10],[-4,-13,10],[-1,-4,10],[-2,-9,10],[-4,-13,10],[-3,-7,10],[-2,-6,10],[-6,-13,10],[-1,-3,10],[-5,-9,10],[-2,-13,10],[-1,-13,10],[-2,-7,10],[-1,-6,10],[-3,-13,10],[-4,-13,10],[-1,-6,10],[-2,-7,10],[-3,-13,10],[-4,-12,10],[0,-1,10],[-5,-12,10],[-5,-8,10],[-5,-5,10],[-4,-4,10],[-10,-9,10],[-9,-9,10],[-3,-4,10],[-6,-2,10],[-10,-2,10],[-9,-2,10],[-9,-2,10],[-8,-5,10],[-2,-1,10],[-9,-10,10],[-2,-2,10],[-7,-8,10],[-5,-5,10],[-5,-7,10],[-3,-5,10],[-6,-6,10],[-9,-6,10],[-3,-1,10],[-7,-3,10],[-9,-2,10],[-9,-1,10],[-10,-2,10],[-9,-4,10],[-6,-1,10],[-4,-1,10],[-9,1,10],[-1,0,10],[-8,3,10],[-10,5,10],[-4,5,10],[-5,5,10],[-7,8,10],[-2,2,10],[-10,1,10],[-9,-3,10],[-2,0,10],[-7,-3,10],[-10,-3,10],[-9,-2,10],[-9,0,10],[-10,2,10],[-9,1,10],[-9,1,10],[-8,4,10],[-2,1,10],[-7,11,10],[0,13,10],[6,13,10],[1,9,10],[1,4,10],[-1,2,10],[-9,3,10],[-10,-2,10],[-9,0,10],[-9,-1,10],[-10,0,10],[-9,0,10],[-9,0,10],[-10,0,10],[-9,0,10],[-9,0,10],[-10,-1,10],[-9,0,10],[-5,-1,10],[-4,-13,10],[8,-13,10],[1,-2,10],[6,-11,10],[3,-12,10],[-1,-13,10],[0,-13,10],[1,-13,10],[0,-5,10],[1,-8,10],[0,-13,10],[2,-13,10],[7,-3,10],[9,-3,10],[9,-1,10],[10,-1,10],[9,6,10],[9,0,10],[8,-10,10],[2,-4,10],[9,-9,10],[-1,-13,10],[1,-7,10],[9,-3,10],[8,10,10],[2,1,10],[9,3,10],[4,-4,10],[6,-5,10],[9,-7,10],[1,-1,10],[8,-6,10],[10,-6,10],[2,-1,10],[7,-5,10],[9,-6,10],[3,-2,10],[7,-5,10],[9,-6,10],[2,-2,10],[7,-5,10],[10,-6,10],[2,-2,10],[7,-5,10],[7,-7,10],[2,-5,10],[3,-8,10],[3,-13,10],[3,-13,10],[1,-3,10],[9,-10,10],[9,-7,10],[8,-6,10],[2,0,10],[9,-5,10],[10,-7,10],[0,-1,10],[9,-3,10],[9,-5,10],[8,-5,10],[2,-1,10],[9,-5,10],[9,-6,10],[2,0,10],[8,-5,10],[9,-5,10],[5,-3,10],[4,-9,10],[2,-4,10],[3,-13,10],[5,-5,10],[6,-8,10],[3,-2,10],[9,-5,10],[10,-6,10],[9,-11,10],[2,-2,10],[6,-12,10],[1,-3,10],[10,-9,10],[1,-1,10],[5,-13,10],[-6,-6,10],[-5,-7,10],[-5,-3,10],[-9,-8,10],[-2,-2,10],[-7,-6,10],[-10,-7,10],[-9,2,10],[-9,4,10],[-10,6,10],[-1,1,10],[-8,10,10],[-2,3,10],[-7,7,10],[-10,-6,10],[-9,1,10],[-9,2,10],[-10,1,10],[-9,5,10],[-2,3,10],[-7,6,10],[-7,7,10],[-3,3,10],[-9,7,10],[-2,3,10],[-8,3,10],[-9,5,10],[-4,4,10],[-5,4,10],[-10,3,10],[-8,6,10],[-1,1,10],[-9,3,10],[-10,4,10],[-8,5,10],[-1,1,10],[-9,8,10],[-6,4,10],[-4,3,10],[-9,3,10],[-9,2,10],[-10,3,10],[-8,2,10],[-1,0,10],[-9,4,10],[-10,5,10],[-6,4,10],[-3,4,10],[-9,9,10],[-1,2,10],[-4,10,10],[-5,13,10],[0,2,10],[-2,11,10],[-2,13,10],[-2,13,10],[1,13,10],[-4,5,10],[-10,-3,10],[-3,-2,10],[-6,-6,10],[-9,-6,10],[-1,-1,10],[-9,-7,10],[-9,2,10],[-6,5,10],[-3,1,10],[-10,0,10],[-9,0,10],[-8,12,10],[-1,1,10],[-10,4,10],[-5,8,10],[-4,7,10],[-4,6,10],[-5,5,10],[-10,6,10],[-4,1,10],[-5,5,10],[-10,6,10],[-8,2,10],[-1,1,10],[-9,9,10],[-10,3,10],[-9,7,10],[-9,4,10],[-4,2,10],[-6,5,10],[-9,4,10],[-9,4,10],[-10,6,10],[-9,3,10],[-5,4,10],[-4,4,10],[-10,4,10],[-7,5,10],[-2,3,10],[-10,4,10],[-9,5,10],[0,1,10],[-9,5,10],[-10,4,10],[-5,3,10],[-4,3,10],[-9,5,10],[-10,5,10],[-9,7,10],[-9,5,10],[-2,1,10],[-8,6,10],[-9,5,10],[-4,2,10],[-5,4,10],[-10,4,10],[-8,5,10],[-1,0,10],[-9,6,10],[-10,5,10],[-2,2,10],[-7,5,10],[-10,5,10],[-3,3,10],[-6,4,10],[-9,4,10],[-7,4,10],[-3,2,10],[-9,5,10],[-9,4,10],[-3,2,10],[-7,4,10],[-9,5,10],[-4,4,10],[-5,3,10],[-10,4,10],[-5,6,10],[-4,2,10],[-9,2,10],[-10,6,10],[-3,3,10],[-6,3,10],[-9,2,10],[-8,8,10],[-2,1,10],[-9,3,10],[-8,9,10],[-2,1,10],[-9,3,10],[-9,8,10],[-1,1,10],[-9,2,10],[-9,3,10],[-8,7,10],[-1,1,10],[-10,3,10],[-8,9,10],[-1,1,10],[-9,2,10],[-8,10,10],[-2,1,10],[-9,1,10],[-9,6,10],[-6,5,10],[-4,1,10],[-9,0,10],[-9,2,10],[-3,-3,10],[3,-6,10],[2,-7,10],[7,-13,10],[9,-2,10],[7,-11,10],[3,0,10],[8,-12,10],[1,-1,10],[9,0,10],[10,-3,10],[8,-9,10],[1,-1,10],[9,-2,10],[10,-7,10],[3,-3,10],[6,-2,10],[9,-6,10],[5,-5,10],[5,-2,10],[9,-2,10],[9,-6,10],[2,-3,10],[8,-2,10],[8,-11,10],[1,-1,10],[10,-3,10],[9,-9,10],[9,-5,10],[9,-8,10],[1,0,10],[9,-5,10],[7,-7,10],[2,-2,10],[10,-4,10],[7,-7,10],[2,-1,10],[9,-5,10],[10,-7,10],[9,-5,10],[9,-7,10],[1,-1,10],[9,-4,10],[9,-8,10],[1,-1,10],[8,-5,10],[10,-8,10],[9,-5,10],[9,-8,10],[1,0,10],[9,-4,10],[9,-7,10],[2,-1,10],[8,-5,10],[8,-8,10],[1,-1,10],[9,-4,10],[10,-7,10],[1,-1,10],[8,-3,10],[9,-4,10],[7,-6,10],[3,-1,10],[9,-4,10],[9,-7,10],[1,-1,10],[9,-3,10],[9,-5,10],[4,-5,10],[5,-2,10],[10,-3,10],[8,-8,10],[1,0,10],[10,-2,10],[9,-4,10],[8,-7,10],[1,0,10],[10,-3,10],[9,-5,10],[4,-4,10],[5,-2,10],[10,-4,10],[7,-7,10],[2,-1,10],[9,-2,10],[10,-8,10],[2,-2,10],[7,-1,10],[9,-4,10],[10,-4,10],[3,-4,10],[6,-2,10],[10,1,10],[9,-8,10],[3,-4,10],[6,-1,10],[10,-6,10],[4,-6,10],[5,-3,10],[8,-10,10],[1,-1,10],[10,-2,10],[9,-10,10],[9,-4,10],[9,-8,10],[1,0,10],[9,-5,10],[8,-8,10],[1,-1,10],[10,-3,10],[6,-9,10],[3,-2,10],[9,-1,10],[10,-6,10],[3,-4,10],[6,-2,10],[10,-3,10],[5,-8,10],[4,-2,10],[9,-7,10],[3,-4,10],[7,-3,10],[9,-8,10],[1,-2,10],[8,-6,10],[9,-6,10],[1,-1,10],[9,-4,10],[9,-6,10],[3,-2,10],[7,-4,10],[9,-5,10],[9,-4,10],[10,-5,10],[9,-5,10],[2,-3,10],[7,-3,10],[10,-3,10],[8,-7,10],[1,0,10],[10,-4,10],[9,-6,10],[2,-3,10],[7,-3,10],[10,-6,10],[3,-4,10],[6,-2,10],[9,-4,10],[7,-7,10],[3,-1,10],[9,-1,10],[9,0,10],[10,-5,10],[4,-5,10],[5,-4,10],[9,-4,10],[4,-5,10],[6,-4,10],[9,-8,10],[1,-1,10],[8,-4,10],[9,-9,10],[1,-1,10],[9,-4,10],[10,-7,10],[0,-1,10],[9,-6,10],[7,-7,10],[2,-1,10],[10,-6,10],[4,-6,10],[5,-3,10],[9,-9,10],[1,0,10],[9,-5,10],[9,-8,10],[0,-1,10],[9,-5,10],[7,-7,10],[3,-2,10],[9,-8,10],[3,-3,10],[6,-5,10],[8,-8,10],[2,-2,10],[9,-5,10],[6,-6,10],[3,-2,10],[10,-7,10],[3,-4,10],[6,-4,10],[8,-9,10],[2,-1,10],[9,-8,10],[3,-3,10],[6,-5,10],[10,-8,10],[9,-4,10],[7,-9,10],[2,-2,10],[8,-11,10],[2,-1,10],[8,-12,10],[1,-2,10],[9,-10,10],[1,-1,10],[9,-7,10],[4,-6,10],[5,-5,10],[6,-8,10],[3,-4,10],[6,-8,10],[4,-4,10],[7,-9,10],[2,-3,10],[8,-10,10],[2,-1,10],[9,-12,10],[9,-10,10],[2,-3,10],[8,-8,10],[3,-5,10],[6,-7,10],[4,-6,10],[5,-7,10],[4,-5,10],[6,-8,10],[4,-5,10],[5,-7,10],[5,-6,10],[4,-7,10],[5,-6,10],[5,-7,10],[4,-6,10],[5,-6,10],[5,-7,10],[4,-5,10],[6,-8,10],[4,-4,10],[6,-9,10],[3,-4,10],[7,-8,10],[2,-4,10],[7,-9,10],[3,-4,10],[7,-9,10],[2,-3,10],[7,-10,10],[3,-4,10],[6,-9,10],[3,-4,10],[6,-9,10],[3,-5,10],[6,-8,10],[4,-5,10],[5,-8,10],[4,-5,10],[5,-7,10],[4,-7,10],[4,-6,10],[6,-8,10],[4,-5,10],[5,-9,10],[3,-4,10],[6,-10,10],[2,-3,10],[8,-11,10],[1,-2,10],[8,-12,10],[1,-1,10],[8,-12,10],[0,-1,10],[8,-12,10],[2,-3,10],[6,-10,10],[3,-5,10],[6,-8,10],[3,-4,10],[6,-9,10],[4,-5,10],[5,-8,10],[4,-7,10],[4,-6,10],[6,-7,10],[3,-6,10],[6,-9,10],[2,-3,10],[7,-13,10],[0,-1,10],[9,-12,10],[1,-1,10],[7,-12,10],[2,-3,10],[7,-10,10],[2,-4,10],[6,-9,10],[4,-6,10],[4,-7,10],[5,-7,10],[4,-5,10],[5,-9,10],[4,-4,10],[6,-10,10],[2,-3,10],[7,-11,10],[2,-2,10],[7,-12,10],[1,-1,10],[9,-11,10],[1,-2,10],[8,-12,10],[0,-1,10],[9,-13,10],[0,-1,10],[9,-11,10],[1,-1,10],[8,-12,10],[1,-2,10],[8,-11,10],[2,-3,10],[7,-10,10],[2,-2,10],[9,-10,10],[1,-1,10],[9,-11,10],[1,-2,10],[8,-12,10],[1,-1,10],[5,-13,10],[3,-4,10],[7,-8,10],[3,-5,10],[6,-8,10],[3,-5,10],[4,-8,10],[5,-7,10],[6,-6,10],[4,-7,10],[4,-6,10],[5,-8,10],[3,-5,10],[6,-7,10],[5,-6,10],[5,-10,10],[1,-2,10],[6,-13,10],[-7,-11,10],[-3,-2,10],[-5,-13,10],[3,-13,10],[0,-13,10],[2,-13,10],[3,-7,10],[2,-6,10],[7,-12,10],[0,-1,10],[7,-12,10],[3,-6,10],[4,-7,10],[5,-11,10],[1,-2,10],[7,-13,10],[1,-4,10],[4,-9,10],[3,-13,10],[3,-11,10],[0,-1,10],[4,-13,10],[5,-12,10],[0,-1,10],[4,-13,10],[1,-13,10],[-5,-8,10],[-4,-5,10],[-5,-9,10],[-3,-4,10],[-7,-11,10],[-1,-2,10],[-8,-12,10],[0,-1,10],[-9,-12,10],[-1,0,10],[-9,-5,10],[-9,-5,10],[-5,-3,10],[-5,-4,10],[-9,-6,10],[-9,-3,10],[-1,0,10],[-9,-4,10],[-9,-5,10],[-9,-3,10],[-1,-1,10],[-9,-6,10],[-9,4,10],[-4,2,10],[-5,5,10],[-5,-5,10],[-5,-8,10],[-2,-5,10],[-7,-10,10],[-2,-3,10],[-7,-9,10],[-4,-4,10],[-6,-8,10],[-3,-4,10],[-6,-10,10],[-2,-3,10],[-8,-8,10],[-4,-5,10],[-5,-3,10],[-9,-5,10],[-8,-5,10],[-2,-1,10],[-9,-4,10],[-9,-3,10],[-10,1,10],[-9,4,10],[-5,3,10],[-4,3,10],[-10,7,10],[-4,3,10],[-5,1,10],[-9,0,10],[-5,-1,10],[-5,-4,10],[-9,-5,10],[-9,-2,10],[-4,-2,10],[-6,-7,10],[-9,-3,10],[-5,-3,10],[-5,-5,10],[-9,-7,10],[0,-1,10],[0,-1,10],[3,-12,10],[1,-12,10],[1,-13,10],[-5,-12,10],[-9,0,10],[-10,0,10],[-5,-1,10],[-4,-1,10],[-9,-2,10],[-10,0,10],[-9,0,10],[-9,1,10],[-10,0,10],[-9,1,10],[-7,1,10],[-2,0,10],[-10,3,10],[-9,2,10],[-9,2,10],[-10,2,10],[-9,1,10],[-10,2,10],[-9,0,10],[-9,0,10],[-4,1,10],[-6,1,10],[-9,1,10],[-9,0,10],[-10,1,10],[-9,1,10],[-9,1,10],[-10,5,10],[-3,3,10],[-6,4,10],[-9,6,10],[-10,2,10],[-9,3,10],[-9,2,10],[-10,2,10],[-9,4,10],[-1,2,10],[-6,13,10],[-3,3,10],[-9,4,10],[-9,2,10],[-10,3,10],[-5,1,10],[-4,3,10],[-9,7,10],[-4,3,10],[-6,4,10],[-9,8,10],[-2,1,10],[-7,3,10],[-10,10,10],[-6,12,10],[-3,6,10],[-4,7,10],[-5,10,10],[-2,3,10],[-8,12,10],[-1,1,10],[-8,9,10],[-5,4,10],[-5,4,10],[-9,7,10],[-2,2,10],[-7,6,10],[-8,7,10],[-2,2,10],[-9,8,10],[-2,3,10],[-7,6,10],[-7,6,10],[-3,3,10],[-9,8,10],[-2,2,10],[-7,8,10],[-6,5,10],[-4,4,10],[-9,4,10],[-9,1,10],[-10,3,10],[-2,1,10],[-7,3,10],[-9,4,10],[-10,2,10],[-9,2,10],[-10,1,10],[-7,1,10],[-2,0,10],[-9,2,10],[-10,1,10],[-9,1,10],[-9,2,10],[-10,3,10],[-9,2,10],[-9,1,10],[-1,1,10],[1,13,10],[6,13,10],[3,7,10],[2,5,10],[-2,7,10],[-9,5,10],[-3,1,10],[-7,3,10],[-9,3,10],[-9,4,10],[-10,3,10],[-9,3,10],[-9,4,10],[-10,3,10],[-7,3,10],[-2,1,10],[-10,3,10],[-9,3,10],[-9,3,10],[-9,3,10],[-1,0,10],[-9,3,10],[-9,5,10],[-8,5,10],[-2,1,10],[-9,5,10],[-9,4,10],[-10,-1,10],[-9,2,10],[-1,2,10],[-4,12,10],[-4,9,10],[-7,4,10],[-3,2,10],[-9,5,10],[-9,6,10],[-1,0,10],[-9,5,10],[-9,5,10],[-5,3,10],[-5,2,10],[-9,5,10],[-9,4,10],[-4,2,10],[-6,3,10],[-9,7,10],[-2,3,10],[-7,11,10],[-2,2,10],[-8,12,10],[0,1,10],[-4,12,10],[1,13,10],[2,13,10],[1,8,10],[1,5,10],[-1,11,10],[0,2,10],[-9,5,10],[-7,8,10],[-2,4,10],[-6,9,10],[-4,5,10],[-5,7,10],[-4,4,10],[-9,9,10],[-1,0,10],[-9,9,10],[-5,4,10],[-4,4,10],[-9,9,10],[-10,9,10],[-4,4,10],[-5,7,10],[-2,6,10],[-2,13,10],[-6,8,10],[-3,5,10],[-6,5,10],[-8,7,10],[-1,2,10],[-10,9,10],[-1,2,10],[-8,8,10],[-5,5,10],[-4,4,10],[-9,9,10],[-1,1,10],[-9,9,10],[-3,3,10],[-6,6,10],[-7,7,10],[-3,3,10],[-9,10,10],[0,1,10],[-3,12,10],[-2,12,10],[-2,13,10],[-2,10,10],[-2,3,10],[-3,13,10],[-2,13,10],[-3,4,10],[-9,6,10],[-10,0,10],[-9,-1,10],[-9,-1,10],[-10,0,10],[-9,-1,10],[-9,-1,10],[-10,0,10],[-9,-1,10],[-9,0,10],[-10,1,10],[-9,1,10],[-9,2,10],[-10,1,10],[-9,1,10],[-9,-3,10],[-10,-5,10],[-9,1,10],[-2,9,10],[2,10,10],[0,3,10],[0,12,10],[0,3,10],[-10,6,10],[-9,-5,10],[-5,-4,10],[-2,-12,10],[0,-13,10],[4,-13,10],[-6,-4,10],[-7,4,10],[-3,7,10],[-5,6,10],[-4,1,10],[-9,4,10],[-10,0,10],[-9,0,10],[-9,-1,10],[-8,-4,10],[-2,-1,10],[-9,-8,10],[-3,-4,10],[-6,-11,10],[-2,-2,10],[-8,-11,10],[-1,-2,10],[-8,-6,10],[-9,-6,10],[-2,-1,10],[-8,-5,10],[-9,-7,10],[-1,-1,10],[-9,-5,10],[-9,-7,10],[-1,0,10],[-8,-7,10],[-9,-6,10],[-1,-1,10],[-9,-7,10],[-7,-5,10],[-2,-2,10],[-10,-7,10],[-4,-4,10],[-5,-3,10],[-9,-7,10],[-7,-3,10],[-3,-1,10],[-2,1,10],[-7,3,10],[-9,1,10],[-7,-4,10],[-3,-3,10],[-9,-7,10],[-3,-3,10],[-6,-8,10],[-7,-5,10],[-3,-2,10],[-9,-11,10],[-10,-6,10],[-9,0,10],[-9,2,10],[-10,1,10],[-9,2,10],[-9,1,10],[0,1,10],[-10,1,10],[-9,2,10],[-9,2,10],[-9,7,10],[-1,1,10],[-4,12,10],[-5,12,10],[-1,1,10],[-8,13,10],[0,1,10],[-10,11,10],[-1,1,10],[-8,9,10],[-3,4,10],[-7,7,10],[-6,6,10],[-3,3,10],[-8,9,10],[-1,2,10],[-9,11,10],[-1,1,10],[-9,9,10],[-3,3,10],[-6,3,10],[-10,2,10],[-9,0,10],[-9,-4,10],[-3,-1,10],[-7,-3,10],[-9,-1,10],[-9,0,10],[-10,0,10],[-9,0,10],[-9,0,10],[-10,0,10],[-9,-1,10],[-10,0,10],[-9,-1,10],[-9,-2,10],[-10,-4,10],[-9,0,10],[-8,12,10],[-1,4,10],[-4,9,10],[-6,11,10],[-1,2,10],[-8,7,10],[-9,5,10],[-3,1,10],[-7,2,10],[-9,6,10],[-9,2,10],[-4,3,10],[-6,4,10],[-9,3,10],[-9,5,10],[0,1,10],[-10,4,10],[-9,2,10],[-10,1,10],[-9,-1,10],[-9,-1,10],[-10,-2,10],[-9,-1,10],[-9,-2,10],[-5,-1,10],[-5,0,10],[-9,-2,10],[-8,2,10],[-1,1,10],[-10,5,10],[-9,2,10],[-8,5,10],[-1,1,10],[-10,6,10],[-9,6,10],[-9,6,10],[-10,6,10],[-2,1,10],[-7,4,10],[-10,1,10],[-9,0,10],[-9,0,10],[-10,-3,10],[-1,-2,10],[-8,-8,10],[-3,-5,10],[-5,-13,10],[-1,-1,10],[-10,-8,10],[-9,-4,10],[-9,0,10],[-4,0,10],[-6,3,10],[-9,5,10],[-9,5,10],[0,1,10],[-10,3,10],[-9,2,10],[-10,4,10],[-5,3,10],[-4,3,10],[-9,5,10],[-10,2,10],[-9,-3,10],[-9,-3,10],[-10,-3,10],[-9,0,10],[-9,4,10],[-10,6,10],[-4,2,10],[-5,3,10],[-9,6,10],[-7,4,10],[-3,1,10],[-9,6,10],[-9,5,10],[-3,1,10],[-7,2,10],[-9,3,10],[-10,1,10],[-9,-1,10],[-9,-4,10],[-3,-1,10],[-7,-4,10],[-9,-4,10],[-9,-5,10],[-10,-5,10],[-9,1,10],[-9,4,10],[-1,0,10],[-9,4,10],[-9,3,10],[-9,4,10],[-3,2,10],[-7,6,10],[-8,7,10],[-1,1,10],[-9,9,10],[-4,3,10],[-6,2,10],[-9,2,10],[-10,3,10],[-9,5,10],[-9,6,10],[-10,1,10],[-6,6,10],[-3,3,10],[-9,1,10],[-10,6,10],[-9,0,10],[-9,-4,10],[-10,-3,10],[-9,-1,10],[-9,3,10],[-10,3,10],[-9,3,10],[-6,2,10],[-3,2,10],[-10,3,10],[-9,3,10],[-10,4,10],[-6,1,10],[-3,1,10],[-9,5,10],[-10,4,10],[-9,0,10],[-9,-1,10],[-10,-1,10],[-9,-1,10],[-9,2,10],[-8,4,10],[-2,4,10],[-2,9,10],[2,9,10],[1,4,10],[-1,5,10],[-1,7,10],[-8,8,10],[-9,0,10],[-10,-1,10],[-9,1,10],[-10,1,10],[-9,-4,10],[-9,-4,10],[-10,0,10],[-9,0,10],[0,-1,10],[-9,-4,10],[-10,-3,10],[-9,0,10],[-9,1,10],[-10,2,10],[-9,-1,10],[-9,-1,10],[-10,0,10],[-9,-1,10],[-9,-1,10],[-10,-3,10],[-4,-1,10],[-5,-2,10],[-10,-2,10],[-6,4,10],[-3,1,10],[-9,3,10],[-10,2,10],[-9,3,10],[-4,3,10],[-3,13,10],[-2,11,10],[-1,2,10],[-8,13,10],[-1,1,10],[-9,8,10],[-8,4,10],[-1,0,10],[-10,1,10],[-9,0,10],[-9,0,10],[-10,-1,10],[-9,0,10],[-9,0,10],[-1,0,10],[-9,-8,10],[-9,-5,10],[-1,0,10],[-6,13,10],[-3,6,10],[-5,7,10],[-4,4,10],[-8,9,10],[-1,1,10],[-10,10,10],[-1,2,10],[-8,9,10],[-3,3,10],[-6,7,10],[-6,6,10],[-4,6,10],[-3,7,10],[-6,11,10],[-2,2,10],[-7,10,10],[-3,3,10],[-4,13,10],[-3,7,10],[-2,6,10],[-5,13,10],[-2,6,10],[-3,6,10],[-5,13,10],[-1,3,10],[-5,10,10],[-5,10,10],[-1,3,10],[-3,13,10],[-1,13,10],[-4,13,10],[-9,2,10],[-10,10,10],[0,1,10],[-9,10,10],[-2,2,10],[-5,13,10],[4,13,10],[0,13,10],[-2,13,10],[-5,7,10],[-2,6,10],[-7,12,10],[0,1,10],[-9,12,10],[-1,0,10],[-9,10,10],[-3,3,10],[-6,7,10],[-6,6,10],[-3,6,10],[-6,7,10],[-4,10,10],[-1,3,10],[-4,13,10],[-4,10,10],[-1,3,10],[-3,13,10],[-5,5,10],[-7,7,10],[-3,3,10],[-9,6,10],[-9,0,10],[-10,0,10],[-9,0,10],[-9,2,10],[-7,2,10],[-3,2,10],[-9,4,10],[-10,5,10],[-5,2,10],[-4,2,10],[-9,4,10],[-10,4,10],[-9,3,10],[-9,1,10],[-10,0,10],[-9,0,10],[-9,1,10],[-10,0,10],[-9,0,10],[-9,0,10],[-10,0,10],[-9,0,10],[-10,0,10],[-9,0,10],[-9,-2,10],[-1,0,10],[-9,-6,10],[-7,-7,10],[-2,-9,10],[-1,-4,10],[1,-4,10],[2,-9,10],[1,-12,10],[-1,-13,10],[-2,-3,10],[-9,-8,10],[-3,-2,10],[-7,-5,10],[-9,-7,10],[-2,-1,10],[-7,-6,10],[-10,-6,10],[0,-1,10],[-9,-6,10],[-9,-7,10],[-10,-7,10],[-8,-6,10],[-1,-1,10],[-9,-6,10],[-10,-6,10],[-6,-12,10],[2,-13,10],[-5,-2,10],[-10,1,10],[-2,1,10],[-7,9,10],[-9,3,10],[-2,1,10],[-8,8,10],[-9,4,10],[-9,10,10],[-10,2,10],[-2,1,10],[-7,6,10],[-9,5,10],[-2,2,10],[-8,10,10],[-7,3,10],[-2,3,10],[-9,6,10],[-7,4,10],[-3,3,10],[-9,6,10],[-7,4,10],[-2,3,10],[-10,5,10],[-6,5,10],[-3,4,10],[-10,7,10],[-3,2,10],[-6,6,10],[-9,5,10],[-2,1,10],[-8,9,10],[-9,4,10],[-1,0,10],[-8,7,10],[-10,5,10],[-1,1,10],[-8,11,10],[-4,2,10],[-5,7,10],[-10,4,10],[-2,2,10],[-7,8,10],[-9,5,10],[-1,0,10],[-9,9,10],[-9,3,10],[0,1,10],[-9,11,10],[-4,1,10],[-6,9,10],[-8,4,10],[-1,3,10],[-10,8,10],[-6,2,10],[-3,5,10],[-9,7,10],[-6,1,10],[-4,7,10],[-9,6,10],[-9,12,10],[-1,1,10],[-9,12,10],[0,1,10],[-7,13,10],[-2,2,10],[-9,6,10],[-5,4,10],[-5,4,10],[-9,9,10],[-6,13,10],[-3,7,10],[-3,6,10],[-7,11,10],[-1,2,10],[-3,4,10],[-1,2,10]],[[8024,1250,10],[-9,5,10],[9,2,10],[9,-2,10],[-9,-5,10]],[[8651,1226,5],[-2,3,5],[-8,10,5],[-1,3,5],[-6,13,5],[-2,5,5],[-3,8,5],[-6,12,5],[0,3,5],[-7,10,5],[7,8,5],[9,-2,5],[9,-3,5],[10,-1,5],[9,-2,5],[3,-13,5],[6,-12,5],[0,-13,5],[-3,-13,5],[-4,-13,5],[-2,-8,5],[-9,5,5]],[[5929,1228,5],[-1,1,5],[-9,4,5],[-6,9,5],[0,13,5],[3,13,5],[3,3,5],[10,2,5],[9,1,5],[10,0,5],[9,1,5],[9,2,5],[10,1,5],[9,0,5],[9,-2,5],[10,-3,5],[9,-3,5],[7,-2,5],[2,-2,5],[10,-3,5],[9,-8,5],[1,0,5],[8,-11,5],[2,-2,5],[3,-13,5],[-3,-13,5],[-2,-4,5],[-4,-9,5],[-5,-2,5],[-9,0,5],[-10,1,5],[-9,0,5],[-2,1,5],[-7,3,5],[-10,3,5],[-9,-2,5],[-9,1,5],[-10,2,5],[-9,3,5],[-7,3,5],[-2,1,5],[-10,6,5],[-9,5,5]],[[5770,1225,5],[-4,4,5],[4,2,5],[9,5,5],[10,5,5],[0,1,5],[9,4,5],[9,5,5],[10,0,5],[9,1,5],[7,3,5],[2,0,5],[10,2,5],[6,-2,5],[3,-1,5],[9,-3,5],[10,-4,5],[5,-5,5],[4,-4,5],[9,-7,5],[2,-2,5],[8,-11,5],[1,-2,5],[-1,-2,5],[-5,-11,5],[-5,-6,5],[-9,-4,5],[-9,0,5],[-10,2,5],[-9,0,5],[-9,1,5],[-10,1,5],[-9,3,5],[-6,3,5],[-3,2,5],[-10,3,5],[-9,3,5],[-9,2,5],[-10,3,5],[-9,9,5]],[[8726,1189,5],[-9,1,5],[-1,1,5],[-3,12,5],[-2,13,5],[-1,13,5],[1,13,5],[2,13,5],[1,13,5],[-7,4,5],[-9,5,5],[-5,3,5],[-5,2,5],[-9,4,5],[-9,3,5],[-10,4,5],[-3,13,5],[3,12,5],[0,1,5],[4,13,5],[6,7,5],[9,4,5],[9,-2,5],[10,-7,5],[1,-2,5],[8,-9,5],[3,-4,5],[6,-8,5],[4,-5,5],[6,-6,5],[5,-7,5],[4,-6,5],[6,-7,5],[3,-7,5],[4,-5,5],[0,-13,5],[-2,-13,5],[-1,-13,5],[-1,-4,5],[-3,-9,5],[-3,-13,5],[-2,-13,5],[-1,0,5],[-9,-1,5]],[[5272,1190,5],[-7,-1,5],[-5,1,5],[1,13,5],[4,10,5],[9,-3,5],[8,-7,5],[-8,-11,5],[-2,-2,5]],[[8174,1138,10],[-2,1,10],[-8,7,10],[-9,4,10],[-5,2,10],[-4,12,10],[-10,-2,10],[-5,3,10],[-4,2,10],[-9,8,10],[-5,2,10],[-5,5,10],[-9,7,10],[-3,1,10],[-6,6,10],[-10,6,10],[-1,1,10],[-8,9,10],[-8,4,10],[-1,4,10],[-10,6,10],[-5,3,10],[-4,4,10],[-10,9,10],[10,3,10],[6,-3,10],[3,-6,10],[10,-6,10],[1,-1,10],[8,-10,10],[9,-2,10],[1,-1,10],[9,-9,10],[9,-2,10],[2,-2,10],[7,-9,10],[9,-4,10],[1,-1,10],[9,-9,10],[4,-3,10],[5,-9,10],[10,-3,10],[9,-11,10],[9,-1,10],[2,-1,10],[8,-12,10],[9,-1,10],[1,0,10],[-1,-3,10],[-9,2,10]],[[7463,1099,10],[-8,1,10],[-1,2,10],[-3,11,10],[1,13,10],[2,13,10],[9,7,10],[9,-1,10],[10,-3,10],[0,-3,10],[0,-10,10],[-10,-2,10],[0,-1,10],[-2,-13,10],[-4,-13,10],[-3,-1,10]],[[8885,1061,10],[0,1,10],[6,0,10],[-6,-1,10]],[[8800,1059,10],[-3,3,10],[3,0,10],[10,0,10],[9,1,10],[10,0,10],[9,-1,10],[0,-4,10],[-9,-1,10],[-10,-1,10],[-9,1,10],[-10,2,10]],[[8670,1047,10],[-10,0,10],[-9,2,10],[-1,0,10],[1,0,10],[9,1,10],[10,0,10],[9,1,10],[9,0,10],[10,0,10],[9,0,10],[9,-1,10],[10,0,10],[9,0,10],[9,0,10],[10,0,10],[9,0,10],[9,-1,10],[3,0,10],[-3,0,10],[-9,0,10],[-9,0,10],[-10,-1,10],[-9,0,10],[-9,0,10],[-10,0,10],[-9,0,10],[-9,-1,10],[-10,0,10],[-9,0,10],[-9,0,10]],[[9399,954,5],[-9,5,5],[-10,4,5],[-9,4,5],[-8,5,5],[-1,0,5],[-10,6,5],[-9,5,5],[-3,1,5],[-6,4,5],[-10,4,5],[-9,5,5],[-1,0,5],[-8,4,5],[-10,4,5],[-9,5,5],[-10,5,5],[-9,4,5],[-8,4,5],[-1,1,5],[-10,3,5],[-9,3,5],[-9,3,5],[-6,3,5],[-4,1,5],[-9,1,5],[-9,0,5],[-10,1,5],[-9,2,5],[-9,2,5],[-10,3,5],[-7,3,5],[-2,0,5],[-9,1,5],[-10,2,5],[-9,0,5],[-10,1,5],[-9,0,5],[-9,-1,5],[-10,0,5],[-9,-1,5],[-9,-1,5],[-10,-1,5],[-9,-4,5],[-9,-2,5],[-10,-1,5],[-9,-3,5],[-9,-1,5],[-10,0,5],[-9,-1,5],[-9,0,5],[-10,-1,5],[-7,0,5],[-2,-1,5],[-10,-1,5],[-9,-1,5],[-9,-1,5],[-10,-1,5],[-9,-1,5],[-9,-1,5],[-10,0,5],[-9,0,5],[-9,-1,5],[-10,6,5],[-1,2,5],[-5,13,5],[-3,9,5],[-2,4,5],[2,3,5],[2,10,5],[5,12,5],[2,4,5],[10,5,5],[9,1,5],[9,1,5],[10,0,5],[9,1,5],[9,0,5],[10,1,5],[9,0,5],[9,0,5],[10,1,5],[9,1,5],[10,0,5],[9,1,5],[9,1,5],[10,1,5],[9,0,5],[9,1,5],[10,1,5],[9,0,5],[9,1,5],[10,0,5],[9,0,5],[9,0,5],[10,0,5],[9,1,5],[9,0,5],[10,-1,5],[9,0,5],[10,-2,5],[9,-1,5],[9,-2,5],[10,-2,5],[1,-1,5],[8,-1,5],[9,-1,5],[10,-1,5],[9,-1,5],[9,-2,5],[10,-3,5],[9,-2,5],[5,-2,5],[4,0,5],[10,-2,5],[9,-2,5],[9,-1,5],[10,-3,5],[6,-4,5],[3,-2,5],[10,-4,5],[9,-3,5],[9,-4,5],[1,0,5],[9,-3,5],[9,-3,5],[9,-6,5],[3,-1,5],[7,-3,5],[9,-5,5],[7,-5,5],[2,-2,5],[10,-6,5],[5,-5,5],[4,-3,5],[9,-7,5],[3,-3,5],[7,-7,5],[4,-6,5],[2,-13,5],[0,-12,5],[-1,-13,5],[-5,-7,5],[-10,-2,5],[-9,4,5]],[[4498,939,5],[2,7,5],[7,8,5],[9,4,5],[2,1,5],[2,13,5],[1,12,5],[0,13,5],[0,13,5],[0,13,5],[0,13,5],[1,13,5],[0,13,5],[1,13,5],[1,12,5],[-3,13,5],[-5,12,5],[0,1,5],[-9,5,5],[-5,8,5],[-4,5,5],[-6,8,5],[-4,4,5],[-6,9,5],[-3,6,5],[-4,7,5],[-5,12,5],[-1,0,5],[-9,13,5],[-9,11,5],[-2,2,5],[-7,8,5],[-5,5,5],[-5,4,5],[-9,9,5],[-9,8,5],[-5,-1,5],[-1,-1,5]],[[6444,907,5],[-1,0,5],[-9,-9,5],[-4,-4,5],[-5,-5,5],[-10,-3,5],[-9,3,5],[-8,5,5],[-1,1,5],[-10,3,5],[-9,2,5],[-6,7,5],[-4,10,5],[-1,3,5],[-3,13,5],[-1,13,5],[-4,13,5],[-4,13,5],[-1,12,5],[-3,13,5],[-1,5,5],[-4,8,5],[-2,13,5],[-1,13,5],[-3,7,5],[-3,6,5],[-2,13,5],[0,13,5],[-3,12,5],[-1,4,5],[-4,9,5],[-1,13,5],[1,13,5],[-4,13,5],[-1,3,5],[-3,10,5],[-2,13,5],[-5,8,5],[-9,3,5],[-5,1,5],[-4,8,5],[-3,5,5],[-4,13,5],[7,7,5],[9,0,5],[9,-4,5],[6,-3,5],[4,-1,5],[3,1,5],[6,3,5],[6,-3,5],[3,-2,5],[8,-11,5],[2,-1,5],[9,-9,5],[2,-3,5],[7,-6,5],[5,-6,5],[5,-5,5],[5,-8,5],[4,-10,5],[1,-3,5],[9,-9,5],[4,-4,5],[5,-3,5],[9,-7,5],[4,-3,5],[6,-4,5],[9,-7,5],[1,-2,5],[-1,-2,5],[-4,-11,5],[-5,-10,5],[-2,-2,5],[-4,-13,5],[-3,-13,5],[-1,-1,5],[-3,-12,5],[-2,-13,5],[2,-13,5],[3,-3,5],[10,-2,5],[9,-3,5],[9,-1,5],[10,3,5],[9,6,5],[9,9,5],[6,4,5],[4,3,5],[9,3,5],[9,-4,5],[6,-2,5],[4,-2,5],[9,-3,5],[9,-5,5],[3,-3,5],[-1,-13,5],[-2,-1,5],[-6,-12,5],[-3,-3,5],[-9,-9,5],[0,-1,5],[-10,-9,5],[-3,-3,5],[-6,-6,5],[-7,-7,5],[-2,-3,5],[-10,-8,5],[-1,-2,5],[-8,-8,5],[-5,-5,5],[-4,-5,5],[-9,-8,5]],[[6443,621,5],[-4,3,5],[-5,4,5],[-9,6,5],[-10,3,5],[-4,0,5],[-5,1,5],[-9,5,5],[-3,7,5],[-7,4,5],[-9,9,5],[-10,2,5],[-9,1,5],[-9,2,5],[-10,2,5],[-9,3,5],[-3,3,5],[-6,7,5],[-5,5,5],[-5,7,5],[-4,6,5],[-5,7,5],[-5,6,5],[-4,6,5],[-5,7,5],[-5,6,5],[-5,7,5],[-4,6,5],[-5,7,5],[-4,7,5],[-4,6,5],[-6,4,5],[-9,3,5],[-9,3,5],[-9,3,5],[0,12,5],[1,13,5],[0,13,5],[-1,13,5],[-1,11,5],[0,2,5],[-1,13,5],[1,13,5],[0,2,5],[10,8,5],[9,0,5],[9,-1,5],[10,0,5],[5,4,5],[4,1,5],[9,11,5],[1,0,5],[3,13,5],[6,4,5],[9,0,5],[5,-4,5],[4,-3,5],[10,-6,5],[4,-4,5],[5,-5,5],[9,-7,5],[1,0,5],[9,-7,5],[9,-1,5],[9,-5,5],[10,-6,5],[9,-6,5],[2,-1,5],[8,-5,5],[9,-8,5],[9,-6,5],[8,-7,5],[2,-4,5],[5,-9,5],[4,-5,5],[9,-6,5],[2,-2,5],[8,-4,5],[9,-6,5],[4,-3,5],[5,-3,5],[10,-7,5],[3,-2,5],[6,-5,5],[6,-8,5],[-3,-13,5],[-3,-6,5],[-4,-7,5],[-5,-10,5],[-2,-3,5],[-6,-13,5],[-2,-3,5],[-5,-10,5],[-4,-6,5],[-5,-7,5],[-4,-12,5],[0,-4,5],[-2,-9,5],[2,-12,5],[0,-1,5],[3,-13,5],[-2,-13,5],[-1,-6,5],[-10,3,5]],[[7538,390,5],[-5,3,5],[-5,2,5],[-9,4,5],[-9,1,5],[-10,1,5],[-9,1,5],[-9,0,5],[-8,3,5],[-2,3,5],[-9,5,5],[-9,1,5],[-10,0,5],[-9,0,5],[-10,1,5],[-9,3,5],[-1,0,5],[-8,12,5],[-10,0,5],[-9,0,5],[-9,0,5],[-10,0,5],[-4,1,5],[4,3,5],[10,1,5],[9,-1,5],[9,-1,5],[10,0,5],[9,-1,5],[9,-1,5],[2,0,5],[8,-1,5],[9,0,5],[10,-1,5],[9,0,5],[9,-1,5],[10,-1,5],[9,-1,5],[9,-1,5],[10,-3,5],[9,0,5],[9,2,5],[10,0,5],[2,-6,5],[3,-13,5],[0,-12,5],[-5,-3,5]],[[7959,392,10],[-1,1,10],[-9,10,10],[-3,2,10],[-6,9,10],[-4,4,10],[-5,11,10],[-2,2,10],[2,6,10],[9,2,10],[9,1,10],[10,2,10],[2,2,10],[7,5,10],[5,8,10],[4,3,10],[10,-1,10],[3,-2,10],[6,-5,10],[9,-8,10],[10,-10,10],[3,-3,10],[6,-5,10],[9,-6,10],[3,-2,10],[7,-5,10],[9,-6,10],[2,-2,10],[8,-6,10],[6,-6,10],[-6,-5,10],[-10,-1,10],[-9,1,10],[-10,0,10],[-9,0,10],[-9,0,10],[-10,0,10],[-9,1,10],[-9,0,10],[-10,0,10],[-9,0,10],[-9,3,10]],[[7931,403,5],[-2,2,5],[-8,8,5],[-3,5,5],[-6,8,5],[-4,5,5],[-6,6,5],[-5,7,5],[-4,6,5],[-5,7,5],[-4,6,5],[-6,7,5],[-4,4,5],[-8,9,5],[-1,1,5],[-9,8,5],[-4,3,5],[-6,6,5],[-8,7,5],[-1,1,5],[-9,7,5],[-8,5,5],[-2,2,5],[-9,6,5],[-7,5,5],[-2,3,5],[-10,6,5],[-7,4,5],[-2,3,5],[-9,8,5],[-2,2,5],[-3,13,5],[-5,1,5],[-6,12,5],[-3,2,5],[-10,4,5],[-3,6,5],[-6,5,5],[-6,8,5],[6,10,5],[3,3,5],[6,6,5],[10,-5,5],[0,-1,5],[9,-3,5],[9,-10,5],[1,0,5],[9,-4,5],[9,-3,5],[6,-6,5],[4,-2,5],[9,-2,5],[9,-3,5],[7,-5,5],[3,-1,5],[5,1,5],[4,11,5],[1,1,5],[8,3,5],[3,-3,5],[7,-3,5],[9,-3,5],[9,-2,5],[4,-4,5],[6,-5,5],[9,-6,5],[4,-2,5],[5,-4,5],[10,-6,5],[3,-3,5],[6,-5,5],[10,-8,5],[9,-7,5],[7,-6,5],[2,-2,5],[10,-7,5],[5,-4,5],[4,-3,5],[9,-7,5],[3,-3,5],[7,-5,5],[8,-8,5],[1,-1,5],[9,-6,5],[6,-5,5],[4,-4,5],[8,-9,5],[1,-2,5],[9,-10,5],[1,-1,5],[9,-9,5],[3,-4,5],[6,-5,5],[8,-8,5],[2,-1,5],[9,-11,5],[0,-1,5],[9,-11,5],[1,-2,5],[9,-4,5],[9,-7,5],[1,-1,5],[-1,-4,5],[-2,-9,5],[-7,-7,5],[-10,-2,5],[-9,0,5],[-9,0,5],[-10,0,5],[-9,0,5],[-10,0,5],[-9,0,5],[-9,0,5],[-10,0,5],[-9,0,5],[-9,1,5],[-10,0,5],[-9,0,5],[-9,5,5],[-3,3,5],[-7,5,5],[-5,8,5],[-4,3,5],[-9,7,5]],[[7613,379,5],[-1,1,5],[-9,7,5],[-9,3,5],[-1,3,5],[-1,12,5],[-3,13,5],[5,1,5],[1,-1,5],[8,-9,5],[10,-2,5],[7,-2,5],[2,0,5],[9,-3,5],[10,-3,5],[9,-3,5],[8,-3,5],[1,-2,5],[10,-6,5],[9,-2,5],[6,-3,5],[-6,-1,5],[-9,-1,5],[-10,1,5],[-9,0,5],[-9,0,5],[-10,0,5],[-9,0,5],[-9,0,5]],[[9998,340,5],[-1,1,5],[-9,9,5],[-5,4,5],[-4,5,5],[-9,7,5],[-1,1,5],[-9,10,5],[-3,3,5],[-6,7,5],[-9,5,5],[-1,1,5],[-9,9,5],[-3,3,5],[-6,10,5],[-4,3,5],[-5,8,5],[-5,5,5],[-5,6,5],[-6,7,5],[-3,3,5],[-8,10,5],[-2,2,5],[-9,10,5],[0,1,5],[-9,10,5],[-2,3,5],[-8,8,5],[-4,4,5],[-5,6,5],[-8,7,5],[-1,2,5],[-10,10,5],[-1,1,5],[-8,10,5],[-4,3,5],[-5,7,5],[-8,6,5],[-2,1,5],[-9,9,5],[-2,3,5],[-7,9,5],[-4,4,5],[-6,8,5],[-5,5,5],[-4,6,5],[-6,6,5],[-3,4,5],[-10,9,5],[-9,11,5],[-2,2,5],[-8,8,5],[-4,5,5],[-5,5,5],[-7,8,5],[-2,2,5],[-10,9,5],[-1,2,5],[-8,8,5],[-4,5,5],[-5,5,5],[-9,7,5],[-1,1,5],[-9,7,5],[-4,5,5],[-5,6,5],[-9,7,5],[-1,1,5],[-9,6,5],[-8,6,5],[-1,2,5],[-10,9,5],[-1,2,5],[-8,8,5],[-4,5,5],[-5,5,5],[-7,8,5],[-3,2,5],[-9,10,5],[-1,1,5],[-9,9,5],[-2,3,5],[-7,7,5],[-5,6,5],[-4,5,5],[-8,8,5],[-2,2,5],[-8,11,5],[-1,1,5],[-4,12,5],[0,13,5],[4,13,5],[9,8,5],[10,-1,5],[9,-7,5],[0,-1,5],[9,-11,5],[2,-1,5],[8,-10,5],[2,-3,5],[7,-9,5],[4,-4,5],[6,-7,5],[4,-6,5],[5,-6,5],[5,-7,5],[4,-5,5],[7,-8,5],[3,-3,5],[7,-9,5],[2,-2,5],[9,-11,5],[0,-1,5],[10,-11,5],[1,-1,5],[8,-11,5],[2,-2,5],[7,-9,5],[3,-4,5],[7,-8,5],[4,-5,5],[5,-7,5],[4,-6,5],[5,-6,5],[6,-7,5],[4,-4,5],[8,-8,5],[1,-2,5],[9,-9,5],[2,-2,5],[8,-10,5],[3,-3,5],[6,-8,5],[5,-5,5],[5,-6,5],[7,-7,5],[2,-2,5],[9,-9,5],[1,-2,5],[9,-10,5],[2,-3,5],[7,-9,5],[3,-3,5],[6,-8,5],[5,-5,5],[5,-6,5],[7,-7,5],[2,-3,5],[9,-10,5],[1,0,5],[9,-11,5],[2,-2,5],[7,-8,5],[5,-5,5],[4,-6,5],[8,-7,5],[2,-2,5],[9,-10,5],[0,-1,5],[9,-11,5],[2,-1,5],[8,-10,5],[3,-3,5],[6,-7,5],[6,-6,5],[4,-5,5],[7,-8,5],[2,-3,5],[9,-10,5],[10,-11,5],[1,-2,5],[8,-9,5],[3,-4,5],[6,-9,5],[3,-3,5],[7,-10,5],[2,-3,5],[7,-10,5],[3,-3,5],[6,-9,5],[4,-4,5],[6,-11,5],[1,-2,5],[-1,-1,5]],[[4964,360,10],[0,7,10],[0,13,10],[1,13,10],[0,1,10],[5,11,10],[5,10,10],[1,3,10],[8,13,10],[0,2,10],[5,11,10],[1,13,10],[-1,13,10],[-3,13,10],[-2,12,10],[-2,13,10],[-2,13,10],[-2,13,10],[-2,13,10],[-1,10,10],[-1,3,10],[-1,13,10],[-4,13,10],[-4,9,10],[-1,3,10],[-6,13,10],[-2,2,10],[-7,11,10],[-2,5,10],[-4,8,10],[-4,13,10],[-2,6,10],[-1,7,10],[-2,13,10],[2,12,10],[1,2,10],[10,10,10],[1,1,10],[8,13,10],[6,13,10],[3,3,10],[10,8,10],[2,2,10],[7,5,10],[9,6,10],[5,2,10],[5,2,10],[9,2,10],[10,0,10],[9,-3,10],[2,-1,10],[7,-6,10],[8,-7,10],[2,-3,10],[6,-10,10],[3,-5,10],[4,-8,10],[5,-8,10],[4,-5,10],[6,-12,10],[0,-1,10],[8,-12,10],[1,-2,10],[6,-11,10],[3,-8,10],[3,-5,10],[6,-13,10],[1,-1,10],[6,-12,10],[3,-7,10],[3,-6,10],[6,-13,10],[6,-12,10],[4,-11,10],[1,-2,10],[-1,-13,10],[0,-3,10],[-2,-10,10],[-3,-13,10],[5,-7,10],[2,7,10],[7,9,10],[9,4,10],[10,1,10],[4,-1,10],[1,-13,10],[-5,-12,10],[-1,-1,10],[-9,-6,10],[-9,-3,10],[-9,2,10],[-2,7,10],[-8,11,10],[-9,-6,10],[-4,-5,10],[-5,-5,10],[-8,-8,10],[-2,-2,10],[-9,-8,10],[-4,-3,10],[-5,-2,10],[-7,-10,10],[0,-13,10],[3,-13,10],[4,-6,10],[3,-7,10],[4,-13,10],[2,-13,10],[0,-3,10],[1,-10,10],[1,-12,10],[-1,-13,10],[-1,-6,10],[-6,-7,10],[-3,-3,10],[-10,-8,10],[-3,-2,10],[-6,-11,10],[-2,-2,10],[1,-13,10],[1,-13,10],[0,-4,10],[1,-9,10],[2,-12,10],[2,-13,10],[0,-13,10],[-5,-13,10],[0,-6,10]],[[9020,1963,5],[-4,0,5],[-10,0,5],[-9,0,5],[-4,-1,5],[-5,-3,5],[-10,-3,5],[-9,-3,5],[-10,-2,5],[-6,-1,5],[-3,-3,5],[-9,-4,5],[-10,-3,5],[-9,-2,5],[-4,-1,5],[-5,-7,5],[-3,-6,5],[-7,-9,5],[-5,-4,5],[-4,-6,5],[-9,2,5],[-10,-2,5],[-8,6,5],[-1,1,5],[-9,8,5],[-10,4,5],[-9,1,5],[-9,0,5],[-4,-1,5],[-6,-2,5],[-9,-3,5],[-10,-4,5],[-9,-3,5],[-4,-1,5],[-5,-2,5],[-10,-4,5],[-9,-4,5],[-9,-3,5],[-10,0,5],[-9,11,5],[-3,2,5],[-6,3,5],[-10,2,5],[-9,2,5],[-9,2,5],[-10,3,5],[-4,1,5],[-5,1,5],[-9,2,5],[-10,3,5],[-9,2,5],[-10,2,5],[-9,2,5],[-9,-1,5],[-8,2,5],[-2,0,5],[-9,2,5],[-9,1,5],[-10,3,5],[-7,7,5],[-2,2,5],[-9,10,5],[0,1,5],[-10,4,5],[-9,5,5],[-8,3,5],[-1,1,5],[-10,5,5],[-6,7,5],[-3,13,5],[0,5,5],[-1,8,5],[-2,13,5],[-7,12,5],[0,1,5],[-9,7,5],[-9,-7,5],[-1,0,5],[-9,-5,5],[-9,-2,5],[-9,-2,5],[-10,-2,5],[-9,-2,5],[-9,-2,5],[-10,-3,5],[-9,-4,5],[-6,-4,5],[-3,-3,5],[-10,-9,5],[-1,-1,5],[-8,-7,5],[-6,-6,5],[-3,-3,5],[-10,-5,5],[-6,8,5],[-3,5,5],[-2,8,5],[-2,13,5],[-2,13,5],[-1,13,5],[-2,13,5],[-1,1,5],[-9,6,5],[-9,3,5],[-7,2,5],[-3,1,5],[-9,2,5],[-9,2,5],[-10,2,5],[-9,2,5],[-9,3,5],[-2,1,5],[-8,8,5],[-3,5,5],[-6,10,5],[-9,-1,5],[-10,0,5],[-9,-1,5],[-9,-1,5],[-10,-1,5],[-9,-1,5],[-10,-1,5],[-9,1,5],[-9,-4,5],[-8,12,5],[-2,3,5],[-9,6,5],[-8,4,5],[-1,0,5],[-10,2,5],[-9,1,5],[-9,3,5],[-10,2,5],[-9,4,5],[-2,1,5],[-7,2,5],[-10,2,5],[-9,3,5],[-9,3,5],[-10,2,5],[-1,1,5],[-8,3,5],[-10,4,5],[-9,4,5],[-3,2,5],[-6,3,5],[-10,5,5],[-9,4,5],[-9,4,5],[-10,3,5],[-8,6,5],[-1,1,5],[-9,4,5],[-10,5,5],[-3,3,5],[-6,2,5],[-9,2,5],[-10,1,5],[-9,0,5],[-10,-1,5],[-9,0,5],[-9,-2,5],[-6,-2,5],[-4,-2,5],[-9,2,5],[-8,13,5],[-1,1,5],[-10,2,5],[-9,0,5],[-9,-1,5],[-10,-1,5],[-5,-1,5],[-4,-3,5],[-9,-10,5],[-10,-10,5],[-3,-3,5],[-6,-7,5],[-6,-6,5],[-3,-3,5],[-9,-9,5],[-1,-1,5],[-9,-6,5],[-10,-5,5],[-2,-1,5],[-7,-4,5],[-9,-6,5],[-7,-3,5],[-3,-1,5],[-9,-4,5],[-9,-3,5],[-10,-2,5],[-9,-3,5],[-1,0,5],[-1,-13,5],[2,-8,5],[1,-5,5],[4,-13,5],[1,-13,5],[1,-12,5],[1,-13,5],[-8,-6,5],[-9,-3,5],[-10,-1,5],[-9,-2,5],[-1,-1,5],[1,-1,5],[9,-1,5],[10,-7,5],[1,-4,5],[8,-3,5],[9,-3,5],[10,-4,5],[3,-3,5],[6,-3,5],[9,-5,5],[6,-5,5],[4,-6,5],[9,-2,5],[9,5,5],[10,2,5],[9,0,5],[10,-5,5],[9,-6,5],[0,-1,5],[9,-7,5],[5,-6,5],[5,-4,5],[8,-8,5],[1,-2,5],[9,-7,5],[5,-4,5],[5,-3,5],[9,-6,5],[3,-4,5],[6,-5,5],[9,-8,5],[1,-1,5],[9,-7,5],[6,-5,5],[3,-2,5],[10,-5,5],[5,-6,5],[4,-9,5],[4,-4,5],[5,-6,5],[10,-5,5],[9,0,5],[10,0,5],[9,3,5],[9,6,5],[5,2,5],[5,2,5],[9,1,5],[9,0,5],[10,0,5],[9,0,5],[9,-1,5],[10,-1,5],[9,0,5],[3,-1,5],[6,0,5],[10,-3,5],[8,-9,5],[1,-4,5],[8,-9,5],[2,-1,5],[9,-6,5],[9,-6,5],[1,0,5],[9,-6,5],[9,-5,5],[2,-2,5],[7,-4,5],[10,-6,5],[4,-3,5],[5,-3,5],[9,-6,5],[6,-4,5],[4,-3,5],[9,-7,5],[3,-3,5],[2,-13,5],[4,-12,5],[0,-1,5],[10,-1,5],[9,-6,5],[2,-5,5],[6,-13,5],[1,-4,5],[2,-9,5],[-2,-1,5],[-5,1,5],[-4,3,5],[-9,1,5],[-10,-3,5],[-2,-1,5],[-7,-1,5],[-9,-3,5],[-10,-2,5],[-9,-3,5],[-9,-4,5],[-1,0,5],[-9,-3,5],[-9,-3,5],[-9,-4,5],[-7,-3,5],[-3,-1,5],[-9,-3,5],[-9,-3,5],[-10,-3,5],[-8,-3,5],[-1,0,5],[-10,-3,5],[-9,-4,5],[-9,-4,5],[-2,-1,5],[-8,-6,5],[-9,-6,5],[-4,-1,5],[4,-1,5],[9,-2,5],[10,0,5],[5,3,5],[4,5,5],[9,0,5],[10,-5,5],[9,-1,5],[9,1,5],[1,0,5],[9,1,5],[9,1,5],[10,1,5],[9,1,5],[9,1,5],[10,1,5],[9,1,5],[9,1,5],[10,3,5],[1,2,5],[8,6,5],[9,5,5],[6,1,5],[4,1,5],[9,1,5],[9,1,5],[10,1,5],[9,2,5],[10,2,5],[9,0,5],[9,-4,5],[5,-4,5],[5,-4,5],[9,-8,5],[9,-10,5],[4,-3,5],[6,-11,5],[2,-2,5],[7,-4,5],[9,-1,5],[10,0,5],[9,0,5],[9,0,5],[10,0,5],[9,-1,5],[9,-1,5],[10,-1,5],[9,-1,5],[10,0,5],[9,-1,5],[9,-1,5],[10,-1,5],[8,-1,5],[1,0,5],[1,0,5],[8,13,5],[-9,4,5],[-9,5,5],[-4,4,5],[-2,13,5],[2,12,5],[4,8,5],[9,-2,5],[9,-1,5],[10,4,5],[9,4,5],[9,1,5],[2,-1,5],[8,-3,5],[9,-6,5],[6,-4,5],[3,-2,5],[10,-4,5],[9,-5,5],[4,-1,5],[5,-3,5],[10,-4,5],[9,-4,5],[6,-2,5],[4,-2,5],[9,-1,5],[8,-10,5],[1,-3,5],[2,-10,5],[3,-13,5],[3,-13,5],[2,-6,5],[1,-7,5],[3,-13,5],[0,-12,5],[-2,-13,5],[3,-13,5],[2,-13,5],[1,-13,5],[-1,-13,5],[0,-13,5],[-1,-13,5],[0,-12,5],[-6,-13,5],[-10,2,5],[-9,-1,5],[-7,-1,5],[-2,-1,5],[-10,-2,5],[-9,-4,5],[-9,-6,5],[-1,-1,5],[-9,-5,5],[-9,-3,5],[-7,-4,5],[-3,-1,5],[-9,-1,5],[-9,-2,5],[-10,-2,5],[-9,-2,5],[-9,-2,5],[-10,-2,5],[-2,-1,5],[-7,-3,5],[-9,-5,5],[-8,-5,5],[8,-6,5],[8,-7,5],[1,-1,5],[9,-8,5],[5,-3,5],[5,-9,5],[3,-4,5],[-3,-4,5],[-10,-2,5],[-9,-1,5],[-9,-1,5],[-10,-1,5],[-6,-4,5],[-1,-13,5],[1,-13,5],[0,-13,5],[-3,-2,5],[-9,-5,5],[-10,-5,5],[0,-1,5],[10,-3,5],[9,-4,5],[9,-5,5],[1,-1,5],[0,-12,5],[-1,-13,5],[1,-13,5],[1,-13,5],[2,-13,5],[2,-13,5],[4,-3,5],[9,-6,5],[7,-4,5],[2,-1,5],[10,-5,5],[9,-5,5],[3,-2,5],[6,-3,5],[10,-5,5],[8,-4,5],[1,-1,5],[9,-8,5],[4,-4,5],[6,-8,5],[4,-5,5],[5,-6,5],[9,-3,5],[5,9,5],[5,9,5],[9,-9,5],[1,0,5],[9,-9,5],[4,-4,5],[5,-5,5],[5,-8,5],[4,-10,5],[1,-3,5],[5,-13,5],[4,-8,5],[3,-4,5],[6,-1,5],[9,0,5],[10,0,5],[9,0,5],[7,1,5],[2,1,5],[10,5,5],[9,4,5],[5,2,5],[4,10,5],[2,3,5],[5,13,5],[3,6,5],[3,7,5],[5,13,5],[1,3,5],[2,-3,5],[7,-13,5],[1,0,5],[9,-9,5],[4,-4,5],[5,-5,5],[6,-8,5],[3,-13,5],[1,0,5],[9,-1,5],[9,-1,5],[10,-1,5],[9,-1,5],[9,-1,5],[10,-1,5],[9,0,5],[9,0,5],[10,1,5],[9,0,5],[9,0,5],[10,0,5],[9,0,5],[10,0,5],[9,0,5],[8,-7,5],[1,-2,5],[5,-11,5],[-1,-13,5],[-4,-11,5],[0,-2,5],[-9,-11,5],[-9,0,5],[-10,0,5],[-9,0,5],[-10,-1,5],[-9,0,5],[-9,0,5],[-10,0,5],[-9,-1,5],[-1,0,5],[-8,-1,5],[-10,-1,5],[-9,-1,5],[-9,-1,5],[-10,-1,5],[-9,-3,5],[-9,-1,5],[-10,0,5],[-9,0,5],[-9,-1,5],[-10,0,5],[-9,0,5],[-10,0,5],[-9,0,5],[-9,0,5],[-10,0,5],[-9,-1,5],[-9,0,5],[-10,0,5],[-9,-2,5],[-1,0,5],[1,-2,5],[6,-11,5],[3,-2,5],[10,-4,5],[9,-7,5],[9,-1,5],[1,1,5],[-1,5,5],[-1,8,5],[1,2,5],[10,3,5],[9,2,5],[9,0,5],[10,1,5],[9,1,5],[10,1,5],[9,0,5],[9,-1,5],[10,-3,5],[4,-6,5],[2,-13,5],[3,-4,5],[7,-8,5],[2,-3,5],[8,-10,5],[2,-2,5],[8,-11,5],[1,-1,5],[9,-10,5],[3,-2,5],[7,-4,5],[9,-3,5],[4,-6,5],[5,-4,5],[10,-4,5],[9,0,5],[9,-1,5],[10,0,5],[9,-1,5],[10,0,5],[3,-3,5],[6,-8,5],[2,-5,5],[-2,-1,5],[-9,-1,5],[-10,0,5],[-9,0,5],[-10,0,5],[-9,-2,5],[-9,-5,5],[-2,-3,5],[1,-13,5],[1,-13,5],[0,-1,5],[9,-10,5],[9,-1,5],[10,1,5],[9,1,5],[10,1,5],[9,-1,5],[3,-3,5],[-1,-13,5],[-2,-4,5],[-9,-2,5],[-10,-1,5],[-9,0,5],[-10,0,5],[-9,0,5],[-9,-2,5],[-10,-3,5],[-6,-1,5],[-3,-1,5],[-9,0,5],[-5,1,5],[-5,1,5],[-9,1,5],[-9,1,5],[-10,1,5],[-9,1,5],[-9,1,5],[-10,0,5],[-9,1,5],[-6,6,5],[-3,13,5],[-1,0,5],[-9,-2,5],[-9,-5,5],[-10,-5,5],[-1,-1,5],[-8,-9,5],[-3,-4,5],[-6,-9,5],[-3,-4,5],[-7,-9,5],[-2,-4,5],[-3,-12,5],[-1,-13,5],[-2,-13,5],[-1,-13,5],[9,-7,5],[6,-6,5],[3,-13,5],[1,-10,5],[0,-3,5],[6,-13,5],[3,-2,5],[9,-9,5],[2,-1,5],[8,-8,5],[5,-5,5],[4,-4,5],[8,-9,5],[2,-2,5],[1,-11,5],[2,-13,5],[-2,-13,5],[0,-13,5],[4,-12,5],[4,-10,5],[1,-3,5],[5,-13,5],[3,-11,5],[1,-2,5],[3,-13,5],[6,-3,5],[9,-3,5],[9,-3,5],[6,-4,5],[4,-3,5],[5,-10,5],[1,-13,5],[3,-12,5],[0,-2,5],[7,2,5],[2,0,5],[1,0,5],[9,-3,5],[9,-5,5],[9,-5,5],[10,-10,5],[3,-3,5],[6,-7,5],[6,-6,5],[3,-4,5],[10,-6,5],[6,-3,5],[3,-4,5],[8,-9,5],[1,-13,5],[-8,-12,5],[-1,-1,5],[-9,-7,5],[-2,-5,5],[2,-7,5],[2,-6,5],[7,-3,5],[10,-1,5],[9,0,5],[9,-1,5],[10,-1,5],[9,-4,5],[9,2,5],[6,8,5],[3,13,5],[1,0,5],[8,13,5],[1,2,5],[6,10,5],[3,5,5],[10,4,5],[9,-4,5],[2,-5,5],[2,-12,5],[5,-13,5],[0,-1,5],[10,-2,5],[9,-2,5],[9,-3,5],[10,-2,5],[9,-3,5],[4,0,5],[6,-2,5],[9,-1,5],[9,-9,5],[2,-1,5],[8,-8,5],[1,-5,5],[4,-13,5],[4,-11,5],[0,-2,5],[1,-13,5],[2,-12,5],[1,-13,5],[-2,-13,5],[-2,-5,5],[-7,-8,5],[-2,-5,5],[-10,-3,5],[-9,0,5],[-9,0,5],[-10,1,5],[-9,1,5],[-10,1,5],[-9,1,5],[-9,1,5],[-10,1,5],[-9,0,5],[-9,1,5],[-10,1,5],[-9,3,5],[-9,3,5],[-10,3,5],[-9,2,5],[-9,1,5],[-5,1,5],[-5,1,5],[-9,2,5],[-9,6,5],[-3,4,5],[-5,13,5],[-2,4,5],[-9,8,5],[-10,-7,5],[-2,-5,5],[-7,-13,5],[-9,-7,5],[-10,-1,5],[-9,2,5],[-9,1,5],[-10,-3,5],[-9,-5,5],[-9,-8,5],[-10,-1,5],[-9,0,5],[-9,-1,5],[-10,0,5],[-9,-1,5],[-9,1,5],[-10,1,5],[-9,0,5],[-10,-1,5],[-9,-1,5],[-9,2,5],[-10,0,5],[-9,0,5],[-9,2,5],[-10,2,5],[-9,2,5],[-9,2,5],[-10,0,5],[-3,1,5],[-6,2,5],[-9,4,5],[-10,5,5],[-6,2,5],[-3,6,5],[-2,7,5],[-5,12,5],[-3,5,5],[-5,8,5],[-4,6,5],[-4,7,5],[-5,6,5],[-6,7,5],[-4,4,5],[-7,9,5],[-2,2,5],[-8,11,5],[-1,1,5],[-6,12,5],[-4,3,5],[-6,10,5],[-3,4,5],[-6,8,5],[-3,7,5],[-4,6,5],[-6,6,5],[-5,7,5],[-4,7,5],[-5,6,5],[-4,12,5],[-1,1,5],[-9,7,5],[-4,6,5],[-3,13,5],[-2,3,5],[-9,8,5],[-3,1,5],[-7,6,5],[-9,3,5],[-7,4,5],[-3,4,5],[-5,9,5],[-4,13,5],[-9,13,5],[-9,13,5],[-1,1,5],[-7,12,5],[-2,2,5],[-8,11,5],[-1,2,5],[-7,10,5],[-3,6,5],[-5,7,5],[-4,4,5],[-7,9,5],[-2,9,5],[-3,4,5],[-7,13,5],[-9,8,5],[-4,5,5],[-5,13,5],[0,1,5],[-9,11,5],[-1,1,5],[-9,9,5],[-3,3,5],[-6,9,5],[-5,4,5],[-5,7,5],[-3,6,5],[-6,7,5],[-4,6,5],[-6,9,5],[-2,4,5],[-7,13,5],[-9,10,5],[-2,3,5],[-6,12,5],[-2,3,5],[-6,10,5],[-1,13,5],[2,13,5],[-4,5,5],[-9,4,5],[-10,3,5],[-2,1,5],[-7,2,5],[-9,3,5],[-10,3,5],[-9,2,5],[-9,3,5],[-10,1,5],[-9,1,5],[-9,0,5],[-10,5,5],[-2,6,5],[-3,13,5],[-4,8,5],[-2,4,5],[-8,10,5],[-2,3,5],[-7,11,5],[-1,2,5],[-7,13,5],[-1,3,5],[-4,10,5],[-6,7,5],[-6,6,5],[-3,3,5],[-9,8,5],[-2,2,5],[-8,6,5],[-8,6,5],[-1,1,5],[-9,5,5],[-10,5,5],[-3,2,5],[-6,3,5],[-9,5,5],[-10,5,5],[-9,5,5],[-10,2,5],[-9,-5,5],[-2,-2,5],[-7,-8,5],[-10,-3,5],[-4,11,5],[-5,8,5],[-2,5,5],[-3,13,5],[-4,6,5],[-4,7,5],[-1,13,5],[-3,13,5],[-2,1,5],[-5,11,5],[-1,13,5],[-3,5,5],[-7,8,5],[-1,13,5],[-1,2,5],[-10,10,5],[0,1,5],[-8,13,5],[-1,2,5],[-6,11,5],[-3,12,5],[0,1,5],[-7,12,5],[-3,5,5],[-5,8,5],[-4,4,5],[-9,-2,5],[-7,-2,5],[-3,-1,5],[-9,1,5],[-2,0,5],[-8,4,5],[-9,7,5],[-2,2,5],[-7,7,5],[-6,6,5],[-4,5,5],[-7,8,5],[-2,1,5],[-4,-1,5],[-5,-3,5],[-10,-6,5],[-6,-4,5],[-3,-2,5],[-9,-6,5],[-8,-5,5],[-2,-1,5],[-9,-7,5],[-7,-5,5],[-2,-1,5],[-10,-7,5],[-9,0,5],[-3,8,5],[-2,13,5],[-4,10,5],[-3,3,5],[-7,11,5],[-1,2,5],[-7,13,5],[-1,2,5],[-10,7,5],[-4,4,5],[-5,4,5],[-9,7,5],[-2,1,5],[-8,7,5],[-7,6,5],[-2,2,5],[-9,6,5],[-10,-4,5],[-3,-4,5],[1,-13,5],[-1,-12,5],[-6,-9,5],[-3,-4,5],[-3,-13,5],[-3,-4,5],[-7,-9,5],[-3,-2,5],[-9,-8,5],[-3,-3,5],[-4,-13,5],[3,-13,5],[1,-13,5],[1,-12,5],[2,-2,5],[7,-11,5],[0,-13,5],[0,-13,5],[0,-13,5],[2,-7,5],[3,-6,5],[2,-13,5],[0,-12,5],[-1,-13,5],[3,-13,5],[3,-8,5],[1,-5,5],[1,-13,5],[0,-13,5],[2,-13,5],[3,-13,5],[2,-10,5],[0,-2,5],[0,-7,5],[-1,-6,5],[0,-13,5],[1,-13,5],[-9,-9,5],[-9,9,5],[-1,1,5],[-4,12,5],[-5,11,5],[-1,2,5],[-6,13,5],[-2,5,5],[-5,7,5],[-5,9,5],[-3,4,5],[-6,10,5],[-2,3,5],[-7,12,5],[-1,1,5],[-3,13,5],[-4,13,5],[-2,3,5],[-5,10,5],[-1,13,5],[-1,12,5],[-2,13,5],[-1,0,5],[-7,13,5],[-1,13,5],[0,13,5],[-1,12,5],[0,1,5],[-8,13,5],[4,12,5],[4,7,5],[10,4,5],[7,2,5],[2,3,5],[10,6,5],[9,3,5],[3,1,5],[-3,9,5],[-3,4,5],[-6,6,5],[-10,7,5],[-9,6,5],[-10,5,5],[-3,2,5],[-6,3,5],[-9,1,5],[-4,-4,5],[-6,-3,5],[-9,-9,5],[-1,-1,5],[-8,-4,5],[-10,-3,5],[-9,-2,5],[-9,-2,5],[-8,-2,5],[-2,0,5],[-9,-2,5],[-9,-3,5],[-10,-2,5],[-9,-1,5],[-10,4,5],[-6,4,5],[-3,2,5],[-9,4,5],[-10,-5,5],[-2,-1,5],[-7,-4,5],[-9,-5,5],[-8,-4,5],[-2,-1,5],[-9,-7,5],[-7,-5,5],[-2,-3,5],[-7,-10,5],[-3,-3,5],[-6,-9,5],[-3,-5,5],[-6,-8,5],[-3,-9,5],[-2,-4,5],[1,-13,5],[1,0,5],[4,-13,5],[5,-11,5],[1,-2,5],[7,-13,5],[-8,-8,5],[-9,3,5],[-6,5,5],[-4,5,5],[-7,8,5],[-2,3,5],[-7,10,5],[-2,3,5],[-7,10,5],[-3,3,5],[-9,8,5],[-10,1,5],[-9,0,5],[-9,0,5],[-10,-1,5],[-9,0,5],[-9,0,5],[-10,-1,5],[-9,0,5],[-9,0,5],[-10,-1,5],[-9,4,5],[-6,13,5],[-3,6,5],[-4,7,5],[-6,10,5],[-9,2,5],[0,1,5],[-9,0,5],[-10,7,5],[-7,5,5],[-2,2,5],[-10,8,5],[-2,3,5],[-7,11,5],[-1,2,5],[-6,13,5],[-2,2,5],[-10,5,5],[-9,2,5],[-9,1,5],[-10,2,5],[-9,0,5],[-9,0,5],[-10,0,5],[-9,0,5],[-9,0,5],[-10,0,5],[-9,-1,5],[-9,-11,5],[3,-13,5],[-3,-3,5],[-10,-1,5],[-9,-3,5],[-8,-6,5],[-2,-2,5],[-9,-10,5],[-9,0,5],[-10,7,5],[-5,5,5],[-4,8,5],[-3,5,5],[3,4,5],[9,4,5],[10,3,5],[4,2,5],[5,2,5],[9,2,5],[10,1,5],[9,0,5],[7,8,5],[-7,5,5],[-5,8,5],[-4,13,5],[-10,12,5],[-9,7,5],[-8,6,5],[-1,1,5],[-10,5,5],[-9,1,5],[-9,-1,5],[-10,0,5],[-9,-1,5],[-9,-1,5],[-10,0,5],[-9,-3,5],[-9,2,5],[-7,10,5],[-3,3,5],[-9,1,5],[-10,4,5],[-7,5,5],[-2,2,5],[-9,6,5],[-7,5,5],[-3,1,5],[-9,7,5],[-7,5,5],[-2,1,5],[-10,6,5],[-8,6,5],[-1,1,5],[-9,6,5],[-10,4,5],[-9,1,5],[0,1,5],[-9,4,5],[-10,5,5],[-8,3,5],[-1,1,5],[-9,3,5],[-10,2,5],[-9,0,5],[-10,-1,5],[-9,-1,5],[-9,-2,5],[-7,-2,5],[-3,0,5],[-9,-1,5],[-5,1,5],[-4,5,5],[-3,8,5],[0,13,5],[1,13,5],[0,13,5],[0,13,5],[-1,13,5],[3,11,5],[0,1,5],[4,13,5],[-4,2,5],[-7,-2,5],[-3,-2,5],[-9,-5,5],[-9,-6,5],[-10,-6,5],[-9,-6,5],[-1,0,5],[-8,-7,5],[-8,-6,5],[-2,-2,5],[-9,-10,5],[-2,-1,5],[-6,-13,5],[-1,-3,5],[-10,-7,5],[-9,-2,5],[-6,-1,5],[-4,-1,5],[-9,-5,5],[-9,-6,5],[-2,-1,5],[-8,-7,5],[-9,-6,5],[-9,-6,5],[-10,-6,5],[-2,-13,5],[1,-13,5],[-8,-10,5],[-9,4,5],[-4,-7,5],[-6,-4,5],[-9,-4,5],[-9,1,5],[-5,7,5],[-5,8,5],[-4,5,5],[-5,4,5],[-9,9,5],[-1,0,5],[-9,7,5],[-8,6,5],[-1,0,5],[-10,4,5],[-7,8,5],[-2,3,5],[-8,10,5],[-1,1,5],[-10,11,5],[-1,1,5],[-8,13,5],[0,1,5],[-9,5,5],[-10,3,5],[-9,3,5],[-3,1,5],[-6,2,5],[-10,4,5],[-9,3,5],[-9,3,5],[-2,1,5],[-8,3,5],[-9,4,5],[-9,1,5],[-10,-1,5],[-9,-2,5],[-10,-1,5],[-9,1,5],[-9,1,5],[-10,1,5],[-9,2,5],[-9,3,5],[-1,1,5],[-9,7,5],[-6,5,5],[-3,4,5],[-3,9,5],[-6,13,5],[-10,6,5],[-9,5,5],[-3,2,5],[-6,4,5],[-10,5,5],[-7,4,5],[-2,1,5],[-10,4,5],[-9,-2,5],[-9,3,5],[-10,3,5],[-9,3,5],[-1,1,5],[-8,3,5],[-10,3,5],[-9,4,5],[-6,3,5],[-3,3,5],[-10,10,5],[-9,6,5],[-9,6,5],[0,1,5],[-10,5,5],[-9,2,5],[-9,-6,5],[-10,8,5],[-3,3,5],[-6,7,5],[-7,6,5],[-3,2,5],[-9,2,5],[-9,2,5],[-10,-3,5],[-5,-3,5],[-4,-2,5],[-9,-10,5],[-1,-1,5],[-9,-11,5],[-1,-2,5],[-8,-10,5],[-3,-2,5],[-6,-8,5],[-10,-2,5],[-9,-3,5],[-2,0,5],[-7,-4,5],[-10,-4,5],[-9,-4,5],[-9,2,5],[-10,7,5],[-3,3,5],[-6,5,5],[-10,7,5],[0,1,5],[-9,7,5],[-6,5,5],[-3,7,5],[-4,6,5],[-6,6,5],[-6,-6,5],[-3,-2,5],[-9,-10,5],[-1,-1,5],[-9,-12,5],[-9,-10,5],[-5,-3,5],[-4,-5,5],[-9,5,5],[-1,0,5],[-9,4,5],[-9,4,5],[-6,5,5],[-4,1,5],[-9,-1,5],[-2,0,5],[-3,-13,5],[-4,-8,5],[-4,-5,5],[-6,-5,5],[-6,-8,5],[6,-8,5],[3,-5,5],[7,-8,5],[5,-5,5],[4,-3,5],[9,-5,5],[3,-5,5],[-2,-13,5],[-1,-1,5],[-2,-11,5],[-7,-13,5],[-1,0,5],[-8,-2,5],[-5,2,5],[-5,2,5],[-9,5,5],[-10,1,5],[-9,1,5],[-5,4,5],[-4,3,5],[-10,4,5],[-9,1,5],[-9,2,5],[-3,2,5],[-7,6,5],[-9,1,5],[-9,2,5],[-8,4,5],[-2,2,5],[-9,3,5],[-9,1,5],[-10,5,5],[-9,2,5],[-2,0,5],[-8,2,5],[-9,6,5],[-9,2,5],[-10,-1,5],[-9,-3,5],[-9,-4,5],[-3,-2,5],[-7,-4,5],[-8,-9,5],[-1,0,5],[-7,0,5],[-2,4,5],[-8,9,5],[-2,3,5],[-7,10,5],[-2,2,5],[-8,11,5],[-1,1,5],[-9,12,5],[-1,1,5],[-9,7,5],[-7,5,5],[-2,1,5],[-10,6,5],[-8,6,5],[-1,1,5],[-8,11,5],[-2,3,5],[-5,10,5],[-4,7,5],[-3,6,5],[-6,10,5],[-3,3,5],[-7,7,5],[-4,6,5],[-5,7,5],[-3,6,5],[-6,9,5],[-3,4,5],[-7,8,5],[-9,-1,5],[-3,-7,5],[-6,-7,5],[-4,-6,5],[-6,-10,5],[-2,-3,5],[-7,-12,5],[0,-1,5],[-8,-13,5],[-1,-2,5],[-6,-11,5],[-4,-6,5],[-2,-7,5],[-7,-9,5],[-9,-2,5],[-10,1,5],[-4,-2,5],[4,-2,5],[10,-2,5],[4,-9,5],[3,-13,5],[-3,-13,5],[-4,-13,5],[3,-13,5],[4,-13,5],[2,-5,5],[3,-8,5],[5,-12,5],[-7,-13,5],[-1,-1,5],[-9,-8,5],[-5,-4,5],[-5,-7,5],[-4,-6,5],[-5,-8,5],[-4,-5,5],[-6,-10,5],[-1,-3,5],[-4,-13,5],[-4,-12,5],[0,-1,5],[-9,-6,5],[-4,7,5],[-6,9,5],[-2,3,5],[-7,12,5],[-1,1,5],[-8,6,5],[-10,-1,5],[-9,-2,5],[-9,-2,5],[-4,-1,5],[-6,-1,5],[-9,-2,5],[-9,3,5],[-1,0,5],[-7,13,5],[-2,4,5],[-3,9,5],[-5,13,5],[-1,4,5],[-5,9,5],[-4,13,5],[-10,1,5],[-9,2,5],[-4,9,5],[4,6,5],[4,7,5],[5,4,5],[10,3,5],[9,2,5],[9,3,5],[3,1,5],[7,5,5],[9,8,5],[9,7,5],[9,6,5],[1,1,5],[9,6,5],[8,6,5],[1,1,5],[10,9,5],[0,3,5],[5,13,5],[4,7,5],[9,2,5],[10,2,5],[9,1,5],[6,0,5],[-6,3,5],[-4,10,5],[-1,13,5],[0,13,5],[3,13,5],[2,3,5],[4,10,5],[5,13,5],[1,0,5],[1,13,5],[-2,5,5],[-9,5,5],[-3,2,5],[-6,5,5],[-10,8,5],[-9,7,5],[-7,6,5],[-2,2,5],[-10,7,5],[-4,4,5],[-5,4,5],[-9,7,5],[-6,2,5],[-4,1,5],[-9,2,5],[-9,6,5],[-4,4,5],[-6,2,5],[-9,4,5],[-8,7,5],[-1,0,5],[-10,4,5],[-9,7,5],[-2,1,5],[-8,6,5],[-9,5,5],[-3,2,5],[-4,13,5],[2,13,5],[3,13,5],[2,9,5],[1,4,5],[3,13,5],[3,13,5],[2,12,5],[-2,13,5],[-1,13,5],[0,13,5],[-3,13,5],[-3,3,5],[-9,4,5],[-8,-7,5],[-2,-1,5],[-7,1,5],[-2,0,5],[-2,0,5],[-7,-3,5],[-8,-10,5],[-2,-2,5],[-9,-11,5],[-9,13,5],[-8,13,5],[-2,2,5],[-5,11,5],[-4,7,5],[-3,6,5],[-6,12,5],[-1,0,5],[-3,13,5],[3,13,5],[-8,13,5],[-1,1,5],[-9,8,5],[-6,4,5],[-4,2,5],[-9,5,5],[-9,2,5],[-10,-6,5],[-3,-3,5],[-6,-6,5],[-6,-7,5],[-3,-8,5],[-2,-5,5],[-8,-10,5],[-1,-3,5],[-8,-12,5],[0,-1,5],[-5,-12,5],[-4,-10,5],[-2,-3,5],[-4,-13,5],[-4,-12,5],[0,-1,5],[0,-2,5],[6,-11,5],[4,-2,5],[9,-8,5],[4,-3,5],[5,-4,5],[10,-7,5],[1,-2,5],[8,-7,5],[7,-5,5],[2,-4,5],[9,-9,5],[-9,-6,5],[-9,3,5],[-9,3,5],[-10,4,5],[-9,4,5],[-9,4,5],[-2,1,5],[-8,3,5],[-9,4,5],[-9,4,5],[-2,1,5],[-8,13,5],[0,2,5],[1,11,5],[0,13,5],[-1,2,5],[-9,6,5],[-9,0,5],[-10,2,5],[-9,0,5],[-10,-4,5],[-7,-6,5],[-2,-2,5],[-9,-5,5],[-9,-6,5],[-1,0,5],[-9,-5,5],[-9,-5,5],[-5,-3,5],[-5,-3,5],[-6,-10,5],[-3,-3,5],[-3,-9,5],[-6,-13,5],[-6,-13,5],[-4,-8,5],[-3,-5,5],[-6,-6,5],[-9,-2,5],[-10,3,5],[-5,5,5],[-4,3,5],[-9,3,5],[-8,7,5],[-2,2,5],[-9,3,5],[-9,8,5],[-1,1,5],[-9,2,5],[-9,6,5],[-7,4,5],[-3,0,5],[-9,5,5],[-9,3,5],[-6,4,5],[-4,2,5],[-9,3,5],[-9,7,5],[-2,1,5],[-8,4,5],[-9,5,5],[-6,4,5],[-3,1,5],[-10,4,5],[-9,0,5],[-6,8,5],[-3,2,5],[-10,0,5],[-9,11,5],[-10,4,5],[-5,9,5],[-4,2,5],[-9,8,5],[-2,3,5],[-8,5,5],[-8,7,5],[-1,3,5],[-4,10,5],[-4,13,5],[1,13,5],[-2,13,5],[0,1,5],[-10,1,5],[-3,-2,5],[-6,-4,5],[-9,-1,5],[-10,5,5],[-9,10,5],[-4,3,5],[-4,13,5],[-1,3,5],[-10,6,5],[-6,4,5],[-3,1,5],[-10,6,5],[-9,5,5],[-9,5,5],[-10,6,5],[-4,2,5],[-5,4,5],[-9,7,5],[-3,2,5],[-7,7,5],[-9,2,5],[-9,-6,5],[-4,-3,5],[-6,-6,5],[-9,6,5],[-5,13,5],[-4,13,5],[-6,13,5],[-4,5,5],[-6,8,5],[-3,4,5],[-9,8,5],[-2,1,5],[-8,4,5],[-9,6,5],[-2,2,5],[-8,9,5],[-3,4,5],[-6,7,5],[-5,6,5],[-4,5,5],[-7,8,5],[-3,3,5],[-9,9,5],[-2,1,5],[-7,4,5],[-10,2,5],[-9,1,5],[-9,2,5],[-8,4,5],[-2,1,5],[-9,2,5],[-9,0,5],[-10,2,5],[-5,8,5],[-4,4,5],[-9,8,5],[-1,0,5],[-9,3,5],[-9,0,5],[-10,1,5],[-9,0,5],[-9,1,5],[-10,0,5],[-9,0,5],[-9,0,5],[-7,8,5],[-2,13,5],[1,13,5],[0,13,5],[-1,13,5],[0,13,5],[-1,0,5],[-8,13,5],[-1,0,5],[-9,1,5],[-2,-1,5],[1,-13,5],[-2,-13,5],[-5,-13,5],[-2,-12,5],[0,-1,5],[-7,-13,5],[-2,-2,5],[-9,-2,5],[-10,1,5],[-9,3,5],[-3,0,5],[-6,2,5],[-10,4,5],[-9,4,5],[-6,3,5],[-4,2,5],[-9,2,5],[-9,-4,5],[-10,-8,5],[-6,-5,5],[-3,-2,5],[-9,-7,5],[-6,-4,5],[-4,-2,5],[-4,2,5],[-5,7,5],[-4,6,5],[-5,7,5],[-5,6,5],[-5,6,5],[-5,7,5],[-4,1,5],[-9,2,5],[-10,2,5],[-9,1,5],[-9,1,5],[-10,0,5],[-9,-4,5],[-5,-3,5],[-4,-13,5],[-1,-1,5],[-9,-10,5],[-3,-2,5],[-6,-3,5],[-10,-6,5],[-7,-4,5],[-2,-1,5],[-9,-5,5],[-10,-6,5],[-1,-1,5],[-8,-4,5],[-9,-6,5],[-4,-2,5],[0,-7,5]],[[8239,213,10],[-1,-1,10],[-8,0,10],[-3,0,10],[0,13,10],[3,2,10],[7,11,10],[2,1,10],[10,2,10],[9,1,10],[9,-3,10],[3,-1,10],[7,-11,10],[6,-2,10],[-6,-5,10],[-10,-1,10],[-9,-2,10],[-9,-1,10],[-10,-3,10]],[[3804,1776,5],[0,6,5],[2,5,5],[8,8,5],[1,1,5],[9,10,5],[2,2,5],[8,10,5],[1,3,5],[3,13,5],[5,9,5],[1,4,5],[3,13,5],[-4,12,5],[-5,13,5],[-4,6,5],[-5,7,5],[-5,8,5],[-4,5,5],[-5,7,5],[-5,6,5],[-4,6,5],[-5,7,5],[-5,6,5],[-4,7,5],[-5,7,5],[-4,5,5],[-6,10,5],[-2,3,5],[-5,13,5],[7,4,5],[10,-2,5],[8,-2,5],[1,0,5],[10,-2,5],[9,-2,5],[9,-1,5],[10,1,5],[9,0,5],[9,1,5],[10,0,5],[9,1,5],[9,0,5],[10,-3,5],[8,-8,5],[1,-1,5],[9,-10,5],[2,-2,5],[8,-8,5],[4,-4,5],[5,-6,5],[8,-7,5],[1,-2,5],[10,-6,5],[9,6,5],[1,2,5],[9,10,5],[1,3,5],[8,10,5],[3,2,5],[6,9,5],[10,-2,5],[3,-7,5],[1,-12,5],[1,-13,5],[1,-13,5],[3,-8,5],[8,-5,5],[1,0,5],[10,-3,5],[9,-3,5],[9,-3,5],[10,-3,5],[4,-1,5],[5,-1,5],[9,-4,5],[10,-4,5],[6,-4,5],[3,-1,5],[9,-4,5],[10,-4,5],[8,-4,5],[1,0,5],[10,-4,5],[9,-4,5],[9,-4,5],[10,-4,5],[9,-3,5],[9,0,5],[6,7,5],[-6,6,5],[-5,6,5],[-4,5,5],[-7,8,5],[-2,3,5],[-9,10,5],[-1,1,5],[-9,11,5],[-1,1,5],[-5,13,5],[4,13,5],[-7,7,5],[-5,6,5],[-5,5,5],[-9,7,5],[-1,0,5],[-9,11,5],[-4,2,5],[4,6,5],[6,-6,5],[4,-8,5],[9,5,5],[10,-2,5],[9,-5,5],[5,-3,5],[4,-2,5],[5,-10,5],[5,-7,5],[9,-6,5],[3,0,5],[6,-4,5],[10,-5,5],[7,-4,5],[2,-1,5],[9,-6,5],[10,-6,5],[9,-4,5],[9,-2,5],[10,-5,5],[1,-2,5],[7,-13,5],[-7,-13,5],[-1,-1,5],[-3,-11,5],[-2,-13,5],[-3,-13,5],[-2,-3,5],[-9,-5,5],[-9,-5,5],[-1,0,5],[-9,-7,5],[-9,-5,5],[-1,-1,5],[1,-1,5],[9,-12,5],[10,-6,5],[8,-7,5],[1,-2,5],[9,-7,5],[10,-3,5],[2,-1,5],[7,-3,5],[10,-9,5],[9,-10,5],[3,-3,5],[6,-6,5],[10,-1,5],[9,0,5],[9,0,5],[9,-6,5],[1,-3,5],[9,-8,5],[9,9,5],[1,2,5],[9,8,5],[9,4,5],[3,1,5],[6,8,5],[10,-2,5],[9,0,5],[9,1,5],[10,1,5],[9,2,5],[10,2,5],[6,1,5],[3,0,5],[9,2,5],[10,2,5],[9,-1,5],[9,-3,5],[1,0,5],[9,-3,5],[9,-3,5],[9,-3,5],[10,-3,5],[3,-1,5],[6,-2,5],[9,-1,5],[5,3,5],[5,8,5],[3,5,5],[6,12,5],[3,-12,5],[-2,-13,5],[-1,-7,5],[-1,-6,5],[-2,-13,5],[-1,-13,5],[-1,-13,5],[4,-13,5],[1,-2,5],[8,-10,5],[1,-2,5],[9,-11,5],[1,-2,5],[8,-11,5],[1,-2,5],[7,-11,5],[-4,-13,5],[-2,-13,5],[4,-13,5],[5,-12,5],[0,-1,5],[5,-12,5],[4,-10,5],[1,-3,5],[5,-13,5],[3,-11,5],[1,-2,5],[-1,-1,5],[-7,-12,5],[-2,-2,5],[-8,-11,5],[-1,-1,5],[-10,-11,5],[0,-1,5],[-3,-13,5],[2,-12,5],[1,-6,5],[2,-7,5],[1,-13,5],[-3,-5,5],[-6,-8,5],[-3,-4,5],[-8,-9,5],[-2,-3,5],[-8,-10,5],[-1,-2,5],[-8,-11,5],[5,-12,5],[3,-7,5],[2,-6,5],[5,-13,5],[2,-8,5],[2,-5,5],[5,-13,5],[3,-10,5],[1,-3,5],[8,-8,5],[5,-5,5],[5,-2,5],[9,-8,5],[2,-3,5],[7,-12,5],[0,-13,5],[-9,-10,5],[-4,-3,5],[4,-11,5],[9,-1,5],[10,0,5],[9,1,5],[9,1,5],[10,8,5],[0,2,5],[8,13,5],[1,2,5],[9,9,5],[10,0,5],[9,-1,5],[9,0,5],[10,2,5],[9,0,5],[9,-1,5],[10,-1,5],[9,-2,5],[10,-3,5],[9,-4,5],[2,-1,5],[7,-7,5],[10,-5,5],[9,-1,5],[1,0,5],[8,-2,5],[10,-10,5],[0,-1,5],[4,-13,5],[5,-5,5],[9,2,5],[10,0,5],[9,-5,5],[5,-5,5],[4,-9,5],[2,-4,5],[7,-13,5],[1,-1,5],[6,-11,5],[3,-7,5],[4,-6,5],[6,-11,5],[1,-2,5],[6,-13,5],[2,-3,5],[9,-8,5],[6,-2,5],[4,-1,5],[9,-2,5],[9,-2,5],[10,-3,5],[9,-2,5],[9,-2,5],[2,-1,5],[8,-2,5],[5,-11,5],[-5,-2,5],[-10,-5,5],[-4,-5,5],[-5,-3,5],[-9,-5,5],[-10,-5,5],[-9,-5,5],[-9,-5,5],[-5,-3,5],[-5,-4,5],[-9,-5,5],[-8,-4,5],[8,-10,5],[9,-2,5],[10,-1,5],[9,0,5],[9,1,5],[10,0,5],[9,1,5],[9,3,5],[10,6,5],[3,2,5],[6,3,5],[9,5,5],[9,5,5],[1,0,5],[9,5,5],[9,5,5],[5,3,5],[5,2,5],[9,5,5],[4,6,5],[6,7,5],[3,5,5],[6,10,5],[4,3,5],[5,3,5],[3,-3,5],[7,-7,5],[4,-6,5],[5,-4,5],[9,-5,5],[5,-3,5],[5,-3,5],[9,-6,5],[6,-4,5],[3,-2,5],[10,-5,5],[9,6,5],[1,1,5],[3,13,5],[4,12,5],[1,5,5],[4,8,5],[6,13,5],[5,13,5],[0,13,5],[-5,11,5],[-10,1,5],[-2,1,5],[-7,10,5],[-1,3,5],[1,12,5],[0,1,5],[9,7,5],[10,3,5],[9,2,5],[1,0,5],[8,2,5],[10,3,5],[9,2,5],[10,2,5],[9,0,5],[9,-9,5],[0,-1,5],[4,-12,5],[6,-6,5],[6,-6,5],[3,-5,5],[4,-8,5],[-4,-9,5],[-2,-4,5],[-7,-12,5],[-1,-1,5],[-9,-12,5],[0,-1,5],[-9,-12,5],[-1,-1,5],[-8,-3,5],[-10,1,5],[-7,2,5],[-2,0,5],[6,-13,5],[3,-4,5],[5,-8,5],[5,-7,5],[4,-6,5],[5,-8,5],[3,-5,5],[6,-10,5],[2,-3,5],[7,-13,5],[1,-1,5],[4,-12,5],[5,-11,5],[1,-2,5],[8,-13,5],[6,13,5],[4,8,5],[0,5,5],[3,13,5],[2,13,5],[2,13,5],[0,13,5],[-1,13,5],[1,12,5],[2,11,5],[5,-11,5],[4,-8,5],[9,-4,5],[1,-1,5],[9,-5,5],[9,-5,5],[4,-2,5],[-4,-8,5],[-1,-5,5],[0,-13,5],[1,-1,5],[9,-12,5],[1,-1,5],[9,-10,5],[2,-2,5],[7,-8,5],[5,-5,5],[5,-9,5],[1,-4,5],[4,-12,5],[4,-13,5],[2,-13,5],[2,-13,5],[2,-13,5],[3,-13,5],[1,-2,5],[1,-11,5],[4,-12,5],[4,-7,5],[3,-6,5],[-3,-4,5],[-9,-3,5],[-10,-1,5],[-9,-1,5],[-10,-1,5],[-9,-3,5],[-1,0,5],[1,-1,5],[9,-4,5],[10,-3,5],[9,-3,5],[5,-2,5],[5,-2,5],[9,-3,5],[9,-8,5],[4,-13,5],[2,-13,5],[2,-13,5],[1,-12,5],[1,-3,5],[1,-10,5],[4,-13,5],[4,-3,5],[9,-5,5],[10,-4,5],[2,-1,5],[7,-8,5],[3,-5,5],[6,-9,5],[3,-4,5],[7,-11,5],[1,-2,5],[8,-12,5],[1,-1,5],[8,-12,5],[0,-1,5],[9,-12,5],[1,-4,5],[3,-9,5],[2,-13,5],[3,-13,5],[1,-7,5],[1,-6,5],[6,-13,5],[3,-4,5],[4,-8,5],[5,-10,5],[2,-3,5],[7,-13,5],[0,-1,5],[7,-12,5],[3,-4,5],[5,-9,5],[4,-8,5],[3,-5,5],[6,-12,5],[1,-1,5],[7,-13,5],[2,-2,5],[9,-3,5],[9,4,5],[10,-10,5],[0,-1,5],[0,-13,5],[1,-13,5],[3,-13,5],[5,-13,5],[8,-13,5],[1,-2,5],[6,-11,5],[4,-7,5],[2,-5,5],[0,-13,5],[-2,-4,5],[-1,4,5],[-9,12,5],[0,1,5],[-9,7,5],[-5,5,5],[-4,5,5],[-10,2,5],[-9,-6,5],[0,-1,5],[-8,-12,5],[-1,-2,5],[-6,-11,5],[-2,-13,5],[-1,-13,5],[0,-13,5],[-1,-13,5],[0,-2,5],[0,-11,5],[-1,-13,5],[-4,-12,5],[-4,-3,5],[-9,0,5],[-8,3,5],[-2,0,5],[-9,0,5],[-2,0,5],[0,-13,5],[2,-4,5],[4,-9,5],[5,-11,5],[1,-2,5],[2,-13,5],[-3,-7,5],[-2,-6,5],[-5,-13,5],[-2,-5,5],[-3,-8,5],[-4,-12,5],[-2,-11,5],[-1,-2,5],[0,-13,5],[1,-1,5],[0,-12,5],[1,-13,5],[1,-13,5],[1,-13,5],[6,-3,5],[9,0,5],[10,0,5],[9,-3,5],[9,-3,5],[6,-3,5],[0,-7,5]],[[5547,90,5],[0,7,5],[3,12,5],[5,6,5],[9,-4,5],[3,-2,5],[6,-7,5],[3,-5,5],[0,-7,5]],[[8370,108,5],[-2,1,5],[-7,4,5],[-10,4,5],[-6,5,5],[-3,2,5],[-9,3,5],[-7,8,5],[-3,3,5],[-9,2,5],[-8,8,5],[-1,1,5],[-10,3,5],[-9,3,5],[-5,6,5],[-4,3,5],[-10,3,5],[-7,7,5],[-2,1,5],[-9,4,5],[-8,8,5],[-2,1,5],[-9,3,5],[-8,8,5],[-1,1,5],[-10,3,5],[-8,9,5],[2,13,5],[6,5,5],[10,5,5],[2,3,5],[7,8,5],[7,5,5],[2,2,5],[10,7,5],[9,1,5],[9,1,5],[10,-6,5],[9,-4,5],[2,-1,5],[7,-2,5],[10,-5,5],[6,-6,5],[3,-3,5],[9,-7,5],[4,-3,5],[6,-5,5],[9,-8,5],[9,-6,5],[7,-7,5],[3,-1,5],[9,-7,5],[4,-4,5],[6,-4,5],[9,-8,5],[1,-1,5],[8,-8,5],[6,-5,5],[4,-3,5],[9,-6,5],[4,-4,5],[5,-5,5],[10,-4,5],[3,-4,5],[6,-8,5],[8,-5,5],[1,-3,5],[10,-5,5],[8,-5,5],[1,-2,5],[9,-6,5],[10,0,5],[9,-3,5],[1,-1,5],[-1,-7,5],[-9,-4,5],[-10,-2,5],[-4,0,5],[-5,-1,5],[-9,0,5],[-10,-2,5],[-9,-1,5],[-9,0,5],[-10,1,5],[-7,3,5],[-2,0,5],[-9,5,5],[-10,3,5],[-6,5,5],[-3,1,5],[-9,4,5],[-10,6,5]],[[8799,0,5],[0,6,5],[-8,7,5],[-9,6,5],[-10,9,5],[-3,4,5],[-6,7,5],[-6,6,5],[-3,3,5],[-10,8,5],[-1,2,5],[-8,6,5],[-5,7,5],[-4,4,5],[-9,9,5],[-1,1,5],[-9,4,5],[-9,6,5],[-2,2,5],[-8,5,5],[-7,7,5],[-2,3,5],[-9,8,5],[-2,2,5],[-8,7,5],[-5,6,5],[-4,4,5],[-9,9,5],[-1,1,5],[-9,4,5],[-9,2,5],[-5,6,5],[-5,3,5],[-9,3,5],[-4,7,5],[-5,6,5],[-10,4,5],[-1,3,5],[1,3,5],[4,9,5],[6,8,5],[9,2,5],[9,0,5],[10,-1,5],[9,-2,5],[9,-2,5],[10,-1,5],[9,-1,5],[10,0,5],[9,0,5],[9,0,5],[4,-3,5],[6,-3,5],[9,-8,5],[1,-1,5],[8,-5,5],[10,-6,5],[2,-2,5],[7,-6,5],[9,-6,5],[1,-1,5],[9,-6,5],[9,-5,5],[3,-2,5],[6,-5,5],[10,-7,5],[1,-1,5],[8,-7,5],[7,-6,5],[2,-1,5],[10,-7,5],[7,-5,5],[2,-2,5],[10,-7,5],[4,-3,5],[5,-4,5],[9,-7,5],[3,-2,5],[7,-6,5],[9,-7,5],[9,-13,5],[0,-7,5]]],"transform":{"scale":[0.000006045119627955304,0.000004394988938495852],"translate":[-71.13449451158058,42.3739689739726]}}
