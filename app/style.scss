@@ -68,26 +68,30 @@ ul {
     left: 400px;
 
     padding: 0.4em;
-    margin: 0.8em;
     background: #eee;
     box-shadow: 3px 3px 0 0 #dfdfdf;
     font-weight: bold;
   }
 }
 
-.video-list {
+.thumbnails {
   @include display(flex);
   @include flex-wrap(wrap);
 
   & > div {
     @include flex-shrink(0);
     padding: 0.4em;
-    margin: 0.8em;
+    margin: 0 1em 1em 0;
     border: 1px solid #ccc;
     background: #fff;
     box-shadow: 3px 3px 0 0 #dfdfdf;
 
-    .video-name {
+    a {
+      color: #444;
+      text-decoration: none;
+    }
+
+    .name {
       color: #ccc;
     }
   }

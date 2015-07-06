@@ -8,12 +8,14 @@ export default React.createClass({
     const {videos} = this.props;
 
     return (
-      <div className='video-list'>
+      <div className='thumbnails'>
         {videos.map(({name, duration, start, thumbnail}) => (
           <div key={name}>
-            <div><Link to={`/videos/${name}`}><img src={thumbnail.small} width="160" height="90"/></Link></div>
-            <div><strong>{start.format('LLL')}</strong></div>
-            <div>{format.duration(duration)} <span className='video-name'>{name}</span></div>
+            <Link to={`/videos/${name}`}>
+              <div><img src={thumbnail.small} width="160" height="90"/></div>
+              <div><strong>{start.format('LLL')}</strong></div>
+              <div>{format.duration(duration)} <span className='name'>{name}</span></div>
+            </Link>
           </div>
         ))}
       </div>

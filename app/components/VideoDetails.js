@@ -24,7 +24,9 @@ export default React.createClass({
         <span style={{display: 'inline-block', verticalAlign: 'top', marginLeft: '1em'}} className='map-box'>
           <MapComponent width={360} height={360} zoomFeature={featColl}>{this.mapLayers}</MapComponent>
         </span>
+        <h2>Trips</h2>
         <TripList trips={video.trips}/>
+        <h2>Stills</h2>
         <div>{video.stills.map(({small, large}, i) => (
           <a href={large} key={i}><img src={large} width="320"/></a>
         ))}</div>

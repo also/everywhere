@@ -1,5 +1,6 @@
 /* eslint-disable camelcase */
 import {feature, tree} from './geo';
+import moment from 'moment';
 
 import {wayTree} from './ways';
 
@@ -17,13 +18,13 @@ export default tripData.then(tripTopojson => {
     properties.videos = [];
     const {activity: {id, start_date, total_elevation_gain, max_speed, distance, elapsed_time, moving_time}} = properties;
 
-    const start = new Date(Date.parse(start_date));
+    const start = moment(start_date);
 
     Object.assign(properties, {
       id,
       start,
-      end: new Date(start.getTime() + (elapsed_time * 1000)),
-      movingTime: moving_time,
+      end: start.clone().add(elapsed_time, 's'),
+      movingTime: moment.duration(moving_time, 's'),
       tree: tree(result)
     });
     return result;

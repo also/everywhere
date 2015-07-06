@@ -16,7 +16,7 @@ import WayDetails from './components/WayDetails';
 import VideoListPage from './components/VideoListPage';
 import VideoDetails from './components/VideoDetails';
 
-import TripList from './components/TripList';
+import TripListPage from './components/TripListPage';
 import TripDetails from './components/TripDetails';
 
 import LocactionDetails from './components/LocationDetails';
@@ -109,7 +109,7 @@ const TripListRoute = React.createClass({
   render() {
     // TODO what's the right way to pass this in?
     const {trips} = this.props.route;
-    return <TripList trips={trips} videoThumbnail={true}/>;
+    return <TripListPage trips={trips}/>;
   }
 });
 

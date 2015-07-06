@@ -24,6 +24,7 @@ const BaseMap = React.createClass({
 
   render() {
     const {boundary, path, contours, ways} = this.context;
+    const {showWays} = this.props;
 
     const cityBoundaryPath = path(boundary);
 
@@ -37,7 +38,7 @@ const BaseMap = React.createClass({
 
         <path className="boundary" d={cityBoundaryPath}/>
         <Contours features={contours.features}/>
-        <Ways features={ways.features}/>
+        {showWays ? <Ways features={ways.features}/> : null}
       </g>
     );
   }
@@ -126,12 +127,12 @@ export default React.createClass({
 
   render() {
     const {boundary, ways, contours} = this.context;
-    const {width, height} = this.props;
+    const {width, height, showWays=true} = this.props;
     const {path} = this.state;
 
     return (
       <svg width={width} height={height} onMouseMove={this.onMouseMove} onClick={this.onClick} ref={component => this.svgNode = React.findDOMNode(component)}>
-        <BaseMap/>
+        <BaseMap showWays={showWays}/>
         {this.props.children()}
       </svg>
     );

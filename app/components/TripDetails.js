@@ -1,5 +1,7 @@
 import * as React from 'react';
 
+import * as format from '../format';
+
 import VideoList from './VideoList';
 import Trips from './Trips';
 import MapComponent from './Map';
@@ -23,10 +25,12 @@ export default React.createClass({
     return (
       <div>
         <h1>{id}</h1>
-        <p>Started {start.toString()}, {Math.round(movingTime / 60)} minutes moving</p>
+        <p>Started <strong>{start.format('LLL')}</strong>, {format.duration(movingTime)} moving</p>
         <MapComponent width="500" height="500" onMouseMove={this.onMouseMove}>
           {this.mapLayers}
         </MapComponent>
+
+        <h2>Videos</h2>
         <VideoList videos={videos}/>
       </div>
     );
