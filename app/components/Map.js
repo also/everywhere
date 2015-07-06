@@ -1,8 +1,40 @@
-import * as React from 'react';
+import * as React from 'react/addons';
 import d3 from 'd3';
 
 import Contours from './Contours';
 import Ways from './Ways';
+
+
+const BaseMap = React.createClass({
+  mixins: [React.addons.PureRenderMixin],
+
+  contextTypes: {
+    path: React.PropTypes.any,
+    boundary: React.PropTypes.any.isRequired,
+    ways: React.PropTypes.any,
+    contours: React.PropTypes.any
+  },
+
+  render() {
+    const {boundary, path, contours, ways} = this.context;
+
+    const cityBoundaryPath = path(boundary);
+
+    return (
+      <g>
+        <defs>
+          <mask id="boundary-mask">
+            <path d={cityBoundaryPath}/>
+          </mask>
+        </defs>
+
+        <path className="boundary" d={cityBoundaryPath}/>
+        <Contours features={contours.features}/>
+        <Ways features={ways.features}/>
+      </g>
+    );
+  }
+});
 
 
 function mouse(e, node) {
@@ -87,19 +119,10 @@ export default React.createClass({
     const {boundary, ways, contours} = this.context;
     const {width, height} = this.props;
     const {path} = this.state;
-    const cityBoundaryPath = path(boundary);
 
     return (
       <svg width={width} height={height} onMouseMove={this.onMouseMove} onClick={this.onClick} ref={component => this.svgNode = React.findDOMNode(component)}>
-        <defs>
-          <mask id="boundary-mask">
-            <path d={cityBoundaryPath}/>
-          </mask>
-        </defs>
-
-        <path className="boundary" d={cityBoundaryPath}/>
-        <Contours features={contours.features}/>
-        <Ways features={ways.features}/>
+        <BaseMap/>
         {this.props.children()}
       </svg>
     );
