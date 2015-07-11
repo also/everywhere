@@ -8,25 +8,31 @@ import intersectionsTopojson from 'compact-json!../app-data/intersections-clippe
 const ways = feature(waysGeojson);
 const intersections = feature(intersectionsTopojson);
 
-const waysByName = new Map();
 const waysById = new Map();
-const unsortedGroupedWays = [];
 
 ways.features.forEach(way => {
   waysById.set(way.properties.id, way);
   way.intersections = [];
-
-  const {properties: {name}} = way;
-  let wayFeatures = waysByName.get(name);
-  if (!wayFeatures) {
-    wayFeatures = [];
-    waysByName.set(name, wayFeatures);
-    unsortedGroupedWays.push({name, features: wayFeatures});
-  }
-  wayFeatures.push(way);
 });
 
-const groupedWays = sortBy(unsortedGroupedWays, ({name}) => name);
+export function group(features) {
+  const waysByName = new Map();
+  const unsortedGroupedWays = [];
+  features.forEach(way => {
+    const {properties: {name}} = way;
+    let wayFeatures = waysByName.get(name);
+    if (!wayFeatures) {
+      wayFeatures = [];
+      waysByName.set(name, wayFeatures);
+      unsortedGroupedWays.push({name, features: wayFeatures});
+    }
+    wayFeatures.push(way);
+  });
+
+  return sortBy(unsortedGroupedWays, ({name}) => name);
+}
+
+const groupedWays = group(ways.features);
 
 intersections.features.forEach(intersection => {
   intersection.ways = [];
@@ -43,4 +49,4 @@ intersections.features.forEach(intersection => {
 
 const wayTree = tree(ways);
 
-export {ways, groupedWays, intersections, wayTree, waysById};
+export {ways, groupedWays, intersections, wayTree, waysById, group};

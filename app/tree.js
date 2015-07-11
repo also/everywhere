@@ -23,7 +23,7 @@ function pointLineSegmentDistance(c, a, b) {
   return pointDistance(c, t <= 0 ? a : t >= 1 ? b : [a[0] + t * dx, a[1] + t * dy]);
 }
 
-function group(children) {
+export function group(children) {
   let n0;
 
   while ((n0 = children.length) > 1) {
@@ -86,10 +86,27 @@ class Node {
           minNode = node;
         }
       }
-
     } while ((candidate = heap.pop()) && (candidate.distance <= minDistance));
 
     return minNode;
+  }
+
+  within(point, maxDistance) {
+    const result = [];
+    const visit = node => {
+      const distance = node.distance(point);
+      if (distance <= maxDistance) {
+        if (node.children) {
+          node.children.map(visit);
+        } else {
+          result.push({node, distance});
+        }
+      }
+    };
+
+    visit(this);
+
+    return result;
   }
 }
 

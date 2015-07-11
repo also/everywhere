@@ -1,5 +1,6 @@
 /* eslint-disable camelcase */
 import {feature, tree} from './geo';
+import {group} from './tree';
 import moment from 'moment';
 
 import videos from './videos';
@@ -68,5 +69,7 @@ export default tripData.then(tripTopojson => {
     }
   }
 
-  return {trips, videoCoverage};
+  const tripTree = group(trips.map(({features: [{properties: {tree}}]}) => tree));
+
+  return {trips, videoCoverage, tripTree};
 });

@@ -124,7 +124,8 @@ const TripDetailsRoute = React.createClass({
 const LocationDetailsRoute = React.createClass({
   render() {
     const {params: {coords}} = this.props;
-    return <LocactionDetails location={coords.split(',').map(parseFloat)}/>;
+    const {tripTree} = this.props.route;
+    return <LocactionDetails location={coords.split(',').map(parseFloat)} tripTree={tripTree}/>;
   }
 });
 
@@ -133,7 +134,7 @@ document.body.appendChild(div);
 
 const history = new HashHistory();
 
-tripsPromise.then(({trips, videoCoverage}) => {
+tripsPromise.then(({trips, videoCoverage, tripTree}) => {
   React.render(
     <MapData {...{boundary, contours, ways}}>{() => (
       <Router history={history}>
@@ -145,7 +146,7 @@ tripsPromise.then(({trips, videoCoverage}) => {
           <Route path="/videos/:name" component={VideoDetailsRoute}/>
           <Route path="/trips" component={TripListRoute} trips={trips}/>
           <Route path="/trips/:id" component={TripDetailsRoute} trips={trips}/>
-          <Route path="/locations/:coords" component={LocationDetailsRoute}/>
+          <Route path="/locations/:coords" component={LocationDetailsRoute} tripTree={tripTree}/>
         </Route>
       </Router>
     )}</MapData>
