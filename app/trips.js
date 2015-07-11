@@ -54,8 +54,7 @@ export default tripData.then(tripTopojson => {
             type: 'FeatureCollection',
             features: [{
               type: 'Feature',
-              id: trip.id,
-              properties: trip.properties,
+              properties,
               geometry: {
                 type: 'MultiLineString',
                 coordinates
