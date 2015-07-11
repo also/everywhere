@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import * as format from '../format';
+import {waysById} from '../ways';
 
 import VideoList from './VideoList';
 import Trips from './Trips';
@@ -16,7 +17,10 @@ export default React.createClass({
     const {trip} = this.props;
     const {features: [{properties: {tree}}]} = trip;
     const nearest = tree.nearest(geo);
-    this.setState({nearest});
+    const coord = nearest.coordinates[0];
+    const wayId = coord[coord.length - 1][0];
+    const way = waysById.get(wayId);
+    this.setState({nearest, way});
   },
 
   render() {

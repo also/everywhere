@@ -2,8 +2,6 @@
 import {feature, tree} from './geo';
 import moment from 'moment';
 
-import {wayTree} from './ways';
-
 import videos from './videos';
 
 const tripData = new Promise(resolve => {
@@ -14,7 +12,7 @@ const tripData = new Promise(resolve => {
 export default tripData.then(tripTopojson => {
   const trips = tripTopojson.map(trip => {
     const result = feature(trip);
-    const {features: [{properties, coordinates}]} = result;
+    const {features: [{properties, geometry}]} = result;
     properties.videos = [];
     const {activity: {id, start_date, total_elevation_gain, max_speed, distance, elapsed_time, moving_time}} = properties;
 
