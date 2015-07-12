@@ -22,7 +22,7 @@ export default React.createClass({
 
     const nearbyWays = wayTree.within(location, maxDistance).map(({node: {data: {feature}}}) => feature);
     const nearbyGroupedWays = group(nearbyWays);
-    const nearbyTrips = Array.from(new Set(tripTree.within(location, maxDistance).map(({node: {data: {feature}}}) => feature))).map(feature => ({type: 'FeatureCollection', features: [feature]}));
+    const nearbyTrips = Array.from(new Set(tripTree.within(location, maxDistance).map(({node: {data: {feature}}}) => feature)));
 
     const nearbyVideoCoverageByName = new Map();
     videoTree.within(location, maxDistance).forEach(result => {

@@ -117,7 +117,7 @@ const TripDetailsRoute = React.createClass({
   render() {
     // TODO what's the right way to pass this in?
     const {trips} = this.props.route;
-    return <TripDetails trip={trips.filter(({features: [{id}]}) => `${id}` === this.props.params.id)[0]}/>;
+    return <TripDetails trip={trips.filter(({id}) => `${id}` === this.props.params.id)[0]}/>;
   }
 });
 

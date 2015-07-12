@@ -35,7 +35,7 @@ const VideoAndMap = React.createClass({
 
     const featColl = {
       type: 'FeatureCollection',
-      features: video.coverage.map(({features: [feature]}) => feature)
+      features: video.coverage
     };
 
     return (

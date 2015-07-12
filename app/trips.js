@@ -12,7 +12,7 @@ const tripData = new Promise(resolve => {
 
 function load(trip) {
   const result = feature(trip);
-  const {features: [{properties, geometry}]} = result;
+  const {properties, geometry} = result;
   properties.videos = [];
   const {activity: {id, start_date, total_elevation_gain, max_speed, distance, elapsed_time, moving_time}} = properties;
 
@@ -32,13 +32,13 @@ function calculateVideoCoverage(trips, videos) {
   const videoCoverage = [];
 
   for (const trip of trips) {
-    const {features: [{properties}]} = trip;
+    const {properties} = trip;
     for (const video of videos.values()) {
       if (properties.start <= video.end && properties.end >= video.start) {
         video.trips.push(trip);
         properties.videos.push(video);
 
-        const [{geometry}] = trip.features;
+        const {geometry} = trip;
         let tripCoords = geometry.coordinates;
         if (geometry.type === 'LineString') {
           tripCoords = [tripCoords];
@@ -52,15 +52,12 @@ function calculateVideoCoverage(trips, videos) {
         if (coordinates.length > 0) {
           const covProperties = Object.assign({video}, properties);
           const coverage = {
-            type: 'FeatureCollection',
-            features: [{
-              type: 'Feature',
-              properties: covProperties,
-              geometry: {
-                type: 'MultiLineString',
-                coordinates
-              }
-            }]
+            type: 'Feature',
+            properties: covProperties,
+            geometry: {
+              type: 'MultiLineString',
+              coordinates
+            }
           };
           covProperties.tree = tree(coverage);
 
@@ -79,10 +76,10 @@ export default tripData.then(tripTopojson => {
 
   const videoCoverage = calculateVideoCoverage(trips, videos);
 
-  const tripTree = group(trips.map(({features: [{properties: {tree}}]}) => tree));
+  const tripTree = group(trips.map(({properties: {tree}}) => tree));
 
   const videoTree = group(Array.from(videos.values()).map(video => {
-    video.coverageTree = group(video.coverage.map(({features: [{properties: {tree}}]}) => tree));
+    video.coverageTree = group(video.coverage.map(({properties: {tree}}) => tree));
     return video.coverageTree;
   }).filter(n => n));
 

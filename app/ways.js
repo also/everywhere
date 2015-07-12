@@ -1,12 +1,12 @@
 import sortBy from 'lodash/collection/sortBy';
 
-import {feature, tree} from './geo';
+import {features, tree} from './geo';
 
 import waysGeojson from 'compact-json!../app-data/highways-clipped-topo.geojson';
 import intersectionsTopojson from 'compact-json!../app-data/intersections-clipped-topo.geojson';
 
-const ways = feature(waysGeojson);
-const intersections = feature(intersectionsTopojson);
+const ways = features(waysGeojson);
+const intersections = features(intersectionsTopojson);
 
 const waysById = new Map();
 

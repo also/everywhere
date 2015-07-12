@@ -15,7 +15,7 @@ export default React.createClass({
 
   onMouseMove({geo}) {
     const {trip} = this.props;
-    const {features: [{properties: {tree}}]} = trip;
+    const {properties: {tree}} = trip;
     const nearest = tree.nearest(geo);
     const coord = nearest.coordinates[0];
     const wayId = coord[coord.length - 1][0];
@@ -25,7 +25,7 @@ export default React.createClass({
 
   render() {
     const {trip} = this.props;
-    const {features: [{properties: {id, start, movingTime, videos}}]} = trip;
+    const {properties: {id, start, movingTime, videos}} = trip;
     const {nearest} = this.state;
     return (
       <div>

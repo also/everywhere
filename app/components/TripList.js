@@ -12,7 +12,7 @@ export default React.createClass({
     return (
       <div className='thumbnails'>
         {trips.map(trip => {
-          const {features: [{properties: {id, start, videos}}]} = trip;
+          const {properties: {id, start, videos}} = trip;
           return (
             <div key={id}>
               <Link to={`/trips/${id}`}>
