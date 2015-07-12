@@ -93,15 +93,14 @@ const WayDetailsRoute = React.createClass({
 
 const VideoListRoute = React.createClass({
   render() {
-    const {videoCoverage} = this.props.route;
-    return <VideoListPage videos={Array.from(videos.values())} videoCoverage={videoCoverage}/>;
+    const {videoCoverage, videoTree} = this.props.route;
+    return <VideoListPage videos={Array.from(videos.values())} videoCoverage={videoCoverage} videoTree={videoTree}/>;
   }
 });
 
 const VideoDetailsRoute = React.createClass({
   render() {
     const {params} = this.props;
-    console.log(params);
     return <VideoDetails video={videos.get(params.name)} seek={params.seek}/>;
   }
 });
@@ -125,8 +124,8 @@ const TripDetailsRoute = React.createClass({
 const LocationDetailsRoute = React.createClass({
   render() {
     const {params: {coords}} = this.props;
-    const {tripTree} = this.props.route;
-    return <LocactionDetails location={coords.split(',').map(parseFloat)} tripTree={tripTree}/>;
+    const {tripTree, videoTree} = this.props.route;
+    return <LocactionDetails location={coords.split(',').map(parseFloat)} tripTree={tripTree} videoTree={videoTree}/>;
   }
 });
 
@@ -143,12 +142,12 @@ tripsPromise.then(({trips, videoCoverage, tripTree, videoTree}) => {
           <Route path="/" component={CityMapRoute} trips={trips}/>
           <Route path="/ways" component={WayListRoute}/>
           <Route path="/ways/:name" component={WayDetailsRoute}/>
-          <Route path="/videos" component={VideoListRoute} videoCoverage={videoCoverage}/>
+          <Route path="/videos" component={VideoListRoute} videoCoverage={videoCoverage} videoTree={videoTree}/>
           <Route path="/videos/:name" component={VideoDetailsRoute}/>
           <Route path="/videos/:name/:seek" component={VideoDetailsRoute}/>
           <Route path="/trips" component={TripListRoute} trips={trips}/>
           <Route path="/trips/:id" component={TripDetailsRoute} trips={trips}/>
-          <Route path="/locations/:coords" component={LocationDetailsRoute} tripTree={tripTree}/>
+          <Route path="/locations/:coords" component={LocationDetailsRoute} tripTree={tripTree} videoTree={videoTree}/>
         </Route>
       </Router>
     )}</MapData>

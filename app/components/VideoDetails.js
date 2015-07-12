@@ -57,7 +57,6 @@ const VideoAndMap = React.createClass({
 
 
 export default React.createClass({
-
   render() {
     const {video, seek} = this.props;
 

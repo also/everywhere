@@ -15,7 +15,7 @@ export default React.createClass({
     let {chapterIndex} = this.state;
     chapterIndex = (chapterIndex + 1) % video.chapters.length;
     const chapter = video.chapters[chapterIndex];
-    this.setState({chapterIndex, chapter, autoPlay: !!play, time: chapter.start});
+    this.setState({chapterIndex, chapter, autoPlay: !!play, time: chapter.start, seekingTo: null});
   },
 
   previous(e) {
@@ -74,27 +74,35 @@ export default React.createClass({
       return;
     }
     const offset = time - chapter.start;
+    const seekingTo = offset / 1000;
     if (this.state.chapter === chapter) {
-      this.videoNode.currentTime = offset / 1000;
-    } else {
-      this.seekingTo = offset / 1000;
+      this.videoNode.currentTime = seekingTo;
     }
-    this.setState({chapter, chapterIndex: video.chapters.indexOf(chapter)});
+    this.setState({chapter, chapterIndex: video.chapters.indexOf(chapter), seekingTo: seekingTo});
   },
 
   onLoadedMetadata() {
-    if (this.seekingTo) {
-      this.videoNode.currentTime = this.seekingTo;
-      this.seekingTo = null;
+    const {seekingTo} = this.state;
+    if (seekingTo) {
+      this.videoNode.currentTime = seekingTo;
     }
   },
 
+  onSeeked() {
+    this.setState({seekingTo: null});
+  },
+
   render() {
-    const {chapter, autoPlay, time} = this.state;
+    const {chapter, autoPlay, time, seekingTo} = this.state;
+    const style = {};
+    if (seekingTo) {
+      style.opacity = 0.2;
+    }
+
     return (
       <div>
-        <video controls="true" width="640" height="360" src={chapter.low} poster={chapter.stills[0].large} autoPlay={autoPlay} ref={component => this.videoNode = React.findDOMNode(component)}/>
-        <p><a onClick={this.previous}>previous</a> <a onClick={this.next}>next</a> <span>{time.format('LTS')}</span></p>
+        <video controls="true" width="640" height="360" style={style} src={chapter.low} poster={chapter.stills[0].large} autoPlay={autoPlay} ref={component => this.videoNode = React.findDOMNode(component)}/>
+        <p>{time.format('LTS')}</p>
       </div>
     );
   },
@@ -107,5 +115,6 @@ export default React.createClass({
     this.videoNode.addEventListener('ended', this.onEnded);
     this.videoNode.addEventListener('timeupdate', this.onTimeUpdate);
     this.videoNode.addEventListener('loadedmetadata', this.onLoadedMetadata);
+    this.videoNode.addEventListener('seeked', this.onSeeked);
   }
 });
