@@ -281,9 +281,11 @@
 	  displayName: 'VideoListRoute',
 
 	  render: function render() {
-	    var videoCoverage = this.props.route.videoCoverage;
+	    var _props$route = this.props.route;
+	    var videoCoverage = _props$route.videoCoverage;
+	    var videoTree = _props$route.videoTree;
 
-	    return React.createElement(_componentsVideoListPage2['default'], { videos: _Array$from(_data.videos.values()), videoCoverage: videoCoverage });
+	    return React.createElement(_componentsVideoListPage2['default'], { videos: _Array$from(_data.videos.values()), videoCoverage: videoCoverage, videoTree: videoTree });
 	  }
 	});
 
@@ -293,7 +295,7 @@
 	  render: function render() {
 	    var params = this.props.params;
 
-	    return React.createElement(_componentsVideoDetails2['default'], { video: _data.videos.get(params.name) });
+	    return React.createElement(_componentsVideoDetails2['default'], { video: _data.videos.get(params.name), seek: params.seek });
 	  }
 	});
 
@@ -331,9 +333,11 @@
 
 	  render: function render() {
 	    var coords = this.props.params.coords;
-	    var tripTree = this.props.route.tripTree;
+	    var _props$route2 = this.props.route;
+	    var tripTree = _props$route2.tripTree;
+	    var videoTree = _props$route2.videoTree;
 
-	    return React.createElement(_componentsLocationDetails2['default'], { location: coords.split(',').map(parseFloat), tripTree: tripTree });
+	    return React.createElement(_componentsLocationDetails2['default'], { location: coords.split(',').map(parseFloat), tripTree: tripTree, videoTree: videoTree });
 	  }
 	});
 
@@ -361,11 +365,12 @@
 	          React.createElement(_reactRouter.Route, { path: '/', component: CityMapRoute, trips: trips }),
 	          React.createElement(_reactRouter.Route, { path: '/ways', component: WayListRoute }),
 	          React.createElement(_reactRouter.Route, { path: '/ways/:name', component: WayDetailsRoute }),
-	          React.createElement(_reactRouter.Route, { path: '/videos', component: VideoListRoute, videoCoverage: videoCoverage }),
+	          React.createElement(_reactRouter.Route, { path: '/videos', component: VideoListRoute, videoCoverage: videoCoverage, videoTree: videoTree }),
 	          React.createElement(_reactRouter.Route, { path: '/videos/:name', component: VideoDetailsRoute }),
+	          React.createElement(_reactRouter.Route, { path: '/videos/:name/:seek', component: VideoDetailsRoute }),
 	          React.createElement(_reactRouter.Route, { path: '/trips', component: TripListRoute, trips: trips }),
 	          React.createElement(_reactRouter.Route, { path: '/trips/:id', component: TripDetailsRoute, trips: trips }),
-	          React.createElement(_reactRouter.Route, { path: '/locations/:coords', component: LocationDetailsRoute, tripTree: tripTree })
+	          React.createElement(_reactRouter.Route, { path: '/locations/:coords', component: LocationDetailsRoute, tripTree: tripTree, videoTree: videoTree })
 	        )
 	      );
 	    }
@@ -39848,6 +39853,8 @@
 
 	'use strict';
 
+	var _slicedToArray = __webpack_require__(1)['default'];
+
 	var _Object$defineProperty = __webpack_require__(268)['default'];
 
 	var _interopRequireWildcard = __webpack_require__(30)['default'];
@@ -39862,6 +39869,8 @@
 
 	var React = _interopRequireWildcard(_react);
 
+	var _reactRouter = __webpack_require__(237);
+
 	var _VideoList = __webpack_require__(332);
 
 	var _VideoList2 = _interopRequireDefault(_VideoList);
@@ -39874,8 +39883,47 @@
 
 	var _Map2 = _interopRequireDefault(_Map);
 
+	var _Dot = __webpack_require__(272);
+
+	var _Dot2 = _interopRequireDefault(_Dot);
+
 	exports['default'] = React.createClass({
 	  displayName: 'VideoListPage',
+
+	  mixins: [_reactRouter.Navigation],
+
+	  getInitialState: function getInitialState() {
+	    return { nearest: null };
+	  },
+
+	  onMouseMove: function onMouseMove(_ref) {
+	    var geo = _ref.geo;
+	    var videoTree = this.props.videoTree;
+
+	    var nearest = videoTree.nearest(geo);
+	    this.setState({ nearest: nearest });
+	  },
+
+	  onClick: function onClick(_ref2) {
+	    var geo = _ref2.geo;
+	    var videoTree = this.props.videoTree;
+
+	    var nearest = videoTree.nearest(geo);
+	    var _nearest$data$feature$properties = nearest.data.feature.properties;
+	    var start = _nearest$data$feature$properties.start;
+	    var video = _nearest$data$feature$properties.video;
+
+	    var _nearest$coordinates = _slicedToArray(nearest.coordinates, 1);
+
+	    var coord = _nearest$coordinates[0];
+
+	    var _coord = _slicedToArray(coord, 4);
+
+	    var timeOffsetSecs = _coord[3];
+
+	    var time = +start.clone().add(timeOffsetSecs, 's');
+	    this.transitionTo('/videos/' + video.name + '/' + time);
+	  },
 
 	  render: function render() {
 	    var videos = this.props.videos;
@@ -39890,7 +39938,7 @@
 	      ),
 	      React.createElement(
 	        _Map2['default'],
-	        { width: '500', height: '500' },
+	        { width: '1000', height: '1000', onMouseMove: this.onMouseMove, onClick: this.onClick },
 	        this.mapLayers
 	      ),
 	      React.createElement(_VideoList2['default'], { videos: videos })
@@ -39898,9 +39946,20 @@
 	  },
 
 	  mapLayers: function mapLayers() {
+	    var nearest = this.state.nearest;
+
+	    var dot = null;
+	    if (nearest) {
+	      var _nearest$coordinates2 = _slicedToArray(nearest.coordinates, 1);
+
+	      var position = _nearest$coordinates2[0];
+
+	      dot = React.createElement(_Dot2['default'], { position: position, r: 4, className: 'position' });
+	    }
+
 	    var videoCoverage = this.props.videoCoverage;
 
-	    return React.createElement(_Trips2['default'], { trips: videoCoverage });
+	    return [React.createElement(_Trips2['default'], { trips: videoCoverage }), dot];
 	  }
 	});
 	module.exports = exports['default'];
@@ -51215,6 +51274,8 @@
 
 	var React = _interopRequireWildcard(_react);
 
+	var _reactRouter = __webpack_require__(237);
+
 	var _format = __webpack_require__(333);
 
 	var format = _interopRequireWildcard(_format);
@@ -51242,9 +51303,13 @@
 	var VideoAndMap = React.createClass({
 	  displayName: 'VideoAndMap',
 
+	  mixins: [_reactRouter.Navigation],
+
 	  onClick: function onClick(_ref) {
 	    var geo = _ref.geo;
-	    var coverageTree = this.props.video.coverageTree;
+	    var _props$video = this.props.video;
+	    var coverageTree = _props$video.coverageTree;
+	    var name = _props$video.name;
 
 	    var nearest = coverageTree.nearest(geo);
 	    var start = nearest.data.feature.properties.start;
@@ -51257,7 +51322,7 @@
 
 	    var timeOffsetSecs = _coord[3];
 
-	    this.refs.video.seek(start.clone().add(timeOffsetSecs, 's'));
+	    this.transitionTo('/videos/' + name + '/' + +start.clone().add(timeOffsetSecs, 's'));
 	  },
 
 	  getInitialState: function getInitialState() {
@@ -51269,7 +51334,9 @@
 	  },
 
 	  render: function render() {
-	    var video = this.props.video;
+	    var _props = this.props;
+	    var video = _props.video;
+	    var seek = _props.seek;
 	    var _state$location = this.state.location;
 	    var location = _state$location === undefined ? [0, 0] : _state$location;
 
@@ -51289,7 +51356,7 @@
 	      React.createElement(
 	        'span',
 	        { style: { display: 'inline-block' } },
-	        React.createElement(_VideoPlayer2['default'], { video: video, onLocationChange: this.onLocationChange, ref: 'video' })
+	        React.createElement(_VideoPlayer2['default'], { video: video, seek: seek, onLocationChange: this.onLocationChange, ref: 'video' })
 	      ),
 	      React.createElement(
 	        'span',
@@ -51316,7 +51383,9 @@
 	  displayName: 'VideoDetails',
 
 	  render: function render() {
-	    var video = this.props.video;
+	    var _props2 = this.props;
+	    var video = _props2.video;
+	    var seek = _props2.seek;
 
 	    return React.createElement(
 	      'div',
@@ -51339,7 +51408,7 @@
 	        format.duration(video.duration),
 	        ' long'
 	      ),
-	      React.createElement(VideoAndMap, { video: video }),
+	      React.createElement(VideoAndMap, { video: video, seek: seek }),
 	      React.createElement(
 	        'h2',
 	        null,
@@ -51494,7 +51563,9 @@
 	  displayName: 'VideoPlayer',
 
 	  getInitialState: function getInitialState() {
-	    return { chapterIndex: -1, coverageCoord: null };
+	    var video = this.props.video;
+
+	    return { chapterIndex: -1, coverageCoord: null, time: video.start };
 	  },
 
 	  advance: function advance(_x, play) {
@@ -51504,7 +51575,7 @@
 
 	    chapterIndex = (chapterIndex + 1) % video.chapters.length;
 	    var chapter = video.chapters[chapterIndex];
-	    this.setState({ chapterIndex: chapterIndex, chapter: chapter, autoPlay: !!play, time: chapter.start });
+	    this.setState({ chapterIndex: chapterIndex, chapter: chapter, autoPlay: !!play, time: chapter.start, seekingTo: null });
 	  },
 
 	  previous: function previous(e) {
@@ -51518,7 +51589,21 @@
 	  },
 
 	  componentWillMount: function componentWillMount() {
-	    this.advance(1);
+	    var seek = this.props.seek;
+
+	    if (seek) {
+	      this.seek(seek);
+	    } else {
+	      this.advance(1);
+	    }
+	  },
+
+	  componentWillReceiveProps: function componentWillReceiveProps(nextProps) {
+	    var seek = nextProps.seek;
+
+	    if (seek && seek !== this.props.seek) {
+	      this.seek(seek);
+	    }
 	  },
 
 	  onTimeUpdate: function onTimeUpdate() {
@@ -51579,19 +51664,23 @@
 	      return;
 	    }
 	    var offset = time - chapter.start;
+	    var seekingTo = offset / 1000;
 	    if (this.state.chapter === chapter) {
-	      this.videoNode.currentTime = offset / 1000;
-	    } else {
-	      this.seekingTo = offset / 1000;
+	      this.videoNode.currentTime = seekingTo;
 	    }
-	    this.setState({ chapter: chapter, chapterIndex: video.chapters.indexOf(chapter) });
+	    this.setState({ chapter: chapter, chapterIndex: video.chapters.indexOf(chapter), seekingTo: seekingTo });
 	  },
 
 	  onLoadedMetadata: function onLoadedMetadata() {
-	    if (this.seekingTo) {
-	      this.videoNode.currentTime = this.seekingTo;
-	      this.seekingTo = null;
+	    var seekingTo = this.state.seekingTo;
+
+	    if (seekingTo) {
+	      this.videoNode.currentTime = seekingTo;
 	    }
+	  },
+
+	  onSeeked: function onSeeked() {
+	    this.setState({ seekingTo: null });
 	  },
 
 	  render: function render() {
@@ -51601,33 +51690,23 @@
 	    var chapter = _state.chapter;
 	    var autoPlay = _state.autoPlay;
 	    var time = _state.time;
+	    var seekingTo = _state.seekingTo;
+
+	    var style = {};
+	    if (seekingTo) {
+	      style.opacity = 0.2;
+	    }
 
 	    return React.createElement(
 	      'div',
 	      null,
-	      React.createElement('video', { controls: 'true', width: '640', height: '360', src: chapter.low, poster: chapter.stills[0].large, autoPlay: autoPlay, ref: function (component) {
+	      React.createElement('video', { controls: 'true', width: '640', height: '360', style: style, src: chapter.low, poster: chapter.stills[0].large, autoPlay: autoPlay, ref: function (component) {
 	          return _this2.videoNode = React.findDOMNode(component);
 	        } }),
 	      React.createElement(
 	        'p',
 	        null,
-	        React.createElement(
-	          'a',
-	          { onClick: this.previous },
-	          'previous'
-	        ),
-	        ' ',
-	        React.createElement(
-	          'a',
-	          { onClick: this.next },
-	          'next'
-	        ),
-	        ' ',
-	        React.createElement(
-	          'span',
-	          null,
-	          time.format('LTS')
-	        )
+	        time.format('LTS')
 	      )
 	    );
 	  },
@@ -51640,6 +51719,7 @@
 	    this.videoNode.addEventListener('ended', this.onEnded);
 	    this.videoNode.addEventListener('timeupdate', this.onTimeUpdate);
 	    this.videoNode.addEventListener('loadedmetadata', this.onLoadedMetadata);
+	    this.videoNode.addEventListener('seeked', this.onSeeked);
 	  }
 	});
 	module.exports = exports['default'];
@@ -53412,13 +53492,19 @@
 
 	'use strict';
 
+	var _slicedToArray = __webpack_require__(1)['default'];
+
 	var _Object$defineProperty = __webpack_require__(268)['default'];
 
 	var _Array$from = __webpack_require__(23)['default'];
 
 	var _Set = __webpack_require__(320)['default'];
 
+	var _Map = __webpack_require__(431)['default'];
+
 	var _interopRequireDefault = __webpack_require__(29)['default'];
+
+	var _interopRequireWildcard = __webpack_require__(30)['default'];
 
 	_Object$defineProperty(exports, '__esModule', {
 	  value: true
@@ -53430,11 +53516,15 @@
 
 	var _reactRouter = __webpack_require__(237);
 
+	var _format = __webpack_require__(333);
+
+	var format = _interopRequireWildcard(_format);
+
 	var _ways = __webpack_require__(430);
 
-	var _Map = __webpack_require__(281);
+	var _Map2 = __webpack_require__(281);
 
-	var _Map2 = _interopRequireDefault(_Map);
+	var _Map3 = _interopRequireDefault(_Map2);
 
 	var _Dot = __webpack_require__(272);
 
@@ -53465,18 +53555,50 @@
 	    var _props = this.props;
 	    var location = _props.location;
 	    var tripTree = _props.tripTree;
+	    var videoTree = _props.videoTree;
 
-	    var nearbyWays = _ways.wayTree.within(location, 5e-7).map(function (_ref2) {
+	    var maxDistance = 5e-7;
+
+	    var nearbyWays = _ways.wayTree.within(location, maxDistance).map(function (_ref2) {
 	      var feature = _ref2.node.data.feature;
 	      return feature;
 	    });
 	    var nearbyGroupedWays = (0, _ways.group)(nearbyWays);
-	    var nearbyTrips = _Array$from(new _Set(tripTree.within(location, 5e-7).map(function (_ref3) {
+	    var nearbyTrips = _Array$from(new _Set(tripTree.within(location, maxDistance).map(function (_ref3) {
 	      var feature = _ref3.node.data.feature;
 	      return feature;
 	    }))).map(function (feature) {
 	      return { type: 'FeatureCollection', features: [feature] };
 	    });
+
+	    var nearbyVideoCoverageByName = new _Map();
+	    videoTree.within(location, maxDistance).forEach(function (result) {
+	      var name = result.node.data.feature.properties.video;
+	      var current = nearbyVideoCoverageByName.get(name);
+	      if (!current || result.distance < current.distance) {
+	        nearbyVideoCoverageByName.set(name, result);
+	      }
+	    });
+
+	    var nearbyVideos = _Array$from(nearbyVideoCoverageByName.values()).map(function (_ref4) {
+	      var node = _ref4.node;
+	      var distance = _ref4.distance;
+	      var _node$data$feature$properties = node.data.feature.properties;
+	      var start = _node$data$feature$properties.start;
+	      var video = _node$data$feature$properties.video;
+
+	      var _node$coordinates = _slicedToArray(node.coordinates, 1);
+
+	      var coord = _node$coordinates[0];
+
+	      var _coord = _slicedToArray(coord, 4);
+
+	      var timeOffsetSecs = _coord[3];
+
+	      var time = +start.clone().add(timeOffsetSecs, 's');
+	      return { video: video, time: time, distance: distance };
+	    });
+
 	    return _reactAddons2['default'].createElement(
 	      'div',
 	      null,
@@ -53486,11 +53608,61 @@
 	        location.join(', ')
 	      ),
 	      _reactAddons2['default'].createElement(
-	        _Map2['default'],
+	        _Map3['default'],
 	        { width: 1000, height: 1000, onClick: this.onClick },
 	        function () {
 	          return [_reactAddons2['default'].createElement(_Ways2['default'], { features: nearbyWays, selected: true }), _reactAddons2['default'].createElement(_Dot2['default'], { r: 4, className: 'position', position: _this.props.location })];
 	        }
+	      ),
+	      _reactAddons2['default'].createElement(
+	        'h2',
+	        null,
+	        'Videos'
+	      ),
+	      _reactAddons2['default'].createElement(
+	        'div',
+	        { className: 'thumbnails' },
+	        nearbyVideos.map(function (_ref5) {
+	          var _ref5$video = _ref5.video;
+	          var name = _ref5$video.name;
+	          var duration = _ref5$video.duration;
+	          var start = _ref5$video.start;
+	          var thumbnail = _ref5$video.thumbnail;
+	          var time = _ref5.time;
+	          return _reactAddons2['default'].createElement(
+	            'div',
+	            { key: name },
+	            _reactAddons2['default'].createElement(
+	              _reactRouter.Link,
+	              { to: '/videos/' + name + '/' + time },
+	              _reactAddons2['default'].createElement(
+	                'div',
+	                null,
+	                _reactAddons2['default'].createElement('img', { src: thumbnail.small, width: '160', height: '90' })
+	              ),
+	              _reactAddons2['default'].createElement(
+	                'div',
+	                null,
+	                _reactAddons2['default'].createElement(
+	                  'strong',
+	                  null,
+	                  start.format('LLL')
+	                )
+	              ),
+	              _reactAddons2['default'].createElement(
+	                'div',
+	                null,
+	                format.duration(duration),
+	                ' ',
+	                _reactAddons2['default'].createElement(
+	                  'span',
+	                  { className: 'name' },
+	                  name
+	                )
+	              )
+	            )
+	          );
+	        })
 	      ),
 	      _reactAddons2['default'].createElement(
 	        'h2',
@@ -53504,16 +53676,31 @@
 	        'Streets'
 	      ),
 	      _reactAddons2['default'].createElement(
-	        'ul',
-	        { style: { WebkitColumnWidth: '200px' } },
+	        'div',
+	        { className: 'thumbnails' },
 	        nearbyGroupedWays.map(function (way) {
 	          return _reactAddons2['default'].createElement(
-	            'li',
+	            'div',
 	            { key: way.name },
 	            _reactAddons2['default'].createElement(
 	              _reactRouter.Link,
 	              { to: '/ways/' + way.name },
-	              way.name || '(no name)'
+	              _reactAddons2['default'].createElement(
+	                _Map3['default'],
+	                { width: 160, height: 160, zoomFeature: { type: 'FeatureCollection', features: way.features } },
+	                function () {
+	                  return _reactAddons2['default'].createElement(_Ways2['default'], { features: way.features, selected: true });
+	                }
+	              ),
+	              _reactAddons2['default'].createElement(
+	                'div',
+	                null,
+	                _reactAddons2['default'].createElement(
+	                  'strong',
+	                  null,
+	                  way.name || '(no name)'
+	                )
+	              )
 	            )
 	          );
 	        })
