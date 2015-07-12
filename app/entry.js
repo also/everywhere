@@ -19,7 +19,7 @@ import VideoDetails from './components/VideoDetails';
 import TripListPage from './components/TripListPage';
 import TripDetails from './components/TripDetails';
 
-import LocactionDetails from './components/LocationDetails';
+import LocationDetails from './components/LocationDetails';
 
 import {geoLines} from './geo';
 
@@ -125,7 +125,7 @@ const LocationDetailsRoute = React.createClass({
   render() {
     const {params: {coords}} = this.props;
     const {tripTree, videoTree} = this.props.route;
-    return <LocactionDetails location={coords.split(',').map(parseFloat)} tripTree={tripTree} videoTree={videoTree}/>;
+    return <LocationDetails location={coords.split(',').map(parseFloat)} tripTree={tripTree} videoTree={videoTree}/>;
   }
 });
 
