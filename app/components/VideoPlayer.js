@@ -6,7 +6,8 @@ import find from 'lodash/collection/find';
 
 export default React.createClass({
   getInitialState() {
-    return {chapterIndex: -1, coverageCoord: null};
+    const {video} = this.props;
+    return {chapterIndex: -1, coverageCoord: null, time: video.start};
   },
 
   advance(n=1, play) {
@@ -28,7 +29,19 @@ export default React.createClass({
   },
 
   componentWillMount() {
-    this.advance(1);
+    const {seek} = this.props;
+    if (seek) {
+      this.seek(seek);
+    } else {
+      this.advance(1);
+    }
+  },
+
+  componentWillReceiveProps(nextProps) {
+    const {seek} = nextProps;
+    if (seek && seek !== this.props.seek) {
+      this.seek(seek);
+    }
   },
 
   onTimeUpdate() {

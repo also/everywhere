@@ -1,4 +1,5 @@
 import * as React from 'react';
+import {Link, Navigation} from 'react-router';
 
 import * as format from '../format';
 
@@ -9,12 +10,14 @@ import Trips from './Trips';
 import Dot from './Dot';
 
 const VideoAndMap = React.createClass({
+  mixins: [Navigation],
+
   onClick({geo}) {
-    const {video: {coverageTree}} = this.props;
+    const {video: {coverageTree, name}} = this.props;
     const nearest = coverageTree.nearest(geo);
     const {data: {feature: {properties: {start}}}, coordinates: [coord]} = nearest;
     const [,,, timeOffsetSecs] = coord;
-    this.refs.video.seek(start.clone().add(timeOffsetSecs, 's'));
+    this.transitionTo(`/videos/${name}/${+start.clone().add(timeOffsetSecs, 's')}`);
   },
 
   getInitialState() {
@@ -26,7 +29,7 @@ const VideoAndMap = React.createClass({
   },
 
   render() {
-    const {video} = this.props;
+    const {video, seek} = this.props;
 
     const {location=[0, 0]} = this.state;
 
@@ -37,7 +40,7 @@ const VideoAndMap = React.createClass({
 
     return (
       <span>
-        <span style={{display: 'inline-block'}}><VideoPlayer video={video} onLocationChange={this.onLocationChange} ref='video'/></span>
+        <span style={{display: 'inline-block'}}><VideoPlayer video={video} seek={seek} onLocationChange={this.onLocationChange} ref='video'/></span>
         <span style={{display: 'inline-block', verticalAlign: 'top', marginLeft: '1em'}} className='map-box'>
           <MapComponent width={360} height={360} zoomFeature={featColl} onClick={this.onClick}>{this.mapLayers}</MapComponent>
         </span>
@@ -56,13 +59,13 @@ const VideoAndMap = React.createClass({
 export default React.createClass({
 
   render() {
-    const {video} = this.props;
+    const {video, seek} = this.props;
 
     return (
       <div>
         <h1>{video.name}</h1>
         <p>Taken <strong>{video.start.format('LLL')}</strong>, {format.duration(video.duration)} long</p>
-        <VideoAndMap video={video}/>
+        <VideoAndMap video={video} seek={seek}/>
         <h2>Trips</h2>
         <TripList trips={video.trips}/>
         <h2>Stills</h2>
