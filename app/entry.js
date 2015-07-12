@@ -134,7 +134,7 @@ document.body.appendChild(div);
 
 const history = new HashHistory();
 
-tripsPromise.then(({trips, videoCoverage, tripTree}) => {
+tripsPromise.then(({trips, videoCoverage, tripTree, videoTree}) => {
   React.render(
     <MapData {...{boundary, contours, ways}}>{() => (
       <Router history={history}>

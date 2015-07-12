@@ -6,24 +6,63 @@ import TripList from './TripList';
 import VideoPlayer from './VideoPlayer';
 import MapComponent from './Map';
 import Trips from './Trips';
+import Dot from './Dot';
 
+const VideoAndMap = React.createClass({
+  onClick({geo}) {
+    const {video: {coverageTree}} = this.props;
+    const nearest = coverageTree.nearest(geo);
+    const {data: {feature: {properties: {start}}}, coordinates: [coord]} = nearest;
+    const [,,, timeOffsetSecs] = coord;
+    this.refs.video.seek(start.clone().add(timeOffsetSecs, 's'));
+  },
 
-export default React.createClass({
+  getInitialState() {
+    return {location: null};
+  },
+
+  onLocationChange(location) {
+    this.setState({location});
+  },
+
   render() {
     const {video} = this.props;
+
+    const {location=[0, 0]} = this.state;
+
     const featColl = {
       type: 'FeatureCollection',
       features: video.coverage.map(({features: [feature]}) => feature)
     };
 
     return (
+      <span>
+        <span style={{display: 'inline-block'}}><VideoPlayer video={video} onLocationChange={this.onLocationChange} ref='video'/></span>
+        <span style={{display: 'inline-block', verticalAlign: 'top', marginLeft: '1em'}} className='map-box'>
+          <MapComponent width={360} height={360} zoomFeature={featColl} onClick={this.onClick}>{this.mapLayers}</MapComponent>
+        </span>
+      </span>
+    );
+  },
+
+  mapLayers() {
+    const {video} = this.props;
+    const {location=[0, 0]} = this.state;
+    return [<Trips trips={video.coverage}/>, <Dot r={4} className='position' position={location}/>];
+  }
+});
+
+
+export default React.createClass({
+
+  render() {
+    const {video} = this.props;
+
+    return (
       <div>
         <h1>{video.name}</h1>
         <p>Taken <strong>{video.start.format('LLL')}</strong>, {format.duration(video.duration)} long</p>
-        <span style={{display: 'inline-block'}}><VideoPlayer video={video}/></span>
-        <span style={{display: 'inline-block', verticalAlign: 'top', marginLeft: '1em'}} className='map-box'>
-          <MapComponent width={360} height={360} zoomFeature={featColl}>{this.mapLayers}</MapComponent>
-        </span>
+        <VideoAndMap video={video}/>
         <h2>Trips</h2>
         <TripList trips={video.trips}/>
         <h2>Stills</h2>
@@ -32,10 +71,5 @@ export default React.createClass({
         ))}</div>
       </div>
     );
-  },
-
-  mapLayers() {
-    const {video} = this.props;
-    return <Trips trips={video.coverage}/>;
   }
 });

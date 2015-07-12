@@ -50,17 +50,20 @@ export default tripData.then(tripTopojson => {
         })).filter(({length}) => length > 0);
 
         if (coordinates.length > 0) {
+          const covProperties = Object.assign({video}, properties);
           const coverage = {
             type: 'FeatureCollection',
             features: [{
               type: 'Feature',
-              properties,
+              properties: covProperties,
               geometry: {
                 type: 'MultiLineString',
                 coordinates
               }
             }]
           };
+          covProperties.tree = tree(coverage);
+
           videoCoverage.push(coverage);
           video.coverage.push(coverage);
         }
@@ -70,5 +73,10 @@ export default tripData.then(tripTopojson => {
 
   const tripTree = group(trips.map(({features: [{properties: {tree}}]}) => tree));
 
-  return {trips, videoCoverage, tripTree};
+  const videoTree = group(Array.from(videos.values()).map(video => {
+    video.coverageTree = group(video.coverage.map(({features: [{properties: {tree}}]}) => tree));
+    return video.coverageTree;
+  }).filter(n => n));
+
+  return {trips, videoCoverage, tripTree, videoTree};
 });

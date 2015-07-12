@@ -18,7 +18,8 @@ videoContext.keys()
     const chapter = chapterString === 'PR' ? 0 : parseInt(chapterString, 10);
 
     // FIXME just assuming EDT?
-    const start = moment(data.start);
+    // FIXME the clock on the gopro was off for some of the later vidoes
+    const start = moment(data.start);//.add(82, 's');
     const duration = moment.duration(parseFloat(data.duration), 's');
     const end = start.clone().add(duration);
     const video = {
