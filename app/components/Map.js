@@ -30,12 +30,6 @@ const BaseMap = React.createClass({
 
     return (
       <g>
-        <defs>
-          <mask id="boundary-mask">
-            <path d={cityBoundaryPath}/>
-          </mask>
-        </defs>
-
         <path className="boundary" d={cityBoundaryPath}/>
         {/*<Contours features={contours.features}/>*/}
         {showWays ? <Ways features={ways.features}/> : null}

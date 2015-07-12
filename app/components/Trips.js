@@ -43,9 +43,6 @@ const Trip = React.createClass({
   },
 
   componentDidMount() {
-    // react doesn't support mask
-    // https://github.com/facebook/react/issues/1657#issuecomment-63209488
-    React.findDOMNode(this).setAttribute('mask', 'url(#boundary-mask)');
     if (this.props.animate) {
       this.startAnimating();
     }
