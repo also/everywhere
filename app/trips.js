@@ -10,25 +10,25 @@ const tripData = new Promise(resolve => {
   require.ensure(['./trip-data'], (require) => resolve(require('./trip-data')));
 });
 
-export default tripData.then(tripTopojson => {
-  const trips = tripTopojson.map(trip => {
-    const result = feature(trip);
-    const {features: [{properties, geometry}]} = result;
-    properties.videos = [];
-    const {activity: {id, start_date, total_elevation_gain, max_speed, distance, elapsed_time, moving_time}} = properties;
+function load(trip) {
+  const result = feature(trip);
+  const {features: [{properties, geometry}]} = result;
+  properties.videos = [];
+  const {activity: {id, start_date, total_elevation_gain, max_speed, distance, elapsed_time, moving_time}} = properties;
 
-    const start = moment(start_date);
+  const start = moment(start_date);
 
-    Object.assign(properties, {
-      id,
-      start,
-      end: start.clone().add(elapsed_time, 's'),
-      movingTime: moment.duration(moving_time, 's'),
-      tree: tree(result)
-    });
-    return result;
+  Object.assign(properties, {
+    id,
+    start,
+    end: start.clone().add(elapsed_time, 's'),
+    movingTime: moment.duration(moving_time, 's'),
+    tree: tree(result)
   });
+  return result;
+}
 
+function calculateVideoCoverage(trips, videos) {
   const videoCoverage = [];
 
   for (const trip of trips) {
@@ -70,6 +70,14 @@ export default tripData.then(tripTopojson => {
       }
     }
   }
+
+  return videoCoverage;
+}
+
+export default tripData.then(tripTopojson => {
+  const trips = tripTopojson.map(load);
+
+  const videoCoverage = calculateVideoCoverage(trips, videos);
 
   const tripTree = group(trips.map(({features: [{properties: {tree}}]}) => tree));
 
