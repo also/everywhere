@@ -32,11 +32,16 @@ export default React.createClass({
         <h2>Trips</h2>
         <TripList trips={nearbyTrips}/>
         <h2>Streets</h2>
-        <ul style={{WebkitColumnWidth: '200px'}}>
+        <div className='thumbnails'>
           {nearbyGroupedWays.map(way => (
-            <li key={way.name}><Link to={`/ways/${way.name}`}>{way.name || '(no name)'}</Link></li>
+            <div key={way.name}>
+              <Link to={`/ways/${way.name}`}>
+                <MapComponent width={160} height={160} zoomFeature={{type: 'FeatureCollection', features: way.features}}>{() => <Ways features={way.features} selected={true}/>}</MapComponent>
+                <div><strong>{way.name || '(no name)'}</strong></div>
+              </Link>
+            </div>
           ))}
-        </ul>
+        </div>
       </div>
     );
   }
