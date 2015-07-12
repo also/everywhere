@@ -66,10 +66,10 @@ export default React.createClass({
         <h2>Streets</h2>
         <div className='thumbnails'>
           {nearbyGroupedWays.map(way => (
-            <div key={way.name}>
-              <Link to={`/ways/${way.name}`}>
+            <div key={way.displayName}>
+              <Link to={`/ways/${way.displayName}`}>
                 <MapComponent width={160} height={160} zoomFeature={{type: 'FeatureCollection', features: way.features}}>{() => <Ways features={way.features} selected={true}/>}</MapComponent>
-                <div><strong>{way.name || '(no name)'}</strong></div>
+                <div><strong>{way.displayName}</strong></div>
               </Link>
             </div>
           ))}

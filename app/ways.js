@@ -12,6 +12,7 @@ const waysById = new Map();
 
 ways.features.forEach(way => {
   waysById.set(way.properties.id, way);
+  way.properties.displayName = way.properties.name || way.properties.id;
   way.intersections = [];
 });
 
@@ -19,17 +20,17 @@ export function group(features) {
   const waysByName = new Map();
   const unsortedGroupedWays = [];
   features.forEach(way => {
-    const {properties: {name}} = way;
-    let wayFeatures = waysByName.get(name);
+    const {properties: {displayName}} = way;
+    let wayFeatures = waysByName.get(displayName);
     if (!wayFeatures) {
       wayFeatures = [];
-      waysByName.set(name, wayFeatures);
-      unsortedGroupedWays.push({name, features: wayFeatures});
+      waysByName.set(displayName, wayFeatures);
+      unsortedGroupedWays.push({displayName, features: wayFeatures});
     }
     wayFeatures.push(way);
   });
 
-  return sortBy(unsortedGroupedWays, ({name}) => name);
+  return sortBy(unsortedGroupedWays, ({displayName}) => displayName);
 }
 
 const groupedWays = group(ways.features);

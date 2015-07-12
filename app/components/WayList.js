@@ -14,7 +14,7 @@ const WayList = React.createClass({
     return (
       <ul style={{WebkitColumnWidth: '200px'}}>
         {groupedWays.map(way => (
-          <li key={way.name}><Link to={`/ways/${way.name}`}>{way.name || '(no name)'}</Link></li>
+          <li key={way.displayName}><Link to={`/ways/${way.displayName}`}>{way.displayName}</Link></li>
         ))}
       </ul>
     );
@@ -38,7 +38,7 @@ export default React.createClass({
     const {wayTree} = this.props;
     const leaf = wayTree.nearest(geo);
     const way = leaf.data.feature;
-    this.transitionTo(`/ways/${way.properties.name}`);
+    this.transitionTo(`/ways/${way.properties.displayName}`);
   },
 
   render() {
@@ -49,7 +49,7 @@ export default React.createClass({
       <div>
         <h1>Streets</h1>
         <div className='way-map'>
-          <div className='way-hover-info'>{hoveredStreet ? (hoveredStreet.properties.name || '(no name)') : '(hover over a street)'}</div>
+          <div className='way-hover-info'>{hoveredStreet ? (hoveredStreet.properties.displayName) : '(hover over a street)'}</div>
           <MapComponent width="1000" height="1000" onMouseMove={this.onMouseMove} onClick={this.onClick}>
             {this.mapLayers}
           </MapComponent>

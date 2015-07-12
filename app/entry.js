@@ -86,7 +86,7 @@ const WayListRoute = React.createClass({
 const WayDetailsRoute = React.createClass({
   render() {
     const {params} = this.props;
-    const way = find(groupedWays, ({name}) => name === params.name);
+    const way = find(groupedWays, ({displayName}) => displayName === params.splat);
     return way ? <WayDetails way={way}/> : null;
   }
 });
@@ -141,7 +141,7 @@ tripsPromise.then(({trips, videoCoverage, tripTree, videoTree}) => {
         <Route component={App}>
           <Route path="/" component={CityMapRoute} trips={trips}/>
           <Route path="/ways" component={WayListRoute}/>
-          <Route path="/ways/:name" component={WayDetailsRoute}/>
+          <Route path="/ways/*" component={WayDetailsRoute}/>
           <Route path="/videos" component={VideoListRoute} videoCoverage={videoCoverage} videoTree={videoTree}/>
           <Route path="/videos/:name" component={VideoDetailsRoute}/>
           <Route path="/videos/:name/:seek" component={VideoDetailsRoute}/>

@@ -9,9 +9,9 @@ export default React.createClass({
     const byName = new Map();
 
     const options = ways.map(way => {
-      const {name} = way;
-      byName.set(name, way);
-      const label = name || '(no name)';
+      const {displayName} = way;
+      byName.set(displayName, way);
+      const label = displayName;
       return {label, value: label, name};
     });
 

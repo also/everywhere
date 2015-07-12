@@ -12,7 +12,7 @@ export default React.createClass({
 
     way.features.forEach(feat => {
       feat.intersections.forEach(intersection => {
-        intersection.ways.forEach(iway => intersections.add(iway.properties.name));
+        intersection.ways.forEach(iway => intersections.add(iway.properties.displayName));
       });
     });
 
@@ -21,11 +21,11 @@ export default React.createClass({
       features: way.features
     };
 
-    intersections.delete(way.name);
+    intersections.delete(way.displayName);
 
     return (
       <div>
-        <h1>{way.name}</h1>
+        <h1>{way.displayName}</h1>
         <div className='map-box'>
           <MapComponent width={400} height={400} zoomFeature={featColl} zoom={0.7}>
             {this.mapLayers}

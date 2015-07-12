@@ -9,7 +9,7 @@ const Way = React.createClass({
   render() {
     const {path} = this.context;
     const {feature, selected} = this.props;
-    const {highway, name, id} = feature.properties;
+    const {highway, displayName, id} = feature.properties;
     const className = selected ? 'selected' : '';
     return <path d={path(feature)} data-highway={highway} className={className} key={id}/>;
   }
