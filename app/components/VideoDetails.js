@@ -2,6 +2,8 @@ import * as React from 'react';
 import {Navigation} from 'react-router';
 
 import * as format from '../format';
+import {findSeekPosition} from '../videos';
+import {featureCollection} from '../geo';
 
 import TripList from './TripList';
 import VideoPlayer from './VideoPlayer';
@@ -13,11 +15,9 @@ const VideoAndMap = React.createClass({
   mixins: [Navigation],
 
   onClick({geo}) {
-    const {video: {coverageTree, name}} = this.props;
-    const nearest = coverageTree.nearest(geo);
-    const {data: {feature: {properties: {start}}}, coordinates: [coord]} = nearest;
-    const [,,, timeOffsetSecs] = coord;
-    this.transitionTo(`/videos/${name}/${+start.clone().add(timeOffsetSecs, 's')}`);
+    const {video} = this.props;
+    const seekPosition = findSeekPosition(video, geo);
+    this.transitionTo(`/videos/${name}/${seekPosition}`);
   },
 
   getInitialState() {
@@ -33,16 +33,11 @@ const VideoAndMap = React.createClass({
 
     const {location=[0, 0]} = this.state;
 
-    const featColl = {
-      type: 'FeatureCollection',
-      features: video.coverage
-    };
-
     return (
       <span>
         <span style={{display: 'inline-block'}}><VideoPlayer video={video} seek={seek} onLocationChange={this.onLocationChange} ref='video'/></span>
         <span style={{display: 'inline-block', verticalAlign: 'top', marginLeft: '1em'}} className='map-box'>
-          <MapComponent width={360} height={360} zoomFeature={featColl} onClick={this.onClick}>{this.mapLayers}</MapComponent>
+          <MapComponent width={360} height={360} zoomFeature={featureCollection(video.coverage)} onClick={this.onClick}>{this.mapLayers}</MapComponent>
         </span>
       </span>
     );

@@ -10,8 +10,12 @@ export function feature(geojson) {
   return features(geojson).features[0];
 }
 
-export function geoLines(geoJson) {
-  return geoJson.features.map(({geometry}) => geometry).filter(({type}) => type === 'LineString' || type === 'MultiLineString');
+export function geoLines(feat) {
+  return (feat.type === 'FeatureCollection' ? feat.features : [feat]).map(({geometry}) => geometry).filter(({type}) => type === 'LineString' || type === 'MultiLineString');
+}
+
+export function featureCollection(features) {
+  return {type: 'FeatureCollection', features: features};
 }
 
 export function tree(feat) {

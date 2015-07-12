@@ -2,7 +2,9 @@ import React from 'react/addons';
 import {Link, Navigation} from 'react-router';
 
 import * as format from '../format';
+import {findNearbyVideos} from '../videos';
 import {wayTree, group} from '../ways';
+import {featureCollection} from '../geo';
 
 import MapComponent from './Map';
 import Dot from './Dot';
@@ -24,21 +26,7 @@ export default React.createClass({
     const nearbyGroupedWays = group(nearbyWays);
     const nearbyTrips = Array.from(new Set(tripTree.within(location, maxDistance).map(({node: {data: {feature}}}) => feature)));
 
-    const nearbyVideoCoverageByName = new Map();
-    videoTree.within(location, maxDistance).forEach(result => {
-      const name = result.node.data.feature.properties.video;
-      const current = nearbyVideoCoverageByName.get(name);
-      if (!current || result.distance < current.distance) {
-        nearbyVideoCoverageByName.set(name, result);
-      }
-    });
-
-    const nearbyVideos = Array.from(nearbyVideoCoverageByName.values()).map(({node, distance}) => {
-      const {data: {feature: {properties: {start, video}}}, coordinates: [coord]} = node;
-      const [,,, timeOffsetSecs] = coord;
-      const time = +start.clone().add(timeOffsetSecs, 's');
-      return {video, time, distance};
-    });
+    const nearbyVideos = findNearbyVideos(videoTree, location, maxDistance);
 
     return (
       <div>
@@ -68,7 +56,7 @@ export default React.createClass({
           {nearbyGroupedWays.map(way => (
             <div key={way.displayName}>
               <Link to={`/ways/${way.displayName}`}>
-                <MapComponent width={160} height={160} zoomFeature={{type: 'FeatureCollection', features: way.features}}>{() => <Ways features={way.features} selected={true}/>}</MapComponent>
+                <MapComponent width={160} height={160} zoomFeature={featureCollection(way.features)}>{() => <Ways features={way.features} selected={true}/>}</MapComponent>
                 <div><strong>{way.displayName}</strong></div>
               </Link>
             </div>

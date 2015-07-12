@@ -1,6 +1,8 @@
 import * as React from 'react';
 import {Link} from 'react-router';
 
+import {featureCollection} from '../geo';
+
 import MapComponent from './Map';
 import Ways from './Ways';
 
@@ -16,18 +18,13 @@ export default React.createClass({
       });
     });
 
-    const featColl = {
-      type: 'FeatureCollection',
-      features: way.features
-    };
-
     intersections.delete(way.displayName);
 
     return (
       <div>
         <h1>{way.displayName}</h1>
         <div className='map-box'>
-          <MapComponent width={400} height={400} zoomFeature={featColl} zoom={0.7}>
+          <MapComponent width={400} height={400} zoomFeature={featureCollection(way.features)} zoom={0.7}>
             {this.mapLayers}
           </MapComponent>
         </div>

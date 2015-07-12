@@ -83,3 +83,32 @@ const videos = videoContext.keys()
   });
 
 export default groupChapters(videos);
+
+export function calculateSeekPosition(nearest) {
+  const {data: {feature: {properties: {start}}}, coordinates: [coord]} = nearest;
+  const [,,, timeOffsetSecs] = coord;
+  return +start.clone().add(timeOffsetSecs, 's');
+}
+
+export function findSeekPosition(video, location) {
+  const {coverageTree, name} = video;
+  const nearest = coverageTree.nearest(location);
+  return calculateSeekPosition(nearest);
+}
+
+export function findNearbyVideos(videoTree, location, maxDistance) {
+  const nearbyVideoCoverageByName = new Map();
+  videoTree.within(location, maxDistance).forEach(result => {
+    const name = result.node.data.feature.properties.video;
+    const current = nearbyVideoCoverageByName.get(name);
+    if (!current || result.distance < current.distance) {
+      nearbyVideoCoverageByName.set(name, result);
+    }
+  });
+
+  return Array.from(nearbyVideoCoverageByName.values()).map(({node, distance}) => {
+    const {data: {feature: {properties: {video}}}} = node;
+    const time = calculateSeekPosition(node);
+    return {video, time, distance};
+  });
+}
