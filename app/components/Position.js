@@ -4,10 +4,6 @@ import Dot from './Dot';
 
 
 export default React.createClass({
-  contextTypes: {
-    projection: React.PropTypes.any
-  },
-
   getInitialState() {
     return {position: null};
   },
@@ -25,7 +21,6 @@ export default React.createClass({
   },
 
   render() {
-    const {projection} = this.context;
     const {position} = this.state;
 
     if (position) {

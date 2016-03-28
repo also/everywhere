@@ -14,7 +14,7 @@ export default React.createClass({
   },
 
   render() {
-    const {groupedWays, tripsLength, waysLength} = this.props;
+    const {tripsLength, waysLength} = this.props;
 
     return (
       <div>

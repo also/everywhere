@@ -47,7 +47,7 @@ export default React.createClass({
   onTimeUpdate() {
     const {video} = this.props;
     const {chapter} = this.state;
-    const time = this.state.chapter.start.clone().add(this.videoNode.currentTime, 'second');
+    const time = chapter.start.clone().add(this.videoNode.currentTime, 'second');
     const coverage = find(video.coverage, ({features: [{properties: {start, end}}]}) => time >= start && time < end);
     let coverageCoord;
     if (coverage) {

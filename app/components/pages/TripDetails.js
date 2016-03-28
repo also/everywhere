@@ -26,7 +26,6 @@ export default React.createClass({
   render() {
     const {trip} = this.props;
     const {properties: {id, start, movingTime, videos}} = trip;
-    const {nearest} = this.state;
     return (
       <div>
         <h1>{id}</h1>

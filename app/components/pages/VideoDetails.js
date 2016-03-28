@@ -31,8 +31,6 @@ const VideoAndMap = React.createClass({
   render() {
     const {video, seek} = this.props;
 
-    const {location=[0, 0]} = this.state;
-
     return (
       <span>
         <span style={{display: 'inline-block'}}><VideoPlayer video={video} seek={seek} onLocationChange={this.onLocationChange} ref='video'/></span>
