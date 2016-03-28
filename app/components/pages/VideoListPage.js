@@ -1,10 +1,10 @@
 import * as React from 'react';
 import {Navigation} from 'react-router';
 
-import VideoList from './VideoList';
-import Trips from './Trips';
-import MapComponent from './Map';
-import Dot from './Dot';
+import VideoList from '../VideoList';
+import Trips from '../Trips';
+import MapComponent from '../Map';
+import Dot from '../Dot';
 
 
 export default React.createClass({

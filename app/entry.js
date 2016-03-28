@@ -7,19 +7,19 @@ import HashHistory from 'react-router/lib/HashHistory';
 
 import {geometryLength} from './distance';
 
-import CityMap from './components/CityMap';
+import CityMap from './components/pages/CityMap';
 import MapData from './components/MapData';
 
-import WayList from './components/WayList';
-import WayDetails from './components/WayDetails';
+import WayList from './components/pages/WayList';
+import WayDetails from './components/pages/WayDetails';
 
-import VideoListPage from './components/VideoListPage';
-import VideoDetails from './components/VideoDetails';
+import VideoListPage from './components/pages/VideoListPage';
+import VideoDetails from './components/pages/VideoDetails';
 
-import TripListPage from './components/TripListPage';
-import TripDetails from './components/TripDetails';
+import TripListPage from './components/pages/TripListPage';
+import TripDetails from './components/pages/TripDetails';
 
-import LocationDetails from './components/LocationDetails';
+import LocationDetails from './components/pages/LocationDetails';
 
 import {geoLines} from './geo';
 

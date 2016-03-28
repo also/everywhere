@@ -1,15 +1,15 @@
 import React from 'react/addons';
 import {Link, Navigation} from 'react-router';
 
-import * as format from '../format';
-import {findNearbyVideos} from '../videos';
-import {wayTree, group} from '../ways';
-import {featureCollection} from '../geo';
+import * as format from '../../format';
+import {findNearbyVideos} from '../../videos';
+import {wayTree, group} from '../../ways';
+import {featureCollection} from '../../geo';
 
-import MapComponent from './Map';
-import Dot from './Dot';
-import Ways from './Ways';
-import TripList from './TripList';
+import MapComponent from '../Map';
+import Dot from '../Dot';
+import Ways from '../Ways';
+import TripList from '../TripList';
 
 export default React.createClass({
   mixins: [Navigation],

@@ -1,15 +1,15 @@
 import * as React from 'react';
 import {Navigation} from 'react-router';
 
-import * as format from '../format';
-import {findSeekPosition} from '../videos';
-import {featureCollection} from '../geo';
+import * as format from '../../format';
+import {findSeekPosition} from '../../videos';
+import {featureCollection} from '../../geo';
 
-import TripList from './TripList';
-import VideoPlayer from './VideoPlayer';
-import MapComponent from './Map';
-import Trips from './Trips';
-import Dot from './Dot';
+import TripList from '../TripList';
+import VideoPlayer from '../VideoPlayer';
+import MapComponent from '../Map';
+import Trips from '../Trips';
+import Dot from '../Dot';
 
 const VideoAndMap = React.createClass({
   mixins: [Navigation],

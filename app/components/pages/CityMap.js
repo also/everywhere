@@ -1,9 +1,9 @@
 import * as React from 'react';
 import {Navigation} from 'react-router';
 
-import Position from './Position';
-import Trips from './Trips';
-import MapComponent from './Map';
+import Position from '../Position';
+import Trips from '../Trips';
+import MapComponent from '../Map';
 
 
 export default React.createClass({

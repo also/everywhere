@@ -1,8 +1,8 @@
 import * as React from 'react/addons';
 import {Link, Navigation} from 'react-router';
 
-import MapComponent from './Map';
-import Ways from './Ways';
+import MapComponent from '../Map';
+import Ways from '../Ways';
 
 
 const WayList = React.createClass({

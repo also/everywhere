@@ -1,10 +1,10 @@
 import * as React from 'react';
 import {Link} from 'react-router';
 
-import {featureCollection} from '../geo';
+import {featureCollection} from '../../geo';
 
-import MapComponent from './Map';
-import Ways from './Ways';
+import MapComponent from '../Map';
+import Ways from '../Ways';
 
 
 export default React.createClass({

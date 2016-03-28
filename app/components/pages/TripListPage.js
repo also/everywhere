@@ -1,6 +1,6 @@
 import React from 'react';
 
-import TripList from './TripList';
+import TripList from '../TripList';
 
 
 export default React.createClass({
