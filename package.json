@@ -10,7 +10,7 @@
     "d3": "^3.5.5",
     "eslint": "^2.5.1",
     "eslint-plugin-react": "^4.2.3",
-    "gdal": "^0.4.4",
+    "gdal": "^0.9.3",
     "geojson-length": "^0.1.1",
     "glob": "^5.0.10",
     "lodash": "^3.9.3",
