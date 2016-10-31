@@ -1,4 +1,5 @@
 import * as React from 'react';
+import {findDOMNode} from 'react-dom';
 
 import sortedIndex from 'lodash/array/sortedIndex';
 import find from 'lodash/collection/find';
@@ -101,7 +102,7 @@ export default React.createClass({
 
     return (
       <div>
-        <video controls="true" width="640" height="360" style={style} src={chapter.low} poster={chapter.stills[0].large} autoPlay={autoPlay} ref={component => this.videoNode = React.findDOMNode(component)}/>
+        <video controls="true" width="640" height="360" style={style} src={chapter.low} poster={chapter.stills[0].large} autoPlay={autoPlay} ref={component => this.videoNode = findDOMNode(component)}/>
         <p>{time.format('LTS')}</p>
       </div>
     );

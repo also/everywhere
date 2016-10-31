@@ -1,4 +1,5 @@
 import * as React from 'react';
+import {findDOMNode} from 'react-dom';
 import d3 from 'd3';
 
 
@@ -12,7 +13,7 @@ const Trip = React.createClass({
     const stopAnimating = () => run = false;
     this._stopAnimating = stopAnimating;
     const duration = 7000;
-    const node = React.findDOMNode(this);
+    const node = findDOMNode(this);
     const length = node.getTotalLength();
     const ease = d3.ease('linear');
     d3.timer((elapsed) => {

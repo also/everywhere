@@ -1,4 +1,5 @@
 import * as React from 'react';
+import {findDOMNode} from 'react-dom';
 import d3 from 'd3';
 import shallowEqual from 'fbjs/lib/shallowEqual';
 import omit from 'lodash/object/omit';
@@ -125,7 +126,7 @@ export default React.createClass({
     const {path} = this.state;
 
     return (
-      <svg width={width} height={height} onMouseMove={this.onMouseMove} onClick={this.onClick} ref={component => this.svgNode = React.findDOMNode(component)}>
+      <svg width={width} height={height} onMouseMove={this.onMouseMove} onClick={this.onClick} ref={component => this.svgNode = findDOMNode(component)}>
         <BaseMap showWays={showWays}/>
         {this.props.children()}
       </svg>
