@@ -35,6 +35,7 @@
   },
   "scripts": {
     "start": "webpack-dev-server -d",
-    "lint": "eslint app"
+    "lint": "eslint app",
+    "build": "webpack"
   }
 }
