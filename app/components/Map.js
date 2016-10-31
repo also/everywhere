@@ -1,6 +1,6 @@
 import * as React from 'react';
 import d3 from 'd3';
-import shallowEqual from 'react/lib/shallowEqual';
+import shallowEqual from 'fbjs/lib/shallowEqual';
 import omit from 'lodash/object/omit';
 
 import Contours from './Contours';
