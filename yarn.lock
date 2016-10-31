@@ -2766,6 +2766,14 @@ rc@~1.1.6:
     minimist "^1.2.0"
     strip-json-comments "~1.0.4"
 
+react-addons-pure-render-mixin@0.14:
+  version "0.14.8"
+  resolved "https://registry.yarnpkg.com/react-addons-pure-render-mixin/-/react-addons-pure-render-mixin-0.14.8.tgz#4109af2d6ceb72e3897bf343d8ae7f329a6713d4"
+
+react-dom@0.14:
+  version "0.14.8"
+  resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-0.14.8.tgz#0f1c547514263f771bd31814a739e5306575069e"
+
 react-input-autosize@^0.4.3:
   version "0.4.5"
   resolved "https://registry.yarnpkg.com/react-input-autosize/-/react-input-autosize-0.4.5.tgz#dddba5aa551968e1b5421885038c5fefd44a269f"

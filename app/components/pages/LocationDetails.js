@@ -1,4 +1,4 @@
-import React from 'react/addons';
+import React from 'react';
 import {Link, Navigation} from 'react-router';
 
 import * as format from '../../format';

@@ -1,8 +1,9 @@
-import * as React from 'react/addons';
+import * as React from 'react';
+import PureRenderMixin from 'react-addons-pure-render-mixin';
 import d3 from 'd3';
 
 export default React.createClass({
-  mixins: [React.addons.PureRenderMixin],
+  mixins: [PureRenderMixin],
 
   contextTypes: {
     projection: React.PropTypes.any

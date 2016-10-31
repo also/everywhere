@@ -1,5 +1,6 @@
 import d3 from 'd3';
 import * as React from 'react';
+import * as ReactDOM from 'react-dom';
 import find from 'lodash/collection/find';
 
 import {Router, Route, Link} from 'react-router';
@@ -135,7 +136,7 @@ document.body.appendChild(div);
 const history = new HashHistory();
 
 tripsPromise.then(({trips, videoCoverage, tripTree, videoTree}) => {
-  React.render(
+  ReactDOM.render(
     <MapData {...{boundary, contours, ways}}>{() => (
       <Router history={history}>
         <Route component={App}>

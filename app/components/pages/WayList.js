@@ -1,4 +1,5 @@
-import * as React from 'react/addons';
+import * as React from 'react';
+import PureRenderMixin from 'react-addons-pure-render-mixin';
 import {Link, Navigation} from 'react-router';
 
 import MapComponent from '../Map';
@@ -6,7 +7,7 @@ import Ways from '../Ways';
 
 
 const WayList = React.createClass({
-  mixins: [React.addons.PureRenderMixin],
+  mixins: [PureRenderMixin],
 
   render() {
     const {groupedWays} = this.props;
@@ -22,7 +23,7 @@ const WayList = React.createClass({
 });
 
 export default React.createClass({
-  mixins: [React.addons.PureRenderMixin, Navigation],
+  mixins: [PureRenderMixin, Navigation],
 
   getInitialState() {
     return {hoveredStreet: null};
