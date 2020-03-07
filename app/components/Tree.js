@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import * as React from 'react';
 import PureRenderMixin from 'react-addons-pure-render-mixin';
 import d3 from 'd3';
@@ -6,11 +7,11 @@ export default React.createClass({
   mixins: [PureRenderMixin],
 
   contextTypes: {
-    projection: React.PropTypes.any,
+    projection: PropTypes.any,
   },
 
   propTypes: {
-    tree: React.PropTypes.any.isRequired,
+    tree: PropTypes.any.isRequired,
   },
 
   render() {

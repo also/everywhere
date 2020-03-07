@@ -1,10 +1,11 @@
+import PropTypes from 'prop-types';
 import * as React from 'react';
 
 export default React.createClass({
   childContextTypes: {
-    boundary: React.PropTypes.any,
-    ways: React.PropTypes.any,
-    contours: React.PropTypes.any,
+    boundary: PropTypes.any,
+    ways: PropTypes.any,
+    contours: PropTypes.any,
   },
 
   getChildContext() {

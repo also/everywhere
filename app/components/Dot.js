@@ -1,8 +1,9 @@
+import PropTypes from 'prop-types';
 import * as React from 'react';
 
 export default React.createClass({
   contextTypes: {
-    projection: React.PropTypes.any,
+    projection: PropTypes.any,
   },
 
   render() {

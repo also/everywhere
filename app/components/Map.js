@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import * as React from 'react';
 import { findDOMNode } from 'react-dom';
 import d3 from 'd3';
@@ -9,10 +10,10 @@ import Ways from './Ways';
 
 const BaseMap = React.createClass({
   contextTypes: {
-    path: React.PropTypes.any,
-    boundary: React.PropTypes.any.isRequired,
-    ways: React.PropTypes.any,
-    contours: React.PropTypes.any,
+    path: PropTypes.any,
+    boundary: PropTypes.any.isRequired,
+    ways: PropTypes.any,
+    contours: PropTypes.any,
   },
 
   // can't use PureRenderMixin because context :(
@@ -53,14 +54,14 @@ function mouse(e, node) {
 
 export default React.createClass({
   contextTypes: {
-    boundary: React.PropTypes.any.isRequired,
-    ways: React.PropTypes.any,
-    contours: React.PropTypes.any,
+    boundary: PropTypes.any.isRequired,
+    ways: PropTypes.any,
+    contours: PropTypes.any,
   },
 
   childContextTypes: {
-    projection: React.PropTypes.any.isRequired,
-    path: React.PropTypes.any.isRequired,
+    projection: PropTypes.any.isRequired,
+    path: PropTypes.any.isRequired,
   },
 
   getChildContext() {

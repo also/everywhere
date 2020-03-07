@@ -1,8 +1,9 @@
+import PropTypes from 'prop-types';
 import * as React from 'react';
 
 const Way = React.createClass({
   contextTypes: {
-    path: React.PropTypes.any,
+    path: PropTypes.any,
   },
 
   render() {

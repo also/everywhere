@@ -1,10 +1,11 @@
+import PropTypes from 'prop-types';
 import * as React from 'react';
 import { findDOMNode } from 'react-dom';
 import d3 from 'd3';
 
 const Trip = React.createClass({
   contextTypes: {
-    path: React.PropTypes.any,
+    path: PropTypes.any,
   },
 
   startAnimating() {
