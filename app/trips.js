@@ -5,10 +5,7 @@ import moment from 'moment';
 
 import videos from './videos';
 
-const tripData = new Promise(resolve => {
-  // note that the callback parameter must be named "require" or webpack won't notice
-  require.ensure(['./trip-data'], (require) => resolve(require('./trip-data')));
-});
+const tripData = import('./trip-data');
 
 function load(trip) {
   const result = feature(trip);
@@ -71,7 +68,7 @@ function calculateVideoCoverage(trips, videos) {
   return videoCoverage;
 }
 
-export default tripData.then(tripTopojson => {
+export default tripData.then(({default: tripTopojson}) => {
   const trips = tripTopojson.map(load);
 
   const videoCoverage = calculateVideoCoverage(trips, videos);

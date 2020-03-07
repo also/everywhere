@@ -7,22 +7,33 @@ module.exports = {
     chunkFilename: 'app-[name].js'
   },
   module: {
-    loaders: [
+    rules: [
       {
         test: /\.jsx?$/,
         exclude: /(node_modules|bower_components)/,
-        loader: 'babel',
+        loader: 'babel-loader',
         query: {
-          optional: ['runtime', 'es7.objectRestSpread']
+          presets: ['@babel/preset-react']
         }
       },
       {
+        test: /\.json$/,
+        type: 'javascript/auto',
+      },
+      {
         test: /\.s[ac]ss$/,
-        loader: 'sass',
+        loader: 'sass-loader',
         query: {
-          includePaths: require('node-bourbon').includePaths
+          sassOptions: {includePaths: require('bourbon').includePaths}
         }
       }
     ]
+  },
+  resolveLoader: {
+    alias: {
+      'compact-json$': 'compact-json-loader',
+      'css$': 'css-loader',
+      'style$': 'style-loader'
+    }
   }
 };

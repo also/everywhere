@@ -50,4 +50,4 @@ intersections.features.forEach(intersection => {
 
 const wayTree = tree(ways);
 
-export {ways, groupedWays, intersections, wayTree, waysById, group};
+export {ways, groupedWays, intersections, wayTree, waysById};
