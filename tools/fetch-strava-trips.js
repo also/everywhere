@@ -2,7 +2,7 @@ import requestNode from 'request';
 import Promise from 'bluebird';
 import topojson from 'topojson';
 
-import {distance} from '../app/distance';
+import { distance } from '../app/distance';
 
 import stravaAuth from '../creds/strava.json';
 
@@ -17,8 +17,8 @@ const streamNames = [
   'watts',
   'temp',
   'moving',
-  'grade_smooth'
-  ];
+  'grade_smooth',
+];
 
 const otherStreamNames = streamNames.slice(1);
 
@@ -27,9 +27,8 @@ const request = Promise.promisify(requestNode);
 function get(path) {
   return request({
     url: `https://www.strava.com/api/v3/${path}`,
-    headers: {Authorization: `Bearer ${stravaAuth.access_token}`}
-  })
-  .then(([response, body]) => {
+    headers: { Authorization: `Bearer ${stravaAuth.access_token}` },
+  }).then(([response, body]) => {
     const result = JSON.parse(body);
     if (result.errors && result.errors.length > 0) {
       return Promise.reject(result);
@@ -48,12 +47,13 @@ function getTrip(id) {
 }
 
 function getStreams(activity) {
-  return get(`activities/${activity.id}/streams/${streamNames.join(',')}`)
-  .then(streams => {
-    const streamsByType = {activity};
-    streams.forEach(({type, data}) => streamsByType[type] = data);
-    return streamsByType;
-  });
+  return get(`activities/${activity.id}/streams/${streamNames.join(',')}`).then(
+    streams => {
+      const streamsByType = { activity };
+      streams.forEach(({ type, data }) => (streamsByType[type] = data));
+      return streamsByType;
+    }
+  );
 }
 
 function streamsToGeoJson(streams) {
@@ -77,38 +77,47 @@ function streamsToGeoJson(streams) {
 
     currentPosition = [lng, lat];
 
-    currentCoordinates.push([lng, lat, ...orderedStreams.map(stream => stream[i])]);
+    currentCoordinates.push([
+      lng,
+      lat,
+      ...orderedStreams.map(stream => stream[i]),
+    ]);
   });
 
   return {
     type: 'FeatureCollection',
-    features: [{
-      type: 'Feature',
-      id: streams.activity.id,
-      properties: {activity: streams.activity},
-      geometry: {
-        type: 'MultiLineString',
-        coordinates: coordinates
-      }
-    }]
+    features: [
+      {
+        type: 'Feature',
+        id: streams.activity.id,
+        properties: { activity: streams.activity },
+        geometry: {
+          type: 'MultiLineString',
+          coordinates: coordinates,
+        },
+      },
+    ],
   };
 }
 
 function geoJsonToTopoJson(geoJson) {
-  return topojson.topology({geoJson}, {'property-transform': f => f.properties});
+  return topojson.topology(
+    { geoJson },
+    { 'property-transform': f => f.properties }
+  );
 }
 
-export default function({_: [id]}) {
+export default function({ _: [id] }) {
   //getTrips()
   // .then(trips);
-   getTrip(id)
-  .then(getStreams)
-  .then(streamsToGeoJson)
-  .then(geoJsonToTopoJson)
-  .then(result => {
-    console.log(JSON.stringify(result));
-  })
-  .catch(result => {
-    console.error('error', result.stack || JSON.stringify(result));
-  });
+  getTrip(id)
+    .then(getStreams)
+    .then(streamsToGeoJson)
+    .then(geoJsonToTopoJson)
+    .then(result => {
+      console.log(JSON.stringify(result));
+    })
+    .catch(result => {
+      console.error('error', result.stack || JSON.stringify(result));
+    });
 }

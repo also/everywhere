@@ -14,8 +14,8 @@ export default function(compare) {
       if (compare(object, parent) >= 0) {
         break;
       }
-      array[parent._ = i] = parent;
-      array[object._ = i = j] = object;
+      array[(parent._ = i)] = parent;
+      array[(object._ = i = j)] = object;
     }
   }
 
@@ -27,23 +27,25 @@ export default function(compare) {
       let child = array[j];
 
       if (l < size && compare(array[l], child) < 0) {
-        child = array[j = l];
+        child = array[(j = l)];
       }
       if (r < size && compare(array[r], child) < 0) {
-        child = array[j = r];
+        child = array[(j = r)];
       }
       if (j === i) {
         break;
       }
-      array[child._ = i] = child;
-      array[object._ = i = j] = object;
+      array[(child._ = i)] = child;
+      array[(object._ = i = j)] = object;
     }
   }
 
-  heap.size = function() { return size; };
+  heap.size = function() {
+    return size;
+  };
 
   heap.push = function(object) {
-    up(array[object._ = size] = object, size++);
+    up((array[(object._ = size)] = object), size++);
     return size;
   };
 
@@ -55,7 +57,7 @@ export default function(compare) {
     const removed = array[0];
     if (--size > 0) {
       const object = array[size];
-      down(array[object._ = 0] = object, 0);
+      down((array[(object._ = 0)] = object), 0);
     }
     return removed;
   };
@@ -69,7 +71,10 @@ export default function(compare) {
 
     if (i !== --size) {
       const object = array[size];
-      (compare(object, removed) < 0 ? up : down)(array[object._ = i] = object, i);
+      (compare(object, removed) < 0 ? up : down)(
+        (array[(object._ = i)] = object),
+        i
+      );
     }
     return i;
   };

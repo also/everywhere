@@ -17,10 +17,13 @@ function pointDistance(a, b) {
 
 function pointLineSegmentDistance(c, a, b) {
   var dx = b[0] - a[0],
-      dy = b[1] - a[1],
-      d2 = dx * dx + dy * dy,
-      t = d2 && ((c[0] - a[0]) * dx + (c[1] - a[1]) * (b[1] - a[1])) / d2;
-  return pointDistance(c, t <= 0 ? a : t >= 1 ? b : [a[0] + t * dx, a[1] + t * dy]);
+    dy = b[1] - a[1],
+    d2 = dx * dx + dy * dy,
+    t = d2 && ((c[0] - a[0]) * dx + (c[1] - a[1]) * (b[1] - a[1])) / d2;
+  return pointDistance(
+    c,
+    t <= 0 ? a : t >= 1 ? b : [a[0] + t * dx, a[1] + t * dy]
+  );
 }
 
 export function group(children) {
@@ -52,7 +55,7 @@ class Node {
     this.children = [child0, child1];
     this.extent = [
       [Math.min(e0[0][0], e1[0][0]), Math.min(e0[0][1], e1[0][1])],
-      [Math.max(e0[1][0], e1[1][0]), Math.max(e0[1][1], e1[1][1])]
+      [Math.max(e0[1][0], e1[1][0]), Math.max(e0[1][1], e1[1][1])],
     ];
   }
 
@@ -60,11 +63,15 @@ class Node {
     const [x, y] = point;
     const [[x0, y0], [x1, y1]] = this.extent;
 
-    return x < x0 ? pointLineSegmentDistance(point, [x0, y0], [x0, y1])
-         : x > x1 ? pointLineSegmentDistance(point, [x1, y0], [x1, y1])
-         : y < y0 ? pointLineSegmentDistance(point, [x0, y0], [x1, y0])
-         : y > y1 ? pointLineSegmentDistance(point, [x0, y1], [x1, y1])
-         : 0;
+    return x < x0
+      ? pointLineSegmentDistance(point, [x0, y0], [x0, y1])
+      : x > x1
+      ? pointLineSegmentDistance(point, [x1, y0], [x1, y1])
+      : y < y0
+      ? pointLineSegmentDistance(point, [x0, y0], [x1, y0])
+      : y > y1
+      ? pointLineSegmentDistance(point, [x0, y1], [x1, y1])
+      : 0;
   }
 
   nearest(point) {
@@ -72,13 +79,19 @@ class Node {
     let minDistance = Infinity;
     const heap = minHeap(compareDistance);
     let node = this;
-    let candidate = {distance: node.distance(point), node};
+    let candidate = { distance: node.distance(point), node };
 
     do {
       node = candidate.node;
       if (node.children) {
-        heap.push({distance: node.children[0].distance(point), node: node.children[0]});
-        heap.push({distance: node.children[1].distance(point), node: node.children[1]});
+        heap.push({
+          distance: node.children[0].distance(point),
+          node: node.children[0],
+        });
+        heap.push({
+          distance: node.children[1].distance(point),
+          node: node.children[1],
+        });
       } else {
         const distance = node.distance(point);
         if (distance < minDistance) {
@@ -86,7 +99,7 @@ class Node {
           minNode = node;
         }
       }
-    } while ((candidate = heap.pop()) && (candidate.distance <= minDistance));
+    } while ((candidate = heap.pop()) && candidate.distance <= minDistance);
 
     return minNode;
   }
@@ -99,7 +112,7 @@ class Node {
         if (node.children) {
           node.children.map(visit);
         } else {
-          result.push({node, distance});
+          result.push({ node, distance });
         }
       }
     };
@@ -115,31 +128,37 @@ class Leaf {
     this.coordinates = [point0, point1];
     this.extent = [
       [Math.min(point0[0], point1[0]), Math.min(point0[1], point1[1])],
-      [Math.max(point0[0], point1[0]), Math.max(point0[1], point1[1])]
+      [Math.max(point0[0], point1[0]), Math.max(point0[1], point1[1])],
     ];
     this.index = index;
     this.data = data;
   }
 
   distance(point) {
-    return pointLineSegmentDistance(point, this.coordinates[0], this.coordinates[1]);
+    return pointLineSegmentDistance(
+      point,
+      this.coordinates[0],
+      this.coordinates[1]
+    );
   }
 }
 
 export default function(topology) {
-  return group(topology.arcs.map(arc => {
-    let i = 0;
-    const n = arc.length;
-    let p0;
-    let p1 = arc[0];
-    const children = new Array(n - 1);
+  return group(
+    topology.arcs.map(arc => {
+      let i = 0;
+      const n = arc.length;
+      let p0;
+      let p1 = arc[0];
+      const children = new Array(n - 1);
 
-    while (++i < n) {
-      p0 = p1;
-      p1 = arc[i];
-      children[i - 1] = new Leaf(p0, p1, i, arc);
-    }
+      while (++i < n) {
+        p0 = p1;
+        p1 = arc[i];
+        children[i - 1] = new Leaf(p0, p1, i, arc);
+      }
 
-    return group(children);
-  }));
+      return group(children);
+    })
+  );
 }

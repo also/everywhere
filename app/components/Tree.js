@@ -6,29 +6,29 @@ export default React.createClass({
   mixins: [PureRenderMixin],
 
   contextTypes: {
-    projection: React.PropTypes.any
+    projection: React.PropTypes.any,
   },
 
   propTypes: {
-    tree: React.PropTypes.any.isRequired
+    tree: React.PropTypes.any.isRequired,
   },
 
   render() {
-    const {tree} = this.props;
-    const {projection} = this.context;
+    const { tree } = this.props;
+    const { projection } = this.context;
 
     const rects = [];
 
     const visit = node => {
-      const {extent} = node;
+      const { extent } = node;
       const coords = [
         [extent[0][0], extent[0][1]],
         [extent[1][0], extent[0][1]],
         [extent[1][0], extent[1][1]],
         [extent[0][0], extent[1][1]],
-        [extent[0][0], extent[0][1]]
+        [extent[0][0], extent[0][1]],
       ].map(projection);
-      rects.push(<path className="extent" d={d3.svg.line()(coords)}/>);
+      rects.push(<path className="extent" d={d3.svg.line()(coords)} />);
 
       if (node.children) {
         node.children.forEach(visit);
@@ -37,10 +37,6 @@ export default React.createClass({
 
     visit(tree);
 
-    return (
-      <g>
-        {rects}
-      </g>
-    );
-  }
+    return <g>{rects}</g>;
+  },
 });

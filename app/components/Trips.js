@@ -1,22 +1,21 @@
 import * as React from 'react';
-import {findDOMNode} from 'react-dom';
+import { findDOMNode } from 'react-dom';
 import d3 from 'd3';
-
 
 const Trip = React.createClass({
   contextTypes: {
-    path: React.PropTypes.any
+    path: React.PropTypes.any,
   },
 
   startAnimating() {
     let run = true;
-    const stopAnimating = () => run = false;
+    const stopAnimating = () => (run = false);
     this._stopAnimating = stopAnimating;
     const duration = 7000;
     const node = findDOMNode(this);
     const length = node.getTotalLength();
     const ease = d3.ease('linear');
-    d3.timer((elapsed) => {
+    d3.timer(elapsed => {
       const t = elapsed / duration;
 
       const e = ease(t);
@@ -38,9 +37,9 @@ const Trip = React.createClass({
   },
 
   render() {
-    const {path} = this.context;
-    const {trip} = this.props;
-    return <path className="trip" d={path(trip)}/>;
+    const { path } = this.context;
+    const { trip } = this.props;
+    return <path className="trip" d={path(trip)} />;
   },
 
   componentDidMount() {
@@ -51,16 +50,18 @@ const Trip = React.createClass({
 
   componentWillUnmount() {
     this.stopAnimating();
-  }
+  },
 });
 
 export default React.createClass({
   render() {
-    const {trips} = this.props;
+    const { trips } = this.props;
     return (
       <g>
-        {trips.map(trip => <Trip trip={trip}/>)}
+        {trips.map(trip => (
+          <Trip trip={trip} />
+        ))}
       </g>
     );
-  }
+  },
 });

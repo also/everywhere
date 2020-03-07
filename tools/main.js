@@ -1,6 +1,5 @@
 import minimist from 'minimist';
 
-
 export default function() {
   const argv = minimist(process.argv.slice(2));
 

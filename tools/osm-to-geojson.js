@@ -3,7 +3,6 @@ import fs from 'fs';
 import osmtogeojson from 'osmtogeojson';
 import osmxmlParser from 'osmtogeojson/parse_osmxml';
 
-
 function writeHead() {
   process.stdout.write('{\n  "type": "FeatureCollection",\n  "features": [');
 }
@@ -25,37 +24,43 @@ function writeFeatures(features) {
     writeFeature(f);
     if (i !== features.length - 1) {
       writeFeatureSeparator();
-      }
+    }
   });
 }
 
 function isBikeable(way) {
-  const {highway, type} = way.tags;
-  return type !== 'multipolygon' &&
-         highway &&
-         highway !== 'steps' &&
-         highway !== 'service' &&
-         highway !== 'proposed' &&
-         highway !== 'motorway' &&
-         highway !== 'motorway_link' &&
-         highway !== 'footway' &&
-         highway !== 'pedestrian';
+  const { highway, type } = way.tags;
+  return (
+    type !== 'multipolygon' &&
+    highway &&
+    highway !== 'steps' &&
+    highway !== 'service' &&
+    highway !== 'proposed' &&
+    highway !== 'motorway' &&
+    highway !== 'motorway_link' &&
+    highway !== 'footway' &&
+    highway !== 'pedestrian'
+  );
 }
 
 function loadCachedJson() {
-  return Promise.resolve(JSON.parse(fs.readFileSync('data/scratch/map-osmjson', {encoding: 'utf8'})));
+  return Promise.resolve(
+    JSON.parse(
+      fs.readFileSync('data/scratch/map-osmjson', { encoding: 'utf8' })
+    )
+  );
 }
 
 function parseXml(file) {
   const input = fs.createReadStream(file);
 
   return new Promise((resolve, reject) => {
-  input
-    .on('data', chunk => osmxmlParser.write(chunk))
-    .on('end', () => {
+    input
+      .on('data', chunk => osmxmlParser.write(chunk))
+      .on('end', () => {
         osmxmlParser.end();
         resolve(osmxmlParser.getJSON());
-    });
+      });
     input.resume();
   });
 }
@@ -68,10 +73,10 @@ function toGeoJson(data) {
     if (!node) {
       node = {
         type: 'Feature',
-        geometry: {type: 'Point'},
+        geometry: { type: 'Point' },
         refs: [],
         refCount: 0,
-        properties: {}
+        properties: {},
       };
       nodes[id] = node;
     }
@@ -86,20 +91,20 @@ function toGeoJson(data) {
     } else if (elt.type === 'way' && isBikeable(elt)) {
       elt.tags.bikeable = true;
 
-      const intersections = elt.intersections = [];
+      const intersections = (elt.intersections = []);
       const last = elt.nodes.length - 1;
       elt.nodes.forEach((id, i) => {
         const node = getNode(id);
         node.refs.push(`way/${elt.id}`);
-        node.refCount += (i === 0 || i === last) ? 2 : 1;
+        node.refCount += i === 0 || i === last ? 2 : 1;
         intersections.push(id);
       });
     }
   });
 
   console.error('converting to geojson');
-  const geoJson = osmtogeojson(data, {flatProperties: true});
-  const {features} = geoJson;
+  const geoJson = osmtogeojson(data, { flatProperties: true });
+  const { features } = geoJson;
 
   writeHead();
   writeFeatures(features);
@@ -118,6 +123,6 @@ function toGeoJson(data) {
   writeFoot();
 }
 
-export default function ({_: [file]}) {
+export default function({ _: [file] }) {
   parseXml(file).then(toGeoJson);
 }

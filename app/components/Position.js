@@ -2,15 +2,16 @@ import * as React from 'react';
 
 import Dot from './Dot';
 
-
 export default React.createClass({
   getInitialState() {
-    return {position: null};
+    return { position: null };
   },
 
   componentWillMount() {
     if ('geolocation' in navigator) {
-      this.watchId = navigator.geolocation.watchPosition(position => this.setState({position}));
+      this.watchId = navigator.geolocation.watchPosition(position =>
+        this.setState({ position })
+      );
     }
   },
 
@@ -21,13 +22,17 @@ export default React.createClass({
   },
 
   render() {
-    const {position} = this.state;
+    const { position } = this.state;
 
     if (position) {
-      const {coords: {latitude, longitude}} = position;
-      return <Dot position={[longitude, latitude]} r={4} className='position'/>;
+      const {
+        coords: { latitude, longitude },
+      } = position;
+      return (
+        <Dot position={[longitude, latitude]} r={4} className="position" />
+      );
     } else {
       return null;
     }
-  }
+  },
 });
