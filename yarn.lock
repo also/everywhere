@@ -1112,11 +1112,6 @@ class-utils@^0.3.5:
     isobject "^3.0.0"
     static-extend "^0.1.1"
 
-classnames@^2.1.1:
-  version "2.2.6"
-  resolved "https://registry.yarnpkg.com/classnames/-/classnames-2.2.6.tgz#43935bffdd291f326dad0a205309b38d00f650ce"
-  integrity sha512-JR/iSQOSt+LQIWwrwEzJ9uk0xfN3mTVYMwt1Ir5mUcSN6pU+V4zQFFaJsclJbPuAUQH+yfWef6tm7l1quW3C8Q==
-
 clean-css@^3.1.9:
   version "3.4.28"
   resolved "https://registry.yarnpkg.com/clean-css/-/clean-css-3.4.28.tgz#bf1945e82fc808f55695e6ddeaec01400efd03ff"
@@ -4764,11 +4759,6 @@ react-dom@0.14:
   resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-0.14.9.tgz#05064a3dcf0fb1880a3b2bfc9d58c55d8d9f6293"
   integrity sha1-BQZKPc8PsYgKOyv8nVjFXY2fYpM=
 
-react-input-autosize@^0.4.3:
-  version "0.4.5"
-  resolved "https://registry.yarnpkg.com/react-input-autosize/-/react-input-autosize-0.4.5.tgz#dddba5aa551968e1b5421885038c5fefd44a269f"
-  integrity sha1-3dulqlUZaOG1QhiFA4xf79RKJp8=
-
 react-router@1.0.0-beta3:
   version "1.0.0-beta3"
   resolved "https://registry.yarnpkg.com/react-router/-/react-router-1.0.0-beta3.tgz#f1d9dfb13125b077339b75cbbc367691f6613a3e"
@@ -4778,14 +4768,6 @@ react-router@1.0.0-beta3:
     keymirror "^0.1.1"
     qs "2.4.1"
     warning "^1.0.1"
-
-react-select@^0.4.9:
-  version "0.4.9"
-  resolved "https://registry.yarnpkg.com/react-select/-/react-select-0.4.9.tgz#f2ce3902ccfc70f4814f02e2736a1277fba35158"
-  integrity sha1-8s45Asz8cPSBTwLic2oSd/ujUVg=
-  dependencies:
-    classnames "^2.1.1"
-    react-input-autosize "^0.4.3"
 
 react@0.14:
   version "0.14.9"

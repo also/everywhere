@@ -25,7 +25,6 @@ import LocationDetails from './components/pages/LocationDetails';
 import { geoLines } from './geo';
 
 import 'style!css!./style.scss';
-import '!style!css!react-select/dist/default.css';
 
 import {
   ways,
