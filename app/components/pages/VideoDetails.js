@@ -17,7 +17,7 @@ const VideoAndMap = withRouter(
     onClick({ geo }) {
       const { video } = this.props;
       const seekPosition = findSeekPosition(video, geo);
-      this.props.history.push(`/videos/${name}/${seekPosition}`);
+      this.props.history.push(`/videos/${video.name}/${seekPosition}`);
     },
 
     getInitialState() {
