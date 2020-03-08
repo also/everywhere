@@ -59,23 +59,14 @@ export default createReactClass({
       .add(this.videoNode.currentTime, 'second');
     const coverage = find(
       video.coverage,
-      ({
-        features: [
-          {
-            properties: { start, end },
-          },
-        ],
-      }) => time >= start && time < end
+      ({ properties: { start, end } }) => time >= start && time < end
     );
     let coverageCoord;
     if (coverage) {
       const {
-        features: [feat],
-      } = coverage;
-      const {
         geometry: { coordinates },
         properties: { start },
-      } = feat;
+      } = coverage;
       const startSecs = start.unix();
       // TODO don't concat every time
       const coords = [].concat(...coordinates);
