@@ -6,9 +6,6 @@ import * as ReactDOM from 'react-dom';
 import styled from 'styled-components';
 import find from 'lodash/collection/find';
 
-// import { Router, Route, Link } from 'react-router';
-// import HashHistory from 'react-router/lib/HashHistory';
-
 import { HashRouter as Router, Switch, Route, Link } from 'react-router-dom';
 
 import { geometryLength } from './distance';

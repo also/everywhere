@@ -23,9 +23,6 @@ module.exports = {
       {
         test: /\.s[ac]ss$/,
         loader: 'sass-loader',
-        query: {
-          sassOptions: { includePaths: require('bourbon').includePaths },
-        },
       },
     ],
   },
