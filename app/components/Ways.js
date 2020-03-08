@@ -1,7 +1,8 @@
 import PropTypes from 'prop-types';
 import * as React from 'react';
+import createReactClass from 'create-react-class';
 
-const Way = React.createClass({
+const Way = createReactClass({
   contextTypes: {
     path: PropTypes.any,
   },
@@ -22,7 +23,7 @@ const Way = React.createClass({
   },
 });
 
-export default React.createClass({
+export default createReactClass({
   render() {
     const { features, selected } = this.props;
     return (

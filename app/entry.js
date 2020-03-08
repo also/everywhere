@@ -1,11 +1,14 @@
 import d3 from 'd3';
 import PropTypes from 'prop-types';
+import createReactClass from 'create-react-class';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import find from 'lodash/collection/find';
 
-import { Router, Route, Link } from 'react-router';
-import HashHistory from 'react-router/lib/HashHistory';
+// import { Router, Route, Link } from 'react-router';
+// import HashHistory from 'react-router/lib/HashHistory';
+
+import { HashRouter as Router, Switch, Route, Link } from 'react-router-dom';
 
 import { geometryLength } from './distance';
 
@@ -41,7 +44,7 @@ document.title = 'not quite everywhere';
 
 const waysLength = d3.sum(geoLines(ways), geometryLength);
 
-const App = React.createClass({
+const App = createReactClass({
   childContextTypes: {
     boundary: PropTypes.any,
     ways: PropTypes.any,
@@ -74,10 +77,10 @@ const App = React.createClass({
   },
 });
 
-const CityMapRoute = React.createClass({
+const CityMapRoute = createReactClass({
   render() {
     // TODO what's the right way to pass this in?
-    const { trips } = this.props.route;
+    const { trips } = this.props;
     const tripsLength = d3.sum(
       trips.map(geoLines).reduce((a, b) => a.concat(b)),
       geometryLength
@@ -93,69 +96,40 @@ const CityMapRoute = React.createClass({
   },
 });
 
-const WayListRoute = React.createClass({
+const WayListRoute = createReactClass({
   render() {
     return <WayList groupedWays={groupedWays} ways={ways} wayTree={wayTree} />;
   },
 });
 
-const WayDetailsRoute = React.createClass({
+const WayDetailsRoute = createReactClass({
   render() {
-    const { params } = this.props;
+    const { params } = this.props.match;
     const way = find(
       groupedWays,
-      ({ displayName }) => displayName === params.splat
+      ({ displayName }) => displayName === params[0]
     );
     return way ? <WayDetails way={way} /> : null;
   },
 });
 
-const VideoListRoute = React.createClass({
+const VideoDetailsRoute = createReactClass({
   render() {
-    const { videoCoverage, videoTree } = this.props.route;
-    return (
-      <VideoListPage
-        videos={Array.from(videos.values())}
-        videoCoverage={videoCoverage}
-        videoTree={videoTree}
-      />
-    );
-  },
-});
-
-const VideoDetailsRoute = React.createClass({
-  render() {
-    const { params } = this.props;
+    console.log(this.props);
+    const { params } = this.props.match;
     return <VideoDetails video={videos.get(params.name)} seek={params.seek} />;
   },
 });
 
-const TripListRoute = React.createClass({
-  render() {
-    // TODO what's the right way to pass this in?
-    const { trips } = this.props.route;
-    return <TripListPage trips={trips} />;
-  },
-});
-
-const TripDetailsRoute = React.createClass({
-  render() {
-    // TODO what's the right way to pass this in?
-    const { trips } = this.props.route;
-    return (
-      <TripDetails
-        trip={trips.filter(({ id }) => `${id}` === this.props.params.id)[0]}
-      />
-    );
-  },
-});
-
-const LocationDetailsRoute = React.createClass({
+const LocationDetailsRoute = createReactClass({
   render() {
     const {
-      params: { coords },
+      tripTree,
+      videoTree,
+      match: {
+        params: { coords },
+      },
     } = this.props;
-    const { tripTree, videoTree } = this.props.route;
     return (
       <LocationDetails
         location={coords.split(',').map(parseFloat)}
@@ -169,38 +143,57 @@ const LocationDetailsRoute = React.createClass({
 const div = document.createElement('div');
 document.body.appendChild(div);
 
-const history = new HashHistory();
-
 tripsPromise.then(({ trips, videoCoverage, tripTree, videoTree }) => {
   ReactDOM.render(
     <MapData {...{ boundary, contours, ways }}>
       {() => (
-        <Router history={history}>
-          <Route component={App}>
-            <Route path="/" component={CityMapRoute} trips={trips} />
-            <Route path="/ways" component={WayListRoute} />
-            <Route path="/ways/*" component={WayDetailsRoute} />
-            <Route
-              path="/videos"
-              component={VideoListRoute}
-              videoCoverage={videoCoverage}
-              videoTree={videoTree}
-            />
-            <Route path="/videos/:name" component={VideoDetailsRoute} />
-            <Route path="/videos/:name/:seek" component={VideoDetailsRoute} />
-            <Route path="/trips" component={TripListRoute} trips={trips} />
-            <Route
-              path="/trips/:id"
-              component={TripDetailsRoute}
-              trips={trips}
-            />
-            <Route
-              path="/locations/:coords"
-              component={LocationDetailsRoute}
-              tripTree={tripTree}
-              videoTree={videoTree}
-            />
-          </Route>
+        <Router>
+          <App>
+            <Switch>
+              <Route path="/ways/*" component={WayDetailsRoute} />
+              <Route path="/ways" component={WayListRoute} />
+              <Route path="/videos/:name/:seek" component={VideoDetailsRoute} />
+              <Route path="/videos/:name" component={VideoDetailsRoute} />
+              <Route
+                path="/videos"
+                render={() => (
+                  <VideoListPage
+                    videos={Array.from(videos.values())}
+                    videoCoverage={videoCoverage}
+                    videoTree={videoTree}
+                  />
+                )}
+              />
+              <Route
+                path="/trips/:id"
+                render={({ match }) => (
+                  <TripDetails
+                    trip={
+                      trips.filter(({ id }) => `${id}` === match.params.id)[0]
+                    }
+                  />
+                )}
+                trips={trips}
+              />
+              <Route
+                path="/trips"
+                render={() => <TripListPage trips={trips} />}
+              />
+              <Route
+                path="/locations/:coords"
+                render={({ match }) => (
+                  <LocationDetailsRoute
+                    tripTree={tripTree}
+                    videoTree={videoTree}
+                    match={match}
+                  />
+                )}
+              />
+              <Route path="/">
+                <CityMapRoute trips={trips} />
+              </Route>
+            </Switch>
+          </App>
         </Router>
       )}
     </MapData>,

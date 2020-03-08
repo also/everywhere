@@ -1,9 +1,10 @@
 import * as React from 'react';
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
+import createReactClass from 'create-react-class';
 
 import * as format from '../format';
 
-export default React.createClass({
+export default createReactClass({
   render() {
     const { videos } = this.props;
 

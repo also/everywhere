@@ -1,7 +1,8 @@
 import PropTypes from 'prop-types';
 import * as React from 'react';
+import createReactClass from 'create-react-class';
 
-export default React.createClass({
+export default createReactClass({
   childContextTypes: {
     boundary: PropTypes.any,
     ways: PropTypes.any,

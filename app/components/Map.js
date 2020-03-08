@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import * as React from 'react';
 import { findDOMNode } from 'react-dom';
+import createReactClass from 'create-react-class';
 import d3 from 'd3';
 import shallowEqual from 'fbjs/lib/shallowEqual';
 import omit from 'lodash/object/omit';
@@ -8,7 +9,7 @@ import omit from 'lodash/object/omit';
 import Contours from './Contours';
 import Ways from './Ways';
 
-const BaseMap = React.createClass({
+const BaseMap = createReactClass({
   contextTypes: {
     path: PropTypes.any,
     boundary: PropTypes.any.isRequired,
@@ -52,7 +53,7 @@ function mouse(e, node) {
   }
 }
 
-export default React.createClass({
+export default createReactClass({
   contextTypes: {
     boundary: PropTypes.any.isRequired,
     ways: PropTypes.any,

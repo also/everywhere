@@ -1,8 +1,9 @@
 import * as React from 'react';
+import createReactClass from 'create-react-class';
 
 import Dot from './Dot';
 
-export default React.createClass({
+export default createReactClass({
   getInitialState() {
     return { position: null };
   },

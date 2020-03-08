@@ -1,35 +1,37 @@
 import * as React from 'react';
-import { Navigation } from 'react-router';
+import createReactClass from 'create-react-class';
+import { withRouter } from 'react-router';
 
 import Position from '../Position';
 import Trips from '../Trips';
 import MapComponent from '../Map';
 
-export default React.createClass({
-  mixins: [Navigation],
+export default withRouter(
+  createReactClass({
+    onClick({ geo }) {
+      this.props.history.push(`/locations/${geo.join(',')}`);
+    },
 
-  onClick({ geo }) {
-    this.transitionTo(`/locations/${geo.join(',')}`);
-  },
+    render() {
+      const { tripsLength, waysLength } = this.props;
 
-  render() {
-    const { tripsLength, waysLength } = this.props;
+      return (
+        <div>
+          <p>
+            {Math.round(tripsLength / 1000)} / {Math.round(waysLength / 1000)}{' '}
+            km
+          </p>
 
-    return (
-      <div>
-        <p>
-          {Math.round(tripsLength / 1000)} / {Math.round(waysLength / 1000)} km
-        </p>
+          <MapComponent width="1000" height="1000" onClick={this.onClick}>
+            {this.layers}
+          </MapComponent>
+        </div>
+      );
+    },
 
-        <MapComponent width="1000" height="1000" onClick={this.onClick}>
-          {this.layers}
-        </MapComponent>
-      </div>
-    );
-  },
-
-  layers() {
-    const { trips } = this.props;
-    return [<Trips trips={trips} />, <Position />];
-  },
-});
+    layers() {
+      const { trips } = this.props;
+      return [<Trips trips={trips} />, <Position />];
+    },
+  })
+);

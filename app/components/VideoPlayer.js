@@ -1,10 +1,11 @@
 import * as React from 'react';
 import { findDOMNode } from 'react-dom';
+import createReactClass from 'create-react-class';
 
 import sortedIndex from 'lodash/array/sortedIndex';
 import find from 'lodash/collection/find';
 
-export default React.createClass({
+export default createReactClass({
   getInitialState() {
     const { video } = this.props;
     return { chapterIndex: -1, coverageCoord: null, time: video.start };

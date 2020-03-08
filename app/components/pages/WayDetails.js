@@ -1,12 +1,13 @@
 import * as React from 'react';
-import { Link } from 'react-router';
+import createReactClass from 'create-react-class';
+import { Link } from 'react-router-dom';
 
 import { featureCollection } from '../../geo';
 
 import MapComponent from '../Map';
 import Ways from '../Ways';
 
-export default React.createClass({
+export default createReactClass({
   render() {
     const { way } = this.props;
     const intersections = new Set();

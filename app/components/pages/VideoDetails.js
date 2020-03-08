@@ -1,5 +1,6 @@
 import * as React from 'react';
-import { Navigation } from 'react-router';
+import createReactClass from 'create-react-class';
+import { withRouter } from 'react-router';
 
 import * as format from '../../format';
 import { findSeekPosition } from '../../videos';
@@ -11,68 +12,68 @@ import MapComponent from '../Map';
 import Trips from '../Trips';
 import Dot from '../Dot';
 
-const VideoAndMap = React.createClass({
-  mixins: [Navigation],
+const VideoAndMap = withRouter(
+  createReactClass({
+    onClick({ geo }) {
+      const { video } = this.props;
+      const seekPosition = findSeekPosition(video, geo);
+      this.props.history.push(`/videos/${name}/${seekPosition}`);
+    },
 
-  onClick({ geo }) {
-    const { video } = this.props;
-    const seekPosition = findSeekPosition(video, geo);
-    this.transitionTo(`/videos/${name}/${seekPosition}`);
-  },
+    getInitialState() {
+      return { location: null };
+    },
 
-  getInitialState() {
-    return { location: null };
-  },
+    onLocationChange(location) {
+      this.setState({ location });
+    },
 
-  onLocationChange(location) {
-    this.setState({ location });
-  },
+    render() {
+      const { video, seek } = this.props;
 
-  render() {
-    const { video, seek } = this.props;
-
-    return (
-      <span>
-        <span style={{ display: 'inline-block' }}>
-          <VideoPlayer
-            video={video}
-            seek={seek}
-            onLocationChange={this.onLocationChange}
-            ref="video"
-          />
-        </span>
-        <span
-          style={{
-            display: 'inline-block',
-            verticalAlign: 'top',
-            marginLeft: '1em',
-          }}
-          className="map-box"
-        >
-          <MapComponent
-            width={360}
-            height={360}
-            zoomFeature={featureCollection(video.coverage)}
-            onClick={this.onClick}
+      return (
+        <span>
+          <span style={{ display: 'inline-block' }}>
+            <VideoPlayer
+              video={video}
+              seek={seek}
+              onLocationChange={this.onLocationChange}
+              ref="video"
+            />
+          </span>
+          <span
+            style={{
+              display: 'inline-block',
+              verticalAlign: 'top',
+              marginLeft: '1em',
+            }}
+            className="map-box"
           >
-            {this.mapLayers}
-          </MapComponent>
+            <MapComponent
+              width={360}
+              height={360}
+              zoomFeature={featureCollection(video.coverage)}
+              onClick={this.onClick}
+            >
+              {this.mapLayers}
+            </MapComponent>
+          </span>
         </span>
-      </span>
-    );
-  },
+      );
+    },
 
-  mapLayers() {
-    const { video } = this.props;
-    const { location = [0, 0] } = this.state;
-    return [
-      <Trips trips={video.coverage} />,
-      <Dot r={4} className="position" position={location} />,
-    ];
-  },
-});
+    mapLayers() {
+      const { video } = this.props;
+      const { location = [0, 0] } = this.state;
+      return [
+        <Trips trips={video.coverage} />,
+        <Dot r={4} className="position" position={location} />,
+      ];
+    },
+  })
+);
 
-export default React.createClass({
+export default createReactClass({
   render() {
     const { video, seek } = this.props;
 

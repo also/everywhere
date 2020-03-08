@@ -1,9 +1,10 @@
 import PropTypes from 'prop-types';
 import * as React from 'react';
 import { findDOMNode } from 'react-dom';
+import createReactClass from 'create-react-class';
 import d3 from 'd3';
 
-const Trip = React.createClass({
+const Trip = createReactClass({
   contextTypes: {
     path: PropTypes.any,
   },
@@ -54,7 +55,7 @@ const Trip = React.createClass({
   },
 });
 
-export default React.createClass({
+export default createReactClass({
   render() {
     const { trips } = this.props;
     return (

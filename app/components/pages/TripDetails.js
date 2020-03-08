@@ -1,4 +1,5 @@
 import * as React from 'react';
+import createReactClass from 'create-react-class';
 
 import * as format from '../../format';
 import { waysById } from '../../ways';
@@ -8,7 +9,7 @@ import Trips from '../Trips';
 import MapComponent from '../Map';
 import Dot from '../Dot';
 
-export default React.createClass({
+export default createReactClass({
   getInitialState() {
     return { nearest: null };
   },
