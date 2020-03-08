@@ -115,7 +115,6 @@ const WayDetailsRoute = createReactClass({
 
 const VideoDetailsRoute = createReactClass({
   render() {
-    console.log(this.props);
     const { params } = this.props.match;
     return <VideoDetails video={videos.get(params.name)} seek={params.seek} />;
   },
