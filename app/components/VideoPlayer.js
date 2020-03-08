@@ -136,7 +136,7 @@ export default createReactClass({
     return (
       <div>
         <video
-          controls="true"
+          controls={true}
           width="640"
           height="360"
           style={style}
