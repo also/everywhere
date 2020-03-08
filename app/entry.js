@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import createReactClass from 'create-react-class';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
+import styled from 'styled-components';
 import find from 'lodash/collection/find';
 
 // import { Router, Route, Link } from 'react-router';
@@ -40,6 +41,26 @@ import {
   wayTree,
 } from './data';
 
+const Header = styled.header`
+  background-color: #eee;
+  border-bottom: 1px solid #ccc;
+
+  padding: 1em 2em;
+
+  font-size: 1.2em;
+`;
+
+const HeaderLink = styled(Link)`
+  color: #444;
+  text-decoration: none;
+  font-weight: bold;
+  margin-right: 2em;
+`;
+
+const Content = styled.div`
+  padding: 3em;
+`;
+
 document.title = 'not quite everywhere';
 
 const waysLength = d3.sum(geoLines(ways), geometryLength);
@@ -58,16 +79,17 @@ const App = createReactClass({
   render() {
     return (
       <div>
-        <header>
+        <Header>
           <div>
-            <Link to="/" style={{ color: '#E05338' }}>
+            <HeaderLink to="/" style={{ color: '#E05338' }}>
               Everywhere
-            </Link>{' '}
-            <Link to="/trips">Trips</Link> <Link to="/videos">Videos</Link>{' '}
-            <Link to="/ways">Streets</Link>
+            </HeaderLink>{' '}
+            <HeaderLink to="/trips">Trips</HeaderLink>{' '}
+            <HeaderLink to="/videos">Videos</HeaderLink>{' '}
+            <HeaderLink to="/ways">Streets</HeaderLink>
           </div>
-        </header>
-        <div id="content">{this.props.children}</div>
+        </Header>
+        <Content>{this.props.children}</Content>
 
         <footer>
           <p>Map data © OpenStreetMap contributors</p>
