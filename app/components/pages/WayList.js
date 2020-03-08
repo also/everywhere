@@ -3,6 +3,7 @@ import createReactClass from 'create-react-class';
 import PureRenderMixin from 'react-addons-pure-render-mixin';
 import { Link } from 'react-router-dom';
 import { withRouter } from 'react-router';
+import styled from 'styled-components';
 
 import MapComponent from '../Map';
 import Ways from '../Ways';
@@ -24,6 +25,23 @@ const WayList = createReactClass({
     );
   },
 });
+
+const WayMap = styled.div`
+  position: relative;
+  display: inline-block;
+`;
+
+const WayHoverInfo = styled.div`
+  position: absolute;
+  // just kinda inside somerville
+  top: 350px;
+  left: 400px;
+
+  padding: 0.4em;
+  background: #eee;
+  box-shadow: 3px 3px 0 0 #dfdfdf;
+  font-weight: bold;
+`;
 
 export default withRouter(
   createReactClass({
@@ -53,12 +71,12 @@ export default withRouter(
       return (
         <div>
           <h1>Streets</h1>
-          <div className="way-map">
-            <div className="way-hover-info">
+          <WayMap>
+            <WayHoverInfo>
               {hoveredStreet
                 ? hoveredStreet.properties.displayName
                 : '(hover over a street)'}
-            </div>
+            </WayHoverInfo>
             <MapComponent
               width="1000"
               height="1000"
@@ -67,7 +85,7 @@ export default withRouter(
             >
               {this.mapLayers}
             </MapComponent>
-          </div>
+          </WayMap>
           <WayList groupedWays={groupedWays} />
         </div>
       );

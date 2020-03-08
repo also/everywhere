@@ -58,6 +58,13 @@ const Content = styled.div`
   padding: 3em;
 `;
 
+const Footer = styled.footer`
+  margin: 1em;
+  text-align: center;
+  font-size: 0.8em;
+  color: #cecece;
+`;
+
 document.title = 'not quite everywhere';
 
 const waysLength = d3.sum(geoLines(ways), geometryLength);
@@ -88,9 +95,9 @@ const App = createReactClass({
         </Header>
         <Content>{this.props.children}</Content>
 
-        <footer>
+        <Footer>
           <p>Map data © OpenStreetMap contributors</p>
-        </footer>
+        </Footer>
       </div>
     );
   },
