@@ -2,6 +2,8 @@ import * as React from 'react';
 import { Link } from 'react-router-dom';
 import createReactClass from 'create-react-class';
 
+import Thumbnails from './Thumbnails';
+import Thumbnail from './Thumbnail';
 import MapComponent from './Map';
 import Trips from './Trips';
 
@@ -10,13 +12,13 @@ export default createReactClass({
     const { trips } = this.props;
 
     return (
-      <div className="thumbnails">
+      <Thumbnails>
         {trips.map(trip => {
           const {
             properties: { id, start, videos },
           } = trip;
           return (
-            <div key={id}>
+            <Thumbnail key={id}>
               <Link to={`/trips/${id}`}>
                 <MapComponent width={160} height={160} showWays={false}>
                   {() => <Trips trips={[trip]} />}
@@ -35,10 +37,10 @@ export default createReactClass({
                   ) : null}
                 </div>
               </Link>
-            </div>
+            </Thumbnail>
           );
         })}
-      </div>
+      </Thumbnails>
     );
   },
 });

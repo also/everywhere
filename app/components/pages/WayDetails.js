@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 
 import { featureCollection } from '../../geo';
 
+import PageTitle from '../PageTitle';
 import MapComponent from '../Map';
 import Ways from '../Ways';
 
@@ -24,7 +25,7 @@ export default createReactClass({
 
     return (
       <div>
-        <h1>{way.displayName}</h1>
+        <PageTitle>{way.displayName}</PageTitle>
         <div className="map-box">
           <MapComponent
             width={400}

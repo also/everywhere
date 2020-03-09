@@ -4,6 +4,7 @@ import createReactClass from 'create-react-class';
 import * as format from '../../format';
 import { waysById } from '../../ways';
 
+import PageTitle from '../PageTitle';
 import VideoList from '../VideoList';
 import Trips from '../Trips';
 import MapComponent from '../Map';
@@ -33,7 +34,7 @@ export default createReactClass({
     } = trip;
     return (
       <div>
-        <h1>{id}</h1>
+        <PageTitle>{id}</PageTitle>
         <p>
           Started <strong>{start.format('LLL')}</strong>,{' '}
           {format.duration(movingTime)} moving

@@ -9,6 +9,9 @@ import { findNearbyVideos } from '../../videos';
 import { wayTree, group } from '../../ways';
 import { featureCollection } from '../../geo';
 
+import PageTitle from '../PageTitle';
+import Thumbnails from '../Thumbnails';
+import Thumbnail from '../Thumbnail';
 import MapComponent from '../Map';
 import Dot from '../Dot';
 import Ways from '../Ways';
@@ -47,7 +50,7 @@ export default function LocationDetails({ location, tripTree, videoTree }) {
 
   return (
     <div>
-      <h1>{location.join(', ')}</h1>
+      <PageTitle>{location.join(', ')}</PageTitle>
       <MapComponent width={1000} height={1000} onClick={onClick}>
         {() => [
           <Ways features={nearbyWays} selected={true} />,
@@ -55,10 +58,10 @@ export default function LocationDetails({ location, tripTree, videoTree }) {
         ]}
       </MapComponent>
       <h2>Videos</h2>
-      <div className="thumbnails">
+      <Thumbnails>
         {nearbyVideos.map(
           ({ video: { name, duration, start, thumbnail }, time }) => (
-            <div key={name}>
+            <Thumbnail key={name}>
               <Link to={`/videos/${name}/${time}`}>
                 <div>
                   <img src={thumbnail.small} width="160" height="90" />
@@ -71,16 +74,16 @@ export default function LocationDetails({ location, tripTree, videoTree }) {
                   <span className="name">{name}</span>
                 </div>
               </Link>
-            </div>
+            </Thumbnail>
           )
         )}
-      </div>
+      </Thumbnails>
       <h2>Trips</h2>
       <TripList trips={nearbyTrips} />
       <h2>Streets</h2>
-      <div className="thumbnails">
+      <Thumbnails>
         {nearbyGroupedWays.map(way => (
-          <div key={way.displayName}>
+          <Thumbnail key={way.displayName}>
             <Link to={`/ways/${way.displayName}`}>
               <MapComponent
                 width={160}
@@ -93,9 +96,9 @@ export default function LocationDetails({ location, tripTree, videoTree }) {
                 <strong>{way.displayName}</strong>
               </div>
             </Link>
-          </div>
+          </Thumbnail>
         ))}
-      </div>
+      </Thumbnails>
     </div>
   );
 }

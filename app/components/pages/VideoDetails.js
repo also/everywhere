@@ -6,6 +6,7 @@ import * as format from '../../format';
 import { findSeekPosition } from '../../videos';
 import { featureCollection } from '../../geo';
 
+import PageTitle from '../PageTitle';
 import TripList from '../TripList';
 import VideoPlayer from '../VideoPlayer';
 import MapComponent from '../Map';
@@ -79,7 +80,7 @@ export default createReactClass({
 
     return (
       <div>
-        <h1>{video.name}</h1>
+        <PageTitle>{video.name}</PageTitle>
         <p>
           Taken <strong>{video.start.format('LLL')}</strong>,{' '}
           {format.duration(video.duration)} long

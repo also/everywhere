@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { withRouter } from 'react-router';
 import styled from 'styled-components';
 
+import PageTitle from '../PageTitle';
 import MapComponent from '../Map';
 import Ways from '../Ways';
 
@@ -70,7 +71,7 @@ export default withRouter(
 
       return (
         <div>
-          <h1>Streets</h1>
+          <PageTitle>Streets</PageTitle>
           <WayMap>
             <WayHoverInfo>
               {hoveredStreet

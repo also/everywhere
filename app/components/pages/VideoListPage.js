@@ -2,6 +2,7 @@ import * as React from 'react';
 import createReactClass from 'create-react-class';
 import { withRouter } from 'react-router';
 
+import PageTitle from '../PageTitle';
 import VideoList from '../VideoList';
 import Trips from '../Trips';
 import MapComponent from '../Map';
@@ -40,7 +41,7 @@ export default withRouter(
 
       return (
         <div>
-          <h1>Videos</h1>
+          <PageTitle>Videos</PageTitle>
           <MapComponent
             width="1000"
             height="1000"

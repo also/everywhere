@@ -1,13 +1,14 @@
 import React from 'react';
 import createReactClass from 'create-react-class';
 
+import PageTitle from '../PageTitle';
 import TripList from '../TripList';
 
 export default createReactClass({
   render() {
     return (
       <div>
-        <h1>Trips</h1>
+        <PageTitle>Trips</PageTitle>
         <TripList {...this.props} />
       </div>
     );
