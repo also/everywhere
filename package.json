@@ -16,7 +16,7 @@
     "geojson-length": "^0.1.1",
     "glob": "^5.0.10",
     "history": "^1.17.0",
-    "lodash": "^3.9.3",
+    "lodash": "^4.17.19",
     "minimist": "^1.1.1",
     "moment": "^2.15.2",
     "node-libs-browser": "^0.5.2",
