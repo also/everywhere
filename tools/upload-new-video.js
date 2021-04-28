@@ -1,43 +1,44 @@
 import * as path from 'path';
+import * as fs from 'fs';
 import { sync as globSync } from 'glob';
 
+import { Upload } from '@aws-sdk/lib-storage';
+
 import { Bucket, client } from './s3-client';
-import { list, simpleNames } from './list-s3-videos';
+import { listVids, simpleNames } from './list-s3-videos';
 
-export default function({ _: [dir = 'video'] }) {
-  list('raw')
-    .then(simpleNames)
-    .then(raw => {
-      const local = simpleNames(globSync(path.join(dir, '*.MP4')));
-      const toUpload = new Set(local);
-      raw.forEach(name => toUpload.delete(name));
+export default async function({ _: [dir = 'video'] }) {
+  const existingVids = simpleNames(await listVids('raw'));
 
-      const first = toUpload[Symbol.iterator]().next().value;
-      if (first) {
-        const basename = `${first}.MP4`;
-        const Key = `everywhere/video/raw/${basename}`;
-        // FIXME update to use the aws client instead of s3 package
-        const upload = client.uploadFile({
-          localFile: path.join(dir, basename),
-          s3Params: { Bucket, Key },
-        });
+  const local = simpleNames(globSync(path.join(dir, '*.MP4')));
+  const toUpload = new Set(local);
+  existingVids.forEach(name => toUpload.delete(name));
 
-        console.log(Key);
+  console.log({ toUpload });
 
-        return new Promise((resolve, reject) => {
-          upload.on('progress', () =>
-            process.stdout.write(
-              `${((upload.progressAmount / upload.progressTotal) * 100).toFixed(
-                2
-              )}\r`
-            )
-          );
-          upload.on('end', resolve(Key));
-          upload.on('error', err => reject(err));
-        });
-      } else {
-        return Promise.resolve(false);
-      }
-    })
-    .catch(err => console.error(err.stack));
+  const first = toUpload[Symbol.iterator]().next().value;
+  if (first) {
+    const basename = `${first}.MP4`;
+    const Key = `everywhere/video/raw/${basename}`;
+    // FIXME update to use the aws client instead of s3 package
+    const upload = new Upload({
+      client,
+      params: {
+        Bucket,
+        Key,
+        Body: fs.createReadStream(path.join(dir, basename)),
+      },
+    });
+
+    console.log(Key);
+
+    upload.on('httpUploadProgress', progress =>
+      process.stdout.write(`${JSON.stringify(progress)}\r`)
+    );
+
+    await upload.done();
+    return true;
+  } else {
+    return Promise.resolve(false);
+  }
 }
