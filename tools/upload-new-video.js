@@ -16,6 +16,7 @@ export default function({ _: [dir = 'video'] }) {
       if (first) {
         const basename = `${first}.MP4`;
         const Key = `everywhere/video/raw/${basename}`;
+        // FIXME update to use the aws client instead of s3 package
         const upload = client.uploadFile({
           localFile: path.join(dir, basename),
           s3Params: { Bucket, Key },
