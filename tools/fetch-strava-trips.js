@@ -29,8 +29,7 @@ async function get(path) {
     }
   );
   if (result.errors && result.errors.length > 0) {
-    // FIXME
-    throw result;
+    throw new Error(JSON.stringify(result));
   } else {
     return result;
   }
@@ -106,13 +105,9 @@ function geoJsonToTopoJson(geoJson) {
 }
 
 export default async function({ _: [id] }) {
-  try {
-    const activity = await getTrip(id);
-    const streams = await getStreams(activity);
-    const gj = streamsToGeoJson(streams);
-    const result = geoJsonToTopoJson(gj);
-    console.log(JSON.stringify(result));
-  } catch (result) {
-    console.error('error', result.stack || JSON.stringify(result));
-  }
+  const activity = await getTrip(id);
+  const streams = await getStreams(activity);
+  const gj = streamsToGeoJson(streams);
+  const result = geoJsonToTopoJson(gj);
+  console.log(JSON.stringify(result));
 }

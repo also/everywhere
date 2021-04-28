@@ -9,5 +9,9 @@ export default function() {
   if (command.default) {
     command = command.default;
   }
-  command(argv);
+  Promise.resolve(command(argv)).catch(e =>
+    setImmediate(() => {
+      throw e;
+    })
+  );
 }
