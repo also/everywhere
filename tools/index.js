@@ -1,3 +1,5 @@
-require('babel-core/register');
+require('@babel/register')({
+  plugins: ['@babel/plugin-transform-modules-commonjs'],
+});
 
-require('./main.js')();
+require('./main.js').default();
