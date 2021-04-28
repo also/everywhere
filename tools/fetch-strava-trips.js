@@ -38,7 +38,7 @@ function get(path) {
   });
 }
 
-function getTrips() {
+export function getTrips() {
   return get('athlete/activities');
 }
 
