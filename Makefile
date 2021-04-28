@@ -43,7 +43,7 @@ app-data/contour.geojson: data/build/contour.geojson
 	./node_modules/.bin/topojson $< -o $@
 
 bundle.js: app-data/somerville-topo.geojson app-data/highways-clipped-topo.geojson app-data/trips/* app/* webpack.config.js
-	webpack
+	./node_modules/.bin/webpack
 
 app-data/video-metadata/%.json: video/%.MP4
 	avprobe -show_streams -of json $< | jq '.streams[0] | {duration, "start": .tags.creation_time}' > $@
