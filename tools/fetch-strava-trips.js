@@ -1,6 +1,6 @@
 import requestNode from 'request';
 import Promise from 'bluebird';
-import topojson from 'topojson';
+import * as topojson from 'topojson';
 
 import { distance } from '../app/distance';
 
