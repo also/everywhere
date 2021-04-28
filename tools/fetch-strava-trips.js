@@ -1,5 +1,4 @@
-import requestNode from 'request';
-import Promise from 'bluebird';
+import axios from 'axios';
 import * as topojson from 'topojson';
 
 import { distance } from '../app/distance';
@@ -22,20 +21,19 @@ const streamNames = [
 
 const otherStreamNames = streamNames.slice(1);
 
-const request = Promise.promisify(requestNode);
-
-function get(path) {
-  return request({
-    url: `https://www.strava.com/api/v3/${path}`,
-    headers: { Authorization: `Bearer ${stravaAuth.access_token}` },
-  }).then(([response, body]) => {
-    const result = JSON.parse(body);
-    if (result.errors && result.errors.length > 0) {
-      return Promise.reject(result);
-    } else {
-      return result;
+async function get(path) {
+  const { data: result } = await axios.get(
+    `https://www.strava.com/api/v3/${path}`,
+    {
+      headers: { Authorization: `Bearer ${stravaAuth.access_token}` },
     }
-  });
+  );
+  if (result.errors && result.errors.length > 0) {
+    // FIXME
+    throw result;
+  } else {
+    return result;
+  }
 }
 
 export function getTrips() {
@@ -107,17 +105,14 @@ function geoJsonToTopoJson(geoJson) {
   );
 }
 
-export default function({ _: [id] }) {
-  //getTrips()
-  // .then(trips);
-  getTrip(id)
-    .then(getStreams)
-    .then(streamsToGeoJson)
-    .then(geoJsonToTopoJson)
-    .then(result => {
-      console.log(JSON.stringify(result));
-    })
-    .catch(result => {
-      console.error('error', result.stack || JSON.stringify(result));
-    });
+export default async function({ _: [id] }) {
+  try {
+    const activity = await getTrip(id);
+    const streams = await getStreams(activity);
+    const gj = streamsToGeoJson(streams);
+    const result = geoJsonToTopoJson(gj);
+    console.log(JSON.stringify(result));
+  } catch (result) {
+    console.error('error', result.stack || JSON.stringify(result));
+  }
 }
