@@ -1,5 +1,3 @@
-import React from 'react';
-
 import PageTitle from '../PageTitle';
 import TripList from '../TripList';
 
