@@ -1,10 +1,10 @@
 /* eslint-disable camelcase */
 import { feature, tree } from './geo';
-import { group } from './tree';
+import { group, Node } from './tree';
 import moment from 'moment';
 
-import videos from './videos';
-import { Feature, LineString } from 'geojson';
+import videos, { Video } from './videos';
+import { Feature, LineString, MultiLineString } from 'geojson';
 
 const tripData = import('./trip-data');
 
@@ -18,13 +18,19 @@ type TripProperties = {
   // we assign these
   id: string;
   start: moment.Moment;
-  // FIXME?
-  videos: any[];
+  end: moment.Moment;
+  videos: Video[];
+  tree: Node;
 };
 
-export type TripFeature = Feature<LineString, TripProperties>;
+export type TripFeature = Feature<LineString | MultiLineString, TripProperties>;
 
 export type TripTopology = {};
+
+export type CoverageFeature = Feature<
+  MultiLineString,
+  TripProperties & { video: Video; tree: Node }
+>;
 
 function load(trip): TripFeature {
   const result: TripFeature = feature(trip);
@@ -47,8 +53,11 @@ function load(trip): TripFeature {
   return result;
 }
 
-function calculateVideoCoverage(trips, videos) {
-  const videoCoverage = [];
+function calculateVideoCoverage(
+  trips: TripFeature[],
+  videos: Map<string, Video>
+): CoverageFeature[] {
+  const videoCoverage: CoverageFeature[] = [];
 
   for (const trip of trips) {
     const { properties } = trip;
@@ -58,23 +67,25 @@ function calculateVideoCoverage(trips, videos) {
         properties.videos.push(video);
 
         const { geometry } = trip;
-        let tripCoords = geometry.coordinates;
-        if (geometry.type === 'LineString') {
-          tripCoords = [tripCoords];
-        }
+        let tripCoords =
+          geometry.type === 'LineString'
+            ? [geometry.coordinates]
+            : geometry.coordinates;
         const coordinates = tripCoords
           .map(coords =>
             coords.filter(coord => {
               const [, , , timeOffset] = coord;
               const time = timeOffset * 1000 + +properties.start;
-              return time >= video.start && time <= video.end;
+              return (
+                time >= video.start.valueOf() && time <= video.end.valueOf()
+              );
             })
           )
           .filter(({ length }) => length > 0);
 
         if (coordinates.length > 0) {
           const covProperties = Object.assign({ video }, properties);
-          const coverage = {
+          const coverage: CoverageFeature = {
             type: 'Feature',
             properties: covProperties,
             geometry: {

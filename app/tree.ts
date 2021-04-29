@@ -3,6 +3,7 @@
 // from http://bl.ocks.org/mbostock/a76006c5bc2a95695c6f
 // FIXME license?
 
+import { Position } from 'geojson';
 import minHeap from './min-heap';
 
 function compareDistance(a, b) {
@@ -15,7 +16,7 @@ function pointDistance(a, b) {
   return dx * dx + dy * dy;
 }
 
-function pointLineSegmentDistance(c, a, b) {
+function pointLineSegmentDistance(c, a: Position, b: Position) {
   var dx = b[0] - a[0],
     dy = b[1] - a[1],
     d2 = dx * dx + dy * dy,
@@ -26,7 +27,7 @@ function pointLineSegmentDistance(c, a, b) {
   );
 }
 
-export function group(children) {
+export function group(children: TreeNode[]): Node {
   let n0;
 
   while ((n0 = children.length) > 1) {
@@ -45,11 +46,21 @@ export function group(children) {
     children = children1;
   }
 
-  return children[0];
+  return children[0] as any;
 }
 
-class Node {
-  constructor(child0, child1) {
+interface TreeNode {
+  extent: [Position, Position];
+  distance(point: Position): number;
+  children?: [TreeNode, TreeNode];
+}
+
+type HeapEntry = { node: TreeNode; distance: number };
+
+export class Node implements TreeNode {
+  extent: [Position, Position];
+  children: [TreeNode, TreeNode];
+  constructor(child0: TreeNode, child1: TreeNode) {
     const e0 = child0.extent;
     const e1 = child1.extent;
     this.children = [child0, child1];
@@ -59,7 +70,7 @@ class Node {
     ];
   }
 
-  distance(point) {
+  distance(point: Position): number {
     const [x, y] = point;
     const [[x0, y0], [x1, y1]] = this.extent;
 
@@ -74,12 +85,12 @@ class Node {
       : 0;
   }
 
-  nearest(point) {
+  nearest(point: Position): TreeNode {
     let minNode;
     let minDistance = Infinity;
-    const heap = minHeap(compareDistance);
-    let node = this;
-    let candidate = { distance: node.distance(point), node };
+    const heap = minHeap<HeapEntry>(compareDistance);
+    let node: TreeNode = this;
+    let candidate: HeapEntry = { distance: node.distance(point), node };
 
     do {
       node = candidate.node;
@@ -104,9 +115,9 @@ class Node {
     return minNode;
   }
 
-  within(point, maxDistance) {
-    const result = [];
-    const visit = node => {
+  within(point: Position, maxDistance: number): HeapEntry[] {
+    const result: HeapEntry[] = [];
+    const visit = (node: TreeNode) => {
       const distance = node.distance(point);
       if (distance <= maxDistance) {
         if (node.children) {
@@ -123,18 +134,23 @@ class Node {
   }
 }
 
-class Leaf {
-  constructor(point0, point1, index, data) {
+class Leaf implements TreeNode {
+  coordinates: [Position, Position];
+  extent: [Position, Position];
+  constructor(
+    point0: Position,
+    point1: Position,
+    public index: number,
+    public data: Position[]
+  ) {
     this.coordinates = [point0, point1];
     this.extent = [
       [Math.min(point0[0], point1[0]), Math.min(point0[1], point1[1])],
       [Math.max(point0[0], point1[0]), Math.max(point0[1], point1[1])],
     ];
-    this.index = index;
-    this.data = data;
   }
 
-  distance(point) {
+  distance(point: Position): number {
     return pointLineSegmentDistance(
       point,
       this.coordinates[0],
@@ -143,14 +159,14 @@ class Leaf {
   }
 }
 
-export default function(topology) {
+export default function(topology: { arcs: Position[][] }): TreeNode {
   return group(
     topology.arcs.map(arc => {
       let i = 0;
       const n = arc.length;
       let p0;
       let p1 = arc[0];
-      const children = new Array(n - 1);
+      const children: Leaf[] = new Array(n - 1);
 
       while (++i < n) {
         p0 = p1;

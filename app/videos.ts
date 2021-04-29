@@ -1,5 +1,7 @@
 import sortBy from 'lodash/collection/sortBy';
 import moment from 'moment';
+import { TripFeature } from './trips';
+import { Node } from './tree';
 
 const videoContext = (require as any).context(
   'compact-json!../app-data/video-metadata',
@@ -33,8 +35,9 @@ export type Video = {
   stills: Still[];
   thumbnail: Still;
   // FIXME
-  trips: any[];
+  trips: TripFeature[];
   coverage: any[];
+  coverageTree: Node;
 };
 
 function load(filename: string, data: SimpleMetadata): VideoChapter {
@@ -82,12 +85,14 @@ function grouped(name: string, chapters: VideoChapter[]): Video {
     name,
     start: first.start,
     end: last.end,
-    duration: moment.duration(last.end - first.start),
+    duration: moment.duration(last.end.valueOf() - first.start.valueOf()),
     chapters,
     stills,
     thumbnail: stills[Math.floor(stills.length / 2)],
+    // FIXME these are assigned later
     trips: [],
     coverage: [],
+    coverageTree: undefined as any,
   };
 }
 

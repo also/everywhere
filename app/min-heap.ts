@@ -1,8 +1,15 @@
 // from http://bl.ocks.org/mbostock/a76006c5bc2a95695c6f
 // FIXME license?
 
-export default function(compare) {
-  const heap = {};
+type Heap<T> = {
+  size(): number;
+  push(v: T): number;
+  pop(): T | null;
+  remove(v: T): number | null;
+};
+
+export default function<T>(compare: (a: T, b: T) => number): Heap<T> {
+  const heap: Heap<T> = {} as any;
   const array = [];
   let size = 0;
 

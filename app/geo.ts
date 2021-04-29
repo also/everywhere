@@ -1,8 +1,15 @@
-import { FeatureCollection } from 'geojson';
+import {
+  Feature,
+  FeatureCollection,
+  LineString,
+  MultiLineString,
+  Position,
+} from 'geojson';
 import * as topojson from 'topojson';
 import * as TopoJSON from 'topojson-specification';
 
 import makeTree from './tree';
+import { CoverageFeature } from './trips';
 
 export function features<
   T extends TopoJSON.Objects<TopoJSON.Properties> = TopoJSON.Objects<
@@ -29,8 +36,12 @@ export function featureCollection(features): FeatureCollection {
   return { type: 'FeatureCollection', features: features };
 }
 
-export function tree(feat) {
-  const arcs = [];
+export function tree(
+  feat:
+    | Feature<LineString | MultiLineString>
+    | FeatureCollection<LineString | MultiLineString>
+) {
+  const arcs: Position[][] = [];
 
   (feat.type === 'FeatureCollection' ? feat.features : [feat]).forEach(feat => {
     (feat.geometry.type === 'MultiLineString'
