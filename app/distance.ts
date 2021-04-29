@@ -5,7 +5,9 @@
  * http://www.movable-type.co.uk/scripts/latlong.html#equirectangular
  */
 
-function calculateLength(lineString) {
+import { Geometry, Position } from 'geojson';
+
+function calculateLength(lineString: Position[]): number {
   if (lineString.length < 2) {
     return 0;
   }
@@ -32,7 +34,7 @@ export function distance(λ1, φ1, λ2, φ2) {
   return R * d;
 }
 
-export function geometryLength(geometry) {
+export function geometryLength(geometry: Geometry): number | null {
   if (geometry.type === 'LineString') {
     return calculateLength(geometry.coordinates);
   } else if (geometry.type === 'MultiLineString') {
