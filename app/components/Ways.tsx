@@ -1,3 +1,5 @@
+import { useContext } from 'react';
+
 import { WayFeature } from '../ways';
 import MapContext from './MapContext';
 
@@ -8,19 +10,17 @@ function Way({
   feature: WayFeature;
   selected: boolean;
 }) {
+  const { path } = useContext(MapContext);
+
   const { highway, displayName, id } = feature.properties;
   const className = selected ? 'selected' : '';
   return (
-    <MapContext.Consumer>
-      {({ path }) => (
-        <path
-          d={path(feature)}
-          data-highway={highway}
-          className={className}
-          key={id}
-        />
-      )}
-    </MapContext.Consumer>
+    <path
+      d={path(feature)}
+      data-highway={highway}
+      className={className}
+      key={id}
+    />
   );
 }
 

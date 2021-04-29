@@ -1,15 +1,13 @@
+import { useContext } from 'react';
+
 import MapContext from './MapContext';
 
 export default function Dot({ position, ...extraProps }) {
+  const { projection } = useContext(MapContext);
+
   if (position) {
-    return (
-      <MapContext.Consumer>
-        {({ projection }) => {
-          const [x, y] = projection(position);
-          return <circle cx={x} cy={y} {...extraProps} />;
-        }}
-      </MapContext.Consumer>
-    );
+    const [x, y] = projection(position);
+    return <circle cx={x} cy={y} {...extraProps} />;
   } else {
     return null;
   }

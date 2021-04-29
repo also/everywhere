@@ -1,15 +1,11 @@
-import { memo } from 'react';
+import { memo, useContext } from 'react';
 import d3 from 'd3';
 
 import { TreeNode } from '../tree';
+import MapContext from './MapContext';
 
-export default memo(function Tree({
-  tree,
-  projection,
-}: {
-  tree: TreeNode;
-  projection: d3.geo.Projection;
-}) {
+export default memo(function Tree({ tree }: { tree: TreeNode }) {
+  const { projection } = useContext(MapContext);
   const rects = [];
 
   const visit = (node: TreeNode, depth = 0) => {

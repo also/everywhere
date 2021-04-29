@@ -1,9 +1,10 @@
+import { useRef, useEffect, useContext } from 'react';
 import d3 from 'd3';
 
 import MapContext from './MapContext';
-import { useRef, useEffect } from 'react';
 
 function AnimTrip({ trip }) {
+  const { path } = useContext(MapContext);
   const ref = useRef<SVGPathElement>();
   const running = useRef(true);
   useEffect(() => {
@@ -30,19 +31,14 @@ function AnimTrip({ trip }) {
       running.current = false;
     };
   }, []);
-  return (
-    <MapContext.Consumer>
-      {({ path }) => <path className="trip" d={path(trip)} ref={ref} />}
-    </MapContext.Consumer>
-  );
+
+  return <path className="trip" d={path(trip)} ref={ref} />;
 }
 
 function Trip({ trip }) {
-  return (
-    <MapContext.Consumer>
-      {({ path }) => <path className="trip" d={path(trip)} />}
-    </MapContext.Consumer>
-  );
+  const { path } = useContext(MapContext);
+
+  return <path className="trip" d={path(trip)} />;
 }
 
 export default function Trips({ trips }) {
