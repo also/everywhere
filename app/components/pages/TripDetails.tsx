@@ -7,9 +7,11 @@ import Trips from '../Trips';
 import MapComponent from '../Map';
 import Dot from '../Dot';
 import { useCallback, useMemo, useState } from 'react';
+import { TripFeature } from '../../trips';
+import { Leaf } from '../../tree';
 
-export default function TripDetails({ trip }) {
-  const [state, setState] = useState({ nearest: null });
+export default function TripDetails({ trip }: { trip: TripFeature }) {
+  const [nearest, setNearest] = useState<Leaf | undefined>(undefined);
 
   const {
     properties: { tree, id, start, movingTime, videos },
@@ -17,18 +19,9 @@ export default function TripDetails({ trip }) {
 
   const trips = useMemo(() => [trip], [trip]);
 
-  const onMouseMove = useCallback(
-    ({ geo }) => {
-      const nearest = tree.nearest(geo);
-      const coord = nearest.coordinates[0];
-      const wayId = coord[coord.length - 1][0];
-      const way = waysById.get(wayId);
-      setState({ nearest, way });
-    },
-    [trip]
-  );
-
-  const { nearest } = state;
+  const onMouseMove = useCallback(({ geo }) => setNearest(tree.nearest(geo)), [
+    trip,
+  ]);
 
   let dot = null;
   if (nearest) {

@@ -19,6 +19,7 @@ type TripProperties = {
   id: string;
   start: moment.Moment;
   end: moment.Moment;
+  movingTime: moment.Duration;
   videos: Video[];
   tree: Node;
 };

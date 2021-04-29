@@ -85,7 +85,7 @@ export class Node implements TreeNode {
       : 0;
   }
 
-  nearest(point: Position): TreeNode {
+  nearest(point: Position): Leaf {
     let minNode;
     let minDistance = Infinity;
     const heap = minHeap<HeapEntry>(compareDistance);
@@ -134,7 +134,7 @@ export class Node implements TreeNode {
   }
 }
 
-class Leaf implements TreeNode {
+export class Leaf implements TreeNode {
   coordinates: [Position, Position];
   extent: [Position, Position];
   constructor(
