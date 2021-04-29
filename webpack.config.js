@@ -13,11 +13,11 @@ module.exports = {
         exclude: /(node_modules|bower_components)/,
         loader: 'babel-loader',
         query: {
-          presets: ['@babel/preset-react'],
+          presets: [['@babel/preset-react', { runtime: 'automatic' }]],
         },
       },
       {
-        test: /\.tsx$/,
+        test: /\.tsx?$/,
         exclude: /(node_modules|bower_components)/,
         loader: 'babel-loader',
         query: {
