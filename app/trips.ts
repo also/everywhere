@@ -34,7 +34,6 @@ export type CoverageFeature = Feature<
 
 function load(trip): TripFeature {
   const result: TripFeature = feature(trip);
-  console.log(result);
   const { properties, geometry } = result;
   properties.videos = [];
   const {
