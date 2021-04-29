@@ -8,13 +8,14 @@ import MapComponent from '../Map';
 import Ways from '../Ways';
 import WayListColumns from '../WayListColumns';
 import MapBox from '../MapBox';
+import { GroupedWays } from '../../ways';
 
-export default function WayDetails({ way }) {
-  const intersections = new Set();
+export default function WayDetails({ way }: { way: GroupedWays }) {
+  const intersections: Set<string> = new Set();
 
   way.features.forEach(feat => {
-    feat.intersections.forEach(intersection => {
-      intersection.ways.forEach(iway =>
+    feat.properties.intersections.forEach(intersection => {
+      intersection.properties.ways.forEach(iway =>
         intersections.add(iway.properties.displayName)
       );
     });

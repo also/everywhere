@@ -4,7 +4,11 @@ import * as TopoJSON from 'topojson-specification';
 
 import makeTree from './tree';
 
-export function features(geojson: TopoJSON.Topology) {
+export function features<
+  T extends TopoJSON.Objects<TopoJSON.Properties> = TopoJSON.Objects<
+    TopoJSON.Properties
+  >
+>(geojson: TopoJSON.Topology<T>): FeatureCollection {
   return topojson.feature(
     geojson,
     geojson.objects[Object.keys(geojson.objects)[0]]

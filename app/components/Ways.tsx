@@ -1,7 +1,13 @@
-import * as React from 'react';
+import { WayFeature } from '../ways';
 import MapContext from './MapContext';
 
-function Way({ feature, selected }) {
+function Way({
+  feature,
+  selected,
+}: {
+  feature: WayFeature;
+  selected: boolean;
+}) {
   const { highway, displayName, id } = feature.properties;
   const className = selected ? 'selected' : '';
   return (
@@ -18,7 +24,13 @@ function Way({ feature, selected }) {
   );
 }
 
-export default function Ways({ features, selected }) {
+export default function Ways({
+  features,
+  selected,
+}: {
+  features: WayFeature[];
+  selected: boolean;
+}) {
   return (
     <g className="roads">
       {features.map((feature, i) => (
