@@ -21,7 +21,6 @@ function AnimTrip({ trip }: { trip: TripFeature }) {
 
       node.setAttribute('stroke-dasharray', `${l},${length}`);
 
-      console.log(t);
       if (t > 1) {
         running.current = false;
       }
