@@ -4,8 +4,9 @@ import Thumbnails from './Thumbnails';
 import Thumbnail from './Thumbnail';
 import MapComponent from './Map';
 import Trips from './Trips';
+import { TripFeature } from '../trips';
 
-export default function TripList({ trips }) {
+export default function TripList({ trips }: { trips: TripFeature[] }) {
   return (
     <Thumbnails>
       {trips.map(trip => {

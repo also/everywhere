@@ -3,8 +3,9 @@ import { Link } from 'react-router-dom';
 import Thumbnails from './Thumbnails';
 import Thumbnail from './Thumbnail';
 import * as format from '../format';
+import { Video } from '../videos';
 
-export default function VideoList({ videos }) {
+export default function VideoList({ videos }: { videos: Video[] }) {
   return (
     <Thumbnails>
       {videos.map(({ name, duration, start, thumbnail }) => (

@@ -4,23 +4,35 @@ import { group } from './tree';
 import moment from 'moment';
 
 import videos from './videos';
+import { Feature, LineString } from 'geojson';
 
 const tripData = import('./trip-data');
 
-function load(trip) {
-  const result = feature(trip);
+type TripProperties = {
+  activity: {
+    id: string;
+    start_date: string;
+    elapsed_time: number;
+    moving_time: number;
+  };
+  // we assign these
+  id: string;
+  start: moment.Moment;
+  // FIXME?
+  videos: any[];
+};
+
+export type TripFeature = Feature<LineString, TripProperties>;
+
+export type TripTopology = {};
+
+function load(trip): TripFeature {
+  const result: TripFeature = feature(trip);
+  console.log(result);
   const { properties, geometry } = result;
   properties.videos = [];
   const {
-    activity: {
-      id,
-      start_date,
-      total_elevation_gain,
-      max_speed,
-      distance,
-      elapsed_time,
-      moving_time,
-    },
+    activity: { id, start_date, elapsed_time, moving_time },
   } = properties;
 
   const start = moment(start_date);
