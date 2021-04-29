@@ -1,15 +1,17 @@
+import { FeatureCollection } from 'geojson';
 import * as topojson from 'topojson';
+import * as TopoJSON from 'topojson-specification';
 
 import makeTree from './tree';
 
-export function features(geojson) {
+export function features(geojson: TopoJSON.Topology) {
   return topojson.feature(
     geojson,
     geojson.objects[Object.keys(geojson.objects)[0]]
   );
 }
 
-export function feature(geojson) {
+export function feature(geojson: TopoJSON.Topology) {
   return features(geojson).features[0];
 }
 
@@ -19,7 +21,7 @@ export function geoLines(feat) {
     .filter(({ type }) => type === 'LineString' || type === 'MultiLineString');
 }
 
-export function featureCollection(features) {
+export function featureCollection(features): FeatureCollection {
   return { type: 'FeatureCollection', features: features };
 }
 
