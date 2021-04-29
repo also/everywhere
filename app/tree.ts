@@ -49,7 +49,7 @@ export function group(children: TreeNode[]): Node {
   return children[0] as any;
 }
 
-interface TreeNode {
+export interface TreeNode {
   extent: [Position, Position];
   distance(point: Position): number;
   children?: [TreeNode, TreeNode];
