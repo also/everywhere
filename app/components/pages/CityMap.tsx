@@ -1,11 +1,19 @@
-import createReactClass from 'create-react-class';
 import { useHistory } from 'react-router';
 
 import Position from '../Position';
 import Trips from '../Trips';
 import MapComponent from '../Map';
+import { TripFeature } from '../../trips';
 
-export default function CityMap({ trips, tripsLength, waysLength }) {
+export default function CityMap({
+  trips,
+  tripsLength,
+  waysLength,
+}: {
+  trips: TripFeature[];
+  tripsLength: number;
+  waysLength: number;
+}) {
   const history = useHistory();
 
   function onClick({ geo }) {
