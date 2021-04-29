@@ -29,8 +29,6 @@ module.exports = {
   resolveLoader: {
     alias: {
       'compact-json$': 'compact-json-loader',
-      css$: 'css-loader',
-      style$: 'style-loader',
     },
   },
 };

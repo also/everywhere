@@ -5,8 +5,10 @@ import createReactClass from 'create-react-class';
 import d3 from 'd3';
 import shallowEqual from 'fbjs/lib/shallowEqual';
 import omit from 'lodash/object/omit';
+import styled from 'styled-components';
 
 import Contours from './Contours';
+
 import Ways from './Ways';
 
 const BaseMap = createReactClass({
@@ -52,6 +54,58 @@ function mouse(e, node) {
     d3.event = previousEvent;
   }
 }
+
+const MapSvg = styled.svg`
+  & {
+    .roads {
+      path {
+        fill: none;
+        stroke-width: 1px;
+        stroke: #fff;
+
+        &.selected {
+          stroke-width: 5px;
+          stroke: #116aa9;
+        }
+      }
+
+      [data-highway='secondary'],
+      [data-highway='trunk'] {
+        stroke-width: 2px;
+      }
+    }
+
+    path.boundary {
+      fill: #00dcc2;
+    }
+
+    path.trip {
+      fill: none;
+      stroke-width: 1.5px;
+      stroke: #888;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    path.contour {
+      fill: none;
+      stroke-width: 1px;
+      stroke: lighten(#00dcc2, 3%);
+    }
+
+    circle.position {
+      fill: #fff;
+      stroke-width: 1px;
+      stroke: #116aa9;
+    }
+
+    path.extent {
+      fill: none;
+      stroke: #333;
+      shape-rendering: crispEdges;
+    }
+  }
+`;
 
 export default createReactClass({
   contextTypes: {
@@ -135,7 +189,7 @@ export default createReactClass({
     const { path } = this.state;
 
     return (
-      <svg
+      <MapSvg
         width={width}
         height={height}
         onMouseMove={this.onMouseMove}
@@ -144,7 +198,7 @@ export default createReactClass({
       >
         <BaseMap showWays={showWays} />
         {this.props.children()}
-      </svg>
+      </MapSvg>
     );
   },
 });

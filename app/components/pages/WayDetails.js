@@ -7,6 +7,8 @@ import { featureCollection } from '../../geo';
 import PageTitle from '../PageTitle';
 import MapComponent from '../Map';
 import Ways from '../Ways';
+import WayListColumns from '../WayListColumns';
+import MapBox from '../MapBox';
 
 export default createReactClass({
   render() {
@@ -26,7 +28,7 @@ export default createReactClass({
     return (
       <div>
         <PageTitle>{way.displayName}</PageTitle>
-        <div className="map-box">
+        <MapBox>
           <MapComponent
             width={400}
             height={400}
@@ -35,9 +37,9 @@ export default createReactClass({
           >
             {this.mapLayers}
           </MapComponent>
-        </div>
+        </MapBox>
         <h2>Intersections</h2>
-        <ul style={{ WebkitColumnWidth: '200px' }}>
+        <WayListColumns>
           {Array.from(intersections)
             .sort()
             .map(int => (
@@ -47,7 +49,7 @@ export default createReactClass({
                 </Link>
               </li>
             ))}
-        </ul>
+        </WayListColumns>
       </div>
     );
   },

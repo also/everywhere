@@ -12,6 +12,7 @@ import VideoPlayer from '../VideoPlayer';
 import MapComponent from '../Map';
 import Trips from '../Trips';
 import Dot from '../Dot';
+import MapBox from '../MapBox';
 
 const VideoAndMap = withRouter(
   createReactClass({
@@ -42,13 +43,12 @@ const VideoAndMap = withRouter(
               ref="video"
             />
           </span>
-          <span
+          <MapBox
             style={{
               display: 'inline-block',
               verticalAlign: 'top',
               marginLeft: '1em',
             }}
-            className="map-box"
           >
             <MapComponent
               width={360}
@@ -58,7 +58,7 @@ const VideoAndMap = withRouter(
             >
               {this.mapLayers}
             </MapComponent>
-          </span>
+          </MapBox>
         </span>
       );
     },

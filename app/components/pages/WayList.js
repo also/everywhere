@@ -8,6 +8,7 @@ import styled from 'styled-components';
 import PageTitle from '../PageTitle';
 import MapComponent from '../Map';
 import Ways from '../Ways';
+import WayListColumns from '../WayListColumns';
 
 const WayList = createReactClass({
   mixins: [PureRenderMixin],
@@ -16,13 +17,13 @@ const WayList = createReactClass({
     const { groupedWays } = this.props;
 
     return (
-      <ul style={{ WebkitColumnWidth: '200px' }}>
+      <WayListColumns>
         {groupedWays.map(way => (
           <li key={way.displayName}>
             <Link to={`/ways/${way.displayName}`}>{way.displayName}</Link>
           </li>
         ))}
-      </ul>
+      </WayListColumns>
     );
   },
 });

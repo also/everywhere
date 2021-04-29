@@ -26,8 +26,6 @@ import LocationDetails from './components/pages/LocationDetails';
 
 import { geoLines } from './geo';
 
-import 'style!css!./style.scss';
-
 import {
   ways,
   groupedWays,
