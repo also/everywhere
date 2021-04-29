@@ -9,11 +9,22 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.jsx?$/,
+        test: /\.js$/,
         exclude: /(node_modules|bower_components)/,
         loader: 'babel-loader',
         query: {
           presets: ['@babel/preset-react'],
+        },
+      },
+      {
+        test: /\.tsx$/,
+        exclude: /(node_modules|bower_components)/,
+        loader: 'babel-loader',
+        query: {
+          presets: [
+            '@babel/preset-typescript',
+            ['@babel/preset-react', { runtime: 'automatic' }],
+          ],
         },
       },
       {
@@ -25,6 +36,9 @@ module.exports = {
         loader: 'sass-loader',
       },
     ],
+  },
+  resolve: {
+    extensions: ['.ts', '.tsx', '.js'],
   },
   resolveLoader: {
     alias: {

@@ -1,5 +1,3 @@
-import * as React from 'react';
-
 import MapContext from './MapContext';
 
 export default function Dot({ position, ...extraProps }) {
