@@ -1,5 +1,4 @@
 import d3 from 'd3';
-import PropTypes from 'prop-types';
 import createReactClass from 'create-react-class';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
@@ -78,16 +77,6 @@ document.title = 'not quite everywhere';
 const waysLength = d3.sum(geoLines(ways), geometryLength);
 
 const App = createReactClass({
-  childContextTypes: {
-    boundary: PropTypes.any,
-    ways: PropTypes.any,
-    contours: PropTypes.any,
-  },
-
-  getChildContext() {
-    return { boundary, ways, contours };
-  },
-
   render() {
     return (
       <div>

@@ -184,7 +184,6 @@ export default createReactClass({
   },
 
   render() {
-    const { boundary, ways, contours } = this.context;
     const { width, height, showWays = true } = this.props;
     const { path } = this.state;
 
