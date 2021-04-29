@@ -1,9 +1,10 @@
-import { useRef, useEffect, useContext } from 'react';
+import { useRef, useEffect, useContext, memo } from 'react';
 import d3 from 'd3';
 
 import MapContext from './MapContext';
+import { TripFeature } from '../trips';
 
-function AnimTrip({ trip }) {
+function AnimTrip({ trip }: { trip: TripFeature }) {
   const { path } = useContext(MapContext);
   const ref = useRef<SVGPathElement>();
   const running = useRef(true);
@@ -35,13 +36,13 @@ function AnimTrip({ trip }) {
   return <path className="trip" d={path(trip)} ref={ref} />;
 }
 
-function Trip({ trip }) {
+function Trip({ trip }: { trip: TripFeature }) {
   const { path } = useContext(MapContext);
 
   return <path className="trip" d={path(trip)} />;
 }
 
-export default function Trips({ trips }) {
+export default memo(function Trips({ trips }: { trips: TripFeature[] }) {
   return (
     <g>
       {trips.map(trip => (
@@ -49,4 +50,4 @@ export default function Trips({ trips }) {
       ))}
     </g>
   );
-}
+});
