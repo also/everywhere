@@ -1,5 +1,4 @@
 import PropTypes from 'prop-types';
-import * as React from 'react';
 import createReactClass from 'create-react-class';
 
 export default createReactClass({
