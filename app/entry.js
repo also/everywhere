@@ -111,41 +111,30 @@ const App = createReactClass({
   },
 });
 
-const CityMapRoute = createReactClass({
-  render() {
-    // TODO what's the right way to pass this in?
-    const { trips } = this.props;
-    const tripsLength = d3.sum(
-      trips.map(geoLines).reduce((a, b) => a.concat(b)),
-      geometryLength
-    );
-    return (
-      <CityMap
-        trips={trips}
-        groupedWays={groupedWays}
-        tripsLength={tripsLength}
-        waysLength={waysLength}
-      />
-    );
-  },
-});
+function CityMapRoute({ trips }) {
+  // TODO what's the right way to pass this in?
+  const tripsLength = d3.sum(
+    trips.map(geoLines).reduce((a, b) => a.concat(b)),
+    geometryLength
+  );
+  return (
+    <CityMap
+      trips={trips}
+      groupedWays={groupedWays}
+      tripsLength={tripsLength}
+      waysLength={waysLength}
+    />
+  );
+}
 
-const WayListRoute = createReactClass({
-  render() {
-    return <WayList groupedWays={groupedWays} ways={ways} wayTree={wayTree} />;
-  },
-});
+function WayListRoute() {
+  return <WayList groupedWays={groupedWays} ways={ways} wayTree={wayTree} />;
+}
 
-const WayDetailsRoute = createReactClass({
-  render() {
-    const { params } = this.props.match;
-    const way = find(
-      groupedWays,
-      ({ displayName }) => displayName === params[0]
-    );
-    return way ? <WayDetails way={way} /> : null;
-  },
-});
+function WayDetailsRoute({ match: { params } }) {
+  const way = find(groupedWays, ({ displayName }) => displayName === params[0]);
+  return way ? <WayDetails way={way} /> : null;
+}
 
 const VideoDetailsRoute = createReactClass({
   render() {

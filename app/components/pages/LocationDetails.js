@@ -1,5 +1,4 @@
 import React from 'react';
-import createReactClass from 'create-react-class';
 import { Link } from 'react-router-dom';
 import { withRouter } from 'react-router';
 import { useHistory } from 'react-router-dom';

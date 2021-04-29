@@ -23,15 +23,12 @@ const Way = createReactClass({
   },
 });
 
-export default createReactClass({
-  render() {
-    const { features, selected } = this.props;
-    return (
-      <g className="roads">
-        {features.map((feature, i) => (
-          <Way key={i} feature={feature} selected={selected} />
-        ))}
-      </g>
-    );
-  },
-});
+export default function Ways({ features, selected }) {
+  return (
+    <g className="roads">
+      {features.map((feature, i) => (
+        <Way key={i} feature={feature} selected={selected} />
+      ))}
+    </g>
+  );
+}
