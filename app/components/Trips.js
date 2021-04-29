@@ -1,14 +1,11 @@
-import PropTypes from 'prop-types';
 import * as React from 'react';
 import { findDOMNode } from 'react-dom';
 import createReactClass from 'create-react-class';
 import d3 from 'd3';
 
-const Trip = createReactClass({
-  contextTypes: {
-    path: PropTypes.any,
-  },
+import MapContext from './MapContext';
 
+const Trip = createReactClass({
   startAnimating() {
     let run = true;
     const stopAnimating = () => (run = false);
@@ -39,9 +36,12 @@ const Trip = createReactClass({
   },
 
   render() {
-    const { path } = this.context;
     const { trip } = this.props;
-    return <path className="trip" d={path(trip)} />;
+    return (
+      <MapContext.Consumer>
+        {({ path }) => <path className="trip" d={path(trip)} />}
+      </MapContext.Consumer>
+    );
   },
 
   componentDidMount() {

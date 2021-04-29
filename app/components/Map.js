@@ -6,6 +6,7 @@ import d3 from 'd3';
 import shallowEqual from 'fbjs/lib/shallowEqual';
 import omit from 'lodash/object/omit';
 import styled from 'styled-components';
+import MapContext from './MapContext';
 
 import Contours from './Contours';
 
@@ -13,7 +14,6 @@ import Ways from './Ways';
 
 const BaseMap = createReactClass({
   contextTypes: {
-    path: PropTypes.any,
     boundary: PropTypes.any.isRequired,
     ways: PropTypes.any,
     contours: PropTypes.any,
@@ -29,14 +29,14 @@ const BaseMap = createReactClass({
   },
 
   render() {
-    const { boundary, path, contours, ways } = this.context;
+    const { boundary, contours, ways } = this.context;
     const { showWays } = this.props;
-
-    const cityBoundaryPath = path(boundary);
 
     return (
       <g>
-        <path className="boundary" d={cityBoundaryPath} />
+        <MapContext.Consumer>
+          {({ path }) => <path className="boundary" d={path(boundary)} />}
+        </MapContext.Consumer>
         {/*<Contours features={contours.features}/>*/}
         {showWays ? <Ways features={ways.features} /> : null}
       </g>
@@ -114,17 +114,6 @@ export default createReactClass({
     contours: PropTypes.any,
   },
 
-  childContextTypes: {
-    projection: PropTypes.any.isRequired,
-    path: PropTypes.any.isRequired,
-  },
-
-  getChildContext() {
-    // FIXME context from state in react 0.13 is :(
-    const { projection, path } = this.state;
-    return { projection, path };
-  },
-
   getInitialState() {
     return this.recompute(this.props);
   },
@@ -164,12 +153,14 @@ export default createReactClass({
 
     projection.scale(s).translate(t);
 
-    return { path, projection };
+    return { mapContext: { path, projection } };
   },
 
   onMouseMove(e) {
     const { onMouseMove } = this.props;
-    const { projection } = this.state;
+    const {
+      mapContext: { projection },
+    } = this.state;
     if (onMouseMove) {
       onMouseMove({ mouse, geo: projection.invert(mouse(e, this.svgNode)) });
     }
@@ -177,7 +168,9 @@ export default createReactClass({
 
   onClick(e) {
     const { onClick } = this.props;
-    const { projection } = this.state;
+    const {
+      mapContext: { projection },
+    } = this.state;
     if (onClick) {
       onClick({ mouse, geo: projection.invert(mouse(e, this.svgNode)) });
     }
@@ -185,19 +178,21 @@ export default createReactClass({
 
   render() {
     const { width, height, showWays = true } = this.props;
-    const { path } = this.state;
+    const { mapContext } = this.state;
 
     return (
-      <MapSvg
-        width={width}
-        height={height}
-        onMouseMove={this.onMouseMove}
-        onClick={this.onClick}
-        ref={component => (this.svgNode = findDOMNode(component))}
-      >
-        <BaseMap showWays={showWays} />
-        {this.props.children()}
-      </MapSvg>
+      <MapContext.Provider value={mapContext}>
+        <MapSvg
+          width={width}
+          height={height}
+          onMouseMove={this.onMouseMove}
+          onClick={this.onClick}
+          ref={component => (this.svgNode = findDOMNode(component))}
+        >
+          <BaseMap showWays={showWays} />
+          {this.props.children()}
+        </MapSvg>
+      </MapContext.Provider>
     );
   },
 });
