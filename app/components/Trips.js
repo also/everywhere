@@ -55,15 +55,12 @@ const Trip = createReactClass({
   },
 });
 
-export default createReactClass({
-  render() {
-    const { trips } = this.props;
-    return (
-      <g>
-        {trips.map(trip => (
-          <Trip trip={trip} />
-        ))}
-      </g>
-    );
-  },
-});
+export default function Trips({ trips }) {
+  return (
+    <g>
+      {trips.map(trip => (
+        <Trip trip={trip} />
+      ))}
+    </g>
+  );
+}

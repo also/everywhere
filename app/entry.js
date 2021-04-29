@@ -136,31 +136,25 @@ function WayDetailsRoute({ match: { params } }) {
   return way ? <WayDetails way={way} /> : null;
 }
 
-const VideoDetailsRoute = createReactClass({
-  render() {
-    const { params } = this.props.match;
-    return <VideoDetails video={videos.get(params.name)} seek={params.seek} />;
-  },
-});
+function VideoDetailsRoute({ match: { params } }) {
+  return <VideoDetails video={videos.get(params.name)} seek={params.seek} />;
+}
 
-const LocationDetailsRoute = createReactClass({
-  render() {
-    const {
-      tripTree,
-      videoTree,
-      match: {
-        params: { coords },
-      },
-    } = this.props;
-    return (
-      <LocationDetails
-        location={coords.split(',').map(parseFloat)}
-        tripTree={tripTree}
-        videoTree={videoTree}
-      />
-    );
+function LocationDetailsRoute({
+  tripTree,
+  videoTree,
+  match: {
+    params: { coords },
   },
-});
+}) {
+  return (
+    <LocationDetails
+      location={coords.split(',').map(parseFloat)}
+      tripTree={tripTree}
+      videoTree={videoTree}
+    />
+  );
+}
 
 const div = document.createElement('div');
 document.body.appendChild(div);

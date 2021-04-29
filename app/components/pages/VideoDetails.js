@@ -74,29 +74,25 @@ const VideoAndMap = withRouter(
   })
 );
 
-export default createReactClass({
-  render() {
-    const { video, seek } = this.props;
-
-    return (
+export default function VideoDetails({ video, seek }) {
+  return (
+    <div>
+      <PageTitle>{video.name}</PageTitle>
+      <p>
+        Taken <strong>{video.start.format('LLL')}</strong>,{' '}
+        {format.duration(video.duration)} long
+      </p>
+      <VideoAndMap video={video} seek={seek} />
+      <h2>Trips</h2>
+      <TripList trips={video.trips} />
+      <h2>Stills</h2>
       <div>
-        <PageTitle>{video.name}</PageTitle>
-        <p>
-          Taken <strong>{video.start.format('LLL')}</strong>,{' '}
-          {format.duration(video.duration)} long
-        </p>
-        <VideoAndMap video={video} seek={seek} />
-        <h2>Trips</h2>
-        <TripList trips={video.trips} />
-        <h2>Stills</h2>
-        <div>
-          {video.stills.map(({ small, large }, i) => (
-            <a href={large} key={i}>
-              <img src={large} width="320" />
-            </a>
-          ))}
-        </div>
+        {video.stills.map(({ small, large }, i) => (
+          <a href={large} key={i}>
+            <img src={large} width="320" />
+          </a>
+        ))}
       </div>
-    );
-  },
-});
+    </div>
+  );
+}
