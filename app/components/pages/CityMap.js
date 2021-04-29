@@ -1,36 +1,27 @@
 import createReactClass from 'create-react-class';
-import { withRouter } from 'react-router';
+import { useHistory } from 'react-router';
 
 import Position from '../Position';
 import Trips from '../Trips';
 import MapComponent from '../Map';
 
-export default withRouter(
-  createReactClass({
-    onClick({ geo }) {
-      this.props.history.push(`/locations/${geo.join(',')}`);
-    },
+export default function CityMap({ trips, tripsLength, waysLength }) {
+  const history = useHistory();
 
-    render() {
-      const { tripsLength, waysLength } = this.props;
+  function onClick({ geo }) {
+    history.push(`/locations/${geo.join(',')}`);
+  }
 
-      return (
-        <div>
-          <p>
-            {Math.round(tripsLength / 1000)} / {Math.round(waysLength / 1000)}{' '}
-            km
-          </p>
+  return (
+    <div>
+      <p>
+        {Math.round(tripsLength / 1000)} / {Math.round(waysLength / 1000)} km
+      </p>
 
-          <MapComponent width="1000" height="1000" onClick={this.onClick}>
-            {this.layers}
-          </MapComponent>
-        </div>
-      );
-    },
-
-    layers() {
-      const { trips } = this.props;
-      return [<Trips trips={trips} />, <Position />];
-    },
-  })
-);
+      <MapComponent width="1000" height="1000" onClick={onClick}>
+        <Trips trips={trips} />
+        <Position />
+      </MapComponent>
+    </div>
+  );
+}

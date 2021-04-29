@@ -49,10 +49,8 @@ export default function LocationDetails({ location, tripTree, videoTree }) {
     <div>
       <PageTitle>{location.join(', ')}</PageTitle>
       <MapComponent width={1000} height={1000} onClick={onClick}>
-        {() => [
-          <Ways features={nearbyWays} selected={true} />,
-          <Dot r={4} className="position" position={location} />,
-        ]}
+        <Ways features={nearbyWays} selected={true} />
+        <Dot r={4} className="position" position={location} />
       </MapComponent>
       <h2>Videos</h2>
       <Thumbnails>

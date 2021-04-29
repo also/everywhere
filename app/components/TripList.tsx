@@ -17,7 +17,7 @@ export default function TripList({ trips }: { trips: TripFeature[] }) {
           <Thumbnail key={id}>
             <Link to={`/trips/${id}`}>
               <MapComponent width={160} height={160} showWays={false}>
-                {() => <Trips trips={[trip]} />}
+                <Trips trips={[trip]} />
               </MapComponent>
               <div>
                 <strong>{start.format('LLL')}</strong>

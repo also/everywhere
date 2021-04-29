@@ -176,7 +176,7 @@ export default createReactClass({
   },
 
   render() {
-    const { width, height, showWays = true } = this.props;
+    const { width, height, showWays = true, children } = this.props;
     const { mapContext } = this.state;
 
     return (
@@ -189,7 +189,7 @@ export default createReactClass({
           ref={component => (this.svgNode = findDOMNode(component))}
         >
           <BaseMap showWays={showWays} />
-          {this.props.children()}
+          {typeof children === 'function' ? children() : children}
         </MapSvg>
       </MapContext.Provider>
     );
