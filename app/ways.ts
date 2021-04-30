@@ -13,7 +13,7 @@ import {
   Point,
 } from 'geojson';
 
-type WayProperties = {
+export type WayProperties = {
   name?: string;
   id: string;
 

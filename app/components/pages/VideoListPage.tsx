@@ -1,6 +1,5 @@
-import createReactClass from 'create-react-class';
-import { withRouter, useHistory } from 'react-router';
-import { useCallback, useMemo, useState } from 'react';
+import { useHistory } from 'react-router';
+import { useCallback, useState } from 'react';
 
 import PageTitle from '../PageTitle';
 import VideoList from '../VideoList';

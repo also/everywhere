@@ -1,6 +1,5 @@
 import d3 from 'd3';
 import createReactClass from 'create-react-class';
-import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import styled, { createGlobalStyle } from 'styled-components';
 import find from 'lodash/collection/find';
@@ -10,7 +9,6 @@ import { HashRouter as Router, Switch, Route, Link } from 'react-router-dom';
 import { geometryLength } from './distance';
 
 import CityMap from './components/pages/CityMap';
-import MapData from './components/MapData';
 
 import WayList from './components/pages/WayList';
 import WayDetails from './components/pages/WayDetails';
@@ -34,6 +32,7 @@ import {
   videos,
   wayTree,
 } from './data';
+import DataContext from './components/DataContext';
 
 const GlobalStyle = createGlobalStyle`
 body {
@@ -152,61 +151,56 @@ tripsPromise.then(({ trips, videoCoverage, tripTree, videoTree }) => {
   ReactDOM.render(
     <>
       <GlobalStyle />
-      <MapData {...{ boundary, contours, ways }}>
-        {() => (
-          <Router>
-            <App>
-              <Switch>
-                <Route path="/ways/*" component={WayDetailsRoute} />
-                <Route path="/ways" component={WayListRoute} />
-                <Route
-                  path="/videos/:name/:seek"
-                  component={VideoDetailsRoute}
-                />
-                <Route path="/videos/:name" component={VideoDetailsRoute} />
-                <Route
-                  path="/videos"
-                  render={() => (
-                    <VideoListPage
-                      videos={Array.from(videos.values())}
-                      videoCoverage={videoCoverage}
-                      videoTree={videoTree}
-                    />
-                  )}
-                />
-                <Route
-                  path="/trips/:id"
-                  render={({ match }) => (
-                    <TripDetails
-                      trip={
-                        trips.filter(({ id }) => `${id}` === match.params.id)[0]
-                      }
-                    />
-                  )}
-                  trips={trips}
-                />
-                <Route
-                  path="/trips"
-                  render={() => <TripListPage trips={trips} />}
-                />
-                <Route
-                  path="/locations/:coords"
-                  render={({ match }) => (
-                    <LocationDetailsRoute
-                      tripTree={tripTree}
-                      videoTree={videoTree}
-                      match={match}
-                    />
-                  )}
-                />
-                <Route path="/">
-                  <CityMapRoute trips={trips} />
-                </Route>
-              </Switch>
-            </App>
-          </Router>
-        )}
-      </MapData>
+      <DataContext.Provider value={{ boundary, contours, ways }}>
+        <Router>
+          <App>
+            <Switch>
+              <Route path="/ways/*" component={WayDetailsRoute} />
+              <Route path="/ways" component={WayListRoute} />
+              <Route path="/videos/:name/:seek" component={VideoDetailsRoute} />
+              <Route path="/videos/:name" component={VideoDetailsRoute} />
+              <Route
+                path="/videos"
+                render={() => (
+                  <VideoListPage
+                    videos={Array.from(videos.values())}
+                    videoCoverage={videoCoverage}
+                    videoTree={videoTree}
+                  />
+                )}
+              />
+              <Route
+                path="/trips/:id"
+                render={({ match }) => (
+                  <TripDetails
+                    trip={
+                      trips.filter(({ id }) => `${id}` === match.params.id)[0]
+                    }
+                  />
+                )}
+                trips={trips}
+              />
+              <Route
+                path="/trips"
+                render={() => <TripListPage trips={trips} />}
+              />
+              <Route
+                path="/locations/:coords"
+                render={({ match }) => (
+                  <LocationDetailsRoute
+                    tripTree={tripTree}
+                    videoTree={videoTree}
+                    match={match}
+                  />
+                )}
+              />
+              <Route path="/">
+                <CityMapRoute trips={trips} />
+              </Route>
+            </Switch>
+          </App>
+        </Router>
+      </DataContext.Provider>
     </>,
     div
   );

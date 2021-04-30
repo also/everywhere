@@ -8,7 +8,7 @@ function Way({
   selected,
 }: {
   feature: WayFeature;
-  selected: boolean;
+  selected?: boolean;
 }) {
   const { path } = useContext(MapContext);
 
@@ -29,7 +29,7 @@ export default function Ways({
   selected,
 }: {
   features: WayFeature[];
-  selected: boolean;
+  selected?: boolean;
 }) {
   return (
     <g className="roads">
