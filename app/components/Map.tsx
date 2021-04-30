@@ -7,7 +7,6 @@ import {
   MouseEvent,
   memo,
 } from 'react';
-import { findDOMNode } from 'react-dom';
 import d3 from 'd3';
 import { Feature, FeatureCollection } from 'geojson';
 import styled from 'styled-components';
@@ -191,7 +190,7 @@ export default function Map({
                 })
             : undefined
         }
-        ref={component => (svgNode.current = findDOMNode(component))}
+        ref={svgNode}
       >
         <BaseMap showWays={showWays} />
         {typeof children === 'function' ? children() : children}
