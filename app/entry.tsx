@@ -2,9 +2,14 @@ import d3 from 'd3';
 import createReactClass from 'create-react-class';
 import * as ReactDOM from 'react-dom';
 import styled, { createGlobalStyle } from 'styled-components';
-import find from 'lodash/collection/find';
 
-import { HashRouter as Router, Switch, Route, Link } from 'react-router-dom';
+import {
+  HashRouter as Router,
+  Switch,
+  Route,
+  Link,
+  RouteComponentProps,
+} from 'react-router-dom';
 
 import { geometryLength } from './distance';
 
@@ -33,6 +38,8 @@ import {
   wayTree,
 } from './data';
 import DataContext from './components/DataContext';
+import { CoverageFeature, TripFeature, TripTree } from './trips';
+import { CoverageTree } from './videos';
 
 const GlobalStyle = createGlobalStyle`
 body {
@@ -73,7 +80,11 @@ const Footer = styled.footer`
 
 document.title = 'not quite everywhere';
 
-const waysLength = d3.sum(geoLines(ways), geometryLength);
+const waysLength = d3.sum(
+  geoLines(ways),
+  // @ts-expect-error the d3.sum type is wrong. d3.sum ignores null
+  geometryLength
+);
 
 const App = createReactClass({
   render() {
@@ -99,32 +110,30 @@ const App = createReactClass({
   },
 });
 
-function CityMapRoute({ trips }) {
+function CityMapRoute({ trips }: { trips: TripFeature[] }) {
   // TODO what's the right way to pass this in?
   const tripsLength = d3.sum(
     trips.map(geoLines).reduce((a, b) => a.concat(b)),
+    // @ts-expect-error the d3.sum type is wrong. d3.sum ignores null
     geometryLength
   );
   return (
-    <CityMap
-      trips={trips}
-      groupedWays={groupedWays}
-      tripsLength={tripsLength}
-      waysLength={waysLength}
-    />
+    <CityMap trips={trips} tripsLength={tripsLength} waysLength={waysLength} />
   );
 }
 
 function WayListRoute() {
-  return <WayList groupedWays={groupedWays} ways={ways} wayTree={wayTree} />;
+  return <WayList groupedWays={groupedWays} wayTree={wayTree} />;
 }
 
-function WayDetailsRoute({ match: { params } }) {
-  const way = find(groupedWays, ({ displayName }) => displayName === params[0]);
+function WayDetailsRoute({ match: { params } }: RouteComponentProps<[string]>) {
+  const way = groupedWays.find(({ displayName }) => displayName === params[0]);
   return way ? <WayDetails way={way} /> : null;
 }
 
-function VideoDetailsRoute({ match: { params } }) {
+function VideoDetailsRoute({
+  match: { params },
+}: RouteComponentProps<{ seek: string; name: string }>) {
   return <VideoDetails video={videos.get(params.name)} seek={params.seek} />;
 }
 
@@ -134,6 +143,9 @@ function LocationDetailsRoute({
   match: {
     params: { coords },
   },
+}: RouteComponentProps<{ coords: string }> & {
+  tripTree: TripTree;
+  videoTree: CoverageTree;
 }) {
   return (
     <LocationDetails
@@ -178,7 +190,6 @@ tripsPromise.then(({ trips, videoCoverage, tripTree, videoTree }) => {
                     }
                   />
                 )}
-                trips={trips}
               />
               <Route
                 path="/trips"
@@ -186,11 +197,11 @@ tripsPromise.then(({ trips, videoCoverage, tripTree, videoTree }) => {
               />
               <Route
                 path="/locations/:coords"
-                render={({ match }) => (
+                render={props => (
                   <LocationDetailsRoute
+                    {...props}
                     tripTree={tripTree}
                     videoTree={videoTree}
-                    match={match}
                   />
                 )}
               />
