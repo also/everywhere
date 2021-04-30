@@ -1,5 +1,4 @@
 import d3 from 'd3';
-import createReactClass from 'create-react-class';
 import * as ReactDOM from 'react-dom';
 import styled, { createGlobalStyle } from 'styled-components';
 
@@ -40,6 +39,7 @@ import {
 import DataContext from './components/DataContext';
 import { CoverageFeature, TripFeature, TripTree } from './trips';
 import { CoverageTree } from './videos';
+import { ReactNode } from 'react';
 
 const GlobalStyle = createGlobalStyle`
 body {
@@ -86,29 +86,27 @@ const waysLength = d3.sum(
   geometryLength
 );
 
-const App = createReactClass({
-  render() {
-    return (
-      <div>
-        <Header>
-          <div>
-            <HeaderLink to="/" style={{ color: '#E05338' }}>
-              Everywhere
-            </HeaderLink>{' '}
-            <HeaderLink to="/trips">Trips</HeaderLink>{' '}
-            <HeaderLink to="/videos">Videos</HeaderLink>{' '}
-            <HeaderLink to="/ways">Streets</HeaderLink>
-          </div>
-        </Header>
-        <Content>{this.props.children}</Content>
+function App({ children }: { children: ReactNode }) {
+  return (
+    <div>
+      <Header>
+        <div>
+          <HeaderLink to="/" style={{ color: '#E05338' }}>
+            Everywhere
+          </HeaderLink>{' '}
+          <HeaderLink to="/trips">Trips</HeaderLink>{' '}
+          <HeaderLink to="/videos">Videos</HeaderLink>{' '}
+          <HeaderLink to="/ways">Streets</HeaderLink>
+        </div>
+      </Header>
+      <Content>{children}</Content>
 
-        <Footer>
-          <p>Map data © OpenStreetMap contributors</p>
-        </Footer>
-      </div>
-    );
-  },
-});
+      <Footer>
+        <p>Map data © OpenStreetMap contributors</p>
+      </Footer>
+    </div>
+  );
+}
 
 function CityMapRoute({ trips }: { trips: TripFeature[] }) {
   // TODO what's the right way to pass this in?

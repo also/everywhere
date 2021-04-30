@@ -1,4 +1,3 @@
-import createReactClass from 'create-react-class';
 import { Link } from 'react-router-dom';
 
 import { featureCollection } from '../../geo';
