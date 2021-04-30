@@ -24,9 +24,7 @@ export default withRouter(
       const nearest = videoTree.nearest(geo);
       const {
         data: {
-          feature: {
-            properties: { start, video },
-          },
+          properties: { start, video },
         },
         coordinates: [coord],
       } = nearest;

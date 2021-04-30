@@ -56,13 +56,13 @@ export default withRouter(
     onMouseMove({ geo }) {
       const { wayTree } = this.props;
       const leaf = wayTree.nearest(geo);
-      this.setState({ hoveredStreet: leaf.data.feature });
+      this.setState({ hoveredStreet: leaf.data });
     },
 
     onClick({ geo }) {
       const { wayTree } = this.props;
       const leaf = wayTree.nearest(geo);
-      const way = leaf.data.feature;
+      const way = leaf.data;
       this.props.history.push(`/ways/${way.properties.displayName}`);
     },
 

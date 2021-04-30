@@ -88,7 +88,7 @@ intersections.features.forEach(intersection => {
   });
 });
 
-export type WayTree = Node<{ feature: WayFeature }>;
+export type WayTree = Node<WayFeature>;
 
 const wayTree: WayTree = tree(ways);
 

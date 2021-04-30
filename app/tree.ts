@@ -145,7 +145,7 @@ export class Leaf<T> {
     point0: Position,
     point1: Position,
     public index: number,
-    public data: Position[] & T
+    public data: T
   ) {
     this.coordinates = [point0, point1];
     this.extent = [
@@ -163,9 +163,11 @@ export class Leaf<T> {
   }
 }
 
-export default function<T>(topology: { arcs: (Position[] & T)[] }): Node<T> {
+export default function<T>(topology: {
+  arcs: { arc: Position[]; data: T }[];
+}): Node<T> {
   return group(
-    topology.arcs.map(arc => {
+    topology.arcs.map(({ arc, data }) => {
       let i = 0;
       const n = arc.length;
       let p0;
@@ -175,7 +177,7 @@ export default function<T>(topology: { arcs: (Position[] & T)[] }): Node<T> {
       while (++i < n) {
         p0 = p1;
         p1 = arc[i];
-        children[i - 1] = new Leaf(p0, p1, i, arc);
+        children[i - 1] = new Leaf(p0, p1, i, data);
       }
 
       return group(children);

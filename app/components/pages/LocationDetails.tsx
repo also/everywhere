@@ -34,23 +34,13 @@ export default function LocationDetails({
 
   const maxDistance = 0.0000005;
 
-  const nearbyWays = wayTree.within(location, maxDistance).map(
-    ({
-      node: {
-        data: { feature },
-      },
-    }) => feature
-  );
+  const nearbyWays = wayTree
+    .within(location, maxDistance)
+    .map(({ node: { data } }) => data);
   const nearbyGroupedWays = group(nearbyWays);
   const nearbyTrips: TripFeature[] = Array.from(
     new Set(
-      tripTree.within(location, maxDistance).map(
-        ({
-          node: {
-            data: { feature },
-          },
-        }) => feature
-      )
+      tripTree.within(location, maxDistance).map(({ node: { data } }) => data)
     )
   );
 

@@ -105,7 +105,7 @@ function calculateVideoCoverage(
   return videoCoverage;
 }
 
-export type TripTree = Node<{ feature: TripFeature }>;
+export type TripTree = Node<TripFeature>;
 
 export default tripData.then(({ default: tripTopojson }) => {
   const trips = tripTopojson.map(load);

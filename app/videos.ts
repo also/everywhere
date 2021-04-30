@@ -26,9 +26,7 @@ type VideoChapter = {
   thumbnail: Still;
 };
 
-export type CoverageTree = Node<{
-  feature: CoverageFeature;
-}>;
+export type CoverageTree = Node<CoverageFeature>;
 
 export type Video = {
   name: string;
@@ -137,9 +135,7 @@ export default groupChapters(videos);
 export function calculateSeekPosition(nearest) {
   const {
     data: {
-      feature: {
-        properties: { start },
-      },
+      properties: { start },
     },
     coordinates: [coord],
   } = nearest;
@@ -160,7 +156,7 @@ export function findNearbyVideos(
 ) {
   const nearbyVideoCoverageByName = new Map();
   videoTree.within(location, maxDistance).forEach(result => {
-    const name = result.node.data.feature.properties.video;
+    const name = result.node.data.properties.video;
     const current = nearbyVideoCoverageByName.get(name);
     if (!current || result.distance < current.distance) {
       nearbyVideoCoverageByName.set(name, result);
@@ -171,9 +167,7 @@ export function findNearbyVideos(
     ({ node, distance }) => {
       const {
         data: {
-          feature: {
-            properties: { video },
-          },
+          properties: { video },
         },
       } = node;
       const time = calculateSeekPosition(node);
