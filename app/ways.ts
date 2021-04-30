@@ -1,10 +1,17 @@
 import sortBy from 'lodash/collection/sortBy';
 
 import { features, tree } from './geo';
+import { Node } from './tree';
 
 import waysGeojson from 'compact-json!../app-data/highways-clipped-topo.geojson';
 import intersectionsTopojson from 'compact-json!../app-data/intersections-clipped-topo.geojson';
-import { Feature, FeatureCollection, LineString, Point } from 'geojson';
+import {
+  Feature,
+  FeatureCollection,
+  LineString,
+  MultiLineString,
+  Point,
+} from 'geojson';
 
 type WayProperties = {
   name?: string;
@@ -27,7 +34,7 @@ export type GroupedWays = {
   features: WayFeature[];
 };
 
-export type WayFeature = Feature<LineString, WayProperties>;
+export type WayFeature = Feature<LineString | MultiLineString, WayProperties>;
 
 export type IntersectionFeature = Feature<Point, IntersectionProperties>;
 
@@ -81,6 +88,8 @@ intersections.features.forEach(intersection => {
   });
 });
 
-const wayTree = tree(ways);
+export type WayTree = Node<{ feature: WayFeature }>;
+
+const wayTree: WayTree = tree(ways);
 
 export { ways, groupedWays, intersections, wayTree, waysById };

@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { useHistory } from 'react-router-dom';
 
 import * as format from '../../format';
-import { findNearbyVideos } from '../../videos';
+import { CoverageTree, findNearbyVideos } from '../../videos';
 import { wayTree, group } from '../../ways';
 import { featureCollection } from '../../geo';
 
@@ -13,8 +13,19 @@ import MapComponent from '../Map';
 import Dot from '../Dot';
 import Ways from '../Ways';
 import TripList from '../TripList';
+import { TripFeature, TripTree } from '../../trips';
+import { Node } from '../../tree';
+import { Position } from 'geojson';
 
-export default function LocationDetails({ location, tripTree, videoTree }) {
+export default function LocationDetails({
+  location,
+  tripTree,
+  videoTree,
+}: {
+  location: Position;
+  tripTree: TripTree;
+  videoTree: CoverageTree;
+}) {
   let history = useHistory();
 
   function onClick({ geo }) {
@@ -31,7 +42,7 @@ export default function LocationDetails({ location, tripTree, videoTree }) {
     }) => feature
   );
   const nearbyGroupedWays = group(nearbyWays);
-  const nearbyTrips = Array.from(
+  const nearbyTrips: TripFeature[] = Array.from(
     new Set(
       tripTree.within(location, maxDistance).map(
         ({

@@ -36,12 +36,14 @@ export function featureCollection(features): FeatureCollection {
   return { type: 'FeatureCollection', features: features };
 }
 
-export function tree(
+export function tree<T>(
   feat:
-    | Feature<LineString | MultiLineString>
-    | FeatureCollection<LineString | MultiLineString>
+    | Feature<LineString | MultiLineString, T>
+    | FeatureCollection<LineString | MultiLineString, T>
 ) {
-  const arcs: Position[][] = [];
+  const arcs: (Position[] & {
+    feature: Feature<LineString | MultiLineString, T>;
+  })[] = [];
 
   (feat.type === 'FeatureCollection' ? feat.features : [feat]).forEach(feat => {
     (feat.geometry.type === 'MultiLineString'
@@ -53,5 +55,7 @@ export function tree(
     });
   });
 
-  return makeTree({ arcs });
+  return makeTree<{
+    feature: Feature<LineString | MultiLineString, T>;
+  }>({ arcs });
 }

@@ -1,5 +1,4 @@
 import * as format from '../../format';
-import { waysById } from '../../ways';
 
 import PageTitle from '../PageTitle';
 import VideoList from '../VideoList';
@@ -11,7 +10,7 @@ import { TripFeature } from '../../trips';
 import { Leaf } from '../../tree';
 
 export default function TripDetails({ trip }: { trip: TripFeature }) {
-  const [nearest, setNearest] = useState<Leaf | undefined>(undefined);
+  const [nearest, setNearest] = useState<Leaf<unknown> | undefined>(undefined);
 
   const {
     properties: { tree, id, start, movingTime, videos },

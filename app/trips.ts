@@ -3,12 +3,12 @@ import { feature, tree } from './geo';
 import { group, Node } from './tree';
 import moment from 'moment';
 
-import videos, { Video } from './videos';
+import videos, { CoverageTree, Video } from './videos';
 import { Feature, LineString, MultiLineString } from 'geojson';
 
 const tripData = import('./trip-data');
 
-type TripProperties = {
+export type TripProperties = {
   activity: {
     id: string;
     start_date: string;
@@ -21,7 +21,7 @@ type TripProperties = {
   end: moment.Moment;
   movingTime: moment.Duration;
   videos: Video[];
-  tree: Node;
+  tree: TripTree;
 };
 
 export type TripFeature = Feature<LineString | MultiLineString, TripProperties>;
@@ -29,8 +29,8 @@ export type TripFeature = Feature<LineString | MultiLineString, TripProperties>;
 export type TripTopology = {};
 
 export type CoverageFeature = Feature<
-  MultiLineString,
-  TripProperties & { video: Video; tree: Node }
+  LineString | MultiLineString,
+  TripProperties & { video: Video; tree: CoverageTree }
 >;
 
 function load(trip): TripFeature {
@@ -105,12 +105,16 @@ function calculateVideoCoverage(
   return videoCoverage;
 }
 
+export type TripTree = Node<{ feature: TripFeature }>;
+
 export default tripData.then(({ default: tripTopojson }) => {
   const trips = tripTopojson.map(load);
 
   const videoCoverage = calculateVideoCoverage(trips, videos);
 
-  const tripTree = group(trips.map(({ properties: { tree } }) => tree));
+  const tripTree: TripTree = group(
+    trips.map(({ properties: { tree } }) => tree)
+  );
 
   const videoTree = group(
     Array.from(videos.values())

@@ -1,6 +1,6 @@
 import sortBy from 'lodash/collection/sortBy';
 import moment from 'moment';
-import { TripFeature } from './trips';
+import { CoverageFeature, TripFeature } from './trips';
 import { Node } from './tree';
 
 const videoContext = (require as any).context(
@@ -26,6 +26,10 @@ type VideoChapter = {
   thumbnail: Still;
 };
 
+export type CoverageTree = Node<{
+  feature: CoverageFeature;
+}>;
+
 export type Video = {
   name: string;
   start: moment.Moment;
@@ -36,8 +40,8 @@ export type Video = {
   thumbnail: Still;
   // FIXME
   trips: TripFeature[];
-  coverage: any[];
-  coverageTree: Node;
+  coverage: CoverageFeature[];
+  coverageTree: CoverageTree;
 };
 
 function load(filename: string, data: SimpleMetadata): VideoChapter {
@@ -149,7 +153,11 @@ export function findSeekPosition(video, location) {
   return calculateSeekPosition(nearest);
 }
 
-export function findNearbyVideos(videoTree, location, maxDistance) {
+export function findNearbyVideos(
+  videoTree: CoverageTree,
+  location,
+  maxDistance
+) {
   const nearbyVideoCoverageByName = new Map();
   videoTree.within(location, maxDistance).forEach(result => {
     const name = result.node.data.feature.properties.video;

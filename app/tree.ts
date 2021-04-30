@@ -27,7 +27,7 @@ function pointLineSegmentDistance(c, a: Position, b: Position) {
   );
 }
 
-export function group(children: TreeNode[]): Node {
+export function group<T>(children: TreeNode<T>[]): Node<T> {
   let n0;
 
   while ((n0 = children.length) > 1) {
@@ -49,18 +49,14 @@ export function group(children: TreeNode[]): Node {
   return children[0] as any;
 }
 
-export interface TreeNode {
-  extent: [Position, Position];
-  distance(point: Position): number;
-  children?: [TreeNode, TreeNode];
-}
+export type TreeNode<T> = Node<T> | Leaf<T>;
 
-type HeapEntry = { node: TreeNode; distance: number };
+type HeapEntry<T> = { node: TreeNode<T>; distance: number };
 
-export class Node implements TreeNode {
+export class Node<T> {
   extent: [Position, Position];
-  children: [TreeNode, TreeNode];
-  constructor(child0: TreeNode, child1: TreeNode) {
+  children: [TreeNode<T>, TreeNode<T>];
+  constructor(child0: TreeNode<T>, child1: TreeNode<T>) {
     const e0 = child0.extent;
     const e1 = child1.extent;
     this.children = [child0, child1];
@@ -85,12 +81,12 @@ export class Node implements TreeNode {
       : 0;
   }
 
-  nearest(point: Position): Leaf {
+  nearest(point: Position): Leaf<T> {
     let minNode;
     let minDistance = Infinity;
-    const heap = minHeap<HeapEntry>(compareDistance);
-    let node: TreeNode = this;
-    let candidate: HeapEntry = { distance: node.distance(point), node };
+    const heap = minHeap<HeapEntry<T>>(compareDistance);
+    let node: TreeNode<T> = this;
+    let candidate: HeapEntry<T> = { distance: node.distance(point), node };
 
     do {
       node = candidate.node;
@@ -115,12 +111,15 @@ export class Node implements TreeNode {
     return minNode;
   }
 
-  within(point: Position, maxDistance: number): HeapEntry[] {
-    const result: HeapEntry[] = [];
-    const visit = (node: TreeNode) => {
+  within(
+    point: Position,
+    maxDistance: number
+  ): { node: Leaf<T>; distance: number }[] {
+    const result: { node: Leaf<T>; distance: number }[] = [];
+    const visit = (node: TreeNode<T>) => {
       const distance = node.distance(point);
       if (distance <= maxDistance) {
-        if (node.children) {
+        if (!isLeaf(node)) {
           node.children.map(visit);
         } else {
           result.push({ node, distance });
@@ -134,14 +133,19 @@ export class Node implements TreeNode {
   }
 }
 
-export class Leaf implements TreeNode {
+function isLeaf<T>(n: TreeNode<T>): n is Leaf<T> {
+  return !n.children;
+}
+
+export class Leaf<T> {
   coordinates: [Position, Position];
   extent: [Position, Position];
+  children: undefined;
   constructor(
     point0: Position,
     point1: Position,
     public index: number,
-    public data: Position[]
+    public data: Position[] & T
   ) {
     this.coordinates = [point0, point1];
     this.extent = [
@@ -159,14 +163,14 @@ export class Leaf implements TreeNode {
   }
 }
 
-export default function(topology: { arcs: Position[][] }): TreeNode {
+export default function<T>(topology: { arcs: (Position[] & T)[] }): Node<T> {
   return group(
     topology.arcs.map(arc => {
       let i = 0;
       const n = arc.length;
       let p0;
       let p1 = arc[0];
-      const children: Leaf[] = new Array(n - 1);
+      const children: Leaf<T>[] = new Array(n - 1);
 
       while (++i < n) {
         p0 = p1;
