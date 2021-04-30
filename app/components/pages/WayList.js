@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { memo } from 'react';
 import createReactClass from 'create-react-class';
 import PureRenderMixin from 'react-addons-pure-render-mixin';
 import { Link } from 'react-router-dom';
@@ -10,22 +10,16 @@ import MapComponent from '../Map';
 import Ways from '../Ways';
 import WayListColumns from '../WayListColumns';
 
-const WayList = createReactClass({
-  mixins: [PureRenderMixin],
-
-  render() {
-    const { groupedWays } = this.props;
-
-    return (
-      <WayListColumns>
-        {groupedWays.map(way => (
-          <li key={way.displayName}>
-            <Link to={`/ways/${way.displayName}`}>{way.displayName}</Link>
-          </li>
-        ))}
-      </WayListColumns>
-    );
-  },
+const WayList = memo(function WayList({ groupedWays }) {
+  return (
+    <WayListColumns>
+      {groupedWays.map(way => (
+        <li key={way.displayName}>
+          <Link to={`/ways/${way.displayName}`}>{way.displayName}</Link>
+        </li>
+      ))}
+    </WayListColumns>
+  );
 });
 
 const WayMap = styled.div`

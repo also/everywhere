@@ -12,8 +12,6 @@ export default function Position() {
     return () => navigator.geolocation.clearWatch(watchId);
   }, []);
 
-  console.log('Position!');
-
   if (position) {
     const {
       coords: { latitude, longitude },
