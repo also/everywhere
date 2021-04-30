@@ -12,10 +12,12 @@ import MapComponent from '../Map';
 import Trips from '../Trips';
 import Dot from '../Dot';
 import MapBox from '../MapBox';
+import moment from 'moment';
 
 function VideoAndMap({ video, seek }: { video: Video; seek: number }) {
   const history = useHistory();
-  const [location, setLocation] = useState<[number, number]>([0, 0]);
+  const [location, setLocation] = useState<[number, number] | undefined>();
+  const [time, setTime] = useState<moment.Moment | undefined>();
 
   function onClick({ geo }: { geo: [number, number] }) {
     history.push(`/videos/${video.name}/${findSeekPosition(video, geo)}`);
@@ -24,7 +26,15 @@ function VideoAndMap({ video, seek }: { video: Video; seek: number }) {
   return (
     <span>
       <span style={{ display: 'inline-block' }}>
-        <VideoPlayer video={video} seek={seek} onLocationChange={setLocation} />
+        <VideoPlayer
+          video={video}
+          seek={seek}
+          onLocationChange={(loc, time) => {
+            setLocation(loc);
+            setTime(time);
+          }}
+        />
+        <p>{time ? time.format('LTS') : '--:--'}</p>
       </span>
       <MapBox
         style={{
@@ -40,7 +50,9 @@ function VideoAndMap({ video, seek }: { video: Video; seek: number }) {
           onClick={onClick}
         >
           <Trips trips={video.coverage} />
-          <Dot r={4} className="position" position={location} />
+          {location ? (
+            <Dot r={4} className="position" position={location} />
+          ) : null}
         </MapComponent>
       </MapBox>
     </span>

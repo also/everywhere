@@ -14,7 +14,7 @@ type SimpleMetadata = { duration: string; start: string };
 
 type Still = { small: string; large: string };
 
-type VideoChapter = {
+export type VideoChapter = {
   name: string;
   start: moment.Moment;
   end: moment.Moment;
