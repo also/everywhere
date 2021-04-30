@@ -1,7 +1,8 @@
 import sortBy from 'lodash/collection/sortBy';
 import moment from 'moment';
 import { CoverageFeature, TripFeature } from './trips';
-import { Node } from './tree';
+import { Leaf, Node } from './tree';
+import { Position } from 'geojson';
 
 const videoContext = (require as any).context(
   'compact-json!../app-data/video-metadata',
@@ -132,7 +133,7 @@ const videos: VideoChapter[] = videoContext.keys().map((filename: string) => {
 
 export default groupChapters(videos);
 
-export function calculateSeekPosition(nearest) {
+export function calculateSeekPosition(nearest: Leaf<CoverageFeature>) {
   const {
     data: {
       properties: { start },
@@ -143,16 +144,16 @@ export function calculateSeekPosition(nearest) {
   return +start.clone().add(timeOffsetSecs, 's');
 }
 
-export function findSeekPosition(video, location) {
-  const { coverageTree, name } = video;
+export function findSeekPosition(video: Video, location: Position) {
+  const { coverageTree } = video;
   const nearest = coverageTree.nearest(location);
   return calculateSeekPosition(nearest);
 }
 
 export function findNearbyVideos(
   videoTree: CoverageTree,
-  location,
-  maxDistance
+  location: Position,
+  maxDistance: number
 ) {
   const nearbyVideoCoverageByName = new Map();
   videoTree.within(location, maxDistance).forEach(result => {
