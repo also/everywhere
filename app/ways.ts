@@ -38,9 +38,10 @@ export type WayFeature = Feature<LineString | MultiLineString, WayProperties>;
 
 export type IntersectionFeature = Feature<Point, IntersectionProperties>;
 
-const ways: FeatureCollection<LineString, WayProperties> = features(
-  waysGeojson
-);
+const ways: FeatureCollection<
+  LineString | MultiLineString,
+  WayProperties
+> = features(waysGeojson);
 const intersections: FeatureCollection<
   Point,
   IntersectionProperties
