@@ -14,7 +14,6 @@ import Dot from '../Dot';
 import Ways from '../Ways';
 import TripList from '../TripList';
 import { TripFeature, TripTree } from '../../trips';
-import { Node } from '../../tree';
 import { Position } from 'geojson';
 
 export default function LocationDetails({
@@ -26,7 +25,7 @@ export default function LocationDetails({
   tripTree: TripTree;
   videoTree: CoverageTree;
 }) {
-  let history = useHistory();
+  const history = useHistory();
 
   function onClick({ geo }) {
     history.push(`/locations/${geo.join(',')}`);
