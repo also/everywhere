@@ -1,4 +1,9 @@
-import { S3Client, ListObjectsV2Command } from '@aws-sdk/client-s3';
+import {
+  S3Client,
+  ListObjectsV2Command,
+  GetObjectCommand,
+} from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 import credentials from '../creds/aws.json';
 
@@ -26,4 +31,13 @@ export async function list(prefix) {
   }
 
   return results;
+}
+
+export function sign(Key) {
+  const command = new GetObjectCommand({ Bucket, Key });
+  return getSignedUrl(client, command, { expiresIn: 3600 });
+}
+
+export default async function({ _: [Key] }) {
+  console.log(await sign(Key));
 }
