@@ -3,6 +3,9 @@
 download:
 	curl -o data/raw/map.xml http://overpass-api.de/api/map?bbox=-71.1631,42.3589,-71.0417,42.4270
 
+download-metro:
+	curl -o data/raw/map.xml "https://overpass-api.de/api/interpreter?data=way%5Bhighway%5D%2842.19596877629178%2C-71.52374267578125%2C42.5379038984207%2C-70.83503723144531%29%3B%0A%28._%3B%3E%3B%29%3B%0Aout%3B"
+
 # data/build/map.geojson: data/raw/map.xml
 # 	node --max_old_space_size=8192 ./node_modules/.bin/osmtogeojson data/raw/map.xml > data/build/map.geojson
 
@@ -26,6 +29,9 @@ data/build/intersections-clipped.geojson: data/build/intersections.geojson data/
 
 app-data/highways-clipped-topo.geojson: data/build/highways-clipped.geojson
 	./node_modules/.bin/topojson data/build/highways-clipped.geojson -p highway,name,oneway,user,id -o app-data/highways-clipped-topo.geojson
+
+app-data/highways-topo.geojson: data/build/highways.geojson
+	./node_modules/.bin/topojson data/build/highways.geojson -p highway,name,oneway,user,id -o app-data/highways-topo.geojson
 
 app-data/intersections-clipped-topo.geojson: data/build/intersections-clipped.geojson
 	./node_modules/.bin/topojson data/build/intersections-clipped.geojson -p refs -o app-data/intersections-clipped-topo.geojson
