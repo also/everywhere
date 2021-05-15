@@ -4,6 +4,7 @@ import {
   Geometry,
   LineString,
   MultiLineString,
+  Polygon,
   Position,
 } from 'geojson';
 import * as topojson from 'topojson';
@@ -40,16 +41,17 @@ export function featureCollection(features): FeatureCollection {
 
 export function tree<T>(
   feat:
-    | Feature<LineString | MultiLineString, T>
-    | FeatureCollection<LineString | MultiLineString, T>
+    | Feature<LineString | MultiLineString | Polygon, T>
+    | FeatureCollection<LineString | MultiLineString | Polygon, T>
 ) {
   const arcs: {
     arc: Position[];
-    data: Feature<LineString | MultiLineString, T>;
+    data: Feature<LineString | MultiLineString | Polygon, T>;
   }[] = [];
 
   (feat.type === 'FeatureCollection' ? feat.features : [feat]).forEach(feat => {
-    (feat.geometry.type === 'MultiLineString'
+    (feat.geometry.type === 'MultiLineString' ||
+    feat.geometry.type === 'Polygon'
       ? feat.geometry.coordinates
       : [feat.geometry.coordinates]
     ).forEach(arc => {
@@ -57,5 +59,7 @@ export function tree<T>(
     });
   });
 
-  return makeTree<Feature<LineString | MultiLineString, T>>({ arcs });
+  return makeTree<Feature<LineString | MultiLineString | Polygon, T>>({
+    arcs,
+  });
 }
