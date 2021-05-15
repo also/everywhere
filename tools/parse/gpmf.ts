@@ -12,7 +12,7 @@ handle MTRX for ACCL type values
 
 export const parser: Parser<KlvHeader, ComplexType> = {
   parseEntry: parseKlvHeader,
-  hasChildren: klv => !klv.type,
+  hasChildren: (klv) => !klv.type,
   nextState(data, klv, type) {
     if (klv.fourcc === 'TYPE') {
       type = parseComplexType(parseData(data, klv));
@@ -94,7 +94,7 @@ export type ComplexType = { size: number; types: TypeReader[] };
 
 export function parseComplexType(s: string): ComplexType {
   let size = 0;
-  const types = Array.from(s, c => {
+  const types = Array.from(s, (c) => {
     const t = simpleTypes[c];
     if (!t) {
       throw new Error('invalid complex type ' + s);
@@ -159,7 +159,7 @@ export function parseData(data: SeekableBuffer, header: KlvHeader): any {
 
     const result = Array(repeat);
     for (let i = 0; i < repeat; i++) {
-      result[i] = type.types.map(simpleType => {
+      result[i] = type.types.map((simpleType) => {
         const v =
           typeof simpleType.f === 'function'
             ? simpleType.f(buf, offset)
@@ -174,9 +174,7 @@ export function parseData(data: SeekableBuffer, header: KlvHeader): any {
   }
 }
 
-export function getMetaTrak(
-  mp4: Traverser<Box>
-): {
+export function getMetaTrak(mp4: Traverser<Box>): {
   stsz: BoxTypes['stsz']['table'];
   stco: BoxTypes['stco']['table'];
   stts: BoxTypes['stts']['table'];
@@ -184,19 +182,19 @@ export function getMetaTrak(
   stsd: BoxTypes['stsd'];
   mdhd: BoxTypes['mdhd'];
 } {
-  return findRequired(mp4, mp4.root, ['moov'], moov =>
-    findFirst(mp4, moov, ['trak'], track =>
+  return findRequired(mp4, mp4.root, ['moov'], (moov) =>
+    findFirst(mp4, moov, ['trak'], (track) =>
       findFirst(mp4, track, ['mdia', 'minf', 'gmhd', 'gpmd'], () =>
-        findRequired(mp4, track, ['mdia'], mdia =>
-          findRequired(mp4, mdia, ['mdhd'], mdhd =>
-            findRequired(mp4, mdia, ['minf', 'stbl'], stbl => ({
+        findRequired(mp4, track, ['mdia'], (mdia) =>
+          findRequired(mp4, mdia, ['mdhd'], (mdhd) =>
+            findRequired(mp4, mdia, ['minf', 'stbl'], (stbl) => ({
               mdhd: mp4.value(mdhd),
               ...findAll(mp4, stbl, {
-                stsd: v => mp4.value(v),
-                stsc: v => mp4.value(v).table,
-                stsz: v => mp4.value(v).table,
-                stco: v => mp4.value(v).table,
-                stts: v => mp4.value(v).table,
+                stsd: (v) => mp4.value(v),
+                stsc: (v) => mp4.value(v).table,
+                stsz: (v) => mp4.value(v).table,
+                stco: (v) => mp4.value(v).table,
+                stts: (v) => mp4.value(v).table,
               }),
             }))
           )
@@ -223,9 +221,13 @@ type MetadataTrack = {
 };
 
 export function getMetaTrack(mp4: Traverser<Box>): MetadataTrack {
-  const { stts, stsc, mdhd, stsz: sizeTable, stco: offsetTable } = getMetaTrak(
-    mp4
-  );
+  const {
+    stts,
+    stsc,
+    mdhd,
+    stsz: sizeTable,
+    stco: offsetTable,
+  } = getMetaTrak(mp4);
 
   if (stsc.length !== 1) {
     throw new Error('expected a stsc table with a single entry');
@@ -288,7 +290,13 @@ export function* iterateMetadataSamples({
 
 type GpsSample = { GPS5: GPS5[]; GPSU: number };
 
-type GPS5 = [latitude: number, longitude: number, altitude: number, groundSpeed: number, speed: number];
+type GPS5 = [
+  latitude: number,
+  longitude: number,
+  altitude: number,
+  groundSpeed: number,
+  speed: number
+];
 
 export function extractGpsSample(
   data: SeekableBuffer,
@@ -296,18 +304,18 @@ export function extractGpsSample(
 ): GpsSample {
   const gpmf = bind(parser, data, root(offset, size));
 
-  return findRequired(gpmf, gpmf.root, ['DEVC', 'STRM'], strm => {
-    return findFirst(gpmf, strm, ['GPS5'], gps5 => {
+  return findRequired(gpmf, gpmf.root, ['DEVC', 'STRM'], (strm) => {
+    return findFirst(gpmf, strm, ['GPS5'], (gps5) => {
       const { SCAL: scal, GPSU } = findAll(gpmf, strm, {
-        SCAL: v =>
+        SCAL: (v) =>
           gpmf.value(v) as [[number], [number], [number], [number], [number]],
-        GPSU: v => gpmf.value(v)[0][0] as number,
+        GPSU: (v) => gpmf.value(v)[0][0] as number,
       });
 
       const gps5Value: GPS5[] = gpmf.value(gps5);
       return {
         GPSU,
-        GPS5: gps5Value.map(row => row.map((v, i) => v / scal[i][0]) as GPS5),
+        GPS5: gps5Value.map((row) => row.map((v, i) => v / scal[i][0]) as GPS5),
       };
     });
   });

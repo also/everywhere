@@ -19,7 +19,12 @@ function extractGps(filename: string) {
   const track = getMetaTrack(mp4);
   const { creationTime, duration } = track;
 
-  const coordinates: [longitude: number, latitude: number, altitude: number, timestamp: number][] = [];
+  const coordinates: [
+    longitude: number,
+    latitude: number,
+    altitude: number,
+    timestamp: number
+  ][] = [];
 
   for (const sample of iterateMetadataSamples(track)) {
     const { GPS5, GPSU } = extractGpsSample(data, sample);
@@ -40,6 +45,6 @@ function extractGps(filename: string) {
   console.log(JSON.stringify(geoJson));
 }
 
-export default function({ _: [filename] }: { _: string[] }) {
+export default function ({ _: [filename] }: { _: string[] }) {
   extractGps(filename);
 }
