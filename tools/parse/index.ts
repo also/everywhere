@@ -36,6 +36,7 @@ export interface Traverser<T extends Entry> {
   iterator(e: T | Root): Generator<T>;
   value(e: T): any;
   root: Root;
+  data: SeekableBuffer;
 }
 
 export function bind<T extends Entry>(
@@ -52,6 +53,7 @@ export function bind<T extends Entry>(
     iterator(e) {
       return iterate(parser, data, e);
     },
+    data,
   };
 }
 
@@ -75,6 +77,10 @@ export function* iterate<T extends Entry, S = undefined>(
     if (parser.nextState) {
       state = parser.nextState(data, entry, state);
     }
+    // only encountered in the udta GPMF
+    if (entry.fourcc === '\0\0\0\0') {
+      break;
+    }
     yield entry;
     data.move(entry.fileOffset + entry.len, 8);
   }
@@ -86,4 +92,12 @@ export function iterateChildren<T extends Entry, S = any>(
   data: SeekableBuffer
 ): Generator<T> {
   return iterate(parser, data, parent);
+}
+
+export function nullTerminated(buf: Buffer): string {
+  const end = buf.findIndex((v) => v === 0);
+  if (end) {
+    buf = buf.slice(0, end);
+  }
+  return buf.toString('utf8');
 }

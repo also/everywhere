@@ -1,6 +1,7 @@
-import { bind, Parser, root, Traverser } from '.';
+import { findAncestor } from 'typescript';
+import { bind, nullTerminated, Parser, root, Traverser } from '.';
 import { BufferWrapper, SeekableBuffer } from './buffers';
-import { findAll, findFirst, findRequired } from './find';
+import { findAll, findAnywhere, findFirst, findRequired } from './find';
 import { Box, BoxTypes } from './mp4';
 
 /*
@@ -135,9 +136,7 @@ export function parseData(data: SeekableBuffer, header: KlvHeader): any {
       return result;
     } else if (type === 'c') {
       const end = offset + header.repeat * header.structSize;
-      return buf
-        .slice(offset, buf[end - 1] === 0 ? end - 1 : end)
-        .toString('ascii');
+      return nullTerminated(buf.slice(offset, end));
     } else {
       throw new Error(`can't handle ${type}`);
     }
@@ -174,7 +173,10 @@ export function parseData(data: SeekableBuffer, header: KlvHeader): any {
   }
 }
 
-export function getMetaTrak(mp4: Traverser<Box>): {
+export function getMetaTrak(
+  mp4: Traverser<Box>,
+  moov: Box
+): {
   stsz: BoxTypes['stsz']['table'];
   stco: BoxTypes['stco']['table'];
   stts: BoxTypes['stts']['table'];
@@ -182,29 +184,27 @@ export function getMetaTrak(mp4: Traverser<Box>): {
   stsd: BoxTypes['stsd'];
   mdhd: BoxTypes['mdhd'];
 } {
-  return findRequired(mp4, mp4.root, ['moov'], (moov) =>
-    findFirst(mp4, moov, ['trak'], (track) =>
-      findFirst(mp4, track, ['mdia', 'minf', 'gmhd', 'gpmd'], () =>
-        findRequired(mp4, track, ['mdia'], (mdia) =>
-          findRequired(mp4, mdia, ['mdhd'], (mdhd) =>
-            findRequired(mp4, mdia, ['minf', 'stbl'], (stbl) => ({
-              mdhd: mp4.value(mdhd),
-              ...findAll(mp4, stbl, {
-                stsd: (v) => mp4.value(v),
-                stsc: (v) => mp4.value(v).table,
-                stsz: (v) => mp4.value(v).table,
-                stco: (v) => mp4.value(v).table,
-                stts: (v) => mp4.value(v).table,
-              }),
-            }))
-          )
+  return findRequired(mp4, moov, ['trak'], (track) =>
+    findFirst(mp4, track, ['mdia', 'minf', 'gmhd', 'gpmd'], () =>
+      findRequired(mp4, track, ['mdia'], (mdia) =>
+        findRequired(mp4, mdia, ['mdhd'], (mdhd) =>
+          findRequired(mp4, mdia, ['minf', 'stbl'], (stbl) => ({
+            mdhd: mp4.value(mdhd),
+            ...findAll(mp4, stbl, {
+              stsd: (v) => mp4.value(v),
+              stsc: (v) => mp4.value(v).table,
+              stsz: (v) => mp4.value(v).table,
+              stco: (v) => mp4.value(v).table,
+              stts: (v) => mp4.value(v).table,
+            }),
+          }))
         )
       )
     )
   );
 }
 
-type MetadataTrack = {
+type Metadata = {
   // stsz
   sizeTable: number[];
   // stsz
@@ -218,16 +218,47 @@ type MetadataTrack = {
   modificationTime: number;
   timeScale: number;
   duration: number;
+
+  // udta
+  firmware: string;
+  lens: string;
+  mediaUID: string;
+  cameraModelName: string;
 };
 
-export function getMetaTrack(mp4: Traverser<Box>): MetadataTrack {
+// // https://github.com/exiftool/exiftool/blob/ceff3cbc4564e93518f3d2a2e00d8ae203ff54af/lib/Image/ExifTool/GoPro.pm#L62
+export function parseGpmfUdta(mp4: Traverser<Box>, b: Box) {
+  const gpmf = bind(parser, mp4.data, root(b.fileOffset + 8, b.len - 8));
+
+  console.log([...gpmf.iterator(gpmf.root)].map(({ fourcc }) => fourcc));
+
+  return findRequired(gpmf, gpmf.root, ['DEVC'], (devc) =>
+    findAll(gpmf, devc, {
+      MINF: (b) => gpmf.value(b),
+    })
+  );
+}
+
+export function getMeta(mp4: Traverser<Box>): Metadata {
   const {
-    stts,
-    stsc,
-    mdhd,
-    stsz: sizeTable,
-    stco: offsetTable,
-  } = getMetaTrak(mp4);
+    trak: { stts, stsc, mdhd, stsz: sizeTable, stco: offsetTable },
+    udta,
+  } = findRequired(mp4, mp4.root, ['moov'], (moov) => ({
+    trak: getMetaTrak(mp4, moov),
+    udta: findRequired(mp4, moov, ['udta'], (udta) => {
+      // console.log([...mp4.iterator(udta)]);
+      // https://github.com/gopro/gpmf-parser/issues/28#issuecomment-401124158
+      return findAll(mp4, udta, {
+        FIRM: (b) => nullTerminated(mp4.value(b)),
+        LENS: (b) => nullTerminated(mp4.value(b)),
+        MUID: (b) => (mp4.value(b) as Buffer).toString('hex'),
+        CAME: (b) => (mp4.value(b) as Buffer).toString('hex'),
+        GPMF: (b) => parseGpmfUdta(mp4, b),
+      });
+    }),
+  }));
+
+  console.log(udta);
 
   if (stsc.length !== 1) {
     throw new Error('expected a stsc table with a single entry');
@@ -247,7 +278,23 @@ export function getMetaTrack(mp4: Traverser<Box>): MetadataTrack {
   }
   const [[, sampleDelta]] = stts;
 
-  return { sizeTable, offsetTable, sampleDelta, ...mdhd };
+  const {
+    LENS: lens,
+    FIRM: firmware,
+    MUID: mediaUID,
+    GPMF: { MINF: cameraModelName },
+  } = udta;
+
+  return {
+    sizeTable,
+    offsetTable,
+    sampleDelta,
+    lens,
+    firmware,
+    mediaUID,
+    cameraModelName,
+    ...mdhd,
+  };
 }
 
 export type Sample = {
@@ -262,7 +309,7 @@ export function* iterateMetadataSamples({
   sizeTable,
   sampleDelta,
   duration: trackDuration,
-}: MetadataTrack): Generator<Sample> {
+}: Metadata): Generator<Sample> {
   if (offsetTable.length === 0) {
     return;
   }
@@ -300,7 +347,7 @@ type GPS5 = [
 
 export function extractGpsSample(
   data: SeekableBuffer,
-  { offset, size }: Sample
+  { offset, size }: { offset: number; size: number }
 ): GpsSample {
   const gpmf = bind(parser, data, root(offset, size));
 

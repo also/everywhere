@@ -3,7 +3,7 @@ import { BufferWrapper, SeekableBuffer } from './buffers';
 
 export const parser: Parser<Box> = {
   parseEntry: parseBox,
-  hasChildren: box => containers.has(box.fourcc),
+  hasChildren: (box) => containers.has(box.fourcc),
   parseValue: readValue,
 };
 
@@ -253,7 +253,13 @@ export function readValue(data: SeekableBuffer, box: Box): any {
     // TODO from https://developer.apple.com/library/archive/documentation/QuickTime/QTFF/QTFFChap2/qtff2.html#//apple_ref/doc/uid/TP40000939-CH204-BBCCFFGD
     data.move(box.fileOffset + 8, box.len - 8);
     if (box.fourcc.charCodeAt(0) === 169) {
-      return parseSmallIntBoxes(data.buf, data.offset, data.offset + box.len);
+      return parseSmallIntBoxes(
+        data.buf,
+        data.offset,
+        data.offset + box.len - 8
+      );
+    } else {
+      return data.buf.slice(data.offset, data.offset + box.len - 8);
     }
   } else {
     const parser = boxParsers[box.fourcc as keyof typeof boxParsers];

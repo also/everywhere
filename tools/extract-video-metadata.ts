@@ -1,12 +1,12 @@
 import fs from 'fs';
 import { SeekableFileBuffer } from './parse/buffers';
 import {
-  getMetaTrack,
+  getMeta,
   iterateMetadataSamples,
   extractGpsSample,
 } from './parse/gpmf';
 import { parser as mp4Parser } from './parse/mp4';
-import { bind, fileRoot, root } from './parse';
+import { bind, fileRoot } from './parse';
 
 function extractGps(filename: string) {
   const data = new SeekableFileBuffer(
@@ -16,8 +16,8 @@ function extractGps(filename: string) {
 
   const mp4 = bind(mp4Parser, data, fileRoot(data));
 
-  const track = getMetaTrack(mp4);
-  const { creationTime, duration } = track;
+  const track = getMeta(mp4);
+  const { creationTime, duration, cameraModelName, mediaUID, firmware } = track;
 
   const coordinates: [
     longitude: number,
@@ -35,7 +35,7 @@ function extractGps(filename: string) {
   // https://datatracker.ietf.org/doc/html/rfc7946#section-3.1.1
   const geoJson: GeoJSON.Feature = {
     type: 'Feature',
-    properties: { creationTime, duration },
+    properties: { creationTime, duration, cameraModelName, mediaUID, firmware },
     geometry: {
       type: 'LineString',
       coordinates,
