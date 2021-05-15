@@ -2,6 +2,9 @@
   "compilerOptions": {
     "allowJs": true,
     "jsx": "react-jsx",
-    "noEmit": true
+    "noEmit": true,
+    "strict": true,
+    "esModuleInterop": true,
+    "downlevelIteration": true
   }
 }

@@ -1,5 +1,3 @@
-require('@babel/register')({
-  plugins: ['@babel/plugin-transform-modules-commonjs'],
-});
+require('ts-node').register({ transpileOnly: true });
 
 require('./main.js').default();
