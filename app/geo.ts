@@ -1,7 +1,6 @@
 import {
   Feature,
   FeatureCollection,
-  Geometry,
   LineString,
   MultiLineString,
   Polygon,

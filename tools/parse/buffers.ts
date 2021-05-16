@@ -62,7 +62,7 @@ export class SeekableInMemoryBuffer implements SeekableBuffer {
     this.offset = this.filePos = to;
   }
 
-  move(to: number, ensureReadable: number) {
+  move(to: number) {
     this.seek(to);
   }
 }

@@ -17,7 +17,7 @@ function pointDistance(a, b) {
 }
 
 function pointLineSegmentDistance(c, a: Position, b: Position) {
-  var dx = b[0] - a[0],
+  const dx = b[0] - a[0],
     dy = b[1] - a[1],
     d2 = dx * dx + dy * dy,
     t = d2 && ((c[0] - a[0]) * dx + (c[1] - a[1]) * (b[1] - a[1])) / d2;

@@ -1,7 +1,6 @@
-import { findAncestor } from 'typescript';
 import { bind, nullTerminated, Parser, root, Traverser } from '.';
 import { BufferWrapper, SeekableBuffer } from './buffers';
-import { findAll, findAnywhere, findFirst, findRequired } from './find';
+import { findAll, findFirst, findRequired } from './find';
 import { Box, BoxTypes } from './mp4';
 
 /*

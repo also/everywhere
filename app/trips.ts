@@ -67,7 +67,7 @@ function calculateVideoCoverage(
         properties.videos.push(video);
 
         const { geometry } = trip;
-        let tripCoords =
+        const tripCoords =
           geometry.type === 'LineString'
             ? [geometry.coordinates]
             : geometry.coordinates;
