@@ -55,13 +55,13 @@ export const boxParsers = {
     const modificationTime = buf.readUInt32BE(offset) - hfsTimestampOffst;
     offset += 4;
 
-    const timeScale = buf.readUInt32BE(offset);
+    const timescale = buf.readUInt32BE(offset);
     offset += 4;
 
     const duration = buf.readUInt32BE(offset);
     offset += 4;
 
-    return { creationTime, modificationTime, timeScale, duration };
+    return { creationTime, modificationTime, timescale, duration };
   },
 
   // 8.4.3 Handler reference box (HandlerBox)

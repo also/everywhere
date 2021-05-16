@@ -17,11 +17,14 @@ function extractGps(filename: string) {
   const mp4 = bind(mp4Parser, data, fileRoot(data));
 
   const track = getMeta(mp4);
-  const { cameraModelName, mediaUID, firmware, samples } = track;
-  let creationTime, duration;
-  if (samples) {
-    ({ creationTime, duration } = samples);
-  }
+  const {
+    cameraModelName,
+    mediaUID,
+    firmware,
+    samples,
+    creationTime,
+    duration,
+  } = track;
 
   const coordinates: [
     longitude: number,

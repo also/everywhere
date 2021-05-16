@@ -218,12 +218,19 @@ type SampleMetadata = {
   // TODO these might have the wrong time zone
   creationTime: number;
   modificationTime: number;
-  timeScale: number;
+  timescale: number;
   duration: number;
 };
 
 type Metadata = {
   samples: SampleMetadata | undefined;
+
+  // mvhd
+  // TODO these might have the wrong time zone
+  creationTime: number;
+  modificationTime: number;
+  timescale: number;
+  duration: number;
 
   // udta
   firmware: string;
@@ -231,6 +238,15 @@ type Metadata = {
   mediaUID: string;
   cameraModelName: string;
 };
+
+function getMoovMeta(mp4: Traverser<Box>, moov: Box) {
+  return findRequired(
+    mp4,
+    moov,
+    ['mvhd'],
+    (b) => mp4.value(b) as BoxTypes['mvhd']
+  );
+}
 
 // // https://github.com/exiftool/exiftool/blob/ceff3cbc4564e93518f3d2a2e00d8ae203ff54af/lib/Image/ExifTool/GoPro.pm#L62
 export function parseGpmfUdta(mp4: Traverser<Box>, b: Box) {
@@ -244,22 +260,30 @@ export function parseGpmfUdta(mp4: Traverser<Box>, b: Box) {
 }
 
 export function getMeta(mp4: Traverser<Box>): Metadata {
-  const { trak, udta } = findRequired(mp4, mp4.root, ['moov'], (moov) => ({
-    trak: getMetaTrak(mp4, moov),
-    udta: findRequired(mp4, moov, ['udta'], (udta) => {
-      const GPMF = findFirst(mp4, udta, ['GPMF'], (b) => parseGpmfUdta(mp4, b));
-      // https://github.com/gopro/gpmf-parser/issues/28#issuecomment-401124158
-      return {
-        GPMF,
-        ...findAll(mp4, udta, {
-          FIRM: (b) => nullTerminated(mp4.value(b)),
-          LENS: (b) => nullTerminated(mp4.value(b)),
-          MUID: (b) => (mp4.value(b) as Buffer).toString('hex'),
-          CAME: (b) => (mp4.value(b) as Buffer).toString('hex'),
-        }),
-      };
-    }),
-  }));
+  const { trak, udta, mvhd } = findRequired(
+    mp4,
+    mp4.root,
+    ['moov'],
+    (moov) => ({
+      mvhd: getMoovMeta(mp4, moov),
+      trak: getMetaTrak(mp4, moov),
+      udta: findRequired(mp4, moov, ['udta'], (udta) => {
+        const GPMF = findFirst(mp4, udta, ['GPMF'], (b) =>
+          parseGpmfUdta(mp4, b)
+        );
+        // https://github.com/gopro/gpmf-parser/issues/28#issuecomment-401124158
+        return {
+          GPMF,
+          ...findAll(mp4, udta, {
+            FIRM: (b) => nullTerminated(mp4.value(b)),
+            LENS: (b) => nullTerminated(mp4.value(b)),
+            MUID: (b) => (mp4.value(b) as Buffer).toString('hex'),
+            CAME: (b) => (mp4.value(b) as Buffer).toString('hex'),
+          }),
+        };
+      }),
+    })
+  );
 
   let samples: SampleMetadata | undefined;
   if (trak) {
@@ -305,6 +329,7 @@ export function getMeta(mp4: Traverser<Box>): Metadata {
     firmware,
     mediaUID,
     cameraModelName,
+    ...mvhd,
   };
 }
 
