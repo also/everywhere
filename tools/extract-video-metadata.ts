@@ -63,19 +63,24 @@ export default function ({ _: [filename] }: { _: string[] }) {
         .map((f) => path.join(filename, f))
     : [filename];
 
-  files.forEach((f) => {
+  files.forEach((f, i) => {
     const basename = path.basename(f);
-    console.log(basename);
-    const geojson = extractGps(f);
-    fs.writeFileSync(
-      path.join(
-        __dirname,
-        '..',
-        'app-data',
-        'video-metadata',
-        basename + '.geojson'
-      ),
-      JSON.stringify(geojson)
+    console.log(basename, (i / files.length) * 100);
+    const dest = path.join(
+      __dirname,
+      '..',
+      'app-data',
+      'video-metadata',
+      basename + '.geojson'
     );
+
+    if (!fs.existsSync(dest)) {
+      try {
+        const geojson = extractGps(f);
+        fs.writeFileSync(dest, JSON.stringify(geojson));
+      } catch (e) {
+        console.log(e);
+      }
+    }
   });
 }
