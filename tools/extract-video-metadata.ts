@@ -17,7 +17,11 @@ function extractGps(filename: string) {
   const mp4 = bind(mp4Parser, data, fileRoot(data));
 
   const track = getMeta(mp4);
-  const { creationTime, duration, cameraModelName, mediaUID, firmware } = track;
+  const { cameraModelName, mediaUID, firmware, samples } = track;
+  let creationTime, duration;
+  if (samples) {
+    ({ creationTime, duration } = samples);
+  }
 
   const coordinates: [
     longitude: number,
@@ -26,9 +30,13 @@ function extractGps(filename: string) {
     timestamp: number
   ][] = [];
 
-  for (const sample of iterateMetadataSamples(track)) {
-    const { GPS5, GPSU } = extractGpsSample(data, sample);
-    GPS5.forEach(([lat, lon, alt]) => coordinates.push([lon, lat, alt, GPSU]));
+  if (samples) {
+    for (const sample of iterateMetadataSamples(samples)) {
+      const { GPS5, GPSU } = extractGpsSample(data, sample);
+      GPS5.forEach(([lat, lon, alt]) =>
+        coordinates.push([lon, lat, alt, GPSU])
+      );
+    }
   }
 
   // it's not quite to spec to include extra data in coordinates

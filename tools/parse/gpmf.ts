@@ -176,15 +176,17 @@ export function parseData(data: SeekableBuffer, header: KlvHeader): any {
 export function getMetaTrak(
   mp4: Traverser<Box>,
   moov: Box
-): {
-  stsz: BoxTypes['stsz']['table'];
-  stco: BoxTypes['stco']['table'];
-  stts: BoxTypes['stts']['table'];
-  stsc: BoxTypes['stsc']['table'];
-  stsd: BoxTypes['stsd'];
-  mdhd: BoxTypes['mdhd'];
-} {
-  return findRequired(mp4, moov, ['trak'], (track) =>
+):
+  | {
+      stsz: BoxTypes['stsz']['table'];
+      stco: BoxTypes['stco']['table'];
+      stts: BoxTypes['stts']['table'];
+      stsc: BoxTypes['stsc']['table'];
+      stsd: BoxTypes['stsd'];
+      mdhd: BoxTypes['mdhd'];
+    }
+  | undefined {
+  return findFirst(mp4, moov, ['trak'], (track) =>
     findFirst(mp4, track, ['mdia', 'minf', 'gmhd', 'gpmd'], () =>
       findRequired(mp4, track, ['mdia'], (mdia) =>
         findRequired(mp4, mdia, ['mdhd'], (mdhd) =>
@@ -204,7 +206,7 @@ export function getMetaTrak(
   );
 }
 
-type Metadata = {
+type SampleMetadata = {
   // stsz
   sizeTable: number[];
   // stsz
@@ -218,6 +220,10 @@ type Metadata = {
   modificationTime: number;
   timeScale: number;
   duration: number;
+};
+
+type Metadata = {
+  samples: SampleMetadata | undefined;
 
   // udta
   firmware: string;
@@ -230,8 +236,6 @@ type Metadata = {
 export function parseGpmfUdta(mp4: Traverser<Box>, b: Box) {
   const gpmf = bind(parser, mp4.data, root(b.fileOffset + 8, b.len - 8));
 
-  console.log([...gpmf.iterator(gpmf.root)].map(({ fourcc }) => fourcc));
-
   return findRequired(gpmf, gpmf.root, ['DEVC'], (devc) =>
     findAll(gpmf, devc, {
       MINF: (b) => gpmf.value(b),
@@ -240,60 +244,67 @@ export function parseGpmfUdta(mp4: Traverser<Box>, b: Box) {
 }
 
 export function getMeta(mp4: Traverser<Box>): Metadata {
-  const {
-    trak: { stts, stsc, mdhd, stsz: sizeTable, stco: offsetTable },
-    udta,
-  } = findRequired(mp4, mp4.root, ['moov'], (moov) => ({
+  const { trak, udta } = findRequired(mp4, mp4.root, ['moov'], (moov) => ({
     trak: getMetaTrak(mp4, moov),
     udta: findRequired(mp4, moov, ['udta'], (udta) => {
-      // console.log([...mp4.iterator(udta)]);
+      const GPMF = findFirst(mp4, udta, ['GPMF'], (b) => parseGpmfUdta(mp4, b));
       // https://github.com/gopro/gpmf-parser/issues/28#issuecomment-401124158
-      return findAll(mp4, udta, {
-        FIRM: (b) => nullTerminated(mp4.value(b)),
-        LENS: (b) => nullTerminated(mp4.value(b)),
-        MUID: (b) => (mp4.value(b) as Buffer).toString('hex'),
-        CAME: (b) => (mp4.value(b) as Buffer).toString('hex'),
-        GPMF: (b) => parseGpmfUdta(mp4, b),
-      });
+      return {
+        GPMF,
+        ...findAll(mp4, udta, {
+          FIRM: (b) => nullTerminated(mp4.value(b)),
+          LENS: (b) => nullTerminated(mp4.value(b)),
+          MUID: (b) => (mp4.value(b) as Buffer).toString('hex'),
+          CAME: (b) => (mp4.value(b) as Buffer).toString('hex'),
+        }),
+      };
     }),
   }));
 
-  console.log(udta);
+  let samples: SampleMetadata | undefined;
+  if (trak) {
+    const { stts, stsc, mdhd, stsz: sizeTable, stco: offsetTable } = trak;
 
-  if (stsc.length !== 1) {
-    throw new Error('expected a stsc table with a single entry');
-  }
-  const [firstChunk, samplesPerChunk] = stsc[0];
-  // 8.18.3 the index of the first chunk in a track has the value 1
-  if (firstChunk !== 1 && samplesPerChunk !== 1) {
-    throw new Error(
-      'expected all chunks to have one sample, so [[1, 1]] in stsc'
-    );
-  }
+    if (stsc.length !== 1) {
+      throw new Error('expected a stsc table with a single entry');
+    }
+    const [firstChunk, samplesPerChunk] = stsc[0];
+    // 8.18.3 the index of the first chunk in a track has the value 1
+    if (firstChunk !== 1 && samplesPerChunk !== 1) {
+      throw new Error(
+        'expected all chunks to have one sample, so [[1, 1]] in stsc'
+      );
+    }
 
-  if (stts.length !== 1) {
-    throw new Error(
-      'expected all samples to have the same delta, so a stts table with a single entry'
-    );
+    if (stts.length !== 1) {
+      throw new Error(
+        'expected all samples to have the same delta, so a stts table with a single entry'
+      );
+    }
+    const [[, sampleDelta]] = stts;
+
+    samples = {
+      sizeTable,
+      offsetTable,
+      sampleDelta,
+
+      ...mdhd,
+    };
   }
-  const [[, sampleDelta]] = stts;
 
   const {
     LENS: lens,
     FIRM: firmware,
     MUID: mediaUID,
-    GPMF: { MINF: cameraModelName },
+    GPMF: { MINF: cameraModelName } = {},
   } = udta;
 
   return {
-    sizeTable,
-    offsetTable,
-    sampleDelta,
+    samples,
     lens,
     firmware,
     mediaUID,
     cameraModelName,
-    ...mdhd,
   };
 }
 
@@ -309,7 +320,7 @@ export function* iterateMetadataSamples({
   sizeTable,
   sampleDelta,
   duration: trackDuration,
-}: Metadata): Generator<Sample> {
+}: SampleMetadata): Generator<Sample> {
   if (offsetTable.length === 0) {
     return;
   }
