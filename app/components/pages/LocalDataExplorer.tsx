@@ -1,7 +1,15 @@
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import PageTitle from '../PageTitle';
 import MapComponent from '../Map';
 import MapContext from '../MapContext';
+import MapBox from '../MapBox';
+import L from 'leaflet';
 
 function FileView<T>({
   file,
@@ -34,9 +42,11 @@ function FileView<T>({
 
   return (
     <>
-      <p>State: {value.state}</p>
-      {value.state === 'error' ? <pre>{value.error.toString()}</pre> : null}
-      {value.state === 'loaded' ? <Component value={value.value} /> : null}
+      {value.state === 'loaded' ? (
+        <Component value={value.value} />
+      ) : value.state === 'error' ? (
+        <pre>{value.error.toString()}</pre>
+      ) : null}
     </>
   );
 }
@@ -51,11 +61,32 @@ function Path({ feature }: { feature: GeoJSON.Feature }) {
   return <path className="trip" d={path(feature)} />;
 }
 
+function LeafletComponent({ value }: { value: GeoJSON.Feature }) {
+  const mapRef = useRef();
+  useEffect(() => {
+    const map = L.map(mapRef.current).setView([51.505, -0.09], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution:
+        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    }).addTo(map);
+
+    const gj = L.geoJSON(value).addTo(map);
+    map.fitBounds(gj.getBounds().pad(0.5));
+  }, []);
+
+  return <div ref={mapRef} style={{ width: 500, height: 500 }} />;
+}
+
 function GeoJSONFileView({ value }: { value: GeoJSON.Feature }) {
   return (
-    <MapComponent width={1000} height={1000} zoomFeature={value}>
-      <Path feature={value} />
-    </MapComponent>
+    <>
+      <JsonComponent value={value.properties} />
+      <MapBox>
+        <MapComponent width={1000} height={1000} zoomFeature={value}>
+          <Path feature={value} />
+        </MapComponent>
+      </MapBox>
+    </>
   );
 }
 
@@ -68,7 +99,7 @@ function File({ file }: { file: File }) {
       <FileView
         file={file}
         parse={async (f) => JSON.parse(await f.text()) as GeoJSON.Feature}
-        component={GeoJSONFileView}
+        component={LeafletComponent}
       />
     </div>
   );
