@@ -10,6 +10,7 @@ module.exports = {
   rules: {
     '@typescript-eslint/no-explicit-any': 0,
     'react/react-in-jsx-scope': 0,
+    '@typescript-eslint/no-this-alias': 0,
     // FIXME
     '@typescript-eslint/explicit-module-boundary-types': 0,
   },
