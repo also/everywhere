@@ -36,10 +36,15 @@ function extractGps(filename: string): GeoJSON.Feature {
 
   if (samples) {
     for (const sample of iterateMetadataSamples(samples)) {
-      const { GPS5, GPSU } = extractGpsSample(data, sample);
-      GPS5.forEach(([lat, lon, alt]) =>
-        coordinates.push([lon, lat, alt, GPSU])
-      );
+      const gpsData = extractGpsSample(data, sample);
+      // most of my videos have gps data in all samples, but not quite all
+      // just GPS disabled?
+      if (gpsData) {
+        const { GPS5, GPSU } = gpsData;
+        GPS5.forEach(([lat, lon, alt]) =>
+          coordinates.push([lon, lat, alt, GPSU])
+        );
+      }
     }
   }
 

@@ -390,10 +390,10 @@ type GPS5 = [
 export function extractGpsSample(
   data: SeekableBuffer,
   { offset, size }: { offset: number; size: number }
-): GpsSample {
+): GpsSample | undefined {
   const gpmf = bind(parser, data, root(offset, size));
 
-  return findRequired(gpmf, gpmf.root, ['DEVC', 'STRM'], (strm) => {
+  return findFirst(gpmf, gpmf.root, ['DEVC', 'STRM'], (strm) => {
     return findFirst(gpmf, strm, ['GPS5'], (gps5) => {
       const { SCAL: scal, GPSU } = findAll(gpmf, strm, {
         SCAL: (v) =>
