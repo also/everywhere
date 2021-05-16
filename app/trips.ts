@@ -35,7 +35,7 @@ export type CoverageFeature = Feature<
 
 function load(trip): TripFeature {
   const result: TripFeature = feature(trip);
-  const { properties, geometry } = result;
+  const { properties } = result;
   properties.videos = [];
   const {
     activity: { id, start_date, elapsed_time, moving_time },
@@ -72,8 +72,8 @@ function calculateVideoCoverage(
             ? [geometry.coordinates]
             : geometry.coordinates;
         const coordinates = tripCoords
-          .map(coords =>
-            coords.filter(coord => {
+          .map((coords) =>
+            coords.filter((coord) => {
               const [, , , timeOffset] = coord;
               const time = timeOffset * 1000 + +properties.start;
               return (
@@ -118,13 +118,13 @@ export default tripData.then(({ default: tripTopojson }) => {
 
   const videoTree = group(
     Array.from(videos.values())
-      .map(video => {
+      .map((video) => {
         video.coverageTree = group(
           video.coverage.map(({ properties: { tree } }) => tree)
         );
         return video.coverageTree;
       })
-      .filter(n => n)
+      .filter((n) => n)
   );
 
   return { trips, videoCoverage, tripTree, videoTree };

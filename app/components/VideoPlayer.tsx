@@ -44,7 +44,7 @@ export default memo(function VideoPlayer({
   }
 
   function advance(n = 1, play = false) {
-    const newChapterIndex = (chapterIndex + 1) % video.chapters.length;
+    const newChapterIndex = (chapterIndex + n) % video.chapters.length;
     setChapterIndex(newChapterIndex);
     setState({ autoPlay: !!play });
     setSeekingTo(undefined);
