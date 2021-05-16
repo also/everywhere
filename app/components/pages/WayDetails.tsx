@@ -12,9 +12,9 @@ import { GroupedWays } from '../../ways';
 export default function WayDetails({ way }: { way: GroupedWays }) {
   const intersections: Set<string> = new Set();
 
-  way.features.forEach(feat => {
-    feat.properties.intersections.forEach(intersection => {
-      intersection.properties.ways.forEach(iway =>
+  way.features.forEach((feat) => {
+    feat.properties.intersections.forEach((intersection) => {
+      intersection.properties.ways.forEach((iway) =>
         intersections.add(iway.properties.displayName)
       );
     });
@@ -39,7 +39,7 @@ export default function WayDetails({ way }: { way: GroupedWays }) {
       <WayListColumns>
         {Array.from(intersections)
           .sort()
-          .map(int => (
+          .map((int) => (
             <li>
               <Link key={int} to={`/ways/${int}`}>
                 {int}

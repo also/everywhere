@@ -6,7 +6,7 @@ export default function Position() {
   const [position, setPosition] = useState<GeolocationPosition>();
 
   useEffect(() => {
-    const watchId = navigator.geolocation.watchPosition(position =>
+    const watchId = navigator.geolocation.watchPosition((position) =>
       setPosition(position)
     );
     return () => navigator.geolocation.clearWatch(watchId);

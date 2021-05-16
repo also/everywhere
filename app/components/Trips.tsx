@@ -13,7 +13,7 @@ function AnimTrip({ trip }: { trip: TripFeature }) {
     const node = ref.current;
     const length = node.getTotalLength();
     const ease = d3.ease('linear');
-    d3.timer(elapsed => {
+    d3.timer((elapsed) => {
       const t = elapsed / duration;
 
       const e = ease(t);
@@ -44,7 +44,7 @@ function Trip({ trip }: { trip: TripFeature }) {
 export default memo(function Trips({ trips }: { trips: TripFeature[] }) {
   return (
     <g>
-      {trips.map(trip => (
+      {trips.map((trip) => (
         <Trip trip={trip} />
       ))}
     </g>

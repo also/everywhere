@@ -102,7 +102,7 @@ function grouped(name: string, chapters: VideoChapter[]): Video {
 function groupChapters(videos: VideoChapter[]): Map<string, Video> {
   const vidChapters: Map<string, VideoChapter[]> = new Map();
 
-  videos.forEach(video => {
+  videos.forEach((video) => {
     const { fileNumber, chapter } = video;
     let chapters = vidChapters.get(fileNumber);
     if (chapters == null) {
@@ -156,7 +156,7 @@ export function findNearbyVideos(
   maxDistance: number
 ) {
   const nearbyVideoCoverageByName = new Map();
-  videoTree.within(location, maxDistance).forEach(result => {
+  videoTree.within(location, maxDistance).forEach((result) => {
     const name = result.node.data.properties.video;
     const current = nearbyVideoCoverageByName.get(name);
     if (!current || result.distance < current.distance) {

@@ -74,7 +74,7 @@ export default function WayList({
       <PageTitle>Streets</PageTitle>
       <HoverStreetMap wayTree={wayTree} />
       <WayListColumns>
-        {groupedWays.map(way => (
+        {groupedWays.map((way) => (
           <li key={way.displayName}>
             <Link to={`/ways/${way.displayName}`}>{way.displayName}</Link>
           </li>

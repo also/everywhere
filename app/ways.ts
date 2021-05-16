@@ -38,18 +38,14 @@ export type WayFeature = Feature<LineString | MultiLineString, WayProperties>;
 
 export type IntersectionFeature = Feature<Point, IntersectionProperties>;
 
-const ways: FeatureCollection<
-  LineString | MultiLineString,
-  WayProperties
-> = features(waysGeojson);
-const intersections: FeatureCollection<
-  Point,
-  IntersectionProperties
-> = features(intersectionsTopojson);
+const ways: FeatureCollection<LineString | MultiLineString, WayProperties> =
+  features(waysGeojson);
+const intersections: FeatureCollection<Point, IntersectionProperties> =
+  features(intersectionsTopojson);
 
 const waysById: Map<string, WayFeature> = new Map();
 
-ways.features.forEach(way => {
+ways.features.forEach((way) => {
   waysById.set(way.properties.id, way);
   way.properties.displayName = way.properties.name || way.properties.id;
   way.properties.intersections = [];
@@ -58,7 +54,7 @@ ways.features.forEach(way => {
 export function group(features: WayFeature[]): GroupedWays[] {
   const waysByName: Map<string, WayFeature[]> = new Map();
   const unsortedGroupedWays: GroupedWays[] = [];
-  features.forEach(way => {
+  features.forEach((way) => {
     const {
       properties: { displayName },
     } = way;
@@ -76,9 +72,9 @@ export function group(features: WayFeature[]): GroupedWays[] {
 
 const groupedWays = group(ways.features);
 
-intersections.features.forEach(intersection => {
+intersections.features.forEach((intersection) => {
   intersection.properties.ways = [];
-  intersection.properties.refs.forEach(id => {
+  intersection.properties.refs.forEach((id) => {
     const way = waysById.get(id);
     if (way) {
       way.properties.intersections.push(intersection);

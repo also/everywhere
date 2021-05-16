@@ -7,4 +7,4 @@ const tripContext = (require as any).context(
 );
 export default tripContext
   .keys()
-  .map(name => tripContext(name)) as TripTopology[];
+  .map((name) => tripContext(name)) as TripTopology[];

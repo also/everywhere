@@ -77,7 +77,7 @@ export default function LocationDetails({
       <TripList trips={nearbyTrips} />
       <h2>Streets</h2>
       <Thumbnails>
-        {nearbyGroupedWays.map(way => (
+        {nearbyGroupedWays.map((way) => (
           <Thumbnail key={way.displayName}>
             <Link to={`/ways/${way.displayName}`}>
               <MapComponent

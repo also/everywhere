@@ -18,9 +18,10 @@ export default function TripDetails({ trip }: { trip: TripFeature }) {
 
   const trips = useMemo(() => [trip], [trip]);
 
-  const onMouseMove = useCallback(({ geo }) => setNearest(tree.nearest(geo)), [
-    trip,
-  ]);
+  const onMouseMove = useCallback(
+    ({ geo }) => setNearest(tree.nearest(geo)),
+    [trip]
+  );
 
   let dot = null;
   if (nearest) {

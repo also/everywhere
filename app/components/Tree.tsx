@@ -20,7 +20,7 @@ export default memo(function Tree({ tree }: { tree: TreeNode }) {
     rects.push(<path className="extent" d={d3.svg.line()(coords)} />);
 
     if (node.children && depth < 5) {
-      node.children.forEach(c => visit(c, depth + 1));
+      node.children.forEach((c) => visit(c, depth + 1));
     }
   };
 

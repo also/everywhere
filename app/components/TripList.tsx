@@ -9,7 +9,7 @@ import { TripFeature } from '../trips';
 export default function TripList({ trips }: { trips: TripFeature[] }) {
   return (
     <Thumbnails>
-      {trips.map(trip => {
+      {trips.map((trip) => {
         const {
           properties: { id, start, videos },
         } = trip;

@@ -20,9 +20,8 @@ export default function VideoListPage({
   videoTree: CoverageTree;
 }) {
   const history = useHistory();
-  const [nearest, setNearest] = useState<Leaf<CoverageFeature> | undefined>(
-    undefined
-  );
+  const [nearest, setNearest] =
+    useState<Leaf<CoverageFeature> | undefined>(undefined);
 
   const onMouseMove = useCallback(
     ({ geo }) => setNearest(videoTree.nearest(geo)),

@@ -195,7 +195,7 @@ tripsPromise.then(({ trips, videoCoverage, tripTree, videoTree }) => {
               />
               <Route
                 path="/locations/:coords"
-                render={props => (
+                render={(props) => (
                   <LocationDetailsRoute
                     {...props}
                     tripTree={tripTree}

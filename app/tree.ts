@@ -163,7 +163,7 @@ export class Leaf<T> {
   }
 }
 
-export default function<T>(topology: {
+export default function <T>(topology: {
   arcs: { arc: Position[]; data: T }[];
 }): Node<T> {
   return group(

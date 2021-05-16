@@ -8,7 +8,7 @@ type Heap<T> = {
   remove(v: T): number | null;
 };
 
-export default function<T>(compare: (a: T, b: T) => number): Heap<T> {
+export default function <T>(compare: (a: T, b: T) => number): Heap<T> {
   const heap: Heap<T> = {} as any;
   const array = [];
   let size = 0;
@@ -47,16 +47,16 @@ export default function<T>(compare: (a: T, b: T) => number): Heap<T> {
     }
   }
 
-  heap.size = function() {
+  heap.size = function () {
     return size;
   };
 
-  heap.push = function(object) {
+  heap.push = function (object) {
     up((array[(object._ = size)] = object), size++);
     return size;
   };
 
-  heap.pop = function() {
+  heap.pop = function () {
     if (size <= 0) {
       return null;
     }
@@ -69,7 +69,7 @@ export default function<T>(compare: (a: T, b: T) => number): Heap<T> {
     return removed;
   };
 
-  heap.remove = function(removed) {
+  heap.remove = function (removed) {
     const i = removed._;
 
     if (array[i] !== removed) {

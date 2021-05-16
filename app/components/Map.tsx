@@ -174,7 +174,7 @@ export default function Map({
         height={height}
         onMouseMove={
           onMouseMove
-            ? e =>
+            ? (e) =>
                 onMouseMove({
                   mouse,
                   geo: mapContext.projection.invert(mouse(e, svgNode.current)),
@@ -183,7 +183,7 @@ export default function Map({
         }
         onClick={
           onClick
-            ? e =>
+            ? (e) =>
                 onClick({
                   mouse,
                   geo: mapContext.projection.invert(mouse(e, svgNode.current)),

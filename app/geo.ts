@@ -49,15 +49,17 @@ export function tree<T>(
     data: Feature<LineString | MultiLineString | Polygon, T>;
   }[] = [];
 
-  (feat.type === 'FeatureCollection' ? feat.features : [feat]).forEach(feat => {
-    (feat.geometry.type === 'MultiLineString' ||
-    feat.geometry.type === 'Polygon'
-      ? feat.geometry.coordinates
-      : [feat.geometry.coordinates]
-    ).forEach(arc => {
-      arcs.push({ arc, data: feat });
-    });
-  });
+  (feat.type === 'FeatureCollection' ? feat.features : [feat]).forEach(
+    (feat) => {
+      (feat.geometry.type === 'MultiLineString' ||
+      feat.geometry.type === 'Polygon'
+        ? feat.geometry.coordinates
+        : [feat.geometry.coordinates]
+      ).forEach((arc) => {
+        arcs.push({ arc, data: feat });
+      });
+    }
+  );
 
   return makeTree<Feature<LineString | MultiLineString | Polygon, T>>({
     arcs,

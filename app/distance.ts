@@ -38,7 +38,7 @@ export function geometryLength(geometry: Geometry): number | null {
   if (geometry.type === 'LineString') {
     return calculateLength(geometry.coordinates);
   } else if (geometry.type === 'MultiLineString') {
-    return geometry.coordinates.reduce(function(memo, coordinates) {
+    return geometry.coordinates.reduce(function (memo, coordinates) {
       return memo + calculateLength(coordinates);
     }, 0);
   } else {
