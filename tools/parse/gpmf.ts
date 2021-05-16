@@ -236,7 +236,7 @@ type Metadata = {
   firmware: string;
   lens: string;
   mediaUID: string;
-  cameraModelName: string;
+  cameraModelName: string | undefined;
 };
 
 function getMoovMeta(mp4: Traverser<Box>, moov: Box) {
@@ -249,13 +249,18 @@ function getMoovMeta(mp4: Traverser<Box>, moov: Box) {
 }
 
 // // https://github.com/exiftool/exiftool/blob/ceff3cbc4564e93518f3d2a2e00d8ae203ff54af/lib/Image/ExifTool/GoPro.pm#L62
-export function parseGpmfUdta(mp4: Traverser<Box>, b: Box) {
+export function parseGpmfUdta(mp4: Traverser<Box>, b: Box): string {
   const gpmf = bind(parser, mp4.data, root(b.fileOffset + 8, b.len - 8));
 
-  return findRequired(gpmf, gpmf.root, ['DEVC'], (devc) =>
-    findAll(gpmf, devc, {
-      MINF: (b) => gpmf.value(b),
-    })
+  return findRequired(
+    gpmf,
+    gpmf.root,
+    ['DEVC'],
+    (devc) =>
+      // HERO 9
+      findFirst(gpmf, devc, ['MINF'], (b) => gpmf.value(b)) ||
+      // HERO 7
+      findFirst(gpmf, devc, ['STRM', 'MINF'], (b) => gpmf.value(b))
   );
 }
 
@@ -268,12 +273,12 @@ export function getMeta(mp4: Traverser<Box>): Metadata {
       mvhd: getMoovMeta(mp4, moov),
       trak: getMetaTrak(mp4, moov),
       udta: findRequired(mp4, moov, ['udta'], (udta) => {
-        const GPMF = findFirst(mp4, udta, ['GPMF'], (b) =>
+        const MINF = findFirst(mp4, udta, ['GPMF'], (b) =>
           parseGpmfUdta(mp4, b)
         );
         // https://github.com/gopro/gpmf-parser/issues/28#issuecomment-401124158
         return {
-          GPMF,
+          MINF,
           ...findAll(mp4, udta, {
             FIRM: (b) => nullTerminated(mp4.value(b)),
             LENS: (b) => nullTerminated(mp4.value(b)),
@@ -320,7 +325,7 @@ export function getMeta(mp4: Traverser<Box>): Metadata {
     LENS: lens,
     FIRM: firmware,
     MUID: mediaUID,
-    GPMF: { MINF: cameraModelName } = {},
+    MINF: cameraModelName,
   } = udta;
 
   return {

@@ -1,4 +1,5 @@
 import fs from 'fs';
+import path from 'path';
 import { SeekableFileBuffer } from './parse/buffers';
 import {
   getMeta,
@@ -8,7 +9,7 @@ import {
 import { parser as mp4Parser } from './parse/mp4';
 import { bind, fileRoot } from './parse';
 
-function extractGps(filename: string) {
+function extractGps(filename: string): GeoJSON.Feature {
   const data = new SeekableFileBuffer(
     fs.openSync(filename, 'r'),
     Buffer.alloc(10240)
@@ -44,7 +45,7 @@ function extractGps(filename: string) {
 
   // it's not quite to spec to include extra data in coordinates
   // https://datatracker.ietf.org/doc/html/rfc7946#section-3.1.1
-  const geoJson: GeoJSON.Feature = {
+  return {
     type: 'Feature',
     properties: { creationTime, duration, cameraModelName, mediaUID, firmware },
     geometry: {
@@ -52,10 +53,29 @@ function extractGps(filename: string) {
       coordinates,
     },
   };
-
-  console.log(JSON.stringify(geoJson));
 }
 
 export default function ({ _: [filename] }: { _: string[] }) {
-  extractGps(filename);
+  const files = fs.statSync(filename).isDirectory()
+    ? fs
+        .readdirSync(filename)
+        .filter((f) => f.toLowerCase().endsWith('.mp4'))
+        .map((f) => path.join(filename, f))
+    : [filename];
+
+  files.forEach((f) => {
+    const basename = path.basename(f);
+    console.log(basename);
+    const geojson = extractGps(f);
+    fs.writeFileSync(
+      path.join(
+        __dirname,
+        '..',
+        'app-data',
+        'video-metadata',
+        basename + '.geojson'
+      ),
+      JSON.stringify(geojson)
+    );
+  });
 }
