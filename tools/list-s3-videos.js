@@ -13,10 +13,10 @@ export function simpleNames(filenames) {
 export async function listVids(dir) {
   return (await list(`everywhere/video/${dir ? dir + '/' : ''}`))
     .map(({ Key }) => Key)
-    .filter(filename => path.extname(filename) === '.MP4');
+    .filter((filename) => path.extname(filename) === '.MP4');
 }
 
-export default async function({ _: [dir] }) {
+export default async function ({ _: [dir] }) {
   const vids = await listVids(dir);
   console.log(vids);
 }

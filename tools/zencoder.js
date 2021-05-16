@@ -26,7 +26,7 @@ export async function encode(file) {
   return data;
 }
 
-export default async function({ _: [file] }) {
+export default async function ({ _: [file] }) {
   const result = await encode(file);
   console.log(result);
 }

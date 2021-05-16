@@ -3,7 +3,7 @@ import path from 'path';
 
 import { feature, tree } from '../app/geo';
 
-export default function() {
+export default function () {
   let coordCount = 0;
 
   const waysGeojson = JSON.parse(
@@ -12,11 +12,11 @@ export default function() {
     )
   );
   const tripDir = path.join(__dirname, '../app-data/trips');
-  const trips = fs.readdirSync(tripDir).map(tripFilename => {
+  const trips = fs.readdirSync(tripDir).map((tripFilename) => {
     const filename = path.join(tripDir, tripFilename);
     const topo = JSON.parse(fs.readFileSync(filename));
 
-    topo.arcs.forEach(arc => arc.forEach(coord => coord.push([])));
+    topo.arcs.forEach((arc) => arc.forEach((coord) => coord.push([])));
 
     const trip = feature(topo);
     trip.topo = topo;
@@ -28,7 +28,7 @@ export default function() {
     (geometry.type === 'LineString'
       ? [geometry.coordinates]
       : geometry.coordinates
-    ).forEach(coords => (coordCount += coords.length));
+    ).forEach((coords) => (coordCount += coords.length));
 
     return trip;
   });
@@ -44,8 +44,8 @@ export default function() {
     (geometry.type === 'LineString'
       ? [geometry.coordinates]
       : geometry.coordinates
-    ).forEach(coords =>
-      coords.forEach(coord => {
+    ).forEach((coords) =>
+      coords.forEach((coord) => {
         const nearestWay = waysTree.nearest(coord).data.feature.properties;
         coord[coord.length - 1].push(nearestWay.id);
         if (n++ % 1 === 0) {

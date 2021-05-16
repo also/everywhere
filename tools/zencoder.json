@@ -19,7 +19,8 @@
           "filename": "large-{{number}}",
           "public": true,
           "format": "jpg"
-        }, {
+        },
+        {
           "label": "thumbnail small",
           "base_url": "s3://static.ryanberdeen.com/everywhere/video/thumbnails/VIDEO_NAME/",
           "width": "640",

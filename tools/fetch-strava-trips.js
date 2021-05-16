@@ -45,7 +45,7 @@ function getTrip(id) {
 
 function getStreams(activity) {
   return get(`activities/${activity.id}/streams/${streamNames.join(',')}`).then(
-    streams => {
+    (streams) => {
       const streamsByType = { activity };
       streams.forEach(({ type, data }) => (streamsByType[type] = data));
       return streamsByType;
@@ -55,7 +55,7 @@ function getStreams(activity) {
 
 function streamsToGeoJson(streams) {
   const orderedStreams = [];
-  otherStreamNames.forEach(type => {
+  otherStreamNames.forEach((type) => {
     if (streams[type]) {
       orderedStreams.push(streams[type]);
     }
@@ -77,7 +77,7 @@ function streamsToGeoJson(streams) {
     currentCoordinates.push([
       lng,
       lat,
-      ...orderedStreams.map(stream => stream[i]),
+      ...orderedStreams.map((stream) => stream[i]),
     ]);
   });
 
@@ -100,11 +100,11 @@ function streamsToGeoJson(streams) {
 function geoJsonToTopoJson(geoJson) {
   return topojson.topology(
     { geoJson },
-    { 'property-transform': f => f.properties }
+    { 'property-transform': (f) => f.properties }
   );
 }
 
-export default async function({ _: [id] }) {
+export default async function ({ _: [id] }) {
   const activity = await getTrip(id);
   const streams = await getStreams(activity);
   const gj = streamsToGeoJson(streams);

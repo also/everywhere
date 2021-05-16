@@ -56,7 +56,7 @@ function parseXml(file) {
 
   return new Promise((resolve, reject) => {
     input
-      .on('data', chunk => osmxmlParser.write(chunk))
+      .on('data', (chunk) => osmxmlParser.write(chunk))
       .on('end', () => {
         osmxmlParser.end();
         resolve(osmxmlParser.getJSON());
@@ -84,7 +84,7 @@ function toGeoJson(data) {
   }
 
   console.error('processing elements');
-  data.elements.forEach(elt => {
+  data.elements.forEach((elt) => {
     if (elt.type === 'node') {
       const node = getNode(elt.id);
       node.geometry.coordinates = [parseFloat(elt.lon), parseFloat(elt.lat)];
@@ -123,6 +123,6 @@ function toGeoJson(data) {
   writeFoot();
 }
 
-export default function({ _: [file] }) {
+export default function ({ _: [file] }) {
   parseXml(file).then(toGeoJson);
 }

@@ -7,12 +7,12 @@ import { Upload } from '@aws-sdk/lib-storage';
 import { Bucket, client } from './s3-client';
 import { listVids, simpleNames } from './list-s3-videos';
 
-export default async function({ _: [dir = 'video'] }) {
+export default async function ({ _: [dir = 'video'] }) {
   const existingVids = simpleNames(await listVids('raw'));
 
   const local = simpleNames(globSync(path.join(dir, '*.MP4')));
   const toUpload = new Set(local);
-  existingVids.forEach(name => toUpload.delete(name));
+  existingVids.forEach((name) => toUpload.delete(name));
 
   console.log({ toUpload });
 
@@ -32,7 +32,7 @@ export default async function({ _: [dir = 'video'] }) {
 
     console.log(Key);
 
-    upload.on('httpUploadProgress', progress =>
+    upload.on('httpUploadProgress', (progress) =>
       process.stdout.write(`${JSON.stringify(progress)}\r`)
     );
 

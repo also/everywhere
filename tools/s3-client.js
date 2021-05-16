@@ -38,6 +38,6 @@ export function sign(Key) {
   return getSignedUrl(client, command, { expiresIn: 3600 });
 }
 
-export default async function({ _: [Key] }) {
+export default async function ({ _: [Key] }) {
   console.log(await sign(Key));
 }

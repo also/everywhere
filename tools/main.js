@@ -1,6 +1,6 @@
 import minimist from 'minimist';
 
-export default function() {
+export default function () {
   const argv = minimist(process.argv.slice(2));
 
   const commandName = argv._.shift();
@@ -9,7 +9,7 @@ export default function() {
   if (command.default) {
     command = command.default;
   }
-  Promise.resolve(command(argv)).catch(e =>
+  Promise.resolve(command(argv)).catch((e) =>
     setImmediate(() => {
       throw e;
     })

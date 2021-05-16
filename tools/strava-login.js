@@ -21,7 +21,7 @@ export default function login({ _: code }) {
       );
       console.log(body);
     })
-    .catch(result => {
+    .catch((result) => {
       console.error('error', result.stack || JSON.stringify(result));
     });
 }

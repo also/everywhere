@@ -32,7 +32,7 @@ export async function encode(file) {
   return data;
 }
 
-export default async function({ _: [file] }) {
+export default async function ({ _: [file] }) {
   try {
     console.log(await encode(file));
   } catch (e) {
