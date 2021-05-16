@@ -9,158 +9,143 @@ export const parser: Parser<Box> = {
 
 const hfsTimestampOffst = 2082844800;
 
+function readUInt32BE(b: BufferWrapper): number {
+  const result = b.buf.readUInt32BE(b.offset);
+  b.offset += 4;
+  return result;
+}
+
+function readUInt16BE(b: BufferWrapper): number {
+  const result = b.buf.readUInt16BE(b.offset);
+  b.offset += 4;
+  return result;
+}
+
+function readByte(b: BufferWrapper) {
+  return b.buf[b.offset++];
+}
+
+function skip(b: BufferWrapper, n: number): void {
+  b.offset += n;
+}
+
+function slice(b: BufferWrapper, n: number): Buffer {
+  const result = b.buf.slice(b.offset, b.offset + n);
+  b.offset += n;
+  return result;
+}
+
 export type BoxTypes = {
   [K in keyof typeof boxParsers]: ReturnType<typeof boxParsers[K]>;
 };
 
 export const boxParsers = {
   // 8.2.2 Movie header box (MovieHeaderBox)
-  mvhd: ({ buf, offset }: BufferWrapper) => {
-    const creationTime = buf.readUInt32BE(offset) - hfsTimestampOffst;
-    offset += 4;
-    const modificationTime = buf.readUInt32BE(offset) - hfsTimestampOffst;
-    offset += 4;
-
-    const timescale = buf.readUInt32BE(offset);
-    offset += 4;
-
-    const duration = buf.readUInt32BE(offset);
-    offset += 4;
+  mvhd: (b: BufferWrapper) => {
+    const creationTime = readUInt32BE(b) - hfsTimestampOffst;
+    const modificationTime = readUInt32BE(b) - hfsTimestampOffst;
+    const timescale = readUInt32BE(b);
+    const duration = readUInt32BE(b);
 
     return { creationTime, modificationTime, timescale, duration };
   },
 
   // 8.3.2 Track header box (TrackHeaderBox)
-  tkhd({ buf, offset }: BufferWrapper) {
-    const creationTime = buf.readUInt32BE(offset) - hfsTimestampOffst;
-    offset += 4;
-    const modificationTime = buf.readUInt32BE(offset) - hfsTimestampOffst;
-    offset += 4;
-    const id = buf.readUInt32BE(offset);
-    offset += 4;
+  tkhd(b: BufferWrapper) {
+    const creationTime = readUInt32BE(b) - hfsTimestampOffst;
+    const modificationTime = readUInt32BE(b) - hfsTimestampOffst;
+    const id = readUInt32BE(b);
     // reserved (4)
-    offset += 4;
-
+    skip(b, 4);
     // TODO only defined as "a time value" and 4 bytes
-    const duration = buf.readUInt32BE(offset);
-    offset += 4;
+    const duration = readUInt32BE(b);
 
     return { creationTime, modificationTime, id, duration };
   },
 
   // 8.4.2 Media header box (MediaHeaderBox)
-  mdhd({ buf, offset }: BufferWrapper) {
-    const creationTime = buf.readUInt32BE(offset) - hfsTimestampOffst;
-    offset += 4;
-    const modificationTime = buf.readUInt32BE(offset) - hfsTimestampOffst;
-    offset += 4;
-
-    const timescale = buf.readUInt32BE(offset);
-    offset += 4;
-
-    const duration = buf.readUInt32BE(offset);
-    offset += 4;
+  mdhd(b: BufferWrapper) {
+    const creationTime = readUInt32BE(b) - hfsTimestampOffst;
+    const modificationTime = readUInt32BE(b) - hfsTimestampOffst;
+    const timescale = readUInt32BE(b);
+    const duration = readUInt32BE(b);
 
     return { creationTime, modificationTime, timescale, duration };
   },
 
   // 8.4.3 Handler reference box (HandlerBox)
-  hdlr({ buf, offset }: BufferWrapper, len: number) {
-    const componentType = buf.slice(offset, offset + 4).toString('ascii');
-    offset += 4;
-    const componentSubtype = buf.slice(offset, offset + 4).toString('ascii');
-    offset += 4;
+  hdlr(b: BufferWrapper, len: number) {
+    const componentType = slice(b, 4).toString('ascii');
+    const componentSubtype = slice(b, 4).toString('ascii');
 
     // manufacturer (4)
-    offset += 4;
+    skip(b, 4);
 
     // flags (4);
-    offset += 4;
+    skip(b, 4);
 
     // flags mask
-    offset += 4;
+    skip(b, 4);
 
-    let strEnd = offset + 1 + buf[offset];
-
-    const componentName = buf.slice(offset + 1, strEnd).toString('utf8');
+    const strLen = readByte(b);
+    const componentName = slice(b, strLen).toString('utf8');
 
     return { componentType, componentSubtype, componentName };
   },
 
   // 8.5.2 Sample description box (SampleTableBox)
   // TODO got this from https://developer.apple.com/library/archive/documentation/QuickTime/QTFF/QTFFChap3/qtff3.html
-  stsd({ buf, offset }: BufferWrapper) {
-    const n = buf.readUInt32BE(offset);
-    offset += 4;
+  stsd(b: BufferWrapper) {
+    const n = readUInt32BE(b);
 
-    const sampleDescriptionSize = buf.readUInt32BE(offset);
-    offset += 4;
+    const sampleDescriptionSize = readUInt32BE(b);
 
-    const dataFormat = buf.slice(offset, offset + 4).toString('ascii');
-    offset += 4;
+    const dataFormat = slice(b, 4).toString('ascii');
 
     // reserved (6)
-    offset += 6;
+    skip(b, 6);
 
-    const dataReferenceIndex = buf.readUInt16BE(offset);
+    const dataReferenceIndex = readUInt16BE(b);
 
     return { n, sampleDescriptionSize, dataFormat, dataReferenceIndex };
   },
 
   // 8.6.1.2 Decoding time to sample box (TimeToSampleBox)
-  stts({ buf, offset }: BufferWrapper) {
-    const n = buf.readUInt32BE(offset);
-    offset += 4;
+  stts(b: BufferWrapper) {
+    const n = readUInt32BE(b);
 
     const table: [number, number][] = [];
 
     for (let i = 0; i < n; i++) {
-      const count = buf.readUInt32BE(offset);
-      offset += 4;
-      const duration = buf.readUInt32BE(offset);
-      offset += 4;
-      table.push([count, duration]);
+      table.push([readUInt32BE(b), readUInt32BE(b)]);
     }
 
     return { n, table };
   },
 
   // 8.7.4 Sample to chunk box (SampleToChunkBox)
-  stsc({ buf, offset }: BufferWrapper) {
-    const n = buf.readUInt32BE(offset);
-    offset += 4;
+  stsc(b: BufferWrapper) {
+    const n = readUInt32BE(b);
 
     const table: [number, number, number][] = [];
 
     for (let i = 0; i < n; i++) {
-      const firstChunk = buf.readUInt32BE(offset);
-      offset += 4;
-      const samplesPerChunk = buf.readUInt32BE(offset);
-      offset += 4;
-      const sampleDescriptionId = buf.readUInt32BE(offset);
-      offset += 4;
-      table.push([firstChunk, samplesPerChunk, sampleDescriptionId]);
+      table.push([readUInt32BE(b), readUInt32BE(b), readUInt32BE(b)]);
     }
 
     return { n, table };
   },
 
   // 8.7.3.2 Sample size box (SampleSizeBox)
-  stsz({ buf, offset }: BufferWrapper) {
-    const sampleSize = buf.readUInt32BE(offset);
-    offset += 4;
-
-    const n = buf.readUInt32BE(offset);
-    offset += 4;
+  stsz(b: BufferWrapper) {
+    const sampleSize = readUInt32BE(b);
+    const n = readUInt32BE(b);
 
     const table = [];
 
     if (sampleSize === 0) {
       for (let i = 0; i < n; i++) {
-        const entrySize = buf.readUInt32BE(offset);
-        offset += 4;
-
-        table.push(entrySize);
+        table.push(readUInt32BE(b));
       }
     }
 
@@ -168,17 +153,13 @@ export const boxParsers = {
   },
 
   // 8.7.5 Chunk offset box (SampleToChunkBox)
-  stco({ buf, offset }: BufferWrapper) {
-    const n = buf.readUInt32BE(offset);
-    offset += 4;
+  stco(b: BufferWrapper) {
+    const n = readUInt32BE(b);
 
     const table = [];
 
     for (let i = 0; i < n; i++) {
-      const entrySize = buf.readUInt32BE(offset);
-      offset += 4;
-
-      table.push(entrySize);
+      table.push(readUInt32BE(b));
     }
 
     return { n, table };
@@ -222,12 +203,10 @@ export type Box = {
 };
 
 export function parseBox(data: SeekableBuffer, parent: Box | Root): Box {
-  const { buf, filePos: fileOffset } = data;
-  let { offset } = data;
+  const { filePos: fileOffset } = data;
 
-  const len = buf.readUInt32BE(offset);
-  offset += 4;
-  const type = buf.slice(offset, offset + 4).toString('latin1');
+  const len = readUInt32BE(data);
+  const type = slice(data, 4).toString('latin1');
   return {
     len,
     fourcc: type,
