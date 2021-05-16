@@ -138,7 +138,7 @@ export function parseData(data: SeekableBuffer, header: KlvHeader): any {
       const end = offset + header.repeat * header.structSize;
       return nullTerminated(buf.slice(offset, end));
     } else {
-      throw new Error(`can't handle ${type}`);
+      throw new Error(`can't handle type ${type}`);
     }
   } else {
     /* TODO can there be repeated complex types? I only saw one case where structSize was longer than the size of the complex struct
@@ -212,7 +212,7 @@ type SampleMetadata = {
   // stsz
   offsetTable: number[];
   // stts
-  sampleDelta: number;
+  // sampleDelta: number;
 
   // mdhd
   // TODO these might have the wrong time zone
@@ -292,7 +292,7 @@ export function getMeta(mp4: Traverser<Box>): Metadata {
 
   let samples: SampleMetadata | undefined;
   if (trak) {
-    const { stts, stsc, mdhd, stsz: sizeTable, stco: offsetTable } = trak;
+    const { stsc, mdhd, stsz: sizeTable, stco: offsetTable } = trak;
 
     if (stsc.length !== 1) {
       throw new Error('expected a stsc table with a single entry');
@@ -305,17 +305,18 @@ export function getMeta(mp4: Traverser<Box>): Metadata {
       );
     }
 
-    if (stts.length !== 1) {
-      throw new Error(
-        'expected all samples to have the same delta, so a stts table with a single entry'
-      );
-    }
-    const [[, sampleDelta]] = stts;
+    // if (stts.length !== 1) {
+    //   console.log(stts);
+    //   throw new Error(
+    //     'expected all samples to have the same delta, so a stts table with a single entry'
+    //   );
+    // }
+    // const [[, sampleDelta]] = stts;
 
     samples = {
       sizeTable,
       offsetTable,
-      sampleDelta,
+      // sampleDelta,
 
       ...mdhd,
     };
@@ -341,38 +342,38 @@ export function getMeta(mp4: Traverser<Box>): Metadata {
 export type Sample = {
   size: number;
   offset: number;
-  duration: number;
-  decodingTs: number;
+  // duration: number;
+  // decodingTs: number;
 };
 
 export function* iterateMetadataSamples({
   offsetTable,
   sizeTable,
-  sampleDelta,
-  duration: trackDuration,
-}: SampleMetadata): Generator<Sample> {
+}: // sampleDelta,
+// duration: trackDuration,
+SampleMetadata): Generator<Sample> {
   if (offsetTable.length === 0) {
     return;
   }
 
   let i = 0;
-  let decodingTs = 0;
+  // let decodingTs = 0;
   for (; i < offsetTable.length - 1; i++) {
     yield {
       size: sizeTable[i],
       offset: offsetTable[i],
-      duration: sampleDelta,
-      decodingTs,
+      // duration: sampleDelta,
+      // decodingTs,
     };
 
-    decodingTs += sampleDelta;
+    // decodingTs += sampleDelta;
   }
 
   yield {
     size: sizeTable[i],
     offset: offsetTable[i],
-    duration: Math.max(trackDuration - decodingTs, 0),
-    decodingTs,
+    // duration: Math.max(trackDuration - decodingTs, 0),
+    // decodingTs,
   };
 }
 
