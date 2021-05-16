@@ -12,14 +12,16 @@ export class SeekableFileBuffer implements SeekableBuffer {
   bufLength = 0;
   offset = 0;
   size: number;
-  buf: Buffer;
+  buf: DataView;
+  _buf: Buffer;
   fd: number;
 
   constructor(fd: number, buf: Buffer) {
     this.fd = fd;
     this.size = fs.fstatSync(this.fd).size;
 
-    this.buf = buf;
+    this._buf = buf;
+    this.buf = new DataView(buf.buffer);
   }
 
   seek(to: number) {
@@ -27,7 +29,7 @@ export class SeekableFileBuffer implements SeekableBuffer {
       return;
     }
     this.bufFileOffset = to;
-    const read = fs.readSync(this.fd, this.buf, 0, this.buf.length, to);
+    const read = fs.readSync(this.fd, this.buf, 0, this._buf.length, to);
     this.bufLength = read;
     this.offset = 0;
     this.filePos = to;
@@ -51,11 +53,11 @@ export class SeekableFileBuffer implements SeekableBuffer {
 export class SeekableInMemoryBuffer implements SeekableBuffer {
   size: number;
   constructor(
-    public buf: Buffer,
+    public buf: DataView,
     public offset: number,
     public filePos = offset
   ) {
-    this.size = buf.length;
+    this.size = buf.byteLength;
   }
 
   seek(to: number) {
@@ -68,7 +70,7 @@ export class SeekableInMemoryBuffer implements SeekableBuffer {
 }
 
 export interface BufferWrapper {
-  buf: Buffer;
+  buf: DataView;
   offset: number;
   filePos: number;
 }

@@ -1,5 +1,16 @@
 import { Parser, Root } from '.';
 import { BufferWrapper, SeekableBuffer } from './buffers';
+import {
+  latin18decoder,
+  readAscii,
+  readUInt8,
+  readUInt16BE,
+  readUInt32BE,
+  readUtf8,
+  skip,
+  slice,
+  utf8decoder,
+} from './read';
 
 export const parser: Parser<Box> = {
   parseEntry: parseBox,
@@ -8,32 +19,6 @@ export const parser: Parser<Box> = {
 };
 
 const hfsTimestampOffst = 2082844800;
-
-function readUInt32BE(b: BufferWrapper): number {
-  const result = b.buf.readUInt32BE(b.offset);
-  b.offset += 4;
-  return result;
-}
-
-function readUInt16BE(b: BufferWrapper): number {
-  const result = b.buf.readUInt16BE(b.offset);
-  b.offset += 4;
-  return result;
-}
-
-function readByte(b: BufferWrapper) {
-  return b.buf[b.offset++];
-}
-
-function skip(b: BufferWrapper, n: number): void {
-  b.offset += n;
-}
-
-function slice(b: BufferWrapper, n: number): Buffer {
-  const result = b.buf.slice(b.offset, b.offset + n);
-  b.offset += n;
-  return result;
-}
 
 export type BoxTypes = {
   [K in keyof typeof boxParsers]: ReturnType<typeof boxParsers[K]>;
@@ -75,8 +60,8 @@ export const boxParsers = {
 
   // 8.4.3 Handler reference box (HandlerBox)
   hdlr(b: BufferWrapper, len: number) {
-    const componentType = slice(b, 4).toString('ascii');
-    const componentSubtype = slice(b, 4).toString('ascii');
+    const componentType = readAscii(b, 4);
+    const componentSubtype = readAscii(b, 4);
 
     // manufacturer (4)
     skip(b, 4);
@@ -87,8 +72,8 @@ export const boxParsers = {
     // flags mask
     skip(b, 4);
 
-    const strLen = readByte(b);
-    const componentName = slice(b, strLen).toString('utf8');
+    const strLen = readUInt8(b);
+    const componentName = readUtf8(b, strLen);
 
     return { componentType, componentSubtype, componentName };
   },
@@ -100,7 +85,7 @@ export const boxParsers = {
 
     const sampleDescriptionSize = readUInt32BE(b);
 
-    const dataFormat = slice(b, 4).toString('ascii');
+    const dataFormat = readAscii(b, 4);
 
     // reserved (6)
     skip(b, 6);
@@ -175,20 +160,20 @@ string.
 
 - https://developer.apple.com/library/archive/documentation/QuickTime/QTFF/QTFFChap2/qtff2.html#//apple_ref/doc/uid/TP40000939-CH204-BBCGFIDH
 */
-export function parseSmallIntBoxes(buf: Buffer, offset: number, end: number) {
+export function parseSmallIntBoxes(buf: DataView, offset: number, end: number) {
   const result = [];
   while (offset < end) {
-    const len = buf.readUInt16BE(offset);
+    const len = buf.getUint16(offset);
     if (len === 0) {
       // i think this is what this means:
       // For historical reasons, the data list is optionally terminated by a 32-bit integer set to 0. If you are writing a program to read user data atoms, you should allow for the terminating 0. However, if you are writing a program to create user data atoms, you can safely leave out the terminating 0.
       break;
     }
     offset += 2;
-    const type = buf.readUInt16BE(offset);
+    const type = buf.getUint16(offset);
     offset += 2;
     const end = offset + len;
-    const value = buf.slice(offset, end).toString('utf8');
+    const value = utf8decoder.decode(new DataView(buf.buffer, offset, len));
     offset = end;
     result.push({ type, len, value });
   }
@@ -206,7 +191,7 @@ export function parseBox(data: SeekableBuffer, parent: Box | Root): Box {
   const { filePos: fileOffset } = data;
 
   const len = readUInt32BE(data);
-  const type = slice(data, 4).toString('latin1');
+  const type = latin18decoder.decode(slice(data, 4));
   return {
     len,
     fourcc: type,
@@ -238,13 +223,13 @@ export function readValue(data: SeekableBuffer, box: Box): any {
         data.offset + box.len - 8
       );
     } else {
-      return data.buf.slice(data.offset, data.offset + box.len - 8);
+      return new DataView(data.buf.buffer, data.offset, box.len - 8);
     }
   } else {
     const parser = boxParsers[box.fourcc as keyof typeof boxParsers];
     if (parser) {
       data.move(box.fileOffset + 8, 1);
-      const version = data.buf[data.offset];
+      const version = data.buf.getInt8(data.offset);
       if (version !== 0) {
         throw new Error(
           `don't support v ${version} for box ${box.fourcc} at ${box.fileOffset}`

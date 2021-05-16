@@ -2,6 +2,7 @@ import { bind, nullTerminated, Parser, root, Traverser } from '.';
 import { BufferWrapper, SeekableBuffer } from './buffers';
 import { findAll, findFirst, findRequired } from './find';
 import { Box, BoxTypes } from './mp4';
+import { readAscii, readUInt8, readUInt16BE, readInt8, readUInt32BE, readFloatBE, readBigUInt64BE } from './read';
 
 /*
 TODO:
@@ -32,14 +33,15 @@ type KlvHeader = {
 };
 
 export function parseKlvHeader(
-  { buf, offset, filePos }: BufferWrapper,
+  b: BufferWrapper,
   _: any,
   typeDetail: ComplexType | undefined
 ): KlvHeader {
-  const key = buf.slice(offset, offset + 4).toString('ascii');
-  const typeInt = buf.readUInt8(offset + 4);
-  const structSize = buf.readUInt8(offset + 5);
-  const repeat = buf.readUInt16BE(offset + 6);
+  const { filePos } = b;
+  const key = readAscii(b, 4);
+  const typeInt = readUInt8(b);
+  const structSize = readUInt8(b);
+  const repeat = readUInt16BE(b);
 
   const typeStr = typeInt ? String.fromCharCode(typeInt) : undefined;
   let type;
@@ -65,29 +67,20 @@ export function parseKlvHeader(
   };
 }
 
-type TypeReader = {
-  f: keyof Buffer | ((buf: Buffer, offset: number) => any);
-  size: number;
-};
+type TypeReader = ((b: BufferWrapper) => any;
 
 const simpleTypes: { [key: string]: TypeReader } = {
-  b: { f: 'readInt8', size: 1 },
-  B: { f: 'readUInt8', size: 1 },
-  f: { f: 'readFloatBE', size: 4 },
-  F: {
-    f: (buf, offset) => buf.slice(offset, offset + 4).toString('ascii'),
-    size: 4,
-  },
-  J: { f: 'readBigUInt64BE', size: 8 },
-  l: { f: 'readInt32BE', size: 4 },
-  L: { f: 'readUInt32BE', size: 4 },
-  s: { f: 'readInt16BE', size: 2 },
-  S: { f: 'readUInt16BE', size: 2 },
-  U: {
-    f: (buf, offset) =>
-      parseDate(buf.slice(offset, offset + 16).toString('ascii')),
-    size: 16,
-  },
+  b: readInt8,
+  B: readUInt8,
+  f: readFloatBE,
+  F: b => readAscii(b, 4),
+  J: readBigUInt64BE,
+  l: readInt32BE,
+  L: readUInt32BE,
+  s: readInt16BE,
+  S: readUInt16BE,
+  U: (b) =>
+      parseDate(readAscii(b, 16)),
 };
 
 export type ComplexType = { size: number; types: TypeReader[] };
