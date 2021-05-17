@@ -33,7 +33,7 @@ export function root(fileOffset: number, len: number): Root {
 
 export interface Traverser<T extends Entry> {
   parser: Parser<T, any>;
-  iterator(e: T | Root): Generator<T>;
+  iterator(e: T | Root): AsyncIterable<T>;
   value(e: T): any;
   root: Root;
   data: SeekableBuffer;
@@ -57,7 +57,7 @@ export function bind<T extends Entry>(
   };
 }
 
-export function* iterate<T extends Entry, S = undefined>(
+export async function* iterate<T extends Entry, S = undefined>(
   parser: Parser<T, S>,
   data: SeekableBuffer,
   parent: T | Root
@@ -90,7 +90,7 @@ export function iterateChildren<T extends Entry, S = any>(
   parent: T,
   parser: Parser<T, S>,
   data: SeekableBuffer
-): Generator<T> {
+): AsyncGenerator<T> {
   return iterate(parser, data, parent);
 }
 

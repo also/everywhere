@@ -190,15 +190,15 @@ export function getMetaTrak(
     findFirst(mp4, track, ['mdia', 'minf', 'gmhd', 'gpmd'], () =>
       findRequired(mp4, track, ['mdia'], (mdia) =>
         findRequired(mp4, mdia, ['mdhd'], (mdhd) =>
-          findRequired(mp4, mdia, ['minf', 'stbl'], (stbl) => ({
+          findRequired(mp4, mdia, ['minf', 'stbl'], async (stbl) => ({
             mdhd: mp4.value(mdhd),
-            ...findAll(mp4, stbl, {
+            ...(await findAll(mp4, stbl, {
               stsd: (v) => mp4.value(v),
               stsc: (v) => mp4.value(v).table,
               stsz: (v) => mp4.value(v).table,
               stco: (v) => mp4.value(v).table,
               stts: (v) => mp4.value(v).table,
-            }),
+            })),
           }))
         )
       )
@@ -279,12 +279,12 @@ export async function getMeta(mp4: Traverser<Box>): Promise<Metadata> {
         // https://github.com/gopro/gpmf-parser/issues/28#issuecomment-401124158
         return {
           MINF,
-          ...findAll(mp4, udta, {
+          ...(await findAll(mp4, udta, {
             FIRM: (b) => nullTerminated(mp4.value(b)),
             LENS: (b) => nullTerminated(mp4.value(b)),
             MUID: (b) => (mp4.value(b) as Buffer).toString('hex'),
             CAME: (b) => (mp4.value(b) as Buffer).toString('hex'),
-          }),
+          })),
         };
       }),
     })
@@ -394,13 +394,13 @@ export function extractGpsSample(
   const gpmf = bind(parser, data, root(offset, size));
 
   return findFirst(gpmf, gpmf.root, ['DEVC', 'STRM'], (strm) => {
-    return findFirst(gpmf, strm, ['GPS5'], (gps5) => {
+    return findFirst(gpmf, strm, ['GPS5'], async (gps5) => {
       const {
         SCAL: scal,
         GPSU,
         GPSP,
         GPSF,
-      } = findAll(gpmf, strm, {
+      } = await findAll(gpmf, strm, {
         SCAL: (v) =>
           gpmf.value(v) as [[number], [number], [number], [number], [number]],
         GPSU: (v) => gpmf.value(v)[0][0] as number,

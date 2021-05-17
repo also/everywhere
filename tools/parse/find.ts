@@ -36,14 +36,14 @@ type Mapped<M extends Mapper<any>> = {
   [K in keyof M]: ReturnType<M[K]>;
 };
 
-export function findAll<E extends Entry, M extends Mapper<E>>(
+export async function findAll<E extends Entry, M extends Mapper<E>>(
   traverser: Traverser<E>,
   parent: E | Root,
   mapper: M
-): Mapped<M> {
+): Promise<Mapped<M>> {
   const result: any = {};
   const missing = new Set(Object.keys(mapper));
-  for (const entry of traverser.iterator(parent)) {
+  for await (const entry of traverser.iterator(parent)) {
     if (missing.delete(entry.fourcc)) {
       result[entry.fourcc] = mapper[entry.fourcc](entry);
     }
@@ -66,7 +66,7 @@ export async function* find<E extends Entry, T>(
     return;
   }
   const [current, ...rest] = path;
-  for (const entry of traverser.iterator(parent)) {
+  for await (const entry of traverser.iterator(parent)) {
     if (entry.fourcc === current) {
       if (rest.length === 0) {
         const result = await fn(entry);
@@ -91,7 +91,7 @@ export async function* findAnywhere<E extends Entry, T>(
   fn: FindFn<E, T>,
   path: E[] = []
 ): AsyncGenerator<E[]> {
-  for (const entry of traverser.iterator(parent)) {
+  for await (const entry of traverser.iterator(parent)) {
     if (await fn(entry)) {
       yield [...path, entry];
     }
