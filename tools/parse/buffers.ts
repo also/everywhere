@@ -1,21 +1,15 @@
 import fs from 'fs';
 
 export interface SeekableBuffer extends BufferWrapper {
-  asyncSeek(to: number): Promise<void>;
-  asyncMove(to: number, ensureReadable: number): Promise<void>;
+  move(to: number, ensureReadable: number): Promise<void>;
   size: number;
 }
 
 abstract class NotReallyAsync {
-  abstract seek(to: number): void;
-  abstract move(to: number, ensureReadable: number): void;
+  protected abstract _move(to: number, ensureReadable: number): void;
 
-  async asyncSeek(to: number): Promise<void> {
-    this.seek(to);
-  }
-
-  async asyncMove(to: number, ensureReadable: number): Promise<void> {
-    this.move(to, ensureReadable);
+  async move(to: number, ensureReadable: number): Promise<void> {
+    this._move(to, ensureReadable);
   }
 }
 
@@ -23,13 +17,13 @@ export class SeekableFileBuffer
   extends NotReallyAsync
   implements SeekableBuffer
 {
-  bufFileOffset = 0;
+  private bufFileOffset = 0;
   filePos = -1;
-  bufLength = 0;
+  private bufLength = 0;
   offset = 0;
   size: number;
   buf: Buffer;
-  fd: number;
+  private fd: number;
 
   constructor(fd: number, buf: Buffer) {
     super();
@@ -39,7 +33,7 @@ export class SeekableFileBuffer
     this.buf = buf;
   }
 
-  seek(to: number) {
+  protected _seek(to: number) {
     if (this.filePos === to) {
       return;
     }
@@ -50,13 +44,13 @@ export class SeekableFileBuffer
     this.filePos = to;
   }
 
-  move(to: number, ensureReadable: number) {
+  protected _move(to: number, ensureReadable: number) {
     if (to < this.bufFileOffset) {
-      this.seek(to);
+      this._seek(to);
     } else {
       const end = to + ensureReadable;
       if (end > this.bufFileOffset + this.bufLength) {
-        this.seek(to);
+        this._seek(to);
       } else {
         this.filePos = to;
         this.offset = to - this.bufFileOffset;
@@ -79,12 +73,12 @@ export class SeekableInMemoryBuffer
     this.size = buf.length;
   }
 
-  seek(to: number) {
+  _seek(to: number) {
     this.offset = this.filePos = to;
   }
 
-  move(to: number) {
-    this.seek(to);
+  _move(to: number) {
+    this._seek(to);
   }
 }
 

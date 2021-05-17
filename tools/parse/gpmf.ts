@@ -110,7 +110,7 @@ async function parseData(
   header: KlvHeader
 ): Promise<any> {
   const valueLength = header.structSize * header.repeat;
-  await data.asyncMove(header.fileOffset + 8, valueLength);
+  await data.move(header.fileOffset + 8, valueLength);
   const { buf } = data;
   let { offset } = data;
 
