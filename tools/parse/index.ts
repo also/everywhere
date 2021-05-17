@@ -75,8 +75,8 @@ export async function* iterate<T extends Entry, S = undefined>(
   let next = start;
 
   while (next < end) {
-    const fileOffset = await data.move(next, 8);
-    const entry = parser.parseEntry(fileOffset, data, parent, state);
+    await data.move(next, 8);
+    const entry = parser.parseEntry(next, data, parent, state);
     if (parser.nextState) {
       state = await parser.nextState(data, entry, state);
     }
