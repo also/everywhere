@@ -62,9 +62,18 @@ function Path({ feature }: { feature: GeoJSON.Feature }) {
 }
 
 function LeafletComponent({ features }: { features: GeoJSON.Feature[] }) {
-  const mapRef = useRef();
+  const mapComponent = useRef();
+  const mapRef = useRef<L.Map>();
+
   useEffect(() => {
-    const map = L.map(mapRef.current).setView([42.389118, -71.097153], 10);
+    if (!mapRef.current) {
+      mapRef.current = L.map(mapComponent.current).setView(
+        [42.389118, -71.097153],
+        10
+      );
+    }
+    const map = mapRef.current;
+    map.eachLayer((layer) => map.removeLayer(layer));
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution:
         '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
@@ -74,9 +83,9 @@ function LeafletComponent({ features }: { features: GeoJSON.Feature[] }) {
         .addTo(map)
         .on('click', (e) => console.log(f.properties))
     );
-  }, []);
+  }, [features]);
 
-  return <div ref={mapRef} style={{ width: 500, height: 500 }} />;
+  return <div ref={mapComponent} style={{ width: 1800, height: 1000 }} />;
 }
 
 function GeoJSONFileView({ value }: { value: GeoJSON.Feature }) {
