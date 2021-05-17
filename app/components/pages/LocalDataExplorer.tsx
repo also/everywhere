@@ -64,12 +64,12 @@ function Path({ feature }: { feature: GeoJSON.Feature }) {
 }
 
 function LeafletComponent({ features }: { features: GeoJSON.Feature[] }) {
-  const mapComponent = useRef();
+  const mapComponent = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map>();
 
   useEffect(() => {
     if (!mapRef.current) {
-      mapRef.current = L.map(mapComponent.current).setView(
+      mapRef.current = L.map(mapComponent.current!).setView(
         [42.389118, -71.097153],
         10
       );
@@ -93,7 +93,7 @@ function LeafletComponent({ features }: { features: GeoJSON.Feature[] }) {
     features.forEach((f) =>
       L.geoJSON(f)
         .addTo(map)
-        .on('click', (e) => console.log(f.properties))
+        .on('click', () => console.log(f.properties))
     );
   }, [features]);
 
