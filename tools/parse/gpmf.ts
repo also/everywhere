@@ -1,4 +1,4 @@
-import { bind, nullTerminated, Parser, root, Traverser } from '.';
+import { bind, Parser, root, Traverser } from '.';
 import { BufferWrapper, SeekableBuffer } from './buffers';
 import { findAllValues, findFirst, findRequired } from './find';
 import { Box, BoxTypes } from './mp4';
@@ -6,10 +6,11 @@ import {
   readAscii,
   readUInt8,
   readUInt16BE,
-  readInt8,
-  readUInt32BE,
-  readFloatBE,
-  readBigUInt64BE,
+  t,
+  readFixedSize,
+  slice,
+  nullTerminated,
+  hex,
 } from './read';
 
 /*
@@ -75,19 +76,22 @@ export function parseKlvHeader(
   };
 }
 
-type TypeReader = (b: BufferWrapper) => any;
+type TypeReader = {
+  f: keyof DataView | ((d: BufferWrapper) => any);
+  size: number;
+};
 
 const simpleTypes: { [key: string]: TypeReader } = {
-  b: readInt8,
-  B: readUInt8,
-  f: readFloatBE,
-  F: (b) => readAscii(b, 4),
-  J: readBigUInt64BE,
-  l: readInt32BE,
-  L: readUInt32BE,
-  s: readInt16BE,
-  S: readUInt16BE,
-  U: (b) => parseDate(readAscii(b, 16)),
+  b: t.int8,
+  B: t.uint8,
+  f: t.float32,
+  F: { f: (b) => readAscii(b, 4), size: 4 },
+  J: t.uint64,
+  l: t.int32,
+  L: t.uint32,
+  s: t.int16,
+  S: t.uint16,
+  U: { f: (b) => parseDate(readAscii(b, 16)), size: 16 },
 };
 
 export type ComplexType = { size: number; types: TypeReader[] };
@@ -111,8 +115,6 @@ async function parseData(
 ): Promise<any> {
   const valueLength = header.structSize * header.repeat;
   await data.move(header.fileOffset + 8, valueLength);
-  const { buf } = data;
-  let { offset } = data;
 
   const { type, repeat, structSize } = header;
   if (!type) {
@@ -129,17 +131,14 @@ async function parseData(
         for (let j = 0; j < n; j++) {
           struct[j] =
             typeof simpleType.f === 'function'
-              ? simpleType.f(buf, offset)
-              : // @ts-expect-error FIXME
-                buf[simpleType.f](offset);
-          offset += simpleType.size;
+              ? simpleType.f(data)
+              : readFixedSize(data, simpleType);
         }
       }
 
       return result;
     } else if (type === 'c') {
-      const end = offset + header.repeat * header.structSize;
-      return nullTerminated(buf.slice(offset, end));
+      return nullTerminated(slice(data, valueLength));
     } else {
       throw new Error(`can't handle type ${type}`);
     }
@@ -161,15 +160,11 @@ async function parseData(
 
     const result = Array(repeat);
     for (let i = 0; i < repeat; i++) {
-      result[i] = type.types.map((simpleType) => {
-        const v =
-          typeof simpleType.f === 'function'
-            ? simpleType.f(buf, offset)
-            : // @ts-expect-error FIXME
-              buf[simpleType.f](offset);
-        offset += simpleType.size;
-        return v;
-      });
+      result[i] = type.types.map((simpleType) =>
+        typeof simpleType.f === 'function'
+          ? simpleType.f(data)
+          : readFixedSize(data, simpleType)
+      );
     }
 
     return result;
@@ -283,8 +278,8 @@ export async function getMeta(mp4: Traverser<Box>): Promise<Metadata> {
           ...(await findAllValues(mp4, udta, {
             FIRM: (v) => nullTerminated(v),
             LENS: (v) => nullTerminated(v),
-            MUID: (v) => (v as Buffer).toString('hex'),
-            CAME: (v) => (v as Buffer).toString('hex'),
+            MUID: (v) => hex(v as DataView),
+            CAME: (v) => hex(v as DataView),
           })),
         };
       }),

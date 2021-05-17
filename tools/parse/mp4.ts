@@ -225,7 +225,11 @@ async function readValue(data: SeekableBuffer, box: Box): Promise<any> {
         data.offset + box.len - 8
       );
     } else {
-      return new DataView(data.buf.buffer, data.offset, box.len - 8);
+      return new DataView(
+        data.buf.buffer,
+        data.buf.byteOffset + data.offset,
+        box.len - 8
+      );
     }
   } else {
     const parser = boxParsers[box.fourcc as keyof typeof boxParsers];

@@ -30,7 +30,7 @@ export class SeekableFileBuffer
     this.fd = fd;
     this.size = fs.fstatSync(this.fd).size;
 
-    this.buf = new DataView(backingBuffer, 0, 0);
+    this.buf = new DataView(backingBuffer.buffer, 0, 0);
   }
 
   private _seek(to: number) {
@@ -52,14 +52,18 @@ export class SeekableFileBuffer
     let buf;
     if (to < this.bufFileOffset) {
       this._seek(to);
-      buf = new DataView(this.backingBuffer, 0, ensureReadable);
+      buf = new DataView(this.backingBuffer.buffer, 0, ensureReadable);
     } else {
       const end = to + ensureReadable;
       if (end > this.bufFileOffset + this.bufLength) {
         this._seek(to);
-        buf = new DataView(this.backingBuffer, 0, ensureReadable);
+        buf = new DataView(this.backingBuffer.buffer, 0, ensureReadable);
       } else {
-        buf = new DataView(this.backingBuffer, to - this.bufFileOffset, end);
+        buf = new DataView(
+          this.backingBuffer.buffer,
+          to - this.bufFileOffset,
+          ensureReadable
+        );
       }
     }
     this.buf = buf;

@@ -7,6 +7,12 @@ export function utf8(v: DataView): string {
   return utf8decoder.decode(v);
 }
 
+export function hex(v: DataView): string {
+  return Array.from(new Uint8Array(v.buffer, v.byteOffset, v.byteLength), (v) =>
+    v.toString(16).padStart(2, '0')
+  ).join('');
+}
+
 export function readUtf8(b: BufferWrapper, len: number): string {
   return utf8(slice(b, len));
 }
@@ -52,7 +58,54 @@ export function skip(b: BufferWrapper, n: number): void {
 }
 
 export function slice(b: BufferWrapper, n: number): DataView {
-  const result = new DataView(b.buf.buffer, b.offset, n);
+  const result = new DataView(b.buf.buffer, b.buf.byteOffset + b.offset, n);
   b.offset += n;
   return result;
+}
+
+export function readFixedSize<K extends keyof DataView>(
+  d: BufferWrapper,
+  t: {
+    f: K;
+    size: number;
+  }
+): DataView[K] extends (...args: any) => any ? ReturnType<DataView[K]> : never {
+  const result = d.buf[t.f](d.offset);
+  d.offset += t.size;
+  return result;
+}
+
+export const t = {
+  int8: { f: 'getInt8', size: 1 },
+  uint8: { f: 'getUint8', size: 1 },
+  float32: { f: 'getFloat32', size: 4 },
+  F: {
+    f: (d: BufferWrapper) => readAscii(d, 4),
+    size: 4,
+  },
+  uint64: { f: 'getBigUint64', size: 8 },
+  int32: { f: 'getInt32', size: 4 },
+  uint32: { f: 'getUint32', size: 4 },
+  int16: { f: 'getInt16', size: 2 },
+  uint16: { f: 'getUint16', size: 2 },
+  U: {
+    f: (d: BufferWrapper) => readAscii(d, 16),
+    size: 16,
+  },
+} as const;
+
+export function nullTerminated(v: DataView): string {
+  if (v.byteLength === 0) {
+    return '';
+  }
+  for (let i = 0; i < v.byteLength; i++) {
+    if (v.getUint8(i) === 0) {
+      if (i === 0) {
+        return '';
+      }
+      v = new DataView(v.buffer, v.byteOffset, i);
+      break;
+    }
+  }
+  return utf8decoder.decode(v);
 }

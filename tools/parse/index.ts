@@ -96,11 +96,3 @@ export function iterateChildren<T extends Entry, S = any>(
 ): AsyncGenerator<T> {
   return iterate(parser, data, parent);
 }
-
-export function nullTerminated(buf: Buffer): string {
-  const end = buf.findIndex((v) => v === 0);
-  if (end) {
-    buf = buf.slice(0, end);
-  }
-  return buf.toString('utf8');
-}
