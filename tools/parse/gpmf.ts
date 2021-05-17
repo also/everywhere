@@ -376,7 +376,7 @@ SampleMetadata): Generator<Sample> {
   };
 }
 
-type GpsSample = { GPS5: GPS5[]; GPSU: number };
+type GpsSample = { GPS5: GPS5[]; GPSU: number; GPSP: number; GPSF: number };
 
 type GPS5 = [
   latitude: number,
@@ -394,15 +394,24 @@ export function extractGpsSample(
 
   return findFirst(gpmf, gpmf.root, ['DEVC', 'STRM'], (strm) => {
     return findFirst(gpmf, strm, ['GPS5'], (gps5) => {
-      const { SCAL: scal, GPSU } = findAll(gpmf, strm, {
+      const {
+        SCAL: scal,
+        GPSU,
+        GPSP,
+        GPSF,
+      } = findAll(gpmf, strm, {
         SCAL: (v) =>
           gpmf.value(v) as [[number], [number], [number], [number], [number]],
         GPSU: (v) => gpmf.value(v)[0][0] as number,
+        GPSP: (v) => gpmf.value(v)[0][0] as number,
+        GPSF: (v) => gpmf.value(v)[0][0] as number,
       });
 
       const gps5Value: GPS5[] = gpmf.value(gps5);
       return {
+        GPSP,
         GPSU,
+        GPSF,
         GPS5: gps5Value.map((row) => row.map((v, i) => v / scal[i][0]) as GPS5),
       };
     });

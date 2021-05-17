@@ -34,16 +34,22 @@ function extractGps(filename: string): GeoJSON.Feature {
     timestamp: number
   ][] = [];
 
+  let dropped;
+
   if (samples) {
     for (const sample of iterateMetadataSamples(samples)) {
       const gpsData = extractGpsSample(data, sample);
       // most of my videos have gps data in all samples, but not quite all
       // just GPS disabled?
       if (gpsData) {
-        const { GPS5, GPSU } = gpsData;
-        GPS5.forEach(([lat, lon, alt]) =>
-          coordinates.push([lon, lat, alt, GPSU])
-        );
+        const { GPS5, GPSU, GPSP, GPSF } = gpsData;
+        if (GPSP < 500 && GPSF === 3) {
+          GPS5.forEach(([lat, lon, alt]) =>
+            coordinates.push([lon, lat, alt, GPSU])
+          );
+        } else {
+          dropped = true;
+        }
       }
     }
   }
@@ -52,7 +58,14 @@ function extractGps(filename: string): GeoJSON.Feature {
   // https://datatracker.ietf.org/doc/html/rfc7946#section-3.1.1
   return {
     type: 'Feature',
-    properties: { creationTime, duration, cameraModelName, mediaUID, firmware },
+    properties: {
+      creationTime,
+      duration,
+      cameraModelName,
+      mediaUID,
+      firmware,
+      dropped,
+    },
     geometry: {
       type: 'LineString',
       coordinates,
@@ -79,7 +92,7 @@ export default function ({ _: [filename] }: { _: string[] }) {
       basename + '.geojson'
     );
 
-    if (!fs.existsSync(dest)) {
+    if (!fs.existsSync(dest) || true) {
       try {
         const geojson = extractGps(f);
         fs.writeFileSync(dest, JSON.stringify(geojson));
