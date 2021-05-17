@@ -175,7 +175,7 @@ export function parseData(data: SeekableBuffer, header: KlvHeader): any {
 export function getMetaTrak(
   mp4: Traverser<Box>,
   moov: Box
-):
+): Promise<
   | {
       stsz: BoxTypes['stsz']['table'];
       stco: BoxTypes['stco']['table'];
@@ -184,7 +184,8 @@ export function getMetaTrak(
       stsd: BoxTypes['stsd'];
       mdhd: BoxTypes['mdhd'];
     }
-  | undefined {
+  | undefined
+> {
   return findFirst(mp4, moov, ['trak'], (track) =>
     findFirst(mp4, track, ['mdia', 'minf', 'gmhd', 'gpmd'], () =>
       findRequired(mp4, track, ['mdia'], (mdia) =>
@@ -248,31 +249,31 @@ function getMoovMeta(mp4: Traverser<Box>, moov: Box) {
 }
 
 // // https://github.com/exiftool/exiftool/blob/ceff3cbc4564e93518f3d2a2e00d8ae203ff54af/lib/Image/ExifTool/GoPro.pm#L62
-export function parseGpmfUdta(mp4: Traverser<Box>, b: Box): string {
+export function parseGpmfUdta(mp4: Traverser<Box>, b: Box): Promise<string> {
   const gpmf = bind(parser, mp4.data, root(b.fileOffset + 8, b.len - 8));
 
   return findRequired(
     gpmf,
     gpmf.root,
     ['DEVC'],
-    (devc) =>
+    async (devc) =>
       // HERO 9
-      findFirst(gpmf, devc, ['MINF'], (b) => gpmf.value(b)) ||
+      (await findFirst(gpmf, devc, ['MINF'], (b) => gpmf.value(b))) ||
       // HERO 7
-      findFirst(gpmf, devc, ['STRM', 'MINF'], (b) => gpmf.value(b))
+      (await findFirst(gpmf, devc, ['STRM', 'MINF'], (b) => gpmf.value(b)))
   );
 }
 
-export function getMeta(mp4: Traverser<Box>): Metadata {
-  const { trak, udta, mvhd } = findRequired(
+export async function getMeta(mp4: Traverser<Box>): Promise<Metadata> {
+  const { trak, udta, mvhd } = await findRequired(
     mp4,
     mp4.root,
     ['moov'],
-    (moov) => ({
-      mvhd: getMoovMeta(mp4, moov),
-      trak: getMetaTrak(mp4, moov),
-      udta: findRequired(mp4, moov, ['udta'], (udta) => {
-        const MINF = findFirst(mp4, udta, ['GPMF'], (b) =>
+    async (moov) => ({
+      mvhd: await getMoovMeta(mp4, moov),
+      trak: await getMetaTrak(mp4, moov),
+      udta: await findRequired(mp4, moov, ['udta'], async (udta) => {
+        const MINF = await findFirst(mp4, udta, ['GPMF'], (b) =>
           parseGpmfUdta(mp4, b)
         );
         // https://github.com/gopro/gpmf-parser/issues/28#issuecomment-401124158
@@ -345,12 +346,12 @@ export type Sample = {
   // decodingTs: number;
 };
 
-export function* iterateMetadataSamples({
+export async function* iterateMetadataSamples({
   offsetTable,
   sizeTable,
 }: // sampleDelta,
 // duration: trackDuration,
-SampleMetadata): Generator<Sample> {
+SampleMetadata): AsyncGenerator<Sample> {
   if (offsetTable.length === 0) {
     return;
   }
@@ -389,7 +390,7 @@ type GPS5 = [
 export function extractGpsSample(
   data: SeekableBuffer,
   { offset, size }: { offset: number; size: number }
-): GpsSample | undefined {
+): Promise<GpsSample | undefined> {
   const gpmf = bind(parser, data, root(offset, size));
 
   return findFirst(gpmf, gpmf.root, ['DEVC', 'STRM'], (strm) => {

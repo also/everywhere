@@ -9,7 +9,7 @@ import {
 import { parser as mp4Parser } from './parse/mp4';
 import { bind, fileRoot } from './parse';
 
-function extractGps(filename: string): GeoJSON.Feature {
+async function extractGps(filename: string): Promise<GeoJSON.Feature> {
   const data = new SeekableFileBuffer(
     fs.openSync(filename, 'r'),
     Buffer.alloc(10240)
@@ -17,7 +17,7 @@ function extractGps(filename: string): GeoJSON.Feature {
 
   const mp4 = bind(mp4Parser, data, fileRoot(data));
 
-  const track = getMeta(mp4);
+  const track = await getMeta(mp4);
   const {
     cameraModelName,
     mediaUID,
@@ -37,8 +37,8 @@ function extractGps(filename: string): GeoJSON.Feature {
   let dropped;
 
   if (samples) {
-    for (const sample of iterateMetadataSamples(samples)) {
-      const gpsData = extractGpsSample(data, sample);
+    for await (const sample of iterateMetadataSamples(samples)) {
+      const gpsData = await extractGpsSample(data, sample);
       // most of my videos have gps data in all samples, but not quite all
       // just GPS disabled?
       if (gpsData) {
@@ -73,7 +73,7 @@ function extractGps(filename: string): GeoJSON.Feature {
   };
 }
 
-export default function ({ _: [filename] }: { _: string[] }) {
+export default async function ({ _: [filename] }: { _: string[] }) {
   const files = fs.statSync(filename).isDirectory()
     ? fs
         .readdirSync(filename)
@@ -81,9 +81,10 @@ export default function ({ _: [filename] }: { _: string[] }) {
         .map((f) => path.join(filename, f))
     : [filename];
 
-  files.forEach((f, i) => {
+  let i = 0;
+  for (const f of files) {
     const basename = path.basename(f);
-    console.log(basename, (i / files.length) * 100);
+    console.log(basename, (i++ / files.length) * 100);
     const dest = path.join(
       __dirname,
       '..',
@@ -94,11 +95,11 @@ export default function ({ _: [filename] }: { _: string[] }) {
 
     if (!fs.existsSync(dest) || true) {
       try {
-        const geojson = extractGps(f);
+        const geojson = await extractGps(f);
         fs.writeFileSync(dest, JSON.stringify(geojson));
       } catch (e) {
         console.log(e);
       }
     }
-  });
+  }
 }
