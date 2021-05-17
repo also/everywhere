@@ -32,7 +32,8 @@ type KlvHeader = {
 };
 
 export function parseKlvHeader(
-  { buf, offset, filePos }: BufferWrapper,
+  fileOffset: number,
+  { buf, offset }: BufferWrapper,
   _: any,
   typeDetail: ComplexType | undefined
 ): KlvHeader {
@@ -56,7 +57,7 @@ export function parseKlvHeader(
   const mod = len % 4;
 
   return {
-    fileOffset: filePos,
+    fileOffset,
     fourcc: key,
     type,
     structSize,

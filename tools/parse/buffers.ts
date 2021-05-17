@@ -1,15 +1,15 @@
 import fs from 'fs';
 
 export interface SeekableBuffer extends BufferWrapper {
-  move(to: number, ensureReadable: number): Promise<void>;
+  move(to: number, ensureReadable: number): Promise<number>;
   size: number;
 }
 
 abstract class NotReallyAsync {
-  protected abstract _move(to: number, ensureReadable: number): void;
+  protected abstract _move(to: number, ensureReadable: number): number;
 
-  async move(to: number, ensureReadable: number): Promise<void> {
-    this._move(to, ensureReadable);
+  async move(to: number, ensureReadable: number): Promise<number> {
+    return this._move(to, ensureReadable);
   }
 }
 
@@ -18,7 +18,7 @@ export class SeekableFileBuffer
   implements SeekableBuffer
 {
   private bufFileOffset = 0;
-  filePos = -1;
+  private filePos = -1;
   private bufLength = 0;
   offset = 0;
   size: number;
@@ -45,6 +45,9 @@ export class SeekableFileBuffer
   }
 
   protected _move(to: number, ensureReadable: number) {
+    if (to + ensureReadable > this.size) {
+      throw new Error(`moving beyond file end`);
+    }
     if (to < this.bufFileOffset) {
       this._seek(to);
     } else {
@@ -56,6 +59,7 @@ export class SeekableFileBuffer
         this.offset = to - this.bufFileOffset;
       }
     }
+    return this.filePos;
   }
 }
 
@@ -67,7 +71,7 @@ export class SeekableInMemoryBuffer
   constructor(
     public buf: Buffer,
     public offset: number,
-    public filePos = offset
+    private filePos = offset
   ) {
     super();
     this.size = buf.length;
@@ -79,11 +83,11 @@ export class SeekableInMemoryBuffer
 
   _move(to: number) {
     this._seek(to);
+    return this.filePos;
   }
 }
 
 export interface BufferWrapper {
   buf: Buffer;
   offset: number;
-  filePos: number;
 }

@@ -202,9 +202,11 @@ export type Box = {
   fileOffset: number;
 };
 
-export function parseBox(data: SeekableBuffer, parent: Box | Root): Box {
-  const { filePos: fileOffset } = data;
-
+function parseBox(
+  fileOffset: number,
+  data: BufferWrapper,
+  parent: Box | Root
+): Box {
   const len = readUInt32BE(data);
   const type = slice(data, 4).toString('latin1');
   return {

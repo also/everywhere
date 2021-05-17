@@ -1,7 +1,12 @@
 import { BufferWrapper, SeekableBuffer } from './buffers';
 
 export interface Parser<T extends Entry, S = any> {
-  parseEntry(data: BufferWrapper, parent: T | Root, state: S | undefined): T;
+  parseEntry(
+    fileOffset: number,
+    data: BufferWrapper,
+    parent: T | Root,
+    state: S | undefined
+  ): T;
   parseValue(data: SeekableBuffer, entry: T): Promise<any>;
   hasChildren(entry: T): boolean;
   nextState?(
@@ -70,8 +75,8 @@ export async function* iterate<T extends Entry, S = undefined>(
   let next = start;
 
   while (next < end) {
-    await data.move(next, 8);
-    const entry = parser.parseEntry(data, parent, state);
+    const fileOffset = await data.move(next, 8);
+    const entry = parser.parseEntry(fileOffset, data, parent, state);
     if (parser.nextState) {
       state = await parser.nextState(data, entry, state);
     }
