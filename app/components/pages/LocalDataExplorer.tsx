@@ -69,7 +69,11 @@ function LeafletComponent({ features }: { features: GeoJSON.Feature[] }) {
       attribution:
         '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     }).addTo(map);
-    features.forEach((f) => L.geoJSON(f).addTo(map));
+    features.forEach((f) =>
+      L.geoJSON(f)
+        .addTo(map)
+        .on('click', (e) => console.log(f.properties))
+    );
   }, []);
 
   return <div ref={mapRef} style={{ width: 500, height: 500 }} />;
@@ -113,7 +117,9 @@ export default function LocalDataExplorer() {
         result.map(async (h) => {
           const file = await h.getFile();
           const text = await file.text();
-          return JSON.parse(text);
+          const geojson = JSON.parse(text) as GeoJSON.Feature;
+          geojson.properties!.filename = file.name;
+          return geojson;
         })
       )
     );
