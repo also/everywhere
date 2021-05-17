@@ -63,14 +63,13 @@ export function slice(b: BufferWrapper, n: number): DataView {
   return result;
 }
 
-export function readFixedSize<K extends keyof DataView>(
-  d: BufferWrapper,
-  t: {
-    f: K;
-    size: number;
-  }
-): DataView[K] extends (...args: any) => any ? ReturnType<DataView[K]> : never {
-  const result = d.buf[t.f](d.offset);
+export type TypeReader = {
+  f: keyof DataView | ((d: BufferWrapper) => any);
+  size: number;
+};
+
+export function readFixedSize(d: BufferWrapper, t: TypeReader): any {
+  const result = typeof t.f === 'function' ? t.f(d) : d.buf[t.f](d.offset);
   d.offset += t.size;
   return result;
 }

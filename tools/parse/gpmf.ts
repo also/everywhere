@@ -11,6 +11,7 @@ import {
   slice,
   nullTerminated,
   hex,
+  TypeReader,
 } from './read';
 
 /*
@@ -76,11 +77,6 @@ export function parseKlvHeader(
   };
 }
 
-type TypeReader = {
-  f: keyof DataView | ((d: BufferWrapper) => any);
-  size: number;
-};
-
 const simpleTypes: { [key: string]: TypeReader } = {
   b: t.int8,
   B: t.uint8,
@@ -129,10 +125,7 @@ async function parseData(
         const struct = Array(n);
         result[i] = struct;
         for (let j = 0; j < n; j++) {
-          struct[j] =
-            typeof simpleType.f === 'function'
-              ? simpleType.f(data)
-              : readFixedSize(data, simpleType);
+          struct[j] = readFixedSize(data, simpleType);
         }
       }
 
@@ -160,11 +153,7 @@ async function parseData(
 
     const result = Array(repeat);
     for (let i = 0; i < repeat; i++) {
-      result[i] = type.types.map((simpleType) =>
-        typeof simpleType.f === 'function'
-          ? simpleType.f(data)
-          : readFixedSize(data, simpleType)
-      );
+      result[i] = type.types.map((t) => readFixedSize(data, t));
     }
 
     return result;
