@@ -45,9 +45,7 @@ export async function findAllValues<E extends Entry, M extends Mapper<E>>(
   const missing = new Set(Object.keys(mapper));
   for await (const entry of traverser.iterator(parent)) {
     if (missing.delete(entry.fourcc)) {
-      result[entry.fourcc] = mapper[entry.fourcc](
-        await traverser.xvalue(entry)
-      );
+      result[entry.fourcc] = mapper[entry.fourcc](await traverser.value(entry));
     }
   }
 

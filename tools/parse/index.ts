@@ -39,7 +39,7 @@ export function root(fileOffset: number, len: number): Root {
 export interface Traverser<T extends Entry> {
   parser: Parser<T, any>;
   iterator(e: T | Root): AsyncIterable<T>;
-  xvalue<V = any>(e: T): Promise<V>;
+  value<V = any>(e: T): Promise<V>;
   root: Root;
   data: SeekableBuffer;
 }
@@ -52,7 +52,7 @@ export function bind<T extends Entry>(
   return {
     parser,
     root,
-    xvalue(e) {
+    value(e) {
       return parser.parseValue(data, e);
     },
     iterator(e) {

@@ -196,7 +196,7 @@ export function getMetaTrak(
       findRequired(mp4, track, ['mdia'], (mdia) =>
         findRequired(mp4, mdia, ['mdhd'], (mdhd) =>
           findRequired(mp4, mdia, ['minf', 'stbl'], async (stbl) => ({
-            mdhd: await mp4.xvalue(mdhd),
+            mdhd: await mp4.value(mdhd),
             ...(await findAllValues(mp4, stbl, {
               stsd: (v) => v,
               stsc: (v) => v.table,
@@ -246,7 +246,7 @@ type Metadata = {
 
 function getMoovMeta(mp4: Traverser<Box>, moov: Box) {
   return findRequired(mp4, moov, ['mvhd'], (b) =>
-    mp4.xvalue<BoxTypes['mvhd']>(b)
+    mp4.value<BoxTypes['mvhd']>(b)
   );
 }
 
@@ -260,9 +260,9 @@ export function parseGpmfUdta(mp4: Traverser<Box>, b: Box): Promise<string> {
     ['DEVC'],
     async (devc) =>
       // HERO 9
-      (await findFirst(gpmf, devc, ['MINF'], (b) => gpmf.xvalue(b))) ||
+      (await findFirst(gpmf, devc, ['MINF'], (b) => gpmf.value(b))) ||
       // HERO 7
-      (await findFirst(gpmf, devc, ['STRM', 'MINF'], (b) => gpmf.xvalue(b)))
+      (await findFirst(gpmf, devc, ['STRM', 'MINF'], (b) => gpmf.value(b)))
   );
 }
 
@@ -409,7 +409,7 @@ export function extractGpsSample(
         GPSF: (v) => v[0][0] as number,
       });
 
-      const gps5Value: GPS5[] = await gpmf.xvalue(gps5);
+      const gps5Value: GPS5[] = await gpmf.value(gps5);
       return {
         GPSP,
         GPSU,
