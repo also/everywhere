@@ -1,5 +1,3 @@
-import fs from 'fs';
-
 export interface BufferWrapper {
   buf: DataView;
   offset: number;
@@ -10,62 +8,38 @@ export interface SeekableBuffer extends BufferWrapper {
   size: number;
 }
 
-abstract class NotReallyAsync {
-  protected abstract _move(to: number, ensureReadable: number): void;
+const empty = new DataView(new ArrayBuffer(0));
 
-  async move(to: number, ensureReadable: number): Promise<void> {
-    return this._move(to, ensureReadable);
-  }
-}
+export abstract class AbstractSeekableBuffer implements SeekableBuffer {
+  protected abstract arrayBuffer: ArrayBuffer;
+  abstract size: number;
+  protected abstract _seek(to: number): Promise<void>;
 
-export class SeekableFileBuffer
-  extends NotReallyAsync
-  implements SeekableBuffer
-{
-  private bufFileOffset = 0;
-  private bufLength = 0;
-  offset = 0;
-  size: number;
   buf: DataView;
+  offset = 0;
+  protected bufFileOffset = 0;
+  protected bufLength = 0;
 
-  private fd: number;
-
-  constructor(fd: number, private backingBuffer: Buffer) {
-    super();
-    this.fd = fd;
-    this.size = fs.fstatSync(this.fd).size;
-
-    this.buf = new DataView(backingBuffer.buffer, 0, 0);
+  constructor() {
+    this.buf = empty;
   }
 
-  private _seek(to: number) {
-    this.bufFileOffset = to;
-    const read = fs.readSync(
-      this.fd,
-      this.backingBuffer,
-      0,
-      this.backingBuffer.length,
-      to
-    );
-    this.bufLength = read;
-  }
-
-  protected _move(to: number, ensureReadable: number) {
+  async move(to: number, ensureReadable: number) {
     if (to + ensureReadable > this.size) {
       throw new Error(`moving beyond file end`);
     }
     let buf;
     if (to < this.bufFileOffset) {
-      this._seek(to);
-      buf = new DataView(this.backingBuffer.buffer, 0, ensureReadable);
+      await this._seek(to);
+      buf = new DataView(this.arrayBuffer, 0, ensureReadable);
     } else {
       const end = to + ensureReadable;
       if (end > this.bufFileOffset + this.bufLength) {
-        this._seek(to);
-        buf = new DataView(this.backingBuffer.buffer, 0, ensureReadable);
+        await this._seek(to);
+        buf = new DataView(this.arrayBuffer, 0, ensureReadable);
       } else {
         buf = new DataView(
-          this.backingBuffer.buffer,
+          this.arrayBuffer,
           to - this.bufFileOffset,
           ensureReadable
         );
@@ -76,17 +50,24 @@ export class SeekableFileBuffer
   }
 }
 
-export class SeekableInMemoryBuffer
-  extends NotReallyAsync
+export class SeekableBlobBuffer
+  extends AbstractSeekableBuffer
   implements SeekableBuffer
 {
+  protected arrayBuffer: ArrayBuffer;
   size: number;
-  constructor(public buf: DataView, public offset: number) {
+
+  constructor(private blob: Blob, private bufferSize: number) {
     super();
-    this.size = buf.byteLength;
+    this.size = blob.size;
+
+    this.arrayBuffer = new ArrayBuffer(0);
   }
 
-  _move(to: number) {
-    return (this.offset = to);
+  protected async _seek(to: number) {
+    this.bufFileOffset = to;
+    const s = this.blob.slice(to, to + this.bufferSize);
+    this.arrayBuffer = await s.arrayBuffer();
+    this.bufLength = this.arrayBuffer.byteLength;
   }
 }

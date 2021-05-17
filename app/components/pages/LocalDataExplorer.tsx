@@ -10,6 +10,8 @@ import MapComponent from '../Map';
 import MapContext from '../MapContext';
 import MapBox from '../MapBox';
 import L from 'leaflet';
+import { SeekableBlobBuffer } from '../../../tools/parse/buffers';
+import { extractGps } from '../../../tools/parse/gopro-gps';
 
 function FileView<T>({
   file,
@@ -77,7 +79,7 @@ function LeafletComponent({ features }: { features: GeoJSON.Feature[] }) {
     L.tileLayer(
       'https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}',
       {
-      attribution:
+        attribution:
           'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
         maxZoom: 18,
         id: 'mapbox/streets-v11',
@@ -135,8 +137,13 @@ export default function LocalDataExplorer() {
       await Promise.all(
         result.map(async (h) => {
           const file = await h.getFile();
-          const text = await file.text();
-          const geojson = JSON.parse(text) as GeoJSON.Feature;
+          let geojson: GeoJSON.Feature;
+          if (file.name.toLowerCase().endsWith('.mp4')) {
+            geojson = await extractGps(new SeekableBlobBuffer(file, 10240));
+          } else {
+            const text = await file.text();
+            geojson = JSON.parse(text) as GeoJSON.Feature;
+          }
           geojson.properties!.filename = file.name;
           return geojson;
         })
