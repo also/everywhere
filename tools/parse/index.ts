@@ -2,13 +2,13 @@ import { BufferWrapper, SeekableBuffer } from './buffers';
 
 export interface Parser<T extends Entry, S = any> {
   parseEntry(data: BufferWrapper, parent: T | Root, state: S | undefined): T;
-  parseValue(data: SeekableBuffer, entry: T): any;
+  parseValue(data: SeekableBuffer, entry: T): Promise<any>;
   hasChildren(entry: T): boolean;
   nextState?(
     data: SeekableBuffer,
     entry: T,
     state: S | undefined
-  ): S | undefined;
+  ): Promise<S | undefined>;
 }
 
 export interface Entry {
@@ -34,7 +34,7 @@ export function root(fileOffset: number, len: number): Root {
 export interface Traverser<T extends Entry> {
   parser: Parser<T, any>;
   iterator(e: T | Root): AsyncIterable<T>;
-  value(e: T): any;
+  xvalue<V = any>(e: T): Promise<V>;
   root: Root;
   data: SeekableBuffer;
 }
@@ -47,7 +47,7 @@ export function bind<T extends Entry>(
   return {
     parser,
     root,
-    value(e) {
+    xvalue(e) {
       return parser.parseValue(data, e);
     },
     iterator(e) {
@@ -75,7 +75,7 @@ export async function* iterate<T extends Entry, S = undefined>(
   while (data.filePos < end) {
     const entry = parser.parseEntry(data, parent, state);
     if (parser.nextState) {
-      state = parser.nextState(data, entry, state);
+      state = await parser.nextState(data, entry, state);
     }
     // only encountered in the udta GPMF
     if (entry.fourcc === '\0\0\0\0') {

@@ -227,10 +227,10 @@ const containers = new Set([
   'tref',
 ]);
 
-function readValue(data: SeekableBuffer, box: Box): any {
+async function readValue(data: SeekableBuffer, box: Box): Promise<any> {
   if (box.parentType === 'udta') {
     // TODO from https://developer.apple.com/library/archive/documentation/QuickTime/QTFF/QTFFChap2/qtff2.html#//apple_ref/doc/uid/TP40000939-CH204-BBCCFFGD
-    data.move(box.fileOffset + 8, box.len - 8);
+    await data.asyncMove(box.fileOffset + 8, box.len - 8);
     if (box.fourcc.charCodeAt(0) === 169) {
       return parseSmallIntBoxes(
         data.buf,
@@ -243,14 +243,14 @@ function readValue(data: SeekableBuffer, box: Box): any {
   } else {
     const parser = boxParsers[box.fourcc as keyof typeof boxParsers];
     if (parser) {
-      data.move(box.fileOffset + 8, 1);
+      await data.asyncMove(box.fileOffset + 8, 1);
       const version = data.buf[data.offset];
       if (version !== 0) {
         throw new Error(
           `don't support v ${version} for box ${box.fourcc} at ${box.fileOffset}`
         );
       }
-      data.move(box.fileOffset + 12, box.len - 8);
+      await data.asyncMove(box.fileOffset + 12, box.len - 8);
 
       return parser(data, box.len);
     }

@@ -29,14 +29,14 @@ export async function findRequired<E extends Entry, T>(
 }
 
 type Mapper<E extends Entry> = {
-  [fourcc: string]: (entry: E) => any;
+  [fourcc: string]: (value: any) => any;
 };
 
 type Mapped<M extends Mapper<any>> = {
   [K in keyof M]: ReturnType<M[K]>;
 };
 
-export async function findAll<E extends Entry, M extends Mapper<E>>(
+export async function findAllValues<E extends Entry, M extends Mapper<E>>(
   traverser: Traverser<E>,
   parent: E | Root,
   mapper: M
@@ -45,7 +45,9 @@ export async function findAll<E extends Entry, M extends Mapper<E>>(
   const missing = new Set(Object.keys(mapper));
   for await (const entry of traverser.iterator(parent)) {
     if (missing.delete(entry.fourcc)) {
-      result[entry.fourcc] = mapper[entry.fourcc](entry);
+      result[entry.fourcc] = mapper[entry.fourcc](
+        await traverser.xvalue(entry)
+      );
     }
   }
 

@@ -1,6 +1,6 @@
 import { bind, nullTerminated, Parser, root, Traverser } from '.';
 import { BufferWrapper, SeekableBuffer } from './buffers';
-import { findAll, findFirst, findRequired } from './find';
+import { findAllValues, findFirst, findRequired } from './find';
 import { Box, BoxTypes } from './mp4';
 
 /*
@@ -13,9 +13,9 @@ handle MTRX for ACCL type values
 export const parser: Parser<KlvHeader, ComplexType> = {
   parseEntry: parseKlvHeader,
   hasChildren: (klv) => !klv.type,
-  nextState(data, klv, type) {
+  async nextState(data, klv, type) {
     if (klv.fourcc === 'TYPE') {
-      type = parseComplexType(parseData(data, klv));
+      type = parseComplexType(await parseData(data, klv));
     }
     return type;
   },
@@ -105,9 +105,12 @@ export function parseComplexType(s: string): ComplexType {
   return { size, types };
 }
 
-function parseData(data: SeekableBuffer, header: KlvHeader): any {
+async function parseData(
+  data: SeekableBuffer,
+  header: KlvHeader
+): Promise<any> {
   const valueLength = header.structSize * header.repeat;
-  data.move(header.fileOffset + 8, valueLength);
+  await data.asyncMove(header.fileOffset + 8, valueLength);
   const { buf } = data;
   let { offset } = data;
 
@@ -192,13 +195,13 @@ export function getMetaTrak(
       findRequired(mp4, track, ['mdia'], (mdia) =>
         findRequired(mp4, mdia, ['mdhd'], (mdhd) =>
           findRequired(mp4, mdia, ['minf', 'stbl'], async (stbl) => ({
-            mdhd: mp4.value(mdhd),
-            ...(await findAll(mp4, stbl, {
-              stsd: (v) => mp4.value(v),
-              stsc: (v) => mp4.value(v).table,
-              stsz: (v) => mp4.value(v).table,
-              stco: (v) => mp4.value(v).table,
-              stts: (v) => mp4.value(v).table,
+            mdhd: await mp4.xvalue(mdhd),
+            ...(await findAllValues(mp4, stbl, {
+              stsd: (v) => v,
+              stsc: (v) => v.table,
+              stsz: (v) => v.table,
+              stco: (v) => v.table,
+              stts: (v) => v.table,
             })),
           }))
         )
@@ -241,11 +244,8 @@ type Metadata = {
 };
 
 function getMoovMeta(mp4: Traverser<Box>, moov: Box) {
-  return findRequired(
-    mp4,
-    moov,
-    ['mvhd'],
-    (b) => mp4.value(b) as BoxTypes['mvhd']
+  return findRequired(mp4, moov, ['mvhd'], (b) =>
+    mp4.xvalue<BoxTypes['mvhd']>(b)
   );
 }
 
@@ -259,9 +259,9 @@ export function parseGpmfUdta(mp4: Traverser<Box>, b: Box): Promise<string> {
     ['DEVC'],
     async (devc) =>
       // HERO 9
-      (await findFirst(gpmf, devc, ['MINF'], (b) => gpmf.value(b))) ||
+      (await findFirst(gpmf, devc, ['MINF'], (b) => gpmf.xvalue(b))) ||
       // HERO 7
-      (await findFirst(gpmf, devc, ['STRM', 'MINF'], (b) => gpmf.value(b)))
+      (await findFirst(gpmf, devc, ['STRM', 'MINF'], (b) => gpmf.xvalue(b)))
   );
 }
 
@@ -280,11 +280,11 @@ export async function getMeta(mp4: Traverser<Box>): Promise<Metadata> {
         // https://github.com/gopro/gpmf-parser/issues/28#issuecomment-401124158
         return {
           MINF,
-          ...(await findAll(mp4, udta, {
-            FIRM: (b) => nullTerminated(mp4.value(b)),
-            LENS: (b) => nullTerminated(mp4.value(b)),
-            MUID: (b) => (mp4.value(b) as Buffer).toString('hex'),
-            CAME: (b) => (mp4.value(b) as Buffer).toString('hex'),
+          ...(await findAllValues(mp4, udta, {
+            FIRM: (v) => nullTerminated(v),
+            LENS: (v) => nullTerminated(v),
+            MUID: (v) => (v as Buffer).toString('hex'),
+            CAME: (v) => (v as Buffer).toString('hex'),
           })),
         };
       }),
@@ -401,15 +401,14 @@ export function extractGpsSample(
         GPSU,
         GPSP,
         GPSF,
-      } = await findAll(gpmf, strm, {
-        SCAL: (v) =>
-          gpmf.value(v) as [[number], [number], [number], [number], [number]],
-        GPSU: (v) => gpmf.value(v)[0][0] as number,
-        GPSP: (v) => gpmf.value(v)[0][0] as number,
-        GPSF: (v) => gpmf.value(v)[0][0] as number,
+      } = await findAllValues(gpmf, strm, {
+        SCAL: (v) => v as [[number], [number], [number], [number], [number]],
+        GPSU: (v) => v[0][0] as number,
+        GPSP: (v) => v[0][0] as number,
+        GPSF: (v) => v[0][0] as number,
       });
 
-      const gps5Value: GPS5[] = gpmf.value(gps5);
+      const gps5Value: GPS5[] = await gpmf.xvalue(gps5);
       return {
         GPSP,
         GPSU,

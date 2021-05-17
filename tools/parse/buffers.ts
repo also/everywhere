@@ -1,8 +1,6 @@
 import fs from 'fs';
 
 export interface SeekableBuffer extends BufferWrapper {
-  seek(to: number): void;
-  move(to: number, ensureReadable: number): void;
   asyncSeek(to: number): Promise<void>;
   asyncMove(to: number, ensureReadable: number): Promise<void>;
   size: number;
