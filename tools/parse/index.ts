@@ -96,7 +96,7 @@ export function iterateChildren<T extends Entry, S = any>(
 
 export function nullTerminated(buf: Buffer): string {
   const end = buf.findIndex((v) => v === 0);
-  if (end) {
+  if (end !== -1) {
     buf = buf.slice(0, end);
   }
   return buf.toString('utf8');
