@@ -1,5 +1,10 @@
 import fs from 'fs';
 
+export interface BufferWrapper {
+  buf: DataView;
+  offset: number;
+}
+
 export interface SeekableBuffer extends BufferWrapper {
   move(to: number, ensureReadable: number): Promise<void>;
   size: number;
@@ -84,9 +89,4 @@ export class SeekableInMemoryBuffer
   _move(to: number) {
     return (this.offset = to);
   }
-}
-
-export interface BufferWrapper {
-  buf: DataView;
-  offset: number;
 }

@@ -69,7 +69,8 @@ export type TypeReader = {
 };
 
 export function readFixedSize(d: BufferWrapper, t: TypeReader): any {
-  const result = typeof t.f === 'function' ? t.f(d) : d.buf[t.f](d.offset);
+  const result =
+    typeof t.f === 'function' ? t.f(d) : (d.buf[t.f] as any)(d.offset);
   d.offset += t.size;
   return result;
 }
