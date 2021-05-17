@@ -63,16 +63,14 @@ export async function* iterate<T extends Entry, S = undefined>(
   parent: T | Root
 ) {
   let state;
-  let start;
-  if (parent.fourcc === 'root') {
-    start = parent.fileOffset;
-  } else {
-    start = parent.fileOffset + 8;
-  }
-  const end = parent.fileOffset + parent.len;
-  await data.move(start, 8);
+  const start =
+    parent.fourcc === 'root' ? parent.fileOffset : parent.fileOffset + 8;
 
-  while (data.filePos < end) {
+  const end = parent.fileOffset + parent.len;
+  let next = start;
+
+  while (next < end) {
+    await data.move(next, 8);
     const entry = parser.parseEntry(data, parent, state);
     if (parser.nextState) {
       state = await parser.nextState(data, entry, state);
@@ -82,7 +80,7 @@ export async function* iterate<T extends Entry, S = undefined>(
       break;
     }
     yield entry;
-    await data.move(entry.fileOffset + entry.len, 8);
+    next = entry.fileOffset + entry.len;
   }
 }
 
