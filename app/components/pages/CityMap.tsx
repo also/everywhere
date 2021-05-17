@@ -26,7 +26,7 @@ export default function CityMap({
         {Math.round(tripsLength / 1000)} / {Math.round(waysLength / 1000)} km
       </p>
 
-      <MapComponent width="1000" height="1000" onClick={onClick}>
+      <MapComponent width={1000} height={1000} onClick={onClick}>
         <Trips trips={trips} />
         <Position />
       </MapComponent>

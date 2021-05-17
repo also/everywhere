@@ -40,6 +40,7 @@ import DataContext from './components/DataContext';
 import { CoverageFeature, TripFeature, TripTree } from './trips';
 import { CoverageTree } from './videos';
 import { ReactNode } from 'react';
+import LocalDataExplorer from './components/pages/LocalDataExplorer';
 
 const GlobalStyle = createGlobalStyle`
 body {
@@ -165,6 +166,7 @@ tripsPromise.then(({ trips, videoCoverage, tripTree, videoTree }) => {
         <Router>
           <App>
             <Switch>
+              <Route path="/local" component={LocalDataExplorer} />
               <Route path="/ways/*" component={WayDetailsRoute} />
               <Route path="/ways" component={WayListRoute} />
               <Route path="/videos/:name/:seek" component={VideoDetailsRoute} />

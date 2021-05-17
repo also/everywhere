@@ -187,9 +187,11 @@ export type Box = {
   fileOffset: number;
 };
 
-export function parseBox(data: SeekableBuffer, parent: Box | Root): Box {
-  const { filePos: fileOffset } = data;
-
+function parseBox(
+  fileOffset: number,
+  data: BufferWrapper,
+  parent: Box | Root
+): Box {
   const len = readUInt32BE(data);
   const type = latin18decoder.decode(slice(data, 4));
   return {
@@ -212,10 +214,10 @@ const containers = new Set([
   'tref',
 ]);
 
-export function readValue(data: SeekableBuffer, box: Box): any {
+async function readValue(data: SeekableBuffer, box: Box): Promise<any> {
   if (box.parentType === 'udta') {
     // TODO from https://developer.apple.com/library/archive/documentation/QuickTime/QTFF/QTFFChap2/qtff2.html#//apple_ref/doc/uid/TP40000939-CH204-BBCCFFGD
-    data.move(box.fileOffset + 8, box.len - 8);
+    await data.move(box.fileOffset + 8, box.len - 8);
     if (box.fourcc.charCodeAt(0) === 169) {
       return parseSmallIntBoxes(
         data.buf,
@@ -228,14 +230,14 @@ export function readValue(data: SeekableBuffer, box: Box): any {
   } else {
     const parser = boxParsers[box.fourcc as keyof typeof boxParsers];
     if (parser) {
-      data.move(box.fileOffset + 8, 1);
+      await data.move(box.fileOffset + 8, 1);
       const version = data.buf.getInt8(data.offset);
       if (version !== 0) {
         throw new Error(
           `don't support v ${version} for box ${box.fourcc} at ${box.fileOffset}`
         );
       }
-      data.move(box.fileOffset + 12, box.len - 8);
+      await data.move(box.fileOffset + 12, box.len - 8);
 
       return parser(data, box.len);
     }

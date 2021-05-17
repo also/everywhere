@@ -1,8 +1,16 @@
 import { bind, nullTerminated, Parser, root, Traverser } from '.';
 import { BufferWrapper, SeekableBuffer } from './buffers';
-import { findAll, findFirst, findRequired } from './find';
+import { findAllValues, findFirst, findRequired } from './find';
 import { Box, BoxTypes } from './mp4';
-import { readAscii, readUInt8, readUInt16BE, readInt8, readUInt32BE, readFloatBE, readBigUInt64BE } from './read';
+import {
+  readAscii,
+  readUInt8,
+  readUInt16BE,
+  readInt8,
+  readUInt32BE,
+  readFloatBE,
+  readBigUInt64BE,
+} from './read';
 
 /*
 TODO:
@@ -14,9 +22,9 @@ handle MTRX for ACCL type values
 export const parser: Parser<KlvHeader, ComplexType> = {
   parseEntry: parseKlvHeader,
   hasChildren: (klv) => !klv.type,
-  nextState(data, klv, type) {
+  async nextState(data, klv, type) {
     if (klv.fourcc === 'TYPE') {
-      type = parseComplexType(parseData(data, klv));
+      type = parseComplexType(await parseData(data, klv));
     }
     return type;
   },
@@ -33,11 +41,11 @@ type KlvHeader = {
 };
 
 export function parseKlvHeader(
+  fileOffset: number,
   b: BufferWrapper,
   _: any,
   typeDetail: ComplexType | undefined
 ): KlvHeader {
-  const { filePos } = b;
   const key = readAscii(b, 4);
   const typeInt = readUInt8(b);
   const structSize = readUInt8(b);
@@ -58,7 +66,7 @@ export function parseKlvHeader(
   const mod = len % 4;
 
   return {
-    fileOffset: filePos,
+    fileOffset,
     fourcc: key,
     type,
     structSize,
@@ -67,20 +75,19 @@ export function parseKlvHeader(
   };
 }
 
-type TypeReader = ((b: BufferWrapper) => any;
+type TypeReader = (b: BufferWrapper) => any;
 
 const simpleTypes: { [key: string]: TypeReader } = {
   b: readInt8,
   B: readUInt8,
   f: readFloatBE,
-  F: b => readAscii(b, 4),
+  F: (b) => readAscii(b, 4),
   J: readBigUInt64BE,
   l: readInt32BE,
   L: readUInt32BE,
   s: readInt16BE,
   S: readUInt16BE,
-  U: (b) =>
-      parseDate(readAscii(b, 16)),
+  U: (b) => parseDate(readAscii(b, 16)),
 };
 
 export type ComplexType = { size: number; types: TypeReader[] };
@@ -98,10 +105,14 @@ export function parseComplexType(s: string): ComplexType {
   return { size, types };
 }
 
-export function parseData(data: SeekableBuffer, header: KlvHeader): any {
+async function parseData(
+  data: SeekableBuffer,
+  header: KlvHeader
+): Promise<any> {
   const valueLength = header.structSize * header.repeat;
-  data.move(header.fileOffset + 8, valueLength);
-  let { buf, offset } = data;
+  await data.move(header.fileOffset + 8, valueLength);
+  const { buf } = data;
+  let { offset } = data;
 
   const { type, repeat, structSize } = header;
   if (!type) {
@@ -168,7 +179,7 @@ export function parseData(data: SeekableBuffer, header: KlvHeader): any {
 export function getMetaTrak(
   mp4: Traverser<Box>,
   moov: Box
-):
+): Promise<
   | {
       stsz: BoxTypes['stsz']['table'];
       stco: BoxTypes['stco']['table'];
@@ -177,20 +188,21 @@ export function getMetaTrak(
       stsd: BoxTypes['stsd'];
       mdhd: BoxTypes['mdhd'];
     }
-  | undefined {
+  | undefined
+> {
   return findFirst(mp4, moov, ['trak'], (track) =>
     findFirst(mp4, track, ['mdia', 'minf', 'gmhd', 'gpmd'], () =>
       findRequired(mp4, track, ['mdia'], (mdia) =>
         findRequired(mp4, mdia, ['mdhd'], (mdhd) =>
-          findRequired(mp4, mdia, ['minf', 'stbl'], (stbl) => ({
-            mdhd: mp4.value(mdhd),
-            ...findAll(mp4, stbl, {
-              stsd: (v) => mp4.value(v),
-              stsc: (v) => mp4.value(v).table,
-              stsz: (v) => mp4.value(v).table,
-              stco: (v) => mp4.value(v).table,
-              stts: (v) => mp4.value(v).table,
-            }),
+          findRequired(mp4, mdia, ['minf', 'stbl'], async (stbl) => ({
+            mdhd: await mp4.value(mdhd),
+            ...(await findAllValues(mp4, stbl, {
+              stsd: (v) => v,
+              stsc: (v) => v.table,
+              stsz: (v) => v.table,
+              stco: (v) => v.table,
+              stts: (v) => v.table,
+            })),
           }))
         )
       )
@@ -232,51 +244,48 @@ type Metadata = {
 };
 
 function getMoovMeta(mp4: Traverser<Box>, moov: Box) {
-  return findRequired(
-    mp4,
-    moov,
-    ['mvhd'],
-    (b) => mp4.value(b) as BoxTypes['mvhd']
+  return findRequired(mp4, moov, ['mvhd'], (b) =>
+    mp4.value<BoxTypes['mvhd']>(b)
   );
 }
 
 // // https://github.com/exiftool/exiftool/blob/ceff3cbc4564e93518f3d2a2e00d8ae203ff54af/lib/Image/ExifTool/GoPro.pm#L62
-export function parseGpmfUdta(mp4: Traverser<Box>, b: Box): string {
+export function parseGpmfUdta(mp4: Traverser<Box>, b: Box): Promise<string> {
   const gpmf = bind(parser, mp4.data, root(b.fileOffset + 8, b.len - 8));
 
   return findRequired(
     gpmf,
     gpmf.root,
     ['DEVC'],
-    (devc) =>
+    async (devc) =>
       // HERO 9
-      findFirst(gpmf, devc, ['MINF'], (b) => gpmf.value(b)) ||
+      (await findFirst(gpmf, devc, ['MINF'], (b) => gpmf.value(b))) ||
       // HERO 7
-      findFirst(gpmf, devc, ['STRM', 'MINF'], (b) => gpmf.value(b))
+      (await findFirst(gpmf, devc, ['STRM', 'MINF'], (b) => gpmf.value(b)))
   );
 }
 
-export function getMeta(mp4: Traverser<Box>): Metadata {
-  const { trak, udta, mvhd } = findRequired(
+export async function getMeta(mp4: Traverser<Box>): Promise<Metadata> {
+  const { trak, udta, mvhd } = await findRequired(
     mp4,
     mp4.root,
     ['moov'],
-    (moov) => ({
-      mvhd: getMoovMeta(mp4, moov),
-      trak: getMetaTrak(mp4, moov),
-      udta: findRequired(mp4, moov, ['udta'], (udta) => {
-        const MINF = findFirst(mp4, udta, ['GPMF'], (b) =>
+    async (moov) => ({
+      mvhd: await getMoovMeta(mp4, moov),
+      trak: await getMetaTrak(mp4, moov),
+      udta: await findRequired(mp4, moov, ['udta'], async (udta) => {
+        const MINF = await findFirst(mp4, udta, ['GPMF'], (b) =>
           parseGpmfUdta(mp4, b)
         );
         // https://github.com/gopro/gpmf-parser/issues/28#issuecomment-401124158
         return {
           MINF,
-          ...findAll(mp4, udta, {
-            FIRM: (b) => nullTerminated(mp4.value(b)),
-            LENS: (b) => nullTerminated(mp4.value(b)),
-            MUID: (b) => (mp4.value(b) as Buffer).toString('hex'),
-            CAME: (b) => (mp4.value(b) as Buffer).toString('hex'),
-          }),
+          ...(await findAllValues(mp4, udta, {
+            FIRM: (v) => nullTerminated(v),
+            LENS: (v) => nullTerminated(v),
+            MUID: (v) => (v as Buffer).toString('hex'),
+            CAME: (v) => (v as Buffer).toString('hex'),
+          })),
         };
       }),
     })
@@ -338,12 +347,12 @@ export type Sample = {
   // decodingTs: number;
 };
 
-export function* iterateMetadataSamples({
+export async function* iterateMetadataSamples({
   offsetTable,
   sizeTable,
 }: // sampleDelta,
 // duration: trackDuration,
-SampleMetadata): Generator<Sample> {
+SampleMetadata): AsyncGenerator<Sample> {
   if (offsetTable.length === 0) {
     return;
   }
@@ -369,7 +378,7 @@ SampleMetadata): Generator<Sample> {
   };
 }
 
-type GpsSample = { GPS5: GPS5[]; GPSU: number };
+type GpsSample = { GPS5: GPS5[]; GPSU: number; GPSP: number; GPSF: number };
 
 type GPS5 = [
   latitude: number,
@@ -382,20 +391,28 @@ type GPS5 = [
 export function extractGpsSample(
   data: SeekableBuffer,
   { offset, size }: { offset: number; size: number }
-): GpsSample | undefined {
+): Promise<GpsSample | undefined> {
   const gpmf = bind(parser, data, root(offset, size));
 
   return findFirst(gpmf, gpmf.root, ['DEVC', 'STRM'], (strm) => {
-    return findFirst(gpmf, strm, ['GPS5'], (gps5) => {
-      const { SCAL: scal, GPSU } = findAll(gpmf, strm, {
-        SCAL: (v) =>
-          gpmf.value(v) as [[number], [number], [number], [number], [number]],
-        GPSU: (v) => gpmf.value(v)[0][0] as number,
+    return findFirst(gpmf, strm, ['GPS5'], async (gps5) => {
+      const {
+        SCAL: scal,
+        GPSU,
+        GPSP,
+        GPSF,
+      } = await findAllValues(gpmf, strm, {
+        SCAL: (v) => v as [[number], [number], [number], [number], [number]],
+        GPSU: (v) => v[0][0] as number,
+        GPSP: (v) => v[0][0] as number,
+        GPSF: (v) => v[0][0] as number,
       });
 
-      const gps5Value: GPS5[] = gpmf.value(gps5);
+      const gps5Value: GPS5[] = await gpmf.value(gps5);
       return {
+        GPSP,
         GPSU,
+        GPSF,
         GPS5: gps5Value.map((row) => row.map((v, i) => v / scal[i][0]) as GPS5),
       };
     });

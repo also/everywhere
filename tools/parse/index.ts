@@ -1,14 +1,19 @@
-import { SeekableBuffer } from './buffers';
+import { BufferWrapper, SeekableBuffer } from './buffers';
 
 export interface Parser<T extends Entry, S = any> {
-  parseEntry(data: SeekableBuffer, parent: T | Root, state: S | undefined): T;
-  parseValue(data: SeekableBuffer, entry: T): any;
+  parseEntry(
+    fileOffset: number,
+    data: BufferWrapper,
+    parent: T | Root,
+    state: S | undefined
+  ): T;
+  parseValue(data: SeekableBuffer, entry: T): Promise<any>;
   hasChildren(entry: T): boolean;
   nextState?(
     data: SeekableBuffer,
     entry: T,
     state: S | undefined
-  ): S | undefined;
+  ): Promise<S | undefined>;
 }
 
 export interface Entry {
@@ -33,8 +38,8 @@ export function root(fileOffset: number, len: number): Root {
 
 export interface Traverser<T extends Entry> {
   parser: Parser<T, any>;
-  iterator(e: T | Root): Generator<T>;
-  value(e: T): any;
+  iterator(e: T | Root): AsyncIterable<T>;
+  value<V = any>(e: T): Promise<V>;
   root: Root;
   data: SeekableBuffer;
 }
@@ -57,32 +62,30 @@ export function bind<T extends Entry>(
   };
 }
 
-export function* iterate<T extends Entry, S = undefined>(
+export async function* iterate<T extends Entry, S = undefined>(
   parser: Parser<T, S>,
   data: SeekableBuffer,
   parent: T | Root
 ) {
   let state;
-  let start;
-  if (parent.fourcc === 'root') {
-    start = parent.fileOffset;
-  } else {
-    start = parent.fileOffset + 8;
-  }
-  const end = parent.fileOffset + parent.len;
-  data.move(start, 8);
+  const start =
+    parent.fourcc === 'root' ? parent.fileOffset : parent.fileOffset + 8;
 
-  while (data.filePos < end) {
-    const entry = parser.parseEntry(data, parent, state);
+  const end = parent.fileOffset + parent.len;
+  let next = start;
+
+  while (next < end) {
+    await data.move(next, 8);
+    const entry = parser.parseEntry(next, data, parent, state);
     if (parser.nextState) {
-      state = parser.nextState(data, entry, state);
+      state = await parser.nextState(data, entry, state);
     }
     // only encountered in the udta GPMF
     if (entry.fourcc === '\0\0\0\0') {
       break;
     }
     yield entry;
-    data.move(entry.fileOffset + entry.len, 8);
+    next = entry.fileOffset + entry.len;
   }
 }
 
@@ -90,7 +93,7 @@ export function iterateChildren<T extends Entry, S = any>(
   parent: T,
   parser: Parser<T, S>,
   data: SeekableBuffer
-): Generator<T> {
+): AsyncGenerator<T> {
   return iterate(parser, data, parent);
 }
 
