@@ -105,7 +105,7 @@ export function parseComplexType(s: string): ComplexType {
   return { size, types };
 }
 
-export function parseData(data: SeekableBuffer, header: KlvHeader): any {
+function parseData(data: SeekableBuffer, header: KlvHeader): any {
   const valueLength = header.structSize * header.repeat;
   data.move(header.fileOffset + 8, valueLength);
   let { buf, offset } = data;

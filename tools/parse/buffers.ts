@@ -3,10 +3,28 @@ import fs from 'fs';
 export interface SeekableBuffer extends BufferWrapper {
   seek(to: number): void;
   move(to: number, ensureReadable: number): void;
+  asyncSeek(to: number): Promise<void>;
+  asyncMove(to: number, ensureReadable: number): Promise<void>;
   size: number;
 }
 
-export class SeekableFileBuffer implements SeekableBuffer {
+abstract class NotReallyAsync {
+  abstract seek(to: number): void;
+  abstract move(to: number, ensureReadable: number): void;
+
+  async asyncSeek(to: number): Promise<void> {
+    this.seek(to);
+  }
+
+  async asyncMove(to: number, ensureReadable: number): Promise<void> {
+    this.move(to, ensureReadable);
+  }
+}
+
+export class SeekableFileBuffer
+  extends NotReallyAsync
+  implements SeekableBuffer
+{
   bufFileOffset = 0;
   filePos = -1;
   bufLength = 0;
@@ -16,6 +34,7 @@ export class SeekableFileBuffer implements SeekableBuffer {
   fd: number;
 
   constructor(fd: number, buf: Buffer) {
+    super();
     this.fd = fd;
     this.size = fs.fstatSync(this.fd).size;
 
@@ -48,13 +67,17 @@ export class SeekableFileBuffer implements SeekableBuffer {
   }
 }
 
-export class SeekableInMemoryBuffer implements SeekableBuffer {
+export class SeekableInMemoryBuffer
+  extends NotReallyAsync
+  implements SeekableBuffer
+{
   size: number;
   constructor(
     public buf: Buffer,
     public offset: number,
     public filePos = offset
   ) {
+    super();
     this.size = buf.length;
   }
 

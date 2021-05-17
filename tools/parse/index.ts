@@ -70,7 +70,7 @@ export async function* iterate<T extends Entry, S = undefined>(
     start = parent.fileOffset + 8;
   }
   const end = parent.fileOffset + parent.len;
-  data.move(start, 8);
+  await data.asyncMove(start, 8);
 
   while (data.filePos < end) {
     const entry = parser.parseEntry(data, parent, state);
@@ -82,7 +82,7 @@ export async function* iterate<T extends Entry, S = undefined>(
       break;
     }
     yield entry;
-    data.move(entry.fileOffset + entry.len, 8);
+    await data.asyncMove(entry.fileOffset + entry.len, 8);
   }
 }
 

@@ -227,7 +227,7 @@ const containers = new Set([
   'tref',
 ]);
 
-export function readValue(data: SeekableBuffer, box: Box): any {
+function readValue(data: SeekableBuffer, box: Box): any {
   if (box.parentType === 'udta') {
     // TODO from https://developer.apple.com/library/archive/documentation/QuickTime/QTFF/QTFFChap2/qtff2.html#//apple_ref/doc/uid/TP40000939-CH204-BBCCFFGD
     data.move(box.fileOffset + 8, box.len - 8);
