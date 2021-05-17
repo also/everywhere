@@ -61,17 +61,15 @@ function Path({ feature }: { feature: GeoJSON.Feature }) {
   return <path className="trip" d={path(feature)} />;
 }
 
-function LeafletComponent({ value }: { value: GeoJSON.Feature }) {
+function LeafletComponent({ features }: { features: GeoJSON.Feature[] }) {
   const mapRef = useRef();
   useEffect(() => {
-    const map = L.map(mapRef.current).setView([51.505, -0.09], 13);
+    const map = L.map(mapRef.current).setView([42.389118, -71.097153], 10);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution:
         '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     }).addTo(map);
-
-    const gj = L.geoJSON(value).addTo(map);
-    map.fitBounds(gj.getBounds().pad(0.5));
+    features.forEach((f) => L.geoJSON(f).addTo(map));
   }, []);
 
   return <div ref={mapRef} style={{ width: 500, height: 500 }} />;
@@ -99,24 +97,32 @@ function File({ file }: { file: File }) {
       <FileView
         file={file}
         parse={async (f) => JSON.parse(await f.text()) as GeoJSON.Feature}
-        component={LeafletComponent}
+        component={GeoJSONFileView}
       />
     </div>
   );
 }
 
 export default function LocalDataExplorer() {
-  const [files, setFiles] = useState<File[] | undefined>();
+  const [files, setFiles] = useState<GeoJSON.Feature[] | undefined>();
   const handleClick = useCallback(async (e) => {
     e.preventDefault();
     const result = await window.showOpenFilePicker({ multiple: true });
-    setFiles(await Promise.all(result.map((f) => f.getFile())));
+    setFiles(
+      await Promise.all(
+        result.map(async (h) => {
+          const file = await h.getFile();
+          const text = await file.text();
+          return JSON.parse(text);
+        })
+      )
+    );
   }, []);
   return (
     <>
       <PageTitle>Local Data</PageTitle>
       <button onClick={handleClick}>load</button>
-      {files ? files.map((f, i) => <File file={f} key={i} />) : null}
+      {files ? <LeafletComponent features={files} /> : null}
     </>
   );
 }
