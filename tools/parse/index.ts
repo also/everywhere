@@ -1,7 +1,7 @@
-import { SeekableBuffer } from './buffers';
+import { BufferWrapper, SeekableBuffer } from './buffers';
 
 export interface Parser<T extends Entry, S = any> {
-  parseEntry(data: SeekableBuffer, parent: T | Root, state: S | undefined): T;
+  parseEntry(data: BufferWrapper, parent: T | Root, state: S | undefined): T;
   parseValue(data: SeekableBuffer, entry: T): any;
   hasChildren(entry: T): boolean;
   nextState?(
