@@ -5,6 +5,7 @@ export interface BufferWrapper {
 
 export interface SeekableBuffer extends BufferWrapper {
   move(to: number, ensureReadable: number): Promise<void>;
+  view(): SeekableBuffer;
   size: number;
 }
 
@@ -14,6 +15,7 @@ export abstract class AbstractSeekableBuffer implements SeekableBuffer {
   protected abstract arrayBuffer: ArrayBuffer;
   abstract size: number;
   protected abstract _seek(to: number): Promise<void>;
+  abstract view(): SeekableBuffer;
 
   buf: DataView;
   offset = 0;
@@ -69,5 +71,20 @@ export class SeekableBlobBuffer
     const s = this.blob.slice(to, to + this.bufferSize);
     this.arrayBuffer = await s.arrayBuffer();
     this.bufLength = this.arrayBuffer.byteLength;
+  }
+
+  view() {
+    const result = new SeekableBlobBuffer(this.blob, this.bufferSize);
+    result.arrayBuffer = this.arrayBuffer.slice(0);
+    result.buf = new DataView(
+      result.arrayBuffer,
+      this.buf.byteOffset,
+      this.buf.byteLength
+    );
+    result.offset = this.offset;
+    result.bufFileOffset = this.bufFileOffset;
+    result.bufLength = this.bufLength;
+
+    return result;
   }
 }

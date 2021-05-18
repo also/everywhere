@@ -40,6 +40,7 @@ export interface Traverser<T extends Entry> {
   parser: Parser<T, any>;
   iterator(e: T | Root): AsyncIterable<T>;
   value<V = any>(e: T): Promise<V>;
+  clone(): Traverser<T>;
   root: Root;
   data: SeekableBuffer;
 }
@@ -56,7 +57,15 @@ export function bind<T extends Entry>(
       return parser.parseValue(data, e);
     },
     iterator(e) {
-      return iterate(parser, data, e);
+      if (e.fourcc === 'root' || parser.hasChildren(e as T)) {
+        return iterate(parser, data, e);
+      } else {
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        return (async function* () {})();
+      }
+    },
+    clone() {
+      return bind(parser, data.view(), root);
     },
     data,
   };
