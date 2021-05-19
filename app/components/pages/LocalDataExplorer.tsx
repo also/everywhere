@@ -12,6 +12,51 @@ import MapBox from '../MapBox';
 import L from 'leaflet';
 import { SeekableBlobBuffer } from '../../../tools/parse/buffers';
 import { extractGps } from '../../../tools/parse/gopro-gps';
+import { bind, Entry, fileRoot, Traverser } from '../../../tools/parse';
+import { Box, parser as mp4Parser } from '../../../tools/parse/mp4';
+
+function TraverserView<T extends Entry>({
+  traverser,
+  entry,
+  depth = 0,
+}: {
+  traverser: Traverser<T>;
+  entry?: T;
+  depth?: number;
+}) {
+  const [entries, setEntries] = useState<T[]>();
+  useEffect(() => {
+    (async () => {
+      const result: T[] = [];
+      for await (const child of traverser.iterator(entry || traverser.root)) {
+        result.push(child);
+      }
+      setEntries(result);
+    })();
+  }, [traverser, entry]);
+
+  if (depth > 8) {
+    return <div>oops</div>;
+  } else if (entries) {
+    return (
+      <ul>
+        {entries.map((e) => (
+          <li key={e.fileOffset}>
+            <code>{e.fourcc}</code> (file offset: {e.fileOffset}, length:{' '}
+            {e.len})
+            <TraverserView
+              traverser={traverser.clone()}
+              entry={e}
+              depth={depth + 1}
+            />
+          </li>
+        ))}
+      </ul>
+    );
+  } else {
+    return <div>loading...</div>;
+  }
+}
 
 function FileView<T>({
   file,
@@ -100,6 +145,16 @@ function LeafletComponent({ features }: { features: GeoJSON.Feature[] }) {
   return <div ref={mapComponent} style={{ width: 1800, height: 1000 }} />;
 }
 
+type SomeFile = { geojson: GeoJSON.Feature; mp4?: Traverser<Box> };
+
+function FileComponent({ file: { geojson, mp4 } }: { file: SomeFile }) {
+  return mp4 ? (
+    <TraverserView traverser={mp4} />
+  ) : (
+    <LeafletComponent features={[geojson]} />
+  );
+}
+
 function GeoJSONFileView({ value }: { value: GeoJSON.Feature }) {
   return (
     <>
@@ -129,23 +184,26 @@ function File({ file }: { file: File }) {
 }
 
 export default function LocalDataExplorer() {
-  const [files, setFiles] = useState<GeoJSON.Feature[] | undefined>();
+  const [files, setFiles] = useState<SomeFile[] | undefined>();
   const handleClick = useCallback(async (e) => {
     e.preventDefault();
-    const result = await window.showOpenFilePicker({ multiple: true });
+    const result = await window.showOpenFilePicker();
     setFiles(
       await Promise.all(
         result.map(async (h) => {
           const file = await h.getFile();
           let geojson: GeoJSON.Feature;
+          let mp4;
           if (file.name.toLowerCase().endsWith('.mp4')) {
-            geojson = await extractGps(new SeekableBlobBuffer(file, 10240));
+            const data = new SeekableBlobBuffer(file, 10240);
+            mp4 = bind(mp4Parser, data, fileRoot(data));
+            geojson = await extractGps(data);
           } else {
             const text = await file.text();
             geojson = JSON.parse(text) as GeoJSON.Feature;
           }
           geojson.properties!.filename = file.name;
-          return geojson;
+          return { geojson, mp4 };
         })
       )
     );
@@ -154,7 +212,7 @@ export default function LocalDataExplorer() {
     <>
       <PageTitle>Local Data</PageTitle>
       <button onClick={handleClick}>load</button>
-      {files ? <LeafletComponent features={files} /> : null}
+      {files ? <FileComponent file={files[0]} /> : null}
     </>
   );
 }
