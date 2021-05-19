@@ -241,7 +241,7 @@ async function readValue(data: SeekableBuffer, box: Box): Promise<any> {
           `don't support v ${version} for box ${box.fourcc} at ${box.fileOffset}`
         );
       }
-      await data.move(box.fileOffset + 12, box.len - 8);
+      await data.move(box.fileOffset + 12, box.len - 12);
 
       return parser(data, box.len);
     }
