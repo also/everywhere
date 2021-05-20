@@ -1,13 +1,10 @@
-import { bind, fileRoot } from '.';
-import { SeekableBuffer } from './buffers';
+import { Traverser } from '.';
 import { getMeta, iterateMetadataSamples, extractGpsSample } from './gpmf';
-import { parser as mp4Parser } from './mp4';
+import { Box } from './mp4';
 
 export async function extractGps(
-  data: SeekableBuffer
+  mp4: Traverser<Box>
 ): Promise<GeoJSON.Feature> {
-  const mp4 = bind(mp4Parser, data, fileRoot(data));
-
   const track = await getMeta(mp4);
   const {
     cameraModelName,
@@ -29,7 +26,7 @@ export async function extractGps(
 
   if (samples) {
     for await (const sample of iterateMetadataSamples(samples)) {
-      const gpsData = await extractGpsSample(data, sample);
+      const gpsData = await extractGpsSample(mp4.data, sample);
       // most of my videos have gps data in all samples, but not quite all
       // just GPS disabled?
       if (gpsData) {

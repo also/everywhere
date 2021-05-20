@@ -244,7 +244,7 @@ export default function LocalDataExplorer() {
           if (file.name.toLowerCase().endsWith('.mp4')) {
             const data = new SeekableBlobBuffer(file, 1024000);
             mp4 = bind(mp4Parser, data, fileRoot(data));
-            geojson = await extractGps(data);
+            geojson = await extractGps(mp4);
           } else {
             const text = await file.text();
             geojson = JSON.parse(text) as GeoJSON.Feature;
