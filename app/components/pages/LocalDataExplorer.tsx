@@ -13,8 +13,38 @@ import MapBox from '../MapBox';
 import L from 'leaflet';
 import { SeekableBlobBuffer } from '../../../tools/parse/buffers';
 import { extractGps } from '../../../tools/parse/gopro-gps';
-import { bind, Entry, fileRoot, Traverser } from '../../../tools/parse';
+import { bind, Entry, fileRoot, root, Traverser } from '../../../tools/parse';
 import { Box, parser as mp4Parser } from '../../../tools/parse/mp4';
+import { utf8decoder } from '../../../tools/parse/read';
+import {
+  getMeta,
+  iterateMetadataSamples,
+  Metadata,
+  SampleMetadata,
+  parser as gpmfParser,
+} from '../../../tools/parse/gpmf';
+
+function DataViewView({ value }: { value: DataView }) {
+  return <div>{utf8decoder.decode(value).slice(0, 100)}</div>;
+}
+
+async function asyncArray<T>(i: AsyncIterable<T>): Promise<T[]> {
+  const result: T[] = [];
+  for await (const item of i) {
+    result.push(item);
+  }
+  return result;
+}
+
+function useMemoAsync<T>(f: () => Promise<T>, deps?: any[]): T | undefined {
+  const [state, setState] = useState<T>();
+
+  useEffect(() => {
+    (async () => setState(await f()))();
+  }, deps);
+
+  return state;
+}
 
 function TraverserValueView<T extends Entry>({
   traverser,
@@ -25,17 +55,12 @@ function TraverserValueView<T extends Entry>({
   entry?: T;
   depth?: number;
 }) {
-  const [state, setState] = useState<{ children: T[]; value?: any }>();
-
-  useEffect(() => {
-    (async () => {
-      const children: T[] = [];
-      for await (const child of traverser.iterator(entry || traverser.root)) {
-        children.push(child);
-      }
-      const value = entry ? await traverser.value(entry) : undefined;
-      setState({ children, value });
-    })();
+  const state = useMemoAsync(async () => {
+    const children = await asyncArray(
+      traverser.iterator(entry || traverser.root)
+    );
+    const value = entry ? await traverser.value(entry) : undefined;
+    return { children, value };
   }, [traverser, entry]);
 
   if (depth > 8) {
@@ -45,7 +70,15 @@ function TraverserValueView<T extends Entry>({
 
     return (
       <>
-        {value ? <pre>{JSON.stringify(value, null, 2)}</pre> : null}
+        {value ? (
+          <pre>
+            {value instanceof DataView ? (
+              <DataViewView value={value} />
+            ) : (
+              JSON.stringify(value, null, 2)
+            )}
+          </pre>
+        ) : null}
         <ul>
           {children.map((e) => (
             <li key={e.fileOffset}>
@@ -189,11 +222,46 @@ function LeafletComponent({ features }: { features: GeoJSON.Feature[] }) {
   return <div ref={mapComponent} style={{ width: 1800, height: 1000 }} />;
 }
 
-type SomeFile = { geojson: GeoJSON.Feature; mp4?: Traverser<Box> };
+function GpmfSamples({
+  sampleMetadata,
+  mp4,
+}: {
+  sampleMetadata: SampleMetadata;
+  mp4: Traverser<Box>;
+}) {
+  const samples = useMemoAsync(
+    () => asyncArray(iterateMetadataSamples(sampleMetadata)),
+    [sampleMetadata]
+  );
 
-function FileComponent({ file: { geojson, mp4 } }: { file: SomeFile }) {
+  if (!samples) {
+    return <div>loading...</div>;
+  } else {
+    const [sample] = samples;
+    const gpmf = bind(gpmfParser, mp4.data, root(sample.offset, sample.size));
+    return (
+      <div>
+        {samples.length} samples
+        <TraverserView traverser={gpmf.clone()} />
+      </div>
+    );
+  }
+}
+
+type SomeFile = {
+  geojson: GeoJSON.Feature;
+  mp4?: Traverser<Box>;
+  track?: Metadata;
+};
+
+function FileComponent({ file: { geojson, mp4, track } }: { file: SomeFile }) {
   return mp4 ? (
-    <TraverserView traverser={mp4} />
+    <>
+      <TraverserView traverser={mp4} />
+      {track?.samples ? (
+        <GpmfSamples sampleMetadata={track.samples} mp4={mp4} />
+      ) : null}
+    </>
   ) : (
     <LeafletComponent features={[geojson]} />
   );
@@ -241,16 +309,18 @@ export default function LocalDataExplorer() {
         result.map(async (file) => {
           let geojson: GeoJSON.Feature;
           let mp4;
+          let track;
           if (file.name.toLowerCase().endsWith('.mp4')) {
             const data = new SeekableBlobBuffer(file, 1024000);
             mp4 = bind(mp4Parser, data, fileRoot(data));
-            geojson = await extractGps(mp4);
+            track = await getMeta(mp4);
+            geojson = await extractGps(track, mp4);
           } else {
             const text = await file.text();
             geojson = JSON.parse(text) as GeoJSON.Feature;
           }
           geojson.properties!.filename = file.name;
-          return { geojson, mp4 };
+          return { geojson, mp4, track };
         })
       )
     );
