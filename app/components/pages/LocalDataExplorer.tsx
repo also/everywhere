@@ -5,6 +5,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
+import { fileOpen } from 'browser-fs-access';
 import PageTitle from '../PageTitle';
 import MapComponent from '../Map';
 import MapContext from '../MapContext';
@@ -207,11 +208,14 @@ export default function LocalDataExplorer() {
   const [files, setFiles] = useState<SomeFile[] | undefined>();
   const handleClick = useCallback(async (e) => {
     e.preventDefault();
-    const result = await window.showOpenFilePicker();
+    const result = [
+      await fileOpen({
+        mimeTypes: ['video/mp4'],
+      }),
+    ];
     setFiles(
       await Promise.all(
-        result.map(async (h) => {
-          const file = await h.getFile();
+        result.map(async (file) => {
           let geojson: GeoJSON.Feature;
           let mp4;
           if (file.name.toLowerCase().endsWith('.mp4')) {
