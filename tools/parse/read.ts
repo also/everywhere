@@ -17,8 +17,12 @@ export function readUtf8(b: BufferWrapper, len: number): string {
   return utf8(slice(b, len));
 }
 
-export function readAscii(b: BufferWrapper, len: number): string {
-  return utf8(slice(b, len));
+export function readAscii(
+  b: BufferWrapper,
+  len: number,
+  advance = true
+): string {
+  return utf8(slice(b, len, advance));
 }
 
 export function readUInt32BE(b: BufferWrapper): number {
@@ -57,9 +61,11 @@ export function skip(b: BufferWrapper, n: number): void {
   b.offset += n;
 }
 
-export function slice(b: BufferWrapper, n: number): DataView {
+export function slice(b: BufferWrapper, n: number, advance = true): DataView {
   const result = new DataView(b.buf.buffer, b.buf.byteOffset + b.offset, n);
-  b.offset += n;
+  if (advance) {
+    b.offset += n;
+  }
   return result;
 }
 
@@ -80,7 +86,7 @@ export const t = {
   uint8: { f: 'getUint8', size: 1 },
   float32: { f: 'getFloat32', size: 4 },
   F: {
-    f: (d: BufferWrapper) => readAscii(d, 4),
+    f: (d: BufferWrapper) => readAscii(d, 4, false),
     size: 4,
   },
   uint64: { f: 'getBigUint64', size: 8 },
@@ -89,7 +95,7 @@ export const t = {
   int16: { f: 'getInt16', size: 2 },
   uint16: { f: 'getUint16', size: 2 },
   U: {
-    f: (d: BufferWrapper) => readAscii(d, 16),
+    f: (d: BufferWrapper) => readAscii(d, 16, false),
     size: 16,
   },
 } as const;

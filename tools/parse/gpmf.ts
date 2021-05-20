@@ -81,13 +81,13 @@ const simpleTypes: { [key: string]: TypeReader } = {
   b: t.int8,
   B: t.uint8,
   f: t.float32,
-  F: { f: (b) => readAscii(b, 4), size: 4 },
+  F: { f: (b) => readAscii(b, 4, false), size: 4 },
   J: t.uint64,
   l: t.int32,
   L: t.uint32,
   s: t.int16,
   S: t.uint16,
-  U: { f: (b) => parseDate(readAscii(b, 16)), size: 16 },
+  U: { f: (b) => parseDate(readAscii(b, 16, false)), size: 16 },
 };
 
 export type ComplexType = { size: number; types: TypeReader[] };
