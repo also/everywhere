@@ -54,7 +54,9 @@ export function bind<T extends Entry>(
     parser,
     root,
     value(e) {
-      return parser.parseValue(data, e);
+      return e.fourcc === 'root'
+        ? Promise.resolve(undefined)
+        : parser.parseValue(data, e);
     },
     iterator(e) {
       if (e.fourcc === 'root' || parser.hasChildren(e as T)) {
