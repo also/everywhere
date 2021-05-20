@@ -16,7 +16,7 @@ import { extractGps } from '../../../tools/parse/gopro-gps';
 import { bind, Entry, fileRoot, Traverser } from '../../../tools/parse';
 import { Box, parser as mp4Parser } from '../../../tools/parse/mp4';
 
-function TraverserView<T extends Entry>({
+function TraverserValueView<T extends Entry>({
   traverser,
   entry,
   depth = 0,
@@ -26,6 +26,7 @@ function TraverserView<T extends Entry>({
   depth?: number;
 }) {
   const [state, setState] = useState<{ children: T[]; value?: any }>();
+
   useEffect(() => {
     (async () => {
       const children: T[] = [];
@@ -37,14 +38,12 @@ function TraverserView<T extends Entry>({
     })();
   }, [traverser, entry]);
 
-  let data;
-
   if (depth > 8) {
-    data = <div>oops</div>;
+    return <div>oops</div>;
   } else if (state) {
     const { children, value } = state;
 
-    data = (
+    return (
       <>
         {value ? <pre>{JSON.stringify(value, null, 2)}</pre> : null}
         <ul>
@@ -61,20 +60,44 @@ function TraverserView<T extends Entry>({
       </>
     );
   } else {
-    data = <div>loading...</div>;
+    return <div>loading...</div>;
+  }
+}
+
+function TraverserView<T extends Entry>({
+  traverser,
+  entry,
+  depth = 0,
+}: {
+  traverser: Traverser<T>;
+  entry?: T;
+  depth?: number;
+}) {
+  const [expanded, setExpanded] = useState(false);
+
+  if (depth > 8) {
+    return <div>oops</div>;
   }
 
   return (
     <>
-      {entry ? (
-        <>
-          <code>{entry.fourcc}</code> (file offset: {entry.fileOffset}, length:{' '}
-          {entry.len})
-        </>
-      ) : (
-        '(root)'
-      )}
-      {data}
+      <div onClick={() => setExpanded(!expanded)}>
+        {entry ? (
+          <>
+            <code>{entry.fourcc}</code> (file offset: {entry.fileOffset},
+            length: {entry.len})
+          </>
+        ) : (
+          '(root)'
+        )}
+      </div>
+      {expanded ? (
+        <TraverserValueView
+          traverser={traverser.clone()}
+          entry={entry || traverser.root}
+          depth={depth}
+        />
+      ) : null}
     </>
   );
 }
