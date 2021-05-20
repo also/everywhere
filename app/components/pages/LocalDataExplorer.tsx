@@ -24,38 +24,58 @@ function TraverserView<T extends Entry>({
   entry?: T;
   depth?: number;
 }) {
-  const [entries, setEntries] = useState<T[]>();
+  const [state, setState] = useState<{ children: T[]; value?: any }>();
   useEffect(() => {
     (async () => {
-      const result: T[] = [];
+      const children: T[] = [];
       for await (const child of traverser.iterator(entry || traverser.root)) {
-        result.push(child);
+        children.push(child);
       }
-      setEntries(result);
+      const value = entry ? await traverser.value(entry) : undefined;
+      setState({ children, value });
     })();
   }, [traverser, entry]);
 
+  let data;
+
   if (depth > 8) {
-    return <div>oops</div>;
-  } else if (entries) {
-    return (
-      <ul>
-        {entries.map((e) => (
-          <li key={e.fileOffset}>
-            <code>{e.fourcc}</code> (file offset: {e.fileOffset}, length:{' '}
-            {e.len})
-            <TraverserView
-              traverser={traverser.clone()}
-              entry={e}
-              depth={depth + 1}
-            />
-          </li>
-        ))}
-      </ul>
+    data = <div>oops</div>;
+  } else if (state) {
+    const { children, value } = state;
+
+    data = (
+      <>
+        {value ? <pre>{JSON.stringify(value, null, 2)}</pre> : null}
+        <ul>
+          {children.map((e) => (
+            <li key={e.fileOffset}>
+              <TraverserView
+                traverser={traverser.clone()}
+                entry={e}
+                depth={depth + 1}
+              />
+            </li>
+          ))}
+        </ul>
+      </>
     );
   } else {
-    return <div>loading...</div>;
+    data = <div>loading...</div>;
   }
+
+  return (
+    <>
+      {entry ? (
+        <>
+          <code>{entry.fourcc}</code> (file offset: {entry.fileOffset}, length:{' '}
+          {entry.len})
+        </>
+      ) : (
+        '(root)'
+      )}
+      {data}
+    </>
+  );
 }
 
 function FileView<T>({
@@ -195,7 +215,7 @@ export default function LocalDataExplorer() {
           let geojson: GeoJSON.Feature;
           let mp4;
           if (file.name.toLowerCase().endsWith('.mp4')) {
-            const data = new SeekableBlobBuffer(file, 10240);
+            const data = new SeekableBlobBuffer(file, 1024000);
             mp4 = bind(mp4Parser, data, fileRoot(data));
             geojson = await extractGps(data);
           } else {
