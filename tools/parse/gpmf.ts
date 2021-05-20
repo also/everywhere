@@ -114,7 +114,7 @@ async function parseData(
 
   const { type, repeat, structSize } = header;
   if (!type) {
-    throw new Error('missing type!');
+    return;
   }
   if (typeof type === 'string') {
     const simpleType = simpleTypes[type];
@@ -194,7 +194,7 @@ export function getMetaTrak(
   );
 }
 
-type SampleMetadata = {
+export type SampleMetadata = {
   // stsz
   sizeTable: number[];
   // stsz
@@ -210,7 +210,7 @@ type SampleMetadata = {
   duration: number;
 };
 
-type Metadata = {
+export type Metadata = {
   samples: SampleMetadata | undefined;
 
   // mvhd

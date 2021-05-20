@@ -4,6 +4,7 @@ import SeekableFileBuffer from './parse/SeekableFileBuffer';
 import { extractGps } from './parse/gopro-gps';
 import { bind, fileRoot } from './parse';
 import { parser as mp4Parser } from './parse/mp4';
+import { getMeta } from './parse/gpmf';
 
 async function extractFileGps(filename: string): Promise<GeoJSON.Feature> {
   const data = new SeekableFileBuffer(
@@ -13,7 +14,9 @@ async function extractFileGps(filename: string): Promise<GeoJSON.Feature> {
 
   const mp4 = bind(mp4Parser, data, fileRoot(data));
 
-  return extractGps(mp4);
+  const track = await getMeta(mp4);
+
+  return extractGps(track, mp4);
 }
 
 export default async function ({ _: [filename] }: { _: string[] }) {

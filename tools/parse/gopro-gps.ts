@@ -1,11 +1,11 @@
 import { Traverser } from '.';
-import { getMeta, iterateMetadataSamples, extractGpsSample } from './gpmf';
+import { iterateMetadataSamples, extractGpsSample, Metadata } from './gpmf';
 import { Box } from './mp4';
 
 export async function extractGps(
+  track: Metadata,
   mp4: Traverser<Box>
 ): Promise<GeoJSON.Feature> {
-  const track = await getMeta(mp4);
   const {
     cameraModelName,
     mediaUID,
