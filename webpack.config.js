@@ -30,7 +30,6 @@ module.exports = {
                 targets: {
                   safari: 14,
                 },
-                include: ['@babel/plugin-proposal-optional-chaining'],
               },
             ],
           ],
