@@ -3,8 +3,14 @@ import sortBy from 'lodash/sortBy';
 import { features, tree } from './geo';
 import { Node } from './tree';
 
-import waysGeojson from 'compact-json!../app-data/highways-clipped-topo.geojson';
-import intersectionsTopojson from 'compact-json!../app-data/intersections-clipped-topo.geojson';
+const waysGeojson =
+  require('compact-json!../app-data/highways-clipped-topo.geojson') as TopoJSON.Topology<{
+    'highways-clipped': TopoJSON.GeometryCollection<WayProperties>;
+  }>;
+const intersectionsTopojson =
+  require('compact-json!../app-data/intersections-clipped-topo.geojson') as TopoJSON.Topology<{
+    'intersections-clipped': TopoJSON.GeometryCollection<IntersectionProperties>;
+  }>;
 import {
   Feature,
   FeatureCollection,

@@ -18,10 +18,18 @@ export function features<
 >(
   geojson: TopoJSON.Topology<TopoJSON.Objects<T>>
 ): FeatureCollection<G, T> | FeatureCollection<G, T> {
-  return topojson.feature(
-    geojson,
-    geojson.objects[Object.keys(geojson.objects)[0]]
-  );
+  const keys = Object.keys(geojson.objects);
+  if (keys.length !== 1) {
+    throw new Error('expected exactly one opject in Topology');
+  }
+  const object = geojson.objects[keys[0]];
+  if (object.type !== 'GeometryCollection') {
+    throw new Error('expected object to be a GeometryCollection');
+  }
+  if (object.geometries.length !== 1) {
+    console.log('expected a single geometry');
+  }
+  return topojson.feature(geojson, object);
 }
 
 export function feature<
