@@ -1,4 +1,4 @@
-import sortBy from 'lodash/collection/sortBy';
+import sortBy from 'lodash/sortBy';
 import moment from 'moment';
 import { CoverageFeature, TripFeature } from './trips';
 import { Leaf, Node } from './tree';
@@ -83,7 +83,9 @@ function grouped(name: string, chapters: VideoChapter[]): Video {
   const first = chapters[0];
   const last = chapters[chapters.length - 1];
 
-  const stills = [].concat(...chapters.map(({ stills }) => stills));
+  const stills = ([] as Still[]).concat(
+    ...chapters.map(({ stills }) => stills)
+  );
   return {
     name,
     start: first.start,

@@ -1,4 +1,4 @@
-import sortedIndex from 'lodash/array/sortedIndex';
+import sortedIndex from 'lodash/sortedIndex';
 import { memo, useEffect, useRef, useState } from 'react';
 import { Video, VideoChapter } from '../videos';
 import moment from 'moment';

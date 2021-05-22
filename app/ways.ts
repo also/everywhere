@@ -1,4 +1,4 @@
-import sortBy from 'lodash/collection/sortBy';
+import sortBy from 'lodash/sortBy';
 
 import { features, tree } from './geo';
 import { Node } from './tree';
