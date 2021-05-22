@@ -4,7 +4,7 @@ import { CoverageFeature, TripFeature } from './trips';
 import { Leaf, Node } from './tree';
 import { Position } from 'geojson';
 
-const videoContext = (require as any).context(
+const videoContext = require.context(
   'compact-json!../app-data/video-metadata',
   false,
   /\.json$/

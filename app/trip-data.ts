@@ -1,6 +1,6 @@
 import { TripTopology } from './trips';
 
-const tripContext = (require as any).context(
+const tripContext = require.context(
   'compact-json!../app-data/trips',
   false,
   /-ways\.geojson$/
