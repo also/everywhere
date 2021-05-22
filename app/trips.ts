@@ -26,14 +26,14 @@ export type TripProperties = {
 
 export type TripFeature = Feature<LineString | MultiLineString, TripProperties>;
 
-export type TripTopology = {};
+export type TripTopology = TopoJSON.Topology<TopoJSON.Objects<TripProperties>>;
 
 export type CoverageFeature = Feature<
   LineString | MultiLineString,
   TripProperties & { video: Video; tree: CoverageTree }
 >;
 
-function load(trip): TripFeature {
+function load(trip: TripTopology): TripFeature {
   const result: TripFeature = feature(trip);
   const { properties } = result;
   properties.videos = [];

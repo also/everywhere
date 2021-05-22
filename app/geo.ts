@@ -1,6 +1,7 @@
 import {
   Feature,
   FeatureCollection,
+  Geometry,
   LineString,
   MultiLineString,
   Polygon,
@@ -14,7 +15,9 @@ import makeTree from './tree';
 export function features<
   G extends GeoJSON.Geometry,
   T extends TopoJSON.Properties
->(geojson: TopoJSON.Topology<TopoJSON.Objects<T>>): FeatureCollection<G, T> {
+>(
+  geojson: TopoJSON.Topology<TopoJSON.Objects<T>>
+): FeatureCollection<G, T> | FeatureCollection<G, T> {
   return topojson.feature(
     geojson,
     geojson.objects[Object.keys(geojson.objects)[0]]
@@ -28,13 +31,15 @@ export function feature<
   return features<G, T>(geojson).features[0];
 }
 
-export function geoLines(feat) {
+export function geoLines(feat: FeatureCollection | Feature): Geometry[] {
   return (feat.type === 'FeatureCollection' ? feat.features : [feat])
     .map(({ geometry }) => geometry)
     .filter(({ type }) => type === 'LineString' || type === 'MultiLineString');
 }
 
-export function featureCollection(features): FeatureCollection {
+export function featureCollection<T extends Geometry>(
+  features: Feature<T>[]
+): FeatureCollection<T> {
   return { type: 'FeatureCollection', features: features };
 }
 
