@@ -10,7 +10,7 @@ import {
 import * as topojson from 'topojson';
 import * as TopoJSON from 'topojson-specification';
 
-import makeTree from './tree';
+import makeTree, { Node } from './tree';
 
 export function features<
   G extends GeoJSON.Geometry,
@@ -43,29 +43,31 @@ export function featureCollection<T extends Geometry>(
   return { type: 'FeatureCollection', features: features };
 }
 
-export function tree<T>(
-  feat:
-    | Feature<LineString | MultiLineString | Polygon, T>
-    | FeatureCollection<LineString | MultiLineString | Polygon, T>
-) {
+function coordses(
+  geometry: LineString | MultiLineString | Polygon
+): Position[][] {
+  return geometry.type === 'MultiLineString' || geometry.type === 'Polygon'
+    ? geometry.coordinates
+    : [geometry.coordinates];
+}
+
+export function tree<G extends LineString | MultiLineString | Polygon, T>(
+  feat: Feature<G, T> | FeatureCollection<G, T>
+): Node<Feature<G, T>> {
   const arcs: {
     arc: Position[];
-    data: Feature<LineString | MultiLineString | Polygon, T>;
+    data: Feature<G, T>;
   }[] = [];
 
   (feat.type === 'FeatureCollection' ? feat.features : [feat]).forEach(
     (feat) => {
-      (feat.geometry.type === 'MultiLineString' ||
-      feat.geometry.type === 'Polygon'
-        ? feat.geometry.coordinates
-        : [feat.geometry.coordinates]
-      ).forEach((arc) => {
+      coordses(feat.geometry).forEach((arc) => {
         arcs.push({ arc, data: feat });
       });
     }
   );
 
-  return makeTree<Feature<LineString | MultiLineString | Polygon, T>>({
+  return makeTree<Feature<G, T>>({
     arcs,
   });
 }
