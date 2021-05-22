@@ -5,12 +5,13 @@ import React, {
   useRef,
   useState,
 } from 'react';
+import L from 'leaflet';
 import { fileOpen } from 'browser-fs-access';
+import { Feature } from 'geojson';
 import PageTitle from '../PageTitle';
 import MapComponent from '../Map';
 import MapContext from '../MapContext';
 import MapBox from '../MapBox';
-import L from 'leaflet';
 import { SeekableBlobBuffer } from '../../../tools/parse/buffers';
 import { extractGps } from '../../../tools/parse/gopro-gps';
 import { bind, Entry, fileRoot, root, Traverser } from '../../../tools/parse';
@@ -23,6 +24,7 @@ import {
   SampleMetadata,
   parser as gpmfParser,
 } from '../../../tools/parse/gpmf';
+import { features } from '../../geo';
 
 function DataViewView({ value }: { value: DataView }) {
   return <div>{utf8decoder.decode(value).slice(0, 100)}</div>;
@@ -249,7 +251,7 @@ function GpmfSamples({
 }
 
 type SomeFile = {
-  geojson: GeoJSON.Feature;
+  geojson: GeoJSON.Feature | GeoJSON.FeatureCollection;
   mp4?: Traverser<Box>;
   track?: Metadata;
 };
@@ -263,7 +265,9 @@ function FileComponent({ file: { geojson, mp4, track } }: { file: SomeFile }) {
       ) : null}
     </>
   ) : (
-    <LeafletComponent features={[geojson]} />
+    <LeafletComponent
+      features={geojson.type === 'Feature' ? [geojson] : geojson.features}
+    />
   );
 }
 
@@ -295,19 +299,30 @@ function File({ file }: { file: File }) {
   );
 }
 
+export function FilesComponent({ files }: { files: SomeFile[] }) {
+  return (
+    <LeafletComponent
+      features={([] as Feature[]).concat(
+        ...files.map(({ geojson }) =>
+          geojson.type === 'Feature' ? [geojson] : geojson.features
+        )
+      )}
+    />
+  );
+}
+
 export default function LocalDataExplorer() {
   const [files, setFiles] = useState<SomeFile[] | undefined>();
   const handleClick = useCallback(async (e) => {
     e.preventDefault();
-    const result = [
-      await fileOpen({
-        mimeTypes: ['video/mp4'],
-      }),
-    ];
+    const result = await fileOpen({
+      multiple: true,
+      // mimeTypes: ['video/mp4'],
+    });
     setFiles(
       await Promise.all(
         result.map(async (file) => {
-          let geojson: GeoJSON.Feature;
+          let geojson: GeoJSON.Feature | GeoJSON.FeatureCollection;
           let mp4;
           let track;
           if (file.name.toLowerCase().endsWith('.mp4')) {
@@ -317,9 +332,18 @@ export default function LocalDataExplorer() {
             geojson = await extractGps(track, mp4);
           } else {
             const text = await file.text();
-            geojson = JSON.parse(text) as GeoJSON.Feature;
+            const json = JSON.parse(text);
+            if (json.type === 'Topology') {
+              const topology = json as TopoJSON.Topology;
+              geojson = features(topology);
+            } else {
+              geojson = json as GeoJSON.Feature;
+            }
           }
-          geojson.properties!.filename = file.name;
+          if (!geojson.properties) {
+            geojson.properties = {};
+          }
+          geojson.properties.filename = file.name;
           return { geojson, mp4, track };
         })
       )
@@ -329,7 +353,7 @@ export default function LocalDataExplorer() {
     <>
       <PageTitle>Local Data</PageTitle>
       <button onClick={handleClick}>load</button>
-      {files ? <FileComponent file={files[0]} /> : null}
+      {files ? <FilesComponent files={files} /> : null}
     </>
   );
 }
