@@ -12,7 +12,7 @@ module.exports = {
         test: /\.js$/,
         exclude: /(node_modules|bower_components)/,
         loader: 'babel-loader',
-        query: {
+        options: {
           presets: [['@babel/preset-react', { runtime: 'automatic' }]],
         },
       },
@@ -20,7 +20,7 @@ module.exports = {
         test: /\.tsx?$/,
         exclude: /(node_modules|bower_components)/,
         loader: 'babel-loader',
-        query: {
+        options: {
           presets: [
             '@babel/preset-typescript',
             ['@babel/preset-react', { runtime: 'automatic' }],
