@@ -27,20 +27,12 @@ import LocationDetails from './components/pages/LocationDetails';
 
 import { geoLines } from './geo';
 
-import {
-  ways,
-  groupedWays,
-  boundary,
-  contours,
-  tripsPromise,
-  videos,
-  wayTree,
-} from './data';
+import { ways, groupedWays, boundary, contours, wayTree } from './data';
 import DataContext from './components/DataContext';
-import { CoverageFeature, TripFeature, TripTree } from './trips';
-import { CoverageTree } from './videos';
-import { ReactNode } from 'react';
+import { ReactNode, useContext } from 'react';
 import LocalDataExplorer from './components/pages/LocalDataExplorer';
+import DataSetContext from './components/DataSetContext';
+import { loadDataset } from './data';
 
 const GlobalStyle = createGlobalStyle`
 body {
@@ -109,7 +101,8 @@ function App({ children }: { children: ReactNode }) {
   );
 }
 
-function CityMapRoute({ trips }: { trips: TripFeature[] }) {
+function CityMapRoute() {
+  const { trips } = useContext(DataSetContext);
   // TODO what's the right way to pass this in?
   const tripsLength = d3.sum(
     trips.map(geoLines).reduce((a, b) => a.concat(b)),
@@ -133,19 +126,16 @@ function WayDetailsRoute({ match: { params } }: RouteComponentProps<[string]>) {
 function VideoDetailsRoute({
   match: { params },
 }: RouteComponentProps<{ seek: string; name: string }>) {
+  const { videos } = useContext(DataSetContext);
   return <VideoDetails video={videos.get(params.name)} seek={params.seek} />;
 }
 
 function LocationDetailsRoute({
-  tripTree,
-  videoTree,
   match: {
     params: { coords },
   },
-}: RouteComponentProps<{ coords: string }> & {
-  tripTree: TripTree;
-  videoTree: CoverageTree;
-}) {
+}: RouteComponentProps<{ coords: string }>) {
+  const { tripTree, videoTree } = useContext(DataSetContext);
   return (
     <LocationDetails
       location={coords.split(',').map(parseFloat)}
@@ -155,62 +145,63 @@ function LocationDetailsRoute({
   );
 }
 
+function TripDetailsRoute({
+  match: {
+    params: { id },
+  },
+}: RouteComponentProps<{ id: string }>) {
+  const { trips } = useContext(DataSetContext);
+  return <TripDetails trip={trips.filter((t) => `${t.id}` === id)[0]} />;
+}
+
+function VideosRoute() {
+  const { videos, videoCoverage, videoTree } = useContext(DataSetContext);
+  return (
+    <VideoListPage
+      videos={Array.from(videos.values())}
+      videoCoverage={videoCoverage}
+      videoTree={videoTree}
+    />
+  );
+}
+
+function TripsRoute() {
+  const { trips } = useContext(DataSetContext);
+  return <TripListPage trips={trips} />;
+}
+
 const div = document.createElement('div');
 document.body.appendChild(div);
 
-tripsPromise.then(({ trips, videoCoverage, tripTree, videoTree }) => {
+loadDataset().then((dataset) => {
   ReactDOM.render(
     <>
       <GlobalStyle />
       <DataContext.Provider value={{ boundary, contours, ways }}>
-        <Router>
-          <App>
-            <Switch>
-              <Route path="/local" component={LocalDataExplorer} />
-              <Route path="/ways/*" component={WayDetailsRoute} />
-              <Route path="/ways" component={WayListRoute} />
-              <Route path="/videos/:name/:seek" component={VideoDetailsRoute} />
-              <Route path="/videos/:name" component={VideoDetailsRoute} />
-              <Route
-                path="/videos"
-                render={() => (
-                  <VideoListPage
-                    videos={Array.from(videos.values())}
-                    videoCoverage={videoCoverage}
-                    videoTree={videoTree}
-                  />
-                )}
-              />
-              <Route
-                path="/trips/:id"
-                render={({ match }) => (
-                  <TripDetails
-                    trip={
-                      trips.filter(({ id }) => `${id}` === match.params.id)[0]
-                    }
-                  />
-                )}
-              />
-              <Route
-                path="/trips"
-                render={() => <TripListPage trips={trips} />}
-              />
-              <Route
-                path="/locations/:coords"
-                render={(props) => (
-                  <LocationDetailsRoute
-                    {...props}
-                    tripTree={tripTree}
-                    videoTree={videoTree}
-                  />
-                )}
-              />
-              <Route path="/">
-                <CityMapRoute trips={trips} />
-              </Route>
-            </Switch>
-          </App>
-        </Router>
+        <DataSetContext.Provider value={dataset}>
+          <Router>
+            <App>
+              <Switch>
+                <Route path="/local" component={LocalDataExplorer} />
+                <Route path="/ways/*" component={WayDetailsRoute} />
+                <Route path="/ways" component={WayListRoute} />
+                <Route
+                  path="/videos/:name/:seek"
+                  component={VideoDetailsRoute}
+                />
+                <Route path="/videos/:name" component={VideoDetailsRoute} />
+                <Route path="/videos" component={VideosRoute} />
+                <Route path="/trips/:id" component={TripDetailsRoute} />
+                <Route path="/trips" component={TripsRoute} />
+                <Route
+                  path="/locations/:coords"
+                  component={LocationDetailsRoute}
+                />
+                <Route path="/" component={CityMapRoute} />
+              </Switch>
+            </App>
+          </Router>
+        </DataSetContext.Provider>
       </DataContext.Provider>
     </>,
     div
