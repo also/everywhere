@@ -96,7 +96,8 @@ function App({ children }: { children: ReactNode }) {
           </HeaderLink>{' '}
           <HeaderLink to="/trips">Trips</HeaderLink>{' '}
           <HeaderLink to="/videos">Videos</HeaderLink>{' '}
-          <HeaderLink to="/ways">Streets</HeaderLink>
+          <HeaderLink to="/ways">Streets</HeaderLink>{' '}
+          <HeaderLink to="/local">Files</HeaderLink>
         </div>
       </Header>
       <Content>{children}</Content>
