@@ -30,4 +30,8 @@ export default class SeekableFileBuffer
     );
     this.bufLength = read;
   }
+
+  view(): SeekableFileBuffer {
+    throw new Error('nope');
+  }
 }
