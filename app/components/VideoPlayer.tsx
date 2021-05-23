@@ -99,7 +99,7 @@ export default memo(function VideoPlayer({
     }
   }
 
-  const style = {};
+  const style: React.CSSProperties = {};
   if (seekingTo) {
     style.opacity = 0.2;
   }

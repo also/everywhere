@@ -369,7 +369,10 @@ export default function LocalDataExplorer({
   setDataSet(dataSet: DataSet): void;
 }) {
   const [files, setFiles] = useState<SomeFile[] | undefined>();
-  const previousFiles = useMemoAsync<FileWithHandle[]>(() => get('files'), []);
+  const previousFiles = useMemoAsync<FileWithHandle[] | undefined>(
+    () => get('files'),
+    []
+  );
   async function setFiles2(newFiles: SomeFile[]) {
     const videos = new Map();
     setDataSet({

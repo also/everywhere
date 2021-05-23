@@ -10,7 +10,7 @@ function AnimTrip({ trip }: { trip: TripFeature }) {
   const running = useRef(true);
   useEffect(() => {
     const duration = 7000;
-    const node = ref.current;
+    const node = ref.current!;
     const length = node.getTotalLength();
     const ease = d3.ease('linear');
     d3.timer((elapsed) => {

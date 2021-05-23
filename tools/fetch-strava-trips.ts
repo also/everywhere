@@ -206,6 +206,7 @@ async function getStreams(
     throw e;
   }
   const streamsByType: StreamsByType = { activity };
+  // @ts-expect-error not sure if there's a right way to do this
   streams.forEach((s) => (streamsByType[s.type] = s.data));
   return streamsByType;
 }
@@ -223,8 +224,9 @@ function streamsToGeoJson(streams: StreamsByType): TripGeoJSON | undefined {
   }
   const orderedStreams: Stream['data'][] = [];
   otherStreamNames.forEach((type) => {
-    if (streams[type]) {
-      orderedStreams.push(streams[type]);
+    const v = streams[type];
+    if (v) {
+      orderedStreams.push(v);
     }
   });
 
