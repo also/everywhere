@@ -13,7 +13,7 @@ export default function <T>(compare: (a: T, b: T) => number): Heap<T> {
   const array: T[] = [];
   let size = 0;
 
-  function up(object: T, i) {
+  function up(object: T, i: number) {
     while (i > 0) {
       const j = ((i + 1) >> 1) - 1;
       const parent = array[j];
@@ -21,12 +21,12 @@ export default function <T>(compare: (a: T, b: T) => number): Heap<T> {
       if (compare(object, parent) >= 0) {
         break;
       }
-      array[(parent._ = i)] = parent;
-      array[(object._ = i = j)] = object;
+      array[i] = parent;
+      array[(i = j)] = object;
     }
   }
 
-  function down(object: T, i) {
+  function down(object: T, i: number) {
     while (true) {
       const r = (i + 1) << 1;
       const l = r - 1;
@@ -42,8 +42,8 @@ export default function <T>(compare: (a: T, b: T) => number): Heap<T> {
       if (j === i) {
         break;
       }
-      array[(child._ = i)] = child;
-      array[(object._ = i = j)] = object;
+      array[i] = child;
+      array[(i = j)] = object;
     }
   }
 
@@ -52,7 +52,7 @@ export default function <T>(compare: (a: T, b: T) => number): Heap<T> {
   };
 
   heap.push = function (object) {
-    up((array[(object._ = size)] = object), size++);
+    up((array[size] = object), size++);
     return size;
   };
 
@@ -64,24 +64,21 @@ export default function <T>(compare: (a: T, b: T) => number): Heap<T> {
     const removed = array[0];
     if (--size > 0) {
       const object = array[size];
-      down((array[(object._ = 0)] = object), 0);
+      down((array[0] = object), 0);
     }
     return removed;
   };
 
   heap.remove = function (removed) {
-    const i = removed._;
+    const i = array.indexOf(removed);
 
-    if (array[i] !== removed) {
+    if (i < 0) {
       return null; // invalid request
     }
 
     if (i !== --size) {
       const object = array[size];
-      (compare(object, removed) < 0 ? up : down)(
-        (array[(object._ = i)] = object),
-        i
-      );
+      (compare(object, removed) < 0 ? up : down)((array[i] = object), i);
     }
     return i;
   };
