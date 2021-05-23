@@ -18,7 +18,7 @@ export type VideoChapter = {
   name: string;
   start: moment.Moment;
   end: moment.Moment;
-  duration: moment.Duration;
+  duration: number;
   fileNumber: string;
   chapter: number;
   low: string;
@@ -33,7 +33,7 @@ export type Video = {
   name: string;
   start: moment.Moment;
   end: moment.Moment;
-  duration: moment.Duration;
+  duration: number;
   chapters: VideoChapter[];
   stills: Still[];
   thumbnail: Still;
@@ -57,7 +57,7 @@ function load(filename: string, data: SimpleMetadata): VideoChapter {
   // FIXME the clock on the gopro was off for some of the later vidoes
   const d = parseFloat(data.duration);
   const start = moment(data.start); //.add(82, 's');
-  const duration = moment.duration(d, 's');
+  const duration = d * 1000;
   const end = start.clone().add(duration);
   const stills = Array(...Array(Math.ceil(d / 30))).map((_, i) => ({
     small: `https://static.ryanberdeen.com/everywhere/video/thumbnails/${name}/small-${i}.jpg`,
@@ -90,7 +90,7 @@ function grouped(name: string, chapters: VideoChapter[]): Video {
     name,
     start: first.start,
     end: last.end,
-    duration: moment.duration(last.end.valueOf() - first.start.valueOf()),
+    duration: last.end.valueOf() - first.start.valueOf(),
     chapters,
     stills,
     thumbnail: stills[Math.floor(stills.length / 2)],

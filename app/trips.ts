@@ -17,7 +17,7 @@ export type TripProperties = {
   id: string;
   start: moment.Moment;
   end: moment.Moment;
-  movingTime: moment.Duration;
+  movingTime: number;
   videos: Video[];
   tree: TripTree;
 };
@@ -45,7 +45,7 @@ function load(trip: TripTopology): TripFeature {
     id,
     start,
     end: start.clone().add(elapsed_time, 's'),
-    movingTime: moment.duration(moving_time, 's'),
+    movingTime: moving_time * 1000,
     tree: tree(result),
   });
   return result;
