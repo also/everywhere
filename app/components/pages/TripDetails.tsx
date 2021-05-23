@@ -38,7 +38,7 @@ export default function TripDetails({ trip }: { trip: TripFeature }) {
         Started <strong>{start.format('LLL')}</strong>,{' '}
         {format.duration(movingTime)} moving
       </p>
-      <MapComponent width="500" height="500" onMouseMove={onMouseMove}>
+      <MapComponent width={500} height={500} onMouseMove={onMouseMove}>
         <Trips trips={trips} />
         {dot}
       </MapComponent>
