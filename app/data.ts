@@ -22,7 +22,9 @@ export type DataSet = {
 };
 
 export async function loadDataset(): Promise<DataSet> {
-  const { trips, videoCoverage, tripTree, videoTree } = await buildDataSet(
+  const tripTopojson = await import('./trip-data');
+  const { trips, videoCoverage, tripTree, videoTree } = buildDataSet(
+    tripTopojson.default,
     videos
   );
   return { trips, videoCoverage, tripTree, videoTree, videos };

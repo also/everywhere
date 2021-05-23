@@ -6,8 +6,6 @@ import moment from 'moment';
 import { CoverageTree, Video } from './videos';
 import { Feature, LineString, MultiLineString } from 'geojson';
 
-const tripData = import('./trip-data');
-
 export type TripProperties = {
   activity: {
     id: string;
@@ -107,27 +105,28 @@ function calculateVideoCoverage(
 
 export type TripTree = Node<TripFeature>;
 
-export function buildDataSet(videos: Map<string, Video>) {
-  return tripData.then(({ default: tripTopojson }) => {
-    const trips = tripTopojson.map(load);
+export function buildDataSet(
+  tripTopojson: TripTopology[],
+  videos: Map<string, Video>
+) {
+  const trips = tripTopojson.map(load);
 
-    const videoCoverage = calculateVideoCoverage(trips, videos);
+  const videoCoverage = calculateVideoCoverage(trips, videos);
 
-    const tripTree: TripTree = group(
-      trips.map(({ properties: { tree } }) => tree)
-    );
+  const tripTree: TripTree = group(
+    trips.map(({ properties: { tree } }) => tree)
+  );
 
-    const videoTree = group(
-      Array.from(videos.values())
-        .map((video) => {
-          video.coverageTree = group(
-            video.coverage.map(({ properties: { tree } }) => tree)
-          );
-          return video.coverageTree;
-        })
-        .filter((n) => n)
-    );
+  const videoTree = group(
+    Array.from(videos.values())
+      .map((video) => {
+        video.coverageTree = group(
+          video.coverage.map(({ properties: { tree } }) => tree)
+        );
+        return video.coverageTree;
+      })
+      .filter((n) => n)
+  );
 
-    return { trips, videoCoverage, tripTree, videoTree };
-  });
+  return { trips, videoCoverage, tripTree, videoTree };
 }

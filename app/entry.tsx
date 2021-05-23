@@ -27,9 +27,16 @@ import LocationDetails from './components/pages/LocationDetails';
 
 import { geoLines } from './geo';
 
-import { ways, groupedWays, boundary, contours, wayTree } from './data';
+import {
+  ways,
+  groupedWays,
+  boundary,
+  contours,
+  wayTree,
+  DataSet,
+} from './data';
 import DataContext from './components/DataContext';
-import { ReactNode, useContext } from 'react';
+import { ReactNode, useContext, useState } from 'react';
 import LocalDataExplorer from './components/pages/LocalDataExplorer';
 import DataSetContext from './components/DataSetContext';
 import { loadDataset } from './data';
@@ -175,6 +182,21 @@ function TripsRoute() {
   return <TripListPage trips={trips} />;
 }
 
+function DataSetSelector({
+  initialDataSet,
+  children,
+}: {
+  initialDataSet: DataSet;
+  children: (renderProp: (dataset: DataSet) => void) => JSX.Element;
+}) {
+  const [dataset, setDataSet] = useState(initialDataSet);
+  return (
+    <DataSetContext.Provider value={dataset}>
+      {children(setDataSet)}
+    </DataSetContext.Provider>
+  );
+}
+
 const div = document.createElement('div');
 document.body.appendChild(div);
 
@@ -183,30 +205,35 @@ loadDataset().then((dataset) => {
     <>
       <GlobalStyle />
       <DataContext.Provider value={{ boundary, contours, ways }}>
-        <DataSetContext.Provider value={dataset}>
-          <Router>
-            <App>
-              <Switch>
-                <Route path="/local" component={LocalDataExplorer} />
-                <Route path="/ways/*" component={WayDetailsRoute} />
-                <Route path="/ways" component={WayListRoute} />
-                <Route
-                  path="/videos/:name/:seek"
-                  component={VideoDetailsRoute}
-                />
-                <Route path="/videos/:name" component={VideoDetailsRoute} />
-                <Route path="/videos" component={VideosRoute} />
-                <Route path="/trips/:id" component={TripDetailsRoute} />
-                <Route path="/trips" component={TripsRoute} />
-                <Route
-                  path="/locations/:coords"
-                  component={LocationDetailsRoute}
-                />
-                <Route path="/" component={CityMapRoute} />
-              </Switch>
-            </App>
-          </Router>
-        </DataSetContext.Provider>
+        <DataSetSelector initialDataSet={dataset}>
+          {(setDataSet) => (
+            <Router>
+              <App>
+                <Switch>
+                  <Route
+                    path="/local"
+                    render={() => <LocalDataExplorer setDataSet={setDataSet} />}
+                  />
+                  <Route path="/ways/*" component={WayDetailsRoute} />
+                  <Route path="/ways" component={WayListRoute} />
+                  <Route
+                    path="/videos/:name/:seek"
+                    component={VideoDetailsRoute}
+                  />
+                  <Route path="/videos/:name" component={VideoDetailsRoute} />
+                  <Route path="/videos" component={VideosRoute} />
+                  <Route path="/trips/:id" component={TripDetailsRoute} />
+                  <Route path="/trips" component={TripsRoute} />
+                  <Route
+                    path="/locations/:coords"
+                    component={LocationDetailsRoute}
+                  />
+                  <Route path="/" component={CityMapRoute} />
+                </Switch>
+              </App>
+            </Router>
+          )}
+        </DataSetSelector>
       </DataContext.Provider>
     </>,
     div
