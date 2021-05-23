@@ -60,8 +60,8 @@ function load(filename: string, data: SimpleMetadata): VideoChapter {
   const duration = moment.duration(d, 's');
   const end = start.clone().add(duration);
   const stills = Array(...Array(Math.ceil(d / 30))).map((_, i) => ({
-    small: `http://static.ryanberdeen.com/everywhere/video/thumbnails/${name}/small-${i}.jpg`,
-    large: `http://static.ryanberdeen.com/everywhere/video/thumbnails/${name}/large-${i}.jpg`,
+    small: `https://static.ryanberdeen.com/everywhere/video/thumbnails/${name}/small-${i}.jpg`,
+    large: `https://static.ryanberdeen.com/everywhere/video/thumbnails/${name}/large-${i}.jpg`,
   }));
   const video = {
     name,
@@ -70,8 +70,8 @@ function load(filename: string, data: SimpleMetadata): VideoChapter {
     duration,
     fileNumber,
     chapter,
-    low: `http://static.ryanberdeen.com/everywhere/video/mp4-low/${name}.MP4`,
-    high: `http://static.ryanberdeen.com/everywhere/video/mp4-high/${name}.MP4`,
+    low: `https://static.ryanberdeen.com/everywhere/video/mp4-low/${name}.MP4`,
+    high: `https://static.ryanberdeen.com/everywhere/video/mp4-high/${name}.MP4`,
     stills,
     thumbnail: stills[Math.floor(stills.length / 2)],
   };
