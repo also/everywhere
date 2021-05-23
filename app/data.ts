@@ -3,7 +3,7 @@ import { feature } from './geo';
 import videos, { CoverageTree, Video } from './videos';
 import { ways, groupedWays, intersections, wayTree } from './ways';
 
-import tripsPromise, { CoverageFeature, TripFeature, TripTree } from './trips';
+import { buildDataSet, CoverageFeature, TripFeature, TripTree } from './trips';
 
 import boundaryGeojson from 'compact-json!../app-data/somerville-topo.geojson';
 import contoursTopojson from 'compact-json!../app-data/contour.geojson';
@@ -11,16 +11,7 @@ import contoursTopojson from 'compact-json!../app-data/contour.geojson';
 const boundary = feature(boundaryGeojson);
 const contours = feature(contoursTopojson);
 
-export {
-  ways,
-  boundary,
-  contours,
-  tripsPromise,
-  groupedWays,
-  videos,
-  intersections,
-  wayTree,
-};
+export { ways, boundary, contours, groupedWays, intersections, wayTree };
 
 export type DataSet = {
   videos: Map<string, Video>;
@@ -31,6 +22,8 @@ export type DataSet = {
 };
 
 export async function loadDataset(): Promise<DataSet> {
-  const { trips, videoCoverage, tripTree, videoTree } = await tripsPromise;
+  const { trips, videoCoverage, tripTree, videoTree } = await buildDataSet(
+    videos
+  );
   return { trips, videoCoverage, tripTree, videoTree, videos };
 }

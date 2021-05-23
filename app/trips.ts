@@ -3,7 +3,7 @@ import { feature, tree } from './geo';
 import { group, Node } from './tree';
 import moment from 'moment';
 
-import videos, { CoverageTree, Video } from './videos';
+import { CoverageTree, Video } from './videos';
 import { Feature, LineString, MultiLineString } from 'geojson';
 
 const tripData = import('./trip-data');
@@ -107,25 +107,27 @@ function calculateVideoCoverage(
 
 export type TripTree = Node<TripFeature>;
 
-export default tripData.then(({ default: tripTopojson }) => {
-  const trips = tripTopojson.map(load);
+export function buildDataSet(videos: Map<string, Video>) {
+  return tripData.then(({ default: tripTopojson }) => {
+    const trips = tripTopojson.map(load);
 
-  const videoCoverage = calculateVideoCoverage(trips, videos);
+    const videoCoverage = calculateVideoCoverage(trips, videos);
 
-  const tripTree: TripTree = group(
-    trips.map(({ properties: { tree } }) => tree)
-  );
+    const tripTree: TripTree = group(
+      trips.map(({ properties: { tree } }) => tree)
+    );
 
-  const videoTree = group(
-    Array.from(videos.values())
-      .map((video) => {
-        video.coverageTree = group(
-          video.coverage.map(({ properties: { tree } }) => tree)
-        );
-        return video.coverageTree;
-      })
-      .filter((n) => n)
-  );
+    const videoTree = group(
+      Array.from(videos.values())
+        .map((video) => {
+          video.coverageTree = group(
+            video.coverage.map(({ properties: { tree } }) => tree)
+          );
+          return video.coverageTree;
+        })
+        .filter((n) => n)
+    );
 
-  return { trips, videoCoverage, tripTree, videoTree };
-});
+    return { trips, videoCoverage, tripTree, videoTree };
+  });
+}
