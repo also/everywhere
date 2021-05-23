@@ -6,13 +6,17 @@ import React, {
   useState,
 } from 'react';
 import L from 'leaflet';
-import { fileOpen } from 'browser-fs-access';
+import { get, set } from 'idb-keyval';
+import { fileOpen, FileWithHandle } from 'browser-fs-access';
 import { Feature } from 'geojson';
 import PageTitle from '../PageTitle';
 import MapComponent from '../Map';
 import MapContext from '../MapContext';
 import MapBox from '../MapBox';
-import { SeekableBlobBuffer } from '../../../tools/parse/buffers';
+import {
+  SeekableBlobBuffer,
+  SeekableFetchBuffer,
+} from '../../../tools/parse/buffers';
 import { extractGps } from '../../../tools/parse/gopro-gps';
 import { bind, Entry, fileRoot, root, Traverser } from '../../../tools/parse';
 import { Box, parser as mp4Parser } from '../../../tools/parse/mp4';
@@ -25,8 +29,9 @@ import {
   parser as gpmfParser,
 } from '../../../tools/parse/gpmf';
 import { features } from '../../geo';
-import { DataSet, loadDataset } from '../../data';
+import { DataSet } from '../../data';
 import { buildDataSet } from '../../trips';
+import { Topology } from 'topojson-specification';
 
 function DataViewView({ value }: { value: DataView }) {
   return <div>{utf8decoder.decode(value).slice(0, 100)}</div>;
@@ -256,6 +261,7 @@ function GpmfSamples({
 
 type SomeFile = {
   geojson: GeoJSON.Feature | GeoJSON.FeatureCollection;
+  topology?: Topology;
   mp4?: Traverser<Box>;
   track?: Metadata;
 };
@@ -315,60 +321,105 @@ export function FilesComponent({ files }: { files: SomeFile[] }) {
   );
 }
 
+async function test() {
+  const data = await SeekableFetchBuffer.forUrl(
+    'https://static.ryanberdeen.com/everywhere/video/raw/GH010599.MP4',
+    3024
+  );
+  const mp4 = bind(mp4Parser, data, fileRoot(data));
+  const track = await getMeta(mp4);
+  const geojson = await extractGps(track, mp4);
+}
+
+function readFiles(files: FileWithHandle[]) {
+  return Promise.all(
+    files.map(async (file) => {
+      let geojson: GeoJSON.Feature | GeoJSON.FeatureCollection;
+      let topology = undefined;
+      let mp4;
+      let track;
+      if (file.name.toLowerCase().endsWith('.mp4')) {
+        const data = new SeekableBlobBuffer(file, 1024000);
+        mp4 = bind(mp4Parser, data, fileRoot(data));
+        track = await getMeta(mp4);
+        geojson = await extractGps(track, mp4);
+      } else {
+        const text = await file.text();
+        const json = JSON.parse(text);
+        if (json.type === 'Topology') {
+          topology = json as TopoJSON.Topology;
+          geojson = features(topology);
+        } else {
+          geojson = json as GeoJSON.Feature;
+        }
+      }
+      if (!geojson.properties) {
+        geojson.properties = {};
+      }
+      geojson.properties.filename = file.name;
+      return { geojson, mp4, track, topology };
+    })
+  );
+}
+
 export default function LocalDataExplorer({
   setDataSet,
 }: {
   setDataSet(dataSet: DataSet): void;
 }) {
   const [files, setFiles] = useState<SomeFile[] | undefined>();
-  const handleClick = useCallback(async (e) => {
+  console.log({ files });
+  const previousFiles = useMemoAsync(() => get('files'), []);
+  async function setFiles2(newFiles: SomeFile[]) {
+    const videos = new Map();
+    setDataSet({
+      videos,
+      ...buildDataSet(
+        newFiles.map(({ topology }) => topology).filter(Boolean),
+        videos
+      ),
+    });
+    setFiles(newFiles);
+  }
+  async function handleFiles(
+    result: FileWithHandle[],
+    existingFiles: SomeFile[] = []
+  ) {
+    await set('files', result);
+    const newFiles = await readFiles(result);
+    await setFiles2([...newFiles, ...existingFiles]);
+  }
+  const handleLoadClick = useCallback(async (e) => {
     e.preventDefault();
     const result = await fileOpen({
       multiple: true,
       // mimeTypes: ['video/mp4'],
     });
-    const newFiles = await Promise.all(
-      result.map(async (file) => {
-        let geojson: GeoJSON.Feature;
-        let topology = undefined;
-        let mp4;
-        let track;
-        if (file.name.toLowerCase().endsWith('.mp4')) {
-          const data = new SeekableBlobBuffer(file, 1024000);
-          mp4 = bind(mp4Parser, data, fileRoot(data));
-          track = await getMeta(mp4);
-          geojson = await extractGps(track, mp4);
-        } else {
-          const text = await file.text();
-          const json = JSON.parse(text);
-          if (json.type === 'Topology') {
-            topology = json as TopoJSON.Topology;
-            geojson = features(topology);
-          } else {
-            geojson = json as GeoJSON.Feature;
-          }
-        }
-        if (!geojson.properties) {
-          geojson.properties = {};
-        }
-        geojson.properties.filename = file.name;
-        return { geojson, mp4, track, topology };
-      })
-    );
-    const videos = new Map();
-    setDataSet({
-      videos,
-      ...buildDataSet(
-        newFiles.map(({ topology }) => topology),
-        videos
-      ),
-    });
-    setFiles(newFiles);
+
+    await handleFiles(result);
   }, []);
+  const handleAddClick = useCallback(
+    async (e) => {
+      e.preventDefault();
+      const result = await fileOpen({
+        multiple: true,
+        // mimeTypes: ['video/mp4'],
+      });
+
+      await handleFiles(result, files);
+    },
+    [files]
+  );
   return (
     <>
       <PageTitle>Local Data</PageTitle>
-      <button onClick={handleClick}>load</button>
+      {previousFiles ? (
+        <button onClick={() => handleFiles(previousFiles)}>
+          Reload Previous Files
+        </button>
+      ) : null}
+      <button onClick={handleLoadClick}>load</button>
+      <button onClick={handleAddClick}>add</button>
       {files ? <FilesComponent files={files} /> : null}
     </>
   );
