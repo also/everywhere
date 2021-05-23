@@ -265,10 +265,7 @@ function streamsToGeoJson(streams: StreamsByType): TripGeoJSON | undefined {
 }
 
 function geoJsonToTopoJson(geoJson: TripGeoJSON) {
-  return topojson.topology(
-    { geoJson },
-    { 'property-transform': (f) => f.properties }
-  );
+  return topojson.topology({ geoJson });
 }
 
 async function fetchTrip(id: string) {
