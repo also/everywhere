@@ -10,10 +10,10 @@ type Heap<T> = {
 
 export default function <T>(compare: (a: T, b: T) => number): Heap<T> {
   const heap: Heap<T> = {} as any;
-  const array = [];
+  const array: T[] = [];
   let size = 0;
 
-  function up(object, i) {
+  function up(object: T, i) {
     while (i > 0) {
       const j = ((i + 1) >> 1) - 1;
       const parent = array[j];
@@ -26,7 +26,7 @@ export default function <T>(compare: (a: T, b: T) => number): Heap<T> {
     }
   }
 
-  function down(object, i) {
+  function down(object: T, i) {
     while (true) {
       const r = (i + 1) << 1;
       const l = r - 1;

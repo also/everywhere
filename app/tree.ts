@@ -6,17 +6,17 @@
 import { Position } from 'geojson';
 import minHeap from './min-heap';
 
-function compareDistance(a, b) {
+function compareDistance(a: { distance: number }, b: { distance: number }) {
   return a.distance - b.distance;
 }
 
-function pointDistance(a, b) {
+function pointDistance(a: Position, b: Position) {
   const dx = a[0] - b[0];
   const dy = a[1] - b[1];
   return dx * dx + dy * dy;
 }
 
-function pointLineSegmentDistance(c, a: Position, b: Position) {
+function pointLineSegmentDistance(c: Position, a: Position, b: Position) {
   const dx = b[0] - a[0],
     dy = b[1] - a[1],
     d2 = dx * dx + dy * dy,

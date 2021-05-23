@@ -23,7 +23,7 @@ function calculateLength(lineString: Position[]): number {
   return result;
 }
 
-export function distance(λ1, φ1, λ2, φ2) {
+export function distance(λ1: number, φ1: number, λ2: number, φ2: number) {
   const R = 6371000;
   const Δλ = ((λ2 - λ1) * Math.PI) / 180;
   φ1 = (φ1 * Math.PI) / 180;

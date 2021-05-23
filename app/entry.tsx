@@ -127,7 +127,12 @@ function VideoDetailsRoute({
   match: { params },
 }: RouteComponentProps<{ seek: string; name: string }>) {
   const { videos } = useContext(DataSetContext);
-  return <VideoDetails video={videos.get(params.name)} seek={params.seek} />;
+  return (
+    <VideoDetails
+      video={videos.get(params.name)}
+      seek={parseInt(params.seek, 10)}
+    />
+  );
 }
 
 function LocationDetailsRoute({

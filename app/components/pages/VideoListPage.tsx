@@ -58,8 +58,8 @@ export default function VideoListPage({
     <div>
       <PageTitle>Videos</PageTitle>
       <MapComponent
-        width="1000"
-        height="1000"
+        width={1000}
+        height={1000}
         onMouseMove={onMouseMove}
         onClick={onClick}
       >
