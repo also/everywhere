@@ -264,6 +264,7 @@ type SomeFile = {
   topology?: Topology;
   mp4?: Traverser<Box>;
   track?: Metadata;
+  raw: FileWithHandle;
 };
 
 function FileComponent({ file: { geojson, mp4, track } }: { file: SomeFile }) {
@@ -331,7 +332,7 @@ async function test() {
   const geojson = await extractGps(track, mp4);
 }
 
-function readFiles(files: FileWithHandle[]) {
+function readFiles(files: FileWithHandle[]): Promise<SomeFile[]> {
   return Promise.all(
     files.map(async (file) => {
       let geojson: GeoJSON.Feature | GeoJSON.FeatureCollection;
@@ -357,7 +358,7 @@ function readFiles(files: FileWithHandle[]) {
         geojson.properties = {};
       }
       geojson.properties.filename = file.name;
-      return { geojson, mp4, track, topology };
+      return { geojson, mp4, track, topology, raw: file };
     })
   );
 }
@@ -368,8 +369,7 @@ export default function LocalDataExplorer({
   setDataSet(dataSet: DataSet): void;
 }) {
   const [files, setFiles] = useState<SomeFile[] | undefined>();
-  console.log({ files });
-  const previousFiles = useMemoAsync(() => get('files'), []);
+  const previousFiles = useMemoAsync<FileWithHandle[]>(() => get('files'), []);
   async function setFiles2(newFiles: SomeFile[]) {
     const videos = new Map();
     setDataSet({
@@ -385,8 +385,10 @@ export default function LocalDataExplorer({
     result: FileWithHandle[],
     existingFiles: SomeFile[] = []
   ) {
-    await set('files', result);
     const newFiles = await readFiles(result);
+    // for safari, it seems to be important that you don't remove the files from indexDB before you read them.
+    // removing them drops the reference or something
+    await set('files', [...result, ...existingFiles.map(({ raw }) => raw)]);
     await setFiles2([...newFiles, ...existingFiles]);
   }
   const handleLoadClick = useCallback(async (e) => {
@@ -415,7 +417,7 @@ export default function LocalDataExplorer({
       <PageTitle>Local Data</PageTitle>
       {previousFiles ? (
         <button onClick={() => handleFiles(previousFiles)}>
-          Reload Previous Files
+          Reload Previous {previousFiles.length} Files
         </button>
       ) : null}
       <button onClick={handleLoadClick}>load</button>
