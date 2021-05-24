@@ -40,6 +40,7 @@ import { ReactNode, useContext, useState } from 'react';
 import LocalDataExplorer from './components/pages/LocalDataExplorer';
 import DataSetContext from './components/DataSetContext';
 import { loadDataset } from './default-data-set';
+import LeafletMap from './components/LeafletMap';
 
 const GlobalStyle = createGlobalStyle`
 body {
@@ -97,6 +98,7 @@ function App({ children }: { children: ReactNode }) {
           <HeaderLink to="/trips">Trips</HeaderLink>{' '}
           <HeaderLink to="/videos">Videos</HeaderLink>{' '}
           <HeaderLink to="/ways">Streets</HeaderLink>{' '}
+          <HeaderLink to="/map">Map</HeaderLink>{' '}
           <HeaderLink to="/local">Files</HeaderLink>
         </div>
       </Header>
@@ -198,6 +200,11 @@ function DataSetSelector({
   );
 }
 
+function MapRoute() {
+  const { trips } = useContext(DataSetContext);
+  return <LeafletMap features={trips} />;
+}
+
 const div = document.createElement('div');
 document.body.appendChild(div);
 
@@ -215,6 +222,7 @@ loadDataset().then((dataset) => {
                     path="/local"
                     render={() => <LocalDataExplorer setDataSet={setDataSet} />}
                   />
+                  <Route path="/map" component={MapRoute} />
                   <Route path="/ways/*" component={WayDetailsRoute} />
                   <Route path="/ways" component={WayListRoute} />
                   <Route
