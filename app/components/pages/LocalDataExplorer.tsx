@@ -396,10 +396,15 @@ export default function LocalDataExplorer({
       if (isProbablyStravaTrip(f)) {
         trips.push(f);
       } else if (isProbablyVideoTrack(f)) {
+        const start = new Date(f.properties.creationTime * 1000);
+        // using current timezone :(
+        start.setMinutes(start.getMinutes() + start.getTimezoneOffset());
         videoChapters.push(
           toChapter(name, {
-            start: f.properties.creationTime * 1000,
-            duration: f.properties.duration / 1000 / 90,
+            start: +start,
+            // TODO what the hell? 90
+            // this gives the right duration for GOPR0039, at least
+            duration: f.properties.duration / 1000 / 1000 / 90,
           })
         );
       }
@@ -423,8 +428,6 @@ export default function LocalDataExplorer({
       multiple: true,
       // mimeTypes: ['video/mp4'],
     });
-
-    console.log(result.length);
 
     await handleFiles(result);
   }, []);
