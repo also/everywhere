@@ -2,15 +2,9 @@ import sortBy from 'lodash/sortBy';
 import moment from 'moment';
 import { CoverageFeature, TripFeature } from './trips';
 import { Leaf, Node } from './tree';
-import { Position } from 'geojson';
+import { Feature, LineString, MultiLineString, Position } from 'geojson';
 
-const videoContext = require.context(
-  'compact-json!../app-data/video-metadata',
-  false,
-  /\.json$/
-);
-
-type SimpleMetadata = { duration: string; start: string };
+export type SimpleMetadata = { duration: string; start: string };
 
 type Still = { small: string; large: string };
 
@@ -26,6 +20,16 @@ export type VideoChapter = {
   stills: Still[];
   thumbnail: Still;
 };
+
+export type RawVideoProperties = {
+  creationTime: number;
+  duration: number;
+};
+
+export type RawVideoFeature = Feature<
+  LineString | MultiLineString,
+  RawVideoProperties
+>;
 
 export type CoverageTree = Node<CoverageFeature>;
 
@@ -43,9 +47,12 @@ export type Video = {
   coverageTree: CoverageTree;
 };
 
-function load(filename: string, data: SimpleMetadata): VideoChapter {
+export function toChapter(
+  filename: string,
+  data: { start: number; duration: number }
+): VideoChapter {
   // gopro videos are broken into chapters with filnames as described here: https://gopro.com/support/articles/hero3-and-hero3-file-naming-convention
-  const match = filename.match(/^\.\/(G[OP](..)(....))\.json$/);
+  const match = filename.match(/^(G[OP](..)(....))\.(json|MP4.geojson)$/);
   if (!match) {
     throw new Error(`bogus video name ${filename}`);
   }
@@ -55,7 +62,7 @@ function load(filename: string, data: SimpleMetadata): VideoChapter {
 
   // FIXME just assuming EDT?
   // FIXME the clock on the gopro was off for some of the later vidoes
-  const d = parseFloat(data.duration);
+  const d = data.duration;
   const start = moment(data.start); //.add(82, 's');
   const duration = d * 1000;
   const end = start.clone().add(duration);
@@ -101,7 +108,7 @@ function grouped(name: string, chapters: VideoChapter[]): Video {
   };
 }
 
-function groupChapters(videos: VideoChapter[]): Map<string, Video> {
+export function groupChapters(videos: VideoChapter[]): Map<string, Video> {
   const vidChapters: Map<string, VideoChapter[]> = new Map();
 
   videos.forEach((video) => {
@@ -127,13 +134,6 @@ function groupChapters(videos: VideoChapter[]): Map<string, Video> {
     )
   );
 }
-
-const videos: VideoChapter[] = videoContext.keys().map((filename: string) => {
-  const data = videoContext(filename);
-  return load(filename, data);
-});
-
-export default groupChapters(videos);
 
 export function calculateSeekPosition(nearest: Leaf<CoverageFeature>) {
   const {

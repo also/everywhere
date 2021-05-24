@@ -28,10 +28,10 @@ import {
   SampleMetadata,
   parser as gpmfParser,
 } from '../../../tools/parse/gpmf';
-import { features } from '../../geo';
+import { FeatureOrCollection, features, singleFeature } from '../../geo';
 import { DataSet } from '../../data';
-import { buildDataSet } from '../../trips';
-import { Topology } from 'topojson-specification';
+import { buildDataSet, RawTripFeature } from '../../trips';
+import { RawVideoFeature, toChapter, VideoChapter } from '../../videos';
 
 function DataViewView({ value }: { value: DataView }) {
   return <div>{utf8decoder.decode(value).slice(0, 100)}</div>;
@@ -261,7 +261,6 @@ function GpmfSamples({
 
 type SomeFile = {
   geojson: GeoJSON.Feature | GeoJSON.FeatureCollection;
-  topology?: Topology;
   mp4?: Traverser<Box>;
   track?: Metadata;
   raw: FileWithHandle;
@@ -336,7 +335,6 @@ function readFiles(files: FileWithHandle[]): Promise<SomeFile[]> {
   return Promise.all(
     files.map(async (file) => {
       let geojson: GeoJSON.Feature | GeoJSON.FeatureCollection;
-      let topology = undefined;
       let mp4;
       let track;
       if (file.name.toLowerCase().endsWith('.mp4')) {
@@ -348,19 +346,35 @@ function readFiles(files: FileWithHandle[]): Promise<SomeFile[]> {
         const text = await file.text();
         const json = JSON.parse(text);
         if (json.type === 'Topology') {
-          topology = json as TopoJSON.Topology;
-          geojson = features(topology);
+          geojson = features(json);
         } else {
           geojson = json as GeoJSON.Feature;
         }
       }
-      if (!geojson.properties) {
-        geojson.properties = {};
-      }
-      geojson.properties.filename = file.name;
-      return { geojson, mp4, track, topology, raw: file };
+      (geojson.type === 'FeatureCollection'
+        ? geojson.features
+        : [geojson]
+      ).forEach((feat) => {
+        if (!feat.properties) {
+          feat.properties = {};
+        }
+        feat.properties.filename = file.name;
+      });
+      return { geojson, mp4, track, raw: file };
     })
   );
+}
+
+function isProbablyStravaTrip(
+  f: FeatureOrCollection<any, any>
+): f is RawTripFeature {
+  return f.type === 'Feature' && !!f.properties?.activity?.moving_time;
+}
+
+function isProbablyVideoTrack(
+  f: FeatureOrCollection<any, any>
+): f is RawVideoFeature {
+  return f.type === 'Feature' && !!f.properties?.creationTime;
 }
 
 export default function LocalDataExplorer({
@@ -374,14 +388,23 @@ export default function LocalDataExplorer({
     []
   );
   async function setFiles2(newFiles: SomeFile[]) {
-    const videos = new Map();
-    setDataSet({
-      videos,
-      ...buildDataSet(
-        newFiles.map(({ topology }) => topology).filter(Boolean),
-        videos
-      ),
+    const trips: RawTripFeature[] = [];
+
+    const videoChapters: VideoChapter[] = [];
+    newFiles.forEach(({ geojson, raw: { name } }) => {
+      const f = singleFeature(geojson) || geojson;
+      if (isProbablyStravaTrip(f)) {
+        trips.push(f);
+      } else if (isProbablyVideoTrack(f)) {
+        videoChapters.push(
+          toChapter(name, {
+            start: f.properties.creationTime * 1000,
+            duration: f.properties.duration / 1000 / 90,
+          })
+        );
+      }
     });
+    setDataSet(buildDataSet(trips, videoChapters));
     setFiles(newFiles);
   }
   async function handleFiles(
@@ -400,6 +423,8 @@ export default function LocalDataExplorer({
       multiple: true,
       // mimeTypes: ['video/mp4'],
     });
+
+    console.log(result.length);
 
     await handleFiles(result);
   }, []);

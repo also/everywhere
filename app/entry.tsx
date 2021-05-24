@@ -39,7 +39,7 @@ import DataContext from './components/DataContext';
 import { ReactNode, useContext, useState } from 'react';
 import LocalDataExplorer from './components/pages/LocalDataExplorer';
 import DataSetContext from './components/DataSetContext';
-import { loadDataset } from './data';
+import { loadDataset } from './default-data-set';
 
 const GlobalStyle = createGlobalStyle`
 body {

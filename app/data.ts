@@ -1,9 +1,9 @@
 import { feature } from './geo';
 
-import videos, { CoverageTree, Video } from './videos';
+import { CoverageTree, Video } from './videos';
 import { ways, groupedWays, intersections, wayTree } from './ways';
 
-import { buildDataSet, CoverageFeature, TripFeature, TripTree } from './trips';
+import { CoverageFeature, TripFeature, TripTree } from './trips';
 
 import boundaryGeojson from 'compact-json!../app-data/somerville-topo.geojson';
 import contoursTopojson from 'compact-json!../app-data/contour.geojson';
@@ -20,12 +20,3 @@ export type DataSet = {
   tripTree: TripTree;
   videoTree: CoverageTree;
 };
-
-export async function loadDataset(): Promise<DataSet> {
-  const tripTopojson = await import('./trip-data');
-  const { trips, videoCoverage, tripTree, videoTree } = buildDataSet(
-    tripTopojson.default,
-    videos
-  );
-  return { trips, videoCoverage, tripTree, videoTree, videos };
-}

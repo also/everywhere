@@ -1,10 +1,19 @@
 /* eslint-disable camelcase */
-import { feature, tree } from './geo';
+import { tree } from './geo';
 import { group, Node } from './tree';
 import moment from 'moment';
 
-import { CoverageTree, Video } from './videos';
+import { CoverageTree, groupChapters, Video, VideoChapter } from './videos';
 import { Feature, LineString, MultiLineString } from 'geojson';
+
+export type RawTripProperties = {
+  activity: {
+    id: string;
+    start_date: string;
+    elapsed_time: number;
+    moving_time: number;
+  };
+};
 
 export type TripProperties = {
   activity: {
@@ -24,15 +33,22 @@ export type TripProperties = {
 
 export type TripFeature = Feature<LineString | MultiLineString, TripProperties>;
 
-export type TripTopology = TopoJSON.Topology<TopoJSON.Objects<TripProperties>>;
+export type TripTopology = TopoJSON.Topology<
+  TopoJSON.Objects<RawTripProperties>
+>;
 
 export type CoverageFeature = Feature<
   LineString | MultiLineString,
   TripProperties & { video: Video; tree: CoverageTree }
 >;
 
-function load(trip: TripTopology): TripFeature {
-  const result: TripFeature = feature(trip);
+export type RawTripFeature = Feature<
+  LineString | MultiLineString,
+  RawTripProperties
+>;
+
+function load(trip: RawTripFeature): TripFeature {
+  const result: TripFeature = trip;
   const { properties } = result;
   properties.videos = [];
   const {
@@ -106,10 +122,11 @@ function calculateVideoCoverage(
 export type TripTree = Node<TripFeature>;
 
 export function buildDataSet(
-  tripTopojson: TripTopology[],
-  videos: Map<string, Video>
+  rawTrips: RawTripFeature[],
+  videoChapters: VideoChapter[]
 ) {
-  const trips = tripTopojson.map(load);
+  const videos = groupChapters(videoChapters);
+  const trips = rawTrips.map(load);
 
   const videoCoverage = calculateVideoCoverage(trips, videos);
 
@@ -128,5 +145,5 @@ export function buildDataSet(
       .filter((n) => n)
   );
 
-  return { trips, videoCoverage, tripTree, videoTree };
+  return { trips, videoCoverage, tripTree, videoTree, videos };
 }
