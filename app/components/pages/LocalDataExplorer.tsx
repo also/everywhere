@@ -1,11 +1,4 @@
-import React, {
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
-import L from 'leaflet';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { get, set } from 'idb-keyval';
 import { fileOpen, FileWithHandle } from 'browser-fs-access';
 import { Feature } from 'geojson';
@@ -13,10 +6,7 @@ import PageTitle from '../PageTitle';
 import MapComponent from '../Map';
 import MapContext from '../MapContext';
 import MapBox from '../MapBox';
-import {
-  SeekableBlobBuffer,
-  SeekableFetchBuffer,
-} from '../../../tools/parse/buffers';
+import { SeekableBlobBuffer } from '../../../tools/parse/buffers';
 import { extractGps } from '../../../tools/parse/gopro-gps';
 import { bind, Entry, fileRoot, root, Traverser } from '../../../tools/parse';
 import { Box, parser as mp4Parser } from '../../../tools/parse/mp4';
@@ -32,6 +22,7 @@ import { FeatureOrCollection, features, singleFeature } from '../../geo';
 import { DataSet } from '../../data';
 import { buildDataSet, RawTripFeature } from '../../trips';
 import { RawVideoFeature, toChapter, VideoChapter } from '../../videos';
+import LeafletMap from '../LeafletMap';
 
 function DataViewView({ value }: { value: DataView }) {
   return <div>{utf8decoder.decode(value).slice(0, 100)}</div>;
@@ -194,45 +185,6 @@ function Path({ feature }: { feature: GeoJSON.Feature }) {
   return <path className="trip" d={path(feature)} />;
 }
 
-function LeafletComponent({ features }: { features: GeoJSON.Feature[] }) {
-  const mapComponent = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<L.Map>();
-
-  useEffect(() => {
-    if (!mapRef.current) {
-      mapRef.current = L.map(mapComponent.current!).setView(
-        [42.389118, -71.097153],
-        10
-      );
-    }
-    const map = mapRef.current;
-    map.eachLayer((layer) => map.removeLayer(layer));
-    L.tileLayer(
-      'https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}',
-      {
-        attribution:
-          'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-        maxZoom: 18,
-        id: 'mapbox/streets-v11',
-        tileSize: 512,
-        zoomOffset: -1,
-        accessToken:
-          'pk.eyJ1IjoicmJlcmRlZW4iLCJhIjoiZTU1YjNmOWU4MWExNDJhNWNlMTAxYjA2NjFlODBiNWUifQ.AHJ0I8wQi1pJekXfAaPxLw',
-      }
-    ).addTo(map);
-
-    features.forEach((f) =>
-      L.geoJSON(f)
-        .addTo(map)
-        .on('click', (e) => {
-          console.log(e, f.properties);
-        })
-    );
-  }, [features]);
-
-  return <div ref={mapComponent} style={{ width: 1800, height: 1000 }} />;
-}
-
 function GpmfSamples({
   sampleMetadata,
   mp4,
@@ -275,7 +227,7 @@ function FileComponent({ file: { geojson, mp4, track } }: { file: SomeFile }) {
       ) : null}
     </>
   ) : (
-    <LeafletComponent
+    <LeafletMap
       features={geojson.type === 'Feature' ? [geojson] : geojson.features}
     />
   );
@@ -311,7 +263,7 @@ function File({ file }: { file: File }) {
 
 export function FilesComponent({ files }: { files: SomeFile[] }) {
   return (
-    <LeafletComponent
+    <LeafletMap
       features={([] as Feature[]).concat(
         ...files.map(({ geojson }) =>
           geojson.type === 'Feature' ? [geojson] : geojson.features
@@ -319,16 +271,6 @@ export function FilesComponent({ files }: { files: SomeFile[] }) {
       )}
     />
   );
-}
-
-async function test() {
-  const data = await SeekableFetchBuffer.forUrl(
-    'https://static.ryanberdeen.com/everywhere/video/raw/GH010599.MP4',
-    3024
-  );
-  const mp4 = bind(mp4Parser, data, fileRoot(data));
-  const track = await getMeta(mp4);
-  const geojson = await extractGps(track, mp4);
 }
 
 function readFiles(files: FileWithHandle[]): Promise<SomeFile[]> {
