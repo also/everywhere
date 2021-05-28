@@ -48,22 +48,30 @@ export type RawTripFeature = Feature<
 >;
 
 function load(trip: RawTripFeature): TripFeature {
-  const result: TripFeature = trip;
-  const { properties } = result;
-  properties.videos = [];
   const {
-    activity: { id, start_date, elapsed_time, moving_time },
-  } = properties;
+    properties,
+    properties: {
+      activity: { id, start_date, elapsed_time, moving_time },
+    },
+  } = trip;
 
   const start = moment(start_date);
 
-  Object.assign(properties, {
-    id,
-    start,
-    end: start.clone().add(elapsed_time, 's'),
-    movingTime: moving_time * 1000,
-    tree: tree(result),
-  });
+  const result: TripFeature = {
+    ...trip,
+    properties: {
+      ...properties,
+      id,
+      start,
+      end: start.clone().add(elapsed_time, 's'),
+      movingTime: moving_time * 1000,
+      videos: [],
+      tree: undefined as any,
+    },
+  };
+
+  result.properties.tree = tree(result);
+
   return result;
 }
 
@@ -98,16 +106,15 @@ function calculateVideoCoverage(
           .filter(({ length }) => length > 0);
 
         if (coordinates.length > 0) {
-          const covProperties = Object.assign({ video }, properties);
           const coverage: CoverageFeature = {
             type: 'Feature',
-            properties: covProperties,
+            properties: { ...properties, video, tree: undefined as any },
             geometry: {
               type: 'MultiLineString',
               coordinates,
             },
           };
-          covProperties.tree = tree(coverage);
+          coverage.properties.tree = tree(coverage);
 
           videoCoverage.push(coverage);
           video.coverage.push(coverage);
