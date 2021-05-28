@@ -53,4 +53,7 @@ module.exports = {
       'compact-json$': 'compact-json-loader',
     },
   },
+  devServer: {
+    publicPath: '/build',
+  },
 };
