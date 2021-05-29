@@ -1,7 +1,8 @@
-import sortedIndex from 'lodash/sortedIndex';
+import sortedIndexBy from 'lodash/sortedIndexBy';
 import { memo, useEffect, useRef, useState } from 'react';
-import { Video, VideoChapter } from '../videos';
+import { Video } from '../videos';
 import moment from 'moment';
+import { Position } from 'geojson';
 
 export default memo(function VideoPlayer({
   video,
@@ -88,14 +89,15 @@ export default memo(function VideoPlayer({
       } = coverage;
       const startSecs = start.unix();
       // TODO don't concat every time
-      const coords = [].concat(...coordinates);
-      const coverageCoordIndex = sortedIndex(
+      // FIXME does this need to handle multi-line strings?
+      const coords = ([] as Position[]).concat(...coordinates);
+      const coverageCoordIndex = sortedIndexBy(
         coords,
         [0, 0, 0, time.unix() - startSecs],
         ([, , , timeOffsetSecs]) => startSecs + timeOffsetSecs
       );
       const coverageCoord = coords[coverageCoordIndex];
-      onLocationChange(coverageCoord, time);
+      onLocationChange(coverageCoord as [number, number], time);
     }
   }
 
