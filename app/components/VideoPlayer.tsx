@@ -29,9 +29,8 @@ export default memo(function VideoPlayer({
       ({ start, end }) => time >= start.valueOf() && time < end.valueOf()
     );
 
-    if (!newChapterIndex) {
+    if (newChapterIndex === -1) {
       // TODO ?
-      console.warn('seek to invalid time');
       return;
     }
     const chapter = video.chapters[newChapterIndex];
