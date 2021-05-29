@@ -105,8 +105,6 @@ export default memo(function VideoPlayer({
     style.opacity = 0.2;
   }
 
-  console.log('vid');
-
   return (
     <video
       controls={true}
