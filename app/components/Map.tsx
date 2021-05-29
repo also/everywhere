@@ -132,7 +132,7 @@ function compute({
   return { path, projection };
 }
 
-type MapMouseHandler = (v: {
+export type MapMouseHandler = (v: {
   mouse: typeof mouse;
   geo: [number, number];
 }) => any;

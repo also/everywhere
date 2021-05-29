@@ -3,7 +3,7 @@ import * as format from '../../format';
 import PageTitle from '../PageTitle';
 import VideoList from '../VideoList';
 import Trips from '../Trips';
-import MapComponent from '../Map';
+import MapComponent, { MapMouseHandler } from '../Map';
 import Dot from '../Dot';
 import { useCallback, useMemo, useState } from 'react';
 import { TripFeature } from '../../trips';
@@ -18,7 +18,7 @@ export default function TripDetails({ trip }: { trip: TripFeature }) {
 
   const trips = useMemo(() => [trip], [trip]);
 
-  const onMouseMove = useCallback(
+  const onMouseMove: MapMouseHandler = useCallback(
     ({ geo }) => setNearest(tree.nearest(geo)),
     [trip]
   );
