@@ -1,26 +1,23 @@
 import moment from 'moment';
 import { DataSet } from './data';
 import { feature } from './geo';
-import { buildDataSet } from './trips';
-import { SimpleMetadata, toChapter, VideoChapter } from './videos';
+import { buildDataSet, TripTopology } from './trips';
+import { toChapter } from './videos';
 
-const videoContext = require.context(
-  'compact-json!../app-data/video-metadata',
-  false,
-  /\.json$/
-);
+export type SimpleMetadata = { duration: string; start: string; name: string };
 
-const videoChapters: VideoChapter[] = videoContext
-  .keys()
-  .map((filename: string) => {
-    const data: SimpleMetadata = videoContext(filename);
-    return toChapter(filename.slice(2), {
+export async function loadDataset(): Promise<DataSet> {
+  const { trips, videos }: { trips: TripTopology[]; videos: SimpleMetadata[] } =
+    await fetch(
+      'https://static.ryanberdeen.com/everywhere/datasets/everywhere-2015-v1.json'
+    ).then((r) => r.json());
+
+  const videoChapters = videos.map((data) => {
+    return toChapter(data.name, {
       start: +moment(data.start),
       duration: parseFloat(data.duration),
     });
   });
 
-export async function loadDataset(): Promise<DataSet> {
-  const tripTopojson = await import('./trip-data');
-  return buildDataSet(tripTopojson.default.map(feature), videoChapters);
+  return buildDataSet(trips.map(feature), videoChapters);
 }

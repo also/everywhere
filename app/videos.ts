@@ -4,8 +4,6 @@ import { CoverageFeature, TripFeature } from './trips';
 import { Leaf, Node } from './tree';
 import { Feature, LineString, MultiLineString, Position } from 'geojson';
 
-export type SimpleMetadata = { duration: string; start: string };
-
 export type Still = { small: string; large: string };
 
 export type VideoChapter = {
@@ -52,7 +50,7 @@ export function toChapter(
   data: { start: number; duration: number }
 ): VideoChapter {
   // gopro videos are broken into chapters with filnames as described here: https://gopro.com/support/articles/hero3-and-hero3-file-naming-convention
-  const match = filename.match(/^(G[OP](..)(....))\.(json|MP4.geojson)$/);
+  const match = filename.match(/^(G[OP](..)(....))\.(MP4|json|MP4.geojson)$/);
   if (!match) {
     throw new Error(`bogus video name ${filename}`);
   }
