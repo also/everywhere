@@ -42,10 +42,8 @@ export default function WayDetails({ way }: { way: GroupedWays }) {
         {Array.from(intersections)
           .sort()
           .map((int) => (
-            <li>
-              <Link key={int} to={`/ways/${int}`}>
-                {int}
-              </Link>
+            <li key={int}>
+              <Link to={`/ways/${int}`}>{int}</Link>
             </li>
           ))}
       </WayListColumns>
