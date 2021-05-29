@@ -89,6 +89,16 @@ const waysLength = d3.sum(
 );
 
 function App({ children }: { children: ReactNode }) {
+  let extras = undefined;
+  if (localStorage.getItem('enableExtras') === 'true') {
+    extras = (
+      <>
+        <HeaderLink to="/map">Map</HeaderLink>{' '}
+        <HeaderLink to="/data">Data</HeaderLink>
+        <HeaderLink to="/local">Files</HeaderLink>
+      </>
+    );
+  }
   return (
     <div>
       <Header>
@@ -98,10 +108,7 @@ function App({ children }: { children: ReactNode }) {
           </HeaderLink>{' '}
           <HeaderLink to="/trips">Trips</HeaderLink>{' '}
           <HeaderLink to="/videos">Videos</HeaderLink>{' '}
-          <HeaderLink to="/ways">Streets</HeaderLink>{' '}
-          <HeaderLink to="/map">Map</HeaderLink>{' '}
-          <HeaderLink to="/data">Data</HeaderLink>
-          <HeaderLink to="/local">Files</HeaderLink>
+          <HeaderLink to="/ways">Streets</HeaderLink> {extras}
         </div>
       </Header>
       <Content>{children}</Content>
