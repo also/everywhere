@@ -165,7 +165,7 @@ export default function Map({
     setMapContext(compute({ width, height, zoomFeature, zoom, boundary }));
   }, [width, height, zoomFeature, zoom, boundary]);
 
-  const svgNode = useRef<Element>();
+  const svgNode = useRef<SVGSVGElement>();
 
   return (
     <MapContext.Provider value={mapContext}>
