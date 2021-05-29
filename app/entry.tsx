@@ -51,6 +51,16 @@ body {
   padding: 0;
   color: #444;
 }
+
+table {
+  font-size: inherit;
+}
+
+a {
+    color: #116aa9;
+    // https://crbug.com/439820
+    outline: none;
+  }
 `;
 
 const Header = styled.header`
