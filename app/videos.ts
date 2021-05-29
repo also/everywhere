@@ -6,7 +6,7 @@ import { Feature, LineString, MultiLineString, Position } from 'geojson';
 
 export type SimpleMetadata = { duration: string; start: string };
 
-type Still = { small: string; large: string };
+export type Still = { small: string; large: string };
 
 export type VideoChapter = {
   name: string;

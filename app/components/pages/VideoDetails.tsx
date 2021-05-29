@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { useHistory } from 'react-router';
+import { useInView } from 'react-intersection-observer';
 
 import * as format from '../../format';
 import { findSeekPosition, Video } from '../../videos';
 import { featureCollection } from '../../geo';
+import { Still } from '../../videos';
 
 import PageTitle from '../PageTitle';
 import TripList from '../TripList';
@@ -59,6 +61,15 @@ function VideoAndMap({ video, seek }: { video: Video; seek: number }) {
   );
 }
 
+function StillImage({ still: { small, large } }: { still: Still }) {
+  const { ref, inView } = useInView({ threshold: 0.9, triggerOnce: true });
+  return (
+    <a href={large} ref={ref}>
+      <img src={inView ? small : undefined} width="320" height="180" />
+    </a>
+  );
+}
+
 export default function VideoDetails({
   video,
   seek,
@@ -78,10 +89,8 @@ export default function VideoDetails({
       <TripList trips={video.trips} />
       <h2>Stills</h2>
       <div>
-        {video.stills.map(({ small, large }, i) => (
-          <a href={large} key={i}>
-            <img src={large} width="320" />
-          </a>
+        {video.stills.map((still, i) => (
+          <StillImage still={still} key={i} />
         ))}
       </div>
     </div>
