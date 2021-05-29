@@ -52,7 +52,7 @@ bundle.js: app-data/somerville-topo.geojson app-data/highways-clipped-topo.geojs
 	./node_modules/.bin/webpack
 
 app-data/video-metadata/%.json: video/%.MP4
-	avprobe -show_streams -of json $< | jq '.streams[0] | {duration, "start": .tags.creation_time}' > $@
+	ffprobe -show_streams -of json $< | jq '.streams[0] | {duration, "start": .tags.creation_time}' > $@
 
 ALL_VIDEOS = $(wildcard video/*.MP4)
 ALL_VIDEO_METADATA = $(patsubst video/%.MP4,app-data/video-metadata/%.json,$(ALL_VIDEOS))
