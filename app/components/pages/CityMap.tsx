@@ -3,14 +3,14 @@ import { useHistory } from 'react-router';
 import Position from '../Position';
 import Trips from '../Trips';
 import MapComponent from '../Map';
-import { TripFeature } from '../../trips';
+import { StravaTripFeature } from '../../trips';
 
 export default function CityMap({
   trips,
   tripsLength,
   waysLength,
 }: {
-  trips: TripFeature[];
+  trips: StravaTripFeature[];
   tripsLength: number;
   waysLength: number;
 }) {

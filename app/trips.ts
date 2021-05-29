@@ -6,7 +6,7 @@ import moment from 'moment';
 import { CoverageTree, groupChapters, Video, VideoChapter } from './videos';
 import { Feature, LineString, MultiLineString } from 'geojson';
 
-export type RawTripProperties = {
+export type RawStravaTripProperties = {
   activity: {
     id: string;
     start_date: string;
@@ -15,7 +15,7 @@ export type RawTripProperties = {
   };
 };
 
-export type TripProperties = {
+export type StravaTripProperties = {
   activity: {
     id: string;
     start_date: string;
@@ -31,23 +31,26 @@ export type TripProperties = {
   tree: TripTree;
 };
 
-export type TripFeature = Feature<LineString | MultiLineString, TripProperties>;
+export type StravaTripFeature = Feature<
+  LineString | MultiLineString,
+  StravaTripProperties
+>;
 
-export type TripTopology = TopoJSON.Topology<
-  TopoJSON.Objects<RawTripProperties>
+export type StravaTripTopology = TopoJSON.Topology<
+  TopoJSON.Objects<RawStravaTripProperties>
 >;
 
 export type CoverageFeature = Feature<
   MultiLineString,
-  TripProperties & { video: Video; tree: CoverageTree }
+  StravaTripProperties & { video: Video; tree: CoverageTree }
 >;
 
-export type RawTripFeature = Feature<
+export type RawStravaTripFeature = Feature<
   LineString | MultiLineString,
-  RawTripProperties
+  RawStravaTripProperties
 >;
 
-function load(trip: RawTripFeature): TripFeature {
+function load(trip: RawStravaTripFeature): StravaTripFeature {
   const {
     properties,
     properties: {
@@ -57,7 +60,7 @@ function load(trip: RawTripFeature): TripFeature {
 
   const start = moment(start_date);
 
-  const result: TripFeature = {
+  const result: StravaTripFeature = {
     ...trip,
     properties: {
       ...properties,
@@ -76,7 +79,7 @@ function load(trip: RawTripFeature): TripFeature {
 }
 
 function calculateVideoCoverage(
-  trips: TripFeature[],
+  trips: StravaTripFeature[],
   videos: Map<string, Video>
 ): CoverageFeature[] {
   const videoCoverage: CoverageFeature[] = [];
@@ -126,10 +129,10 @@ function calculateVideoCoverage(
   return videoCoverage;
 }
 
-export type TripTree = Node<TripFeature>;
+export type TripTree = Node<StravaTripFeature>;
 
 export function buildDataSet(
-  rawTrips: RawTripFeature[],
+  rawTrips: RawStravaTripFeature[],
   videoChapters: VideoChapter[]
 ) {
   const videos = groupChapters(videoChapters);

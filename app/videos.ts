@@ -1,6 +1,6 @@
 import sortBy from 'lodash/sortBy';
 import moment from 'moment';
-import { CoverageFeature, TripFeature } from './trips';
+import { CoverageFeature, StravaTripFeature } from './trips';
 import { Leaf, Node } from './tree';
 import { Feature, LineString, MultiLineString, Position } from 'geojson';
 
@@ -40,7 +40,7 @@ export type Video = {
   stills: Still[];
   thumbnail: Still;
   // FIXME
-  trips: TripFeature[];
+  trips: StravaTripFeature[];
   coverage: CoverageFeature[];
   coverageTree: CoverageTree;
 };

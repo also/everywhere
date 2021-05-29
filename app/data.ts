@@ -3,7 +3,7 @@ import { feature } from './geo';
 import { CoverageTree, Video } from './videos';
 import { ways, groupedWays, intersections, wayTree } from './ways';
 
-import { CoverageFeature, TripFeature, TripTree } from './trips';
+import { CoverageFeature, StravaTripFeature, TripTree } from './trips';
 
 import boundaryGeojson from 'compact-json!../app-data/somerville-topo.geojson';
 import contoursTopojson from 'compact-json!../app-data/contour.geojson';
@@ -15,7 +15,7 @@ export { ways, boundary, contours, groupedWays, intersections, wayTree };
 
 export type DataSet = {
   videos: Map<string, Video>;
-  trips: TripFeature[];
+  trips: StravaTripFeature[];
   videoCoverage: CoverageFeature[];
   tripTree: TripTree;
   videoTree: CoverageTree;

@@ -6,10 +6,10 @@ import Trips from '../Trips';
 import MapComponent, { MapMouseHandler } from '../Map';
 import Dot from '../Dot';
 import { useCallback, useMemo, useState } from 'react';
-import { TripFeature } from '../../trips';
+import { StravaTripFeature } from '../../trips';
 import { Leaf } from '../../tree';
 
-export default function TripDetails({ trip }: { trip: TripFeature }) {
+export default function TripDetails({ trip }: { trip: StravaTripFeature }) {
   const [nearest, setNearest] = useState<Leaf<unknown> | undefined>(undefined);
 
   const {

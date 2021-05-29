@@ -2,9 +2,9 @@ import { useRef, useEffect, useContext, memo } from 'react';
 import d3 from 'd3';
 
 import MapContext from './MapContext';
-import { TripFeature } from '../trips';
+import { StravaTripFeature } from '../trips';
 
-function AnimTrip({ trip }: { trip: TripFeature }) {
+function AnimTrip({ trip }: { trip: StravaTripFeature }) {
   const { path } = useContext(MapContext);
   const ref = useRef<SVGPathElement>();
   const running = useRef(true);
@@ -35,13 +35,13 @@ function AnimTrip({ trip }: { trip: TripFeature }) {
   return <path className="trip" d={path(trip)} ref={ref} />;
 }
 
-function Trip({ trip }: { trip: TripFeature }) {
+function Trip({ trip }: { trip: StravaTripFeature }) {
   const { path } = useContext(MapContext);
 
   return <path className="trip" d={path(trip)} />;
 }
 
-export default memo(function Trips({ trips }: { trips: TripFeature[] }) {
+export default memo(function Trips({ trips }: { trips: StravaTripFeature[] }) {
   return (
     <g>
       {trips.map((trip) => (

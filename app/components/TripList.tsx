@@ -4,9 +4,9 @@ import Thumbnails from './Thumbnails';
 import Thumbnail from './Thumbnail';
 import MapComponent from './Map';
 import Trips from './Trips';
-import { TripFeature } from '../trips';
+import { StravaTripFeature } from '../trips';
 
-export default function TripList({ trips }: { trips: TripFeature[] }) {
+export default function TripList({ trips }: { trips: StravaTripFeature[] }) {
   return (
     <Thumbnails>
       {trips.map((trip) => {

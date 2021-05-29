@@ -20,7 +20,7 @@ import {
 } from '../../../tools/parse/gpmf';
 import { FeatureOrCollection, features, singleFeature } from '../../geo';
 import { DataSet } from '../../data';
-import { buildDataSet, RawTripFeature } from '../../trips';
+import { buildDataSet, RawStravaTripFeature } from '../../trips';
 import { RawVideoFeature, toChapter, VideoChapter } from '../../videos';
 import LeafletMap from '../LeafletMap';
 
@@ -309,7 +309,7 @@ function readFiles(files: FileWithHandle[]): Promise<SomeFile[]> {
 
 function isProbablyStravaTrip(
   f: FeatureOrCollection<any, any>
-): f is RawTripFeature {
+): f is RawStravaTripFeature {
   return f.type === 'Feature' && !!f.properties?.activity?.moving_time;
 }
 
@@ -330,7 +330,7 @@ export default function LocalDataExplorer({
     []
   );
   async function setFiles2(newFiles: SomeFile[]) {
-    const trips: RawTripFeature[] = [];
+    const trips: RawStravaTripFeature[] = [];
 
     const videoChapters: VideoChapter[] = [];
     newFiles.forEach(({ geojson, raw: { name } }) => {

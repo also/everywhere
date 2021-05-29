@@ -13,7 +13,7 @@ import MapComponent from '../Map';
 import Dot from '../Dot';
 import Ways from '../Ways';
 import TripList from '../TripList';
-import { TripFeature, TripTree } from '../../trips';
+import { StravaTripFeature, TripTree } from '../../trips';
 import { Position } from 'geojson';
 
 export default function LocationDetails({
@@ -37,7 +37,7 @@ export default function LocationDetails({
     .within(location, maxDistance)
     .map(({ node: { data } }) => data);
   const nearbyGroupedWays = group(nearbyWays);
-  const nearbyTrips: TripFeature[] = Array.from(
+  const nearbyTrips: StravaTripFeature[] = Array.from(
     new Set(
       tripTree.within(location, maxDistance).map(({ node: { data } }) => data)
     )

@@ -1,9 +1,13 @@
 import { useContext } from 'react';
 import { Link } from 'react-router-dom';
-import { TripFeature } from '../../trips';
+import { StravaTripFeature } from '../../trips';
 import DataSetContext from '../DataSetContext';
 
-function GeometryInfo({ geometry: g }: { geometry: TripFeature['geometry'] }) {
+function GeometryInfo({
+  geometry: g,
+}: {
+  geometry: StravaTripFeature['geometry'];
+}) {
   return g.type === 'MultiLineString' ? (
     <>
       {g.coordinates.reduce((s, c) => s + c.length, 0).toLocaleString()}{' '}
