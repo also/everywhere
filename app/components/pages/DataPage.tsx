@@ -2,6 +2,7 @@ import { useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { StravaTripFeature } from '../../trips';
 import DataSetContext from '../DataSetContext';
+import Table from '../Table';
 
 function GeometryInfo({
   geometry: g,
@@ -22,11 +23,12 @@ export default function DataPage() {
   const { trips } = useContext(DataSetContext);
 
   return (
-    <table>
+    <Table>
       <thead>
         <tr>
           <th>Trip ID</th>
           <th>Type</th>
+          <th>Geometry</th>
         </tr>
       </thead>
       <tbody>
@@ -42,6 +44,6 @@ export default function DataPage() {
           </tr>
         ))}
       </tbody>
-    </table>
+    </Table>
   );
 }
