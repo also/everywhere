@@ -207,6 +207,16 @@ export default function Map({
           >
             <path d="M0,0 L0,6 L9,3 z" fill={selectedColor} />
           </marker>
+
+          <marker
+            id="selected-circle"
+            markerWidth="4"
+            markerHeight="4"
+            refX="2"
+            refY="2"
+          >
+            <circle cx="2" cy="2" r="1" stroke="none" fill={selectedColor} />
+          </marker>
         </defs>
         <BaseMap showWays={showWays} />
         {typeof children === 'function' ? children() : children}

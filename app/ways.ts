@@ -25,6 +25,9 @@ export type WayProperties = {
 
   highway: string;
 
+  // https://wiki.openstreetmap.org/wiki/Key:oneway
+  oneway?: 'yes' | 'no' | '-1';
+
   // we're writing this one
   displayName: string;
   intersections: IntersectionFeature[];
