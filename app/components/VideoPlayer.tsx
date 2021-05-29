@@ -81,7 +81,7 @@ export default memo(function VideoPlayer({
     const coverage = video.coverage.find(
       ({ properties: { start, end } }) => time >= start && time < end
     );
-    if (coverage && onLocationChange) {
+    if (coverage) {
       const {
         geometry: { coordinates },
         properties: { start },
