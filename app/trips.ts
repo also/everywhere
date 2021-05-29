@@ -38,7 +38,7 @@ export type TripTopology = TopoJSON.Topology<
 >;
 
 export type CoverageFeature = Feature<
-  LineString | MultiLineString,
+  MultiLineString,
   TripProperties & { video: Video; tree: CoverageTree }
 >;
 
