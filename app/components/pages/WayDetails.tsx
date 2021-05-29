@@ -7,6 +7,7 @@ import MapComponent from '../Map';
 import Ways from '../Ways';
 import WayListColumns from '../WayListColumns';
 import MapBox from '../MapBox';
+import Table from '../Table';
 import { GroupedWays } from '../../ways';
 
 export default function WayDetails({ way }: { way: GroupedWays }) {
@@ -50,7 +51,7 @@ export default function WayDetails({ way }: { way: GroupedWays }) {
       </WayListColumns>
 
       <h2>OpenStreetMap Ways</h2>
-      <table>
+      <Table>
         <thead>
           <tr>
             <th>Name</th>
@@ -73,7 +74,7 @@ export default function WayDetails({ way }: { way: GroupedWays }) {
             </tr>
           ))}
         </tbody>
-      </table>
+      </Table>
     </div>
   );
 }

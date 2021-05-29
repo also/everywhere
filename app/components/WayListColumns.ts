@@ -8,10 +8,4 @@ export default styled.ul`
   li {
     margin-bottom: 0.3em;
   }
-
-  & a {
-    color: #116aa9;
-    // https://crbug.com/439820
-    outline: none;
-  }
 `;
