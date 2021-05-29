@@ -88,6 +88,10 @@ const Footer = styled.footer`
   text-align: center;
   font-size: 0.8em;
   color: #cecece;
+
+  & a {
+    color: inherit;
+  }
 `;
 
 document.title = 'not quite everywhere';
@@ -124,7 +128,11 @@ function App({ children }: { children: ReactNode }) {
       <Content>{children}</Content>
 
       <Footer>
-        <p>Map data © OpenStreetMap contributors</p>
+        <p>
+          Map data ©{' '}
+          <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>{' '}
+          contributors
+        </p>
       </Footer>
     </div>
   );
