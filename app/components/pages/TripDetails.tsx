@@ -42,6 +42,9 @@ export default function TripDetails({ trip }: { trip: StravaTripFeature }) {
         <Trips trips={trips} />
         {dot}
       </MapComponent>
+      <p>
+        <a href={`https://strava.com/activities/${id}`}>View on Strava</a>
+      </p>
 
       <h2>Videos</h2>
       <VideoList videos={videos} />
