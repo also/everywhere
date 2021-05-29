@@ -12,7 +12,7 @@ function Way({
 }) {
   const { path } = useContext(MapContext);
 
-  const { highway, displayName, id } = feature.properties;
+  const { highway, id } = feature.properties;
   const className = selected ? 'selected' : '';
   return (
     <path
@@ -20,6 +20,7 @@ function Way({
       data-highway={highway}
       className={className}
       key={id}
+      markerEnd={selected ? 'url(#selected-arrow)' : undefined}
     />
   );
 }
