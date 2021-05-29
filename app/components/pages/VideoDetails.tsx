@@ -80,13 +80,17 @@ export default function VideoDetails({
   return (
     <div>
       <PageTitle>{video.name}</PageTitle>
+
       <p>
         Taken <strong>{video.start.format('LLL')}</strong>,{' '}
         {format.duration(video.duration)} long
       </p>
+
       <VideoAndMap video={video} seek={seek} />
+
       <h2>Trips</h2>
       <TripList trips={video.trips} />
+
       <h2>Stills</h2>
       <div>
         {video.stills.map((still, i) => (
