@@ -42,6 +42,14 @@ import DataSetContext from './components/DataSetContext';
 import { loadDataset } from './default-data-set';
 import LeafletMap from './components/LeafletMap';
 import DataPage from './components/pages/DataPage';
+import { WorkerChannel, workerHandshake } from './WorkerChannel';
+import WorkerContext from './components/WorkerContext';
+import StandardPage from './components/StandardPage';
+
+const worker = new Worker(new URL('./worker.ts', import.meta.url));
+
+const workerChannel = WorkerChannel.forWorker(worker);
+const handshakeResult = workerChannel.sendRequest(workerHandshake, 'ping');
 
 const GlobalStyle = createGlobalStyle`
 body {
@@ -77,10 +85,6 @@ const HeaderLink = styled(Link)`
   text-decoration: none;
   font-weight: bold;
   margin-right: 2em;
-`;
-
-const Content = styled.div`
-  padding: 3em;
 `;
 
 const Footer = styled.footer`
@@ -125,7 +129,7 @@ function App({ children }: { children: ReactNode }) {
           <HeaderLink to="/ways">Streets</HeaderLink> {extras}
         </div>
       </Header>
-      <Content>{children}</Content>
+      {children}
 
       <Footer>
         <p>
@@ -147,7 +151,13 @@ function CityMapRoute() {
     geometryLength
   );
   return (
-    <CityMap trips={trips} tripsLength={tripsLength} waysLength={waysLength} />
+    <StandardPage>
+      <CityMap
+        trips={trips}
+        tripsLength={tripsLength}
+        waysLength={waysLength}
+      />
+    </StandardPage>
   );
 }
 
@@ -235,42 +245,46 @@ function MapRoute() {
 const div = document.createElement('div');
 document.body.appendChild(div);
 
-loadDataset().then((dataset) => {
+Promise.all([loadDataset(), handshakeResult]).then(([dataset]) => {
   ReactDOM.render(
     <>
       <GlobalStyle />
       <DataContext.Provider value={{ boundary, contours, ways }}>
-        <DataSetSelector initialDataSet={dataset}>
-          {(setDataSet) => (
-            <Router>
-              <App>
-                <Switch>
-                  <Route
-                    path="/local"
-                    render={() => <LocalDataExplorer setDataSet={setDataSet} />}
-                  />
-                  <Route path="/data" component={DataPage} />
-                  <Route path="/map" component={MapRoute} />
-                  <Route path="/ways/*" component={WayDetailsRoute} />
-                  <Route path="/ways" component={WayListRoute} />
-                  <Route
-                    path="/videos/:name/:seek"
-                    component={VideoDetailsRoute}
-                  />
-                  <Route path="/videos/:name" component={VideoDetailsRoute} />
-                  <Route path="/videos" component={VideosRoute} />
-                  <Route path="/trips/:id" component={TripDetailsRoute} />
-                  <Route path="/trips" component={TripsRoute} />
-                  <Route
-                    path="/locations/:coords"
-                    component={LocationDetailsRoute}
-                  />
-                  <Route path="/" component={CityMapRoute} />
-                </Switch>
-              </App>
-            </Router>
-          )}
-        </DataSetSelector>
+        <WorkerContext.Provider value={{ worker, channel: workerChannel }}>
+          <DataSetSelector initialDataSet={dataset}>
+            {(setDataSet) => (
+              <Router>
+                <App>
+                  <Switch>
+                    <Route
+                      path="/local"
+                      render={() => (
+                        <LocalDataExplorer setDataSet={setDataSet} />
+                      )}
+                    />
+                    <Route path="/data" component={DataPage} />
+                    <Route path="/map" component={MapRoute} />
+                    <Route path="/ways/*" component={WayDetailsRoute} />
+                    <Route path="/ways" component={WayListRoute} />
+                    <Route
+                      path="/videos/:name/:seek"
+                      component={VideoDetailsRoute}
+                    />
+                    <Route path="/videos/:name" component={VideoDetailsRoute} />
+                    <Route path="/videos" component={VideosRoute} />
+                    <Route path="/trips/:id" component={TripDetailsRoute} />
+                    <Route path="/trips" component={TripsRoute} />
+                    <Route
+                      path="/locations/:coords"
+                      component={LocationDetailsRoute}
+                    />
+                    <Route path="/" component={CityMapRoute} />
+                  </Switch>
+                </App>
+              </Router>
+            )}
+          </DataSetSelector>
+        </WorkerContext.Provider>
       </DataContext.Provider>
     </>,
     div

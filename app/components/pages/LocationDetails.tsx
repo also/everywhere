@@ -6,6 +6,7 @@ import { CoverageTree, findNearbyVideos } from '../../videos';
 import { wayTree, group } from '../../ways';
 import { featureCollection } from '../../geo';
 
+import StandardPage from '../StandardPage';
 import PageTitle from '../PageTitle';
 import Thumbnails from '../Thumbnails';
 import Thumbnail from '../Thumbnail';
@@ -46,7 +47,7 @@ export default function LocationDetails({
   const nearbyVideos = findNearbyVideos(videoTree, location, maxDistance);
 
   return (
-    <div>
+    <StandardPage>
       <PageTitle>{location.join(', ')}</PageTitle>
       <MapComponent width={1000} height={1000} onClick={onClick}>
         <Ways features={nearbyWays} selected={true} />
@@ -94,6 +95,6 @@ export default function LocationDetails({
           </Thumbnail>
         ))}
       </Thumbnails>
-    </div>
+    </StandardPage>
   );
 }

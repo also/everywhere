@@ -2,9 +2,11 @@ import { useEffect, useMemo, useRef } from 'react';
 import L from 'leaflet';
 
 export default function LeafletMap({
-  features,
+  features = [],
+  customize,
 }: {
-  features: GeoJSON.Feature[];
+  features?: GeoJSON.Feature[];
+  customize?(map: L.Map): void;
 }) {
   const mapComponent = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map>();
@@ -16,7 +18,7 @@ export default function LeafletMap({
         {
           attribution:
             'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-          maxZoom: 18,
+          maxZoom: 22,
           id: 'mapbox/streets-v11',
           tileSize: 512,
           zoomOffset: -1,
@@ -31,7 +33,7 @@ export default function LeafletMap({
     if (!mapRef.current) {
       mapRef.current = L.map(mapComponent.current!).setView(
         [42.389118, -71.097153],
-        10
+        11
       );
 
       tiles.addTo(mapRef.current);
@@ -42,6 +44,10 @@ export default function LeafletMap({
         map.removeLayer(layer);
       }
     });
+
+    if (customize) {
+      customize(mapRef.current);
+    }
 
     features.forEach((f) =>
       L.geoJSON(f)

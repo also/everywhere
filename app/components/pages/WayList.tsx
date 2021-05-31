@@ -8,6 +8,7 @@ import MapComponent from '../Map';
 import Ways from '../Ways';
 import WayListColumns from '../WayListColumns';
 import { GroupedWays, WayFeature, WayTree } from '../../ways';
+import StandardPage from '../StandardPage';
 
 const WayMap = styled.div`
   position: relative;
@@ -70,7 +71,7 @@ export default function WayList({
   groupedWays: GroupedWays[];
 }) {
   return (
-    <div>
+    <StandardPage>
       <PageTitle>Streets</PageTitle>
       <HoverStreetMap wayTree={wayTree} />
       <WayListColumns>
@@ -80,6 +81,6 @@ export default function WayList({
           </li>
         ))}
       </WayListColumns>
-    </div>
+    </StandardPage>
   );
 }

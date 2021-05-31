@@ -9,6 +9,7 @@ import Dot from '../Dot';
 import { Leaf } from '../../tree';
 import { CoverageTree, Video } from '../../videos';
 import { CoverageFeature } from '../../trips';
+import StandardPage from '../StandardPage';
 
 export default function VideoListPage({
   videos,
@@ -55,7 +56,7 @@ export default function VideoListPage({
   }
 
   return (
-    <div>
+    <StandardPage>
       <PageTitle>Videos</PageTitle>
       <MapComponent
         width={1000}
@@ -67,6 +68,6 @@ export default function VideoListPage({
         {dot}
       </MapComponent>
       <VideoList videos={videos} />
-    </div>
+    </StandardPage>
   );
 }

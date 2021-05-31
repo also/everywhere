@@ -1,4 +1,12 @@
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
+
+import L from 'leaflet';
 import { get, set } from 'idb-keyval';
 import { fileOpen, FileWithHandle } from 'browser-fs-access';
 import { Feature } from 'geojson';
@@ -8,132 +16,20 @@ import MapContext from '../MapContext';
 import MapBox from '../MapBox';
 import { SeekableBlobBuffer } from '../../../tools/parse/buffers';
 import { extractGps } from '../../../tools/parse/gopro-gps';
-import { bind, Entry, fileRoot, root, Traverser } from '../../../tools/parse';
+import { bind, fileRoot, Traverser } from '../../../tools/parse';
 import { Box, parser as mp4Parser } from '../../../tools/parse/mp4';
-import { utf8decoder } from '../../../tools/parse/read';
-import {
-  getMeta,
-  iterateMetadataSamples,
-  Metadata,
-  SampleMetadata,
-  parser as gpmfParser,
-} from '../../../tools/parse/gpmf';
+import { getMeta, Metadata } from '../../../tools/parse/gpmf';
 import { FeatureOrCollection, features, singleFeature } from '../../geo';
 import { DataSet } from '../../data';
 import { buildDataSet, RawStravaTripFeature } from '../../trips';
 import { RawVideoFeature, toChapter, VideoChapter } from '../../videos';
 import LeafletMap from '../LeafletMap';
-
-function DataViewView({ value }: { value: DataView }) {
-  return <div>{utf8decoder.decode(value).slice(0, 100)}</div>;
-}
-
-async function asyncArray<T>(i: AsyncIterable<T>): Promise<T[]> {
-  const result: T[] = [];
-  for await (const item of i) {
-    result.push(item);
-  }
-  return result;
-}
-
-function useMemoAsync<T>(f: () => Promise<T>, deps?: any[]): T | undefined {
-  const [state, setState] = useState<T>();
-
-  useEffect(() => {
-    (async () => setState(await f()))();
-  }, deps);
-
-  return state;
-}
-
-function TraverserValueView<T extends Entry>({
-  traverser,
-  entry,
-  depth = 0,
-}: {
-  traverser: Traverser<T>;
-  entry?: T;
-  depth?: number;
-}) {
-  const state = useMemoAsync(async () => {
-    const children = await asyncArray(
-      traverser.iterator(entry || traverser.root)
-    );
-    const value = entry ? await traverser.value(entry) : undefined;
-    return { children, value };
-  }, [traverser, entry]);
-
-  if (depth > 8) {
-    return <div>oops</div>;
-  } else if (state) {
-    const { children, value } = state;
-
-    return (
-      <>
-        {value ? (
-          <pre>
-            {value instanceof DataView ? (
-              <DataViewView value={value} />
-            ) : (
-              JSON.stringify(value, null, 2)
-            )}
-          </pre>
-        ) : null}
-        <ul>
-          {children.map((e) => (
-            <li key={e.fileOffset}>
-              <TraverserView
-                traverser={traverser.clone()}
-                entry={e}
-                depth={depth + 1}
-              />
-            </li>
-          ))}
-        </ul>
-      </>
-    );
-  } else {
-    return <div>loading...</div>;
-  }
-}
-
-function TraverserView<T extends Entry>({
-  traverser,
-  entry,
-  depth = 0,
-}: {
-  traverser: Traverser<T>;
-  entry?: T;
-  depth?: number;
-}) {
-  const [expanded, setExpanded] = useState(false);
-
-  if (depth > 8) {
-    return <div>oops</div>;
-  }
-
-  return (
-    <>
-      <div onClick={() => setExpanded(!expanded)}>
-        {entry ? (
-          <>
-            <code>{entry.fourcc}</code> (file offset: {entry.fileOffset},
-            length: {entry.len})
-          </>
-        ) : (
-          '(root)'
-        )}
-      </div>
-      {expanded ? (
-        <TraverserValueView
-          traverser={traverser.clone()}
-          entry={entry || traverser.root}
-          depth={depth}
-        />
-      ) : null}
-    </>
-  );
-}
+import Table from '../Table';
+import TraverserView, { GpmfSamples } from '../data/TraverserView';
+import { useMemoAsync } from '../../hooks';
+import WorkerContext from '../WorkerContext';
+import { setWorkerFile } from '../../worker-stuff';
+import CanvasLayer from '../../CanvasLayer';
 
 function FileView<T>({
   file,
@@ -183,32 +79,6 @@ function Path({ feature }: { feature: GeoJSON.Feature }) {
   const { path } = useContext(MapContext);
 
   return <path className="trip" d={path(feature)} />;
-}
-
-function GpmfSamples({
-  sampleMetadata,
-  mp4,
-}: {
-  sampleMetadata: SampleMetadata;
-  mp4: Traverser<Box>;
-}) {
-  const samples = useMemoAsync(
-    () => asyncArray(iterateMetadataSamples(sampleMetadata)),
-    [sampleMetadata]
-  );
-
-  if (!samples) {
-    return <div>loading...</div>;
-  } else {
-    const [sample] = samples;
-    const gpmf = bind(gpmfParser, mp4.data, root(sample.offset, sample.size));
-    return (
-      <div>
-        {samples.length} samples
-        <TraverserView traverser={gpmf.clone()} />
-      </div>
-    );
-  }
 }
 
 type SomeFile = {
@@ -261,7 +131,7 @@ function File({ file }: { file: File }) {
   );
 }
 
-export function FilesComponent({ files }: { files: SomeFile[] }) {
+function FilesComponent({ files }: { files: SomeFile[] }) {
   return (
     <LeafletMap
       features={([] as Feature[]).concat(
@@ -319,50 +189,75 @@ function isProbablyVideoTrack(
   return f.type === 'Feature' && !!f.properties?.creationTime;
 }
 
+function readToDataset(newFiles: SomeFile[]) {
+  const trips: RawStravaTripFeature[] = [];
+
+  const videoChapters: VideoChapter[] = [];
+  newFiles.forEach(({ geojson, raw: { name } }) => {
+    const f = singleFeature(geojson) || geojson;
+    if (isProbablyStravaTrip(f)) {
+      trips.push(f);
+    } else if (isProbablyVideoTrack(f)) {
+      const start = new Date(f.properties.creationTime * 1000);
+      // using current timezone :(
+      start.setMinutes(start.getMinutes() + start.getTimezoneOffset());
+      videoChapters.push(
+        toChapter(name, {
+          start: +start,
+          // TODO what the hell? 90
+          // this gives the right duration for GOPR0039, at least
+          duration: f.properties.duration / 1000 / 1000 / 90,
+        })
+      );
+    }
+  });
+
+  return buildDataSet(trips, videoChapters);
+}
+
+function VectorTileView({ file }: { file: File }) {
+  const { channel } = useContext(WorkerContext);
+  const customize = useMemo(() => {
+    return (l: L.Map) => new CanvasLayer(channel).addTo(l);
+  }, [file]);
+
+  return <LeafletMap customize={customize} />;
+}
+
+function VectorTileFileView({ file }: { file: FileWithHandle }) {
+  const { channel } = useContext(WorkerContext);
+  const loaded = useMemoAsync(async () => {
+    await channel.sendRequest(setWorkerFile, file);
+    return true;
+  }, [file]);
+  if (loaded) {
+    return <VectorTileView file={file} />;
+  } else {
+    return <>loading</>;
+  }
+}
+
 export default function LocalDataExplorer({
   setDataSet,
 }: {
   setDataSet(dataSet: DataSet): void;
 }) {
-  const [files, setFiles] = useState<SomeFile[] | undefined>();
-  const previousFiles = useMemoAsync<FileWithHandle[] | undefined>(
-    () => get('files'),
-    []
-  );
-  async function setFiles2(newFiles: SomeFile[]) {
-    const trips: RawStravaTripFeature[] = [];
+  const [files, setFiles] = useState<FileWithHandle[] | undefined>();
+  const [file, setFile] = useState<FileWithHandle>();
+  const initialized = useMemoAsync<boolean>(async () => {
+    setFiles(await get('files'));
+    return true;
+  }, []);
 
-    const videoChapters: VideoChapter[] = [];
-    newFiles.forEach(({ geojson, raw: { name } }) => {
-      const f = singleFeature(geojson) || geojson;
-      if (isProbablyStravaTrip(f)) {
-        trips.push(f);
-      } else if (isProbablyVideoTrack(f)) {
-        const start = new Date(f.properties.creationTime * 1000);
-        // using current timezone :(
-        start.setMinutes(start.getMinutes() + start.getTimezoneOffset());
-        videoChapters.push(
-          toChapter(name, {
-            start: +start,
-            // TODO what the hell? 90
-            // this gives the right duration for GOPR0039, at least
-            duration: f.properties.duration / 1000 / 1000 / 90,
-          })
-        );
-      }
-    });
-    setDataSet(buildDataSet(trips, videoChapters));
-    setFiles(newFiles);
-  }
   async function handleFiles(
     result: FileWithHandle[],
-    existingFiles: SomeFile[] = []
+    existingFiles: FileWithHandle[] = []
   ) {
-    const newFiles = await readFiles(result);
+    const allFiles = [...result, ...existingFiles];
+    setFiles(allFiles);
     // for safari, it seems to be important that you don't remove the files from indexDB before you read them.
     // removing them drops the reference or something
-    await set('files', [...result, ...existingFiles.map(({ raw }) => raw)]);
-    await setFiles2([...newFiles, ...existingFiles]);
+    await set('files', allFiles);
   }
   const handleLoadClick = useCallback(async (e) => {
     e.preventDefault();
@@ -385,17 +280,51 @@ export default function LocalDataExplorer({
     },
     [files]
   );
+  async function handleSetDatasetClick() {
+    setDataSet(readToDataset(await readFiles(files || [])));
+  }
   return (
     <>
       <PageTitle>Local Data</PageTitle>
-      {previousFiles ? (
-        <button onClick={() => handleFiles(previousFiles)}>
-          Reload Previous {previousFiles.length} Files
-        </button>
-      ) : null}
-      <button onClick={handleLoadClick}>load</button>
-      <button onClick={handleAddClick}>add</button>
-      {files ? <FilesComponent files={files} /> : null}
+      {initialized ? (
+        <>
+          <button onClick={handleLoadClick}>load</button>
+          <button onClick={handleAddClick}>add</button>
+        </>
+      ) : undefined}
+
+      {files ? (
+        <>
+          <button onClick={handleSetDatasetClick}>Set Dataset</button>
+        </>
+      ) : undefined}
+      {file ? (
+        <>
+          <button onClick={() => setFile(undefined)}>Unload</button>
+          <VectorTileFileView file={file} />
+        </>
+      ) : undefined}
+      <Table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Size</th>
+            <th>Last Modified</th>
+          </tr>
+        </thead>
+        <tbody>
+          {(files || []).map((f, i) => (
+            <tr key={i}>
+              <td>{f.name}</td>
+              <td>{f.size.toLocaleString()}</td>
+              <td>{new Date(f.lastModified).toLocaleString()}</td>
+              <td>
+                <button onClick={() => setFile(f)}>load</button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </Table>
     </>
   );
 }
