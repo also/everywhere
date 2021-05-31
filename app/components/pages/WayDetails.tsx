@@ -9,6 +9,7 @@ import WayListColumns from '../WayListColumns';
 import MapBox from '../MapBox';
 import Table from '../Table';
 import { GroupedWays } from '../../ways';
+import StandardPage from '../StandardPage';
 
 export default function WayDetails({ way }: { way: GroupedWays }) {
   const intersections: Set<string> = new Set();
@@ -24,7 +25,7 @@ export default function WayDetails({ way }: { way: GroupedWays }) {
   intersections.delete(way.displayName);
 
   return (
-    <div>
+    <StandardPage>
       <PageTitle>{way.displayName}</PageTitle>
       <MapBox>
         <MapComponent
@@ -73,6 +74,6 @@ export default function WayDetails({ way }: { way: GroupedWays }) {
           ))}
         </tbody>
       </Table>
-    </div>
+    </StandardPage>
   );
 }

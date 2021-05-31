@@ -44,6 +44,7 @@ import LeafletMap from './components/LeafletMap';
 import DataPage from './components/pages/DataPage';
 import { WorkerChannel, workerHandshake } from './WorkerChannel';
 import WorkerContext from './components/WorkerContext';
+import StandardPage from './components/StandardPage';
 
 const worker = new Worker(new URL('./worker.ts', import.meta.url));
 
@@ -84,10 +85,6 @@ const HeaderLink = styled(Link)`
   text-decoration: none;
   font-weight: bold;
   margin-right: 2em;
-`;
-
-const Content = styled.div`
-  padding: 3em;
 `;
 
 const Footer = styled.footer`
@@ -132,7 +129,7 @@ function App({ children }: { children: ReactNode }) {
           <HeaderLink to="/ways">Streets</HeaderLink> {extras}
         </div>
       </Header>
-      <Content>{children}</Content>
+      {children}
 
       <Footer>
         <p>
@@ -154,7 +151,13 @@ function CityMapRoute() {
     geometryLength
   );
   return (
-    <CityMap trips={trips} tripsLength={tripsLength} waysLength={waysLength} />
+    <StandardPage>
+      <CityMap
+        trips={trips}
+        tripsLength={tripsLength}
+        waysLength={waysLength}
+      />
+    </StandardPage>
   );
 }
 
@@ -242,7 +245,7 @@ function MapRoute() {
 const div = document.createElement('div');
 document.body.appendChild(div);
 
-Promise.all([loadDataset(), handshakeResult]).then(([dataset, pong]) => {
+Promise.all([loadDataset(), handshakeResult]).then(([dataset]) => {
   ReactDOM.render(
     <>
       <GlobalStyle />

@@ -8,6 +8,7 @@ import Dot from '../Dot';
 import { useCallback, useMemo, useState } from 'react';
 import { StravaTripFeature } from '../../trips';
 import { Leaf } from '../../tree';
+import StandardPage from '../StandardPage';
 
 export default function TripDetails({ trip }: { trip: StravaTripFeature }) {
   const [nearest, setNearest] = useState<Leaf<unknown> | undefined>(undefined);
@@ -32,7 +33,7 @@ export default function TripDetails({ trip }: { trip: StravaTripFeature }) {
   }
 
   return (
-    <div>
+    <StandardPage>
       <PageTitle>{id}</PageTitle>
       <p>
         Started <strong>{start.format('LLL')}</strong>,{' '}
@@ -48,6 +49,6 @@ export default function TripDetails({ trip }: { trip: StravaTripFeature }) {
 
       <h2>Videos</h2>
       <VideoList videos={videos} />
-    </div>
+    </StandardPage>
   );
 }

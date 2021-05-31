@@ -15,6 +15,7 @@ import Trips from '../Trips';
 import Dot from '../Dot';
 import MapBox from '../MapBox';
 import moment from 'moment';
+import StandardPage from '../StandardPage';
 
 function VideoAndMap({ video, seek }: { video: Video; seek: number }) {
   const history = useHistory();
@@ -78,7 +79,7 @@ export default function VideoDetails({
   seek: number;
 }) {
   return (
-    <div>
+    <StandardPage>
       <PageTitle>{video.name}</PageTitle>
 
       <p>
@@ -97,6 +98,6 @@ export default function VideoDetails({
           <StillImage still={still} key={i} />
         ))}
       </div>
-    </div>
+    </StandardPage>
   );
 }
