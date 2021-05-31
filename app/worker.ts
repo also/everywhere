@@ -1,8 +1,9 @@
 import { WorkerChannel, workerHandshake } from './WorkerChannel';
 
 import geojsonvt from 'geojson-vt';
-import { getTile, setWorkerFile } from './worker-stuff';
+import { getTile, renderTileInWorker, setWorkerFile } from './worker-stuff';
 import { features } from './geo';
+import { drawTile2 } from './vector-tiles';
 
 const channel = new WorkerChannel(self.postMessage.bind(self), self);
 channel.handle(workerHandshake, () => 'pong');
@@ -19,3 +20,10 @@ channel.handle(setWorkerFile, async (f) => {
 });
 
 channel.handle(getTile, ({ z, x, y }) => tileIndex?.getTile(z, x, y));
+
+channel.handle(renderTileInWorker, ({ canvas, coords: { z, x, y } }) => {
+  const tile = tileIndex?.getTile(z, x, y);
+  if (tile) {
+    drawTile2(canvas, tile);
+  }
+});

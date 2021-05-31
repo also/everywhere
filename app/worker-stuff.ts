@@ -6,3 +6,5 @@ export type Tile = {
 
 export const setWorkerFile = key<File | undefined, void>('setFile');
 export const getTile = key<any, Tile>('getTile');
+export const renderTileInWorker =
+  key<{ coords: any; canvas: OffscreenCanvas }>('renderTileInWorker');

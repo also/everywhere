@@ -243,7 +243,6 @@ const div = document.createElement('div');
 document.body.appendChild(div);
 
 Promise.all([loadDataset(), handshakeResult]).then(([dataset, pong]) => {
-  console.log(pong);
   ReactDOM.render(
     <>
       <GlobalStyle />

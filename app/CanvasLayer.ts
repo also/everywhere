@@ -1,6 +1,5 @@
 import L from 'leaflet';
 import { drawTile } from './vector-tiles';
-import { getTile } from './worker-stuff';
 import { WorkerChannel } from './WorkerChannel';
 
 export default L.GridLayer.extend({
@@ -19,14 +18,10 @@ export default L.GridLayer.extend({
     canvas.width = size.x;
     canvas.height = size.y;
 
-    const ctx = canvas.getContext('2d')!;
-
-    this.channel.sendRequest(getTile, coords).then((tile) => {
-      if (tile) {
-        drawTile(ctx, tile, size.x);
-      }
-      done(undefined, canvas);
-    }, done);
+    drawTile(this.channel, canvas, coords, size.x).then(
+      () => done(undefined, canvas),
+      done
+    );
 
     return canvas;
   },

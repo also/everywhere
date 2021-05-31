@@ -1,6 +1,6 @@
 type MessageChannelKey<I, O> = { key: string; __in: I; __out: O };
 
-export function key<I, O>(key: string): MessageChannelKey<I, O> {
+export function key<I, O = undefined>(key: string): MessageChannelKey<I, O> {
   return { key } as any;
 }
 
@@ -70,13 +70,20 @@ export class WorkerChannel {
   }
 
   // FIXME doesn't actually restrict I or O to match key types
-  sendRequest<I, O>({ key }: MessageChannelKey<I, O>, input: I): Promise<O> {
+  sendRequest<I, O>(
+    { key }: MessageChannelKey<I, O>,
+    input: I,
+    transferrable: Transferable[] = []
+  ): Promise<O> {
     const id = this.id++;
     return new Promise((resolve, reject) => {
-      this.postMessage({
-        from: 'MessageChannel',
-        value: { type: 'request', id, key, input },
-      });
+      this.postMessage(
+        {
+          from: 'MessageChannel',
+          value: { type: 'request', id, key, input },
+        },
+        transferrable
+      );
       this.requests.set(id, { resolve, reject });
     });
   }
