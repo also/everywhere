@@ -258,7 +258,6 @@ const CanvasLayer = L.GridLayer.extend({
     const tile = this.tileIndex.getTile(z, x, y);
 
     if (tile) {
-      console.log(tile);
       drawTile(ctx, tile, size.x);
     }
 
@@ -337,7 +336,6 @@ export default function LocalDataExplorer({
   async function handleSetDatasetClick() {
     setDataSet(readToDataset(await readFiles(files || [])));
   }
-  console.log({ file });
   return (
     <>
       <PageTitle>Local Data</PageTitle>
