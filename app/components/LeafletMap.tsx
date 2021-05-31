@@ -33,7 +33,7 @@ export default function LeafletMap({
     if (!mapRef.current) {
       mapRef.current = L.map(mapComponent.current!).setView(
         [42.389118, -71.097153],
-        10
+        11
       );
 
       tiles.addTo(mapRef.current);
