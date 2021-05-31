@@ -31,8 +31,8 @@ const highwayLevels: Record<string, number> = {
   trunk: 5,
   primary: 10,
   secondary: 11,
-  tertiary: 13,
-  residential: 14,
+  tertiary: 11,
+  residential: 12,
 };
 
 export function drawTile2(
@@ -46,13 +46,16 @@ export function drawTile2(
   const pad = 0;
   tile.features.forEach((feat) => {
     const highway = feat.tags.highway as string;
+    const { type, geometry } = feat;
+    if (type !== 2) {
+      return;
+    }
     if (highway) {
       const level = highwayLevels[highway];
       if (!level || level >= z) {
         return;
       }
     }
-    const { type, geometry } = feat;
     ctx.beginPath();
     ctx.strokeStyle = 'red';
     ctx.lineWidth = 2;
