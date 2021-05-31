@@ -3,10 +3,9 @@ import React, {
   useContext,
   useEffect,
   useMemo,
-  useRef,
   useState,
 } from 'react';
-import geojsonvt from 'geojson-vt';
+
 import L from 'leaflet';
 import { get, set } from 'idb-keyval';
 import { fileOpen, FileWithHandle } from 'browser-fs-access';
@@ -28,6 +27,10 @@ import LeafletMap from '../LeafletMap';
 import Table from '../Table';
 import TraverserView, { GpmfSamples } from '../data/TraverserView';
 import { useMemoAsync } from '../../hooks';
+import WorkerContext from '../WorkerContext';
+import { getTile, setWorkerFile, Tile } from '../../worker-stuff';
+import { WorkerChannel } from '../../WorkerChannel';
+import CanvasLayer from '../../CanvasLayer';
 
 function FileView<T>({
   file,
@@ -213,82 +216,26 @@ function readToDataset(newFiles: SomeFile[]) {
   return buildDataSet(trips, videoChapters);
 }
 
-type Tile = {
-  features: [{ geometry: [number, number][][]; type: 2 }];
-};
-
-const extent = 4096;
-
-function drawTile(ctx: CanvasRenderingContext2D, tile: Tile, size: number) {
-  const ratio = size / extent;
-  const pad = 0;
-  tile.features.forEach(({ type, geometry }) => {
-    ctx.beginPath();
-    ctx.strokeStyle = 'red';
-    // TODO handle points
-    geometry.forEach((points) => {
-      points.forEach(([x, y], i) => {
-        if (i > 0) {
-          ctx.lineTo(x * ratio + pad, y * ratio + pad);
-        } else {
-          ctx.moveTo(x * ratio + pad, y * ratio + pad);
-        }
-      });
-    });
-    ctx.stroke();
-  });
-}
-
-const CanvasLayer = L.GridLayer.extend({
-  initialize(tileIndex: any) {
-    this.tileIndex = tileIndex;
-  },
-
-  createTile: function ({ x, y, z }) {
-    // create a <canvas> element for drawing
-    const canvas = L.DomUtil.create('canvas') as HTMLCanvasElement;
-
-    // setup tile width and height according to the options
-    const size = this.getTileSize();
-    canvas.width = size.x;
-    canvas.height = size.y;
-
-    const ctx = canvas.getContext('2d')!;
-
-    const tile = this.tileIndex.getTile(z, x, y);
-
-    if (tile) {
-      drawTile(ctx, tile, size.x);
-    }
-
-    // return the tile so it can be rendered on screen
-    return canvas;
-  },
-});
-
-function VectorTileView({ value }: { value: any }) {
-  const ref = useRef<HTMLCanvasElement>(null);
-  const { customize, tileIndex } = useMemo(() => {
-    const f = features(value);
-    const tileIndex = geojsonvt(f, { maxZoom: 24 });
-
-    return {
-      customize: (l: L.Map) => new CanvasLayer(tileIndex).addTo(l),
-      tileIndex,
-    };
-  }, [value]);
+function VectorTileView({ file }: { file: File }) {
+  const { channel } = useContext(WorkerContext);
+  const customize = useMemo(() => {
+    return (l: L.Map) => new CanvasLayer(channel).addTo(l);
+  }, [file]);
 
   return <LeafletMap customize={customize} />;
 }
 
 function VectorTileFileView({ file }: { file: FileWithHandle }) {
-  return (
-    <FileView
-      file={file}
-      parse={async (f) => JSON.parse(await f.text())}
-      component={VectorTileView}
-    />
-  );
+  const { channel } = useContext(WorkerContext);
+  const loaded = useMemoAsync(async () => {
+    await channel.sendRequest(setWorkerFile, file);
+    return true;
+  }, [file]);
+  if (loaded) {
+    return <VectorTileView file={file} />;
+  } else {
+    return <>loading</>;
+  }
 }
 
 export default function LocalDataExplorer({
@@ -298,19 +245,20 @@ export default function LocalDataExplorer({
 }) {
   const [files, setFiles] = useState<FileWithHandle[] | undefined>();
   const [file, setFile] = useState<FileWithHandle>();
-  const previousFiles = useMemoAsync<FileWithHandle[] | undefined>(
-    () => get('files'),
-    []
-  );
+  const initialized = useMemoAsync<boolean>(async () => {
+    setFiles(await get('files'));
+    return true;
+  }, []);
 
   async function handleFiles(
     result: FileWithHandle[],
     existingFiles: FileWithHandle[] = []
   ) {
-    setFiles(result);
+    const allFiles = [...result, ...existingFiles];
+    setFiles(allFiles);
     // for safari, it seems to be important that you don't remove the files from indexDB before you read them.
     // removing them drops the reference or something
-    await set('files', [...result, ...existingFiles]);
+    await set('files', allFiles);
   }
   const handleLoadClick = useCallback(async (e) => {
     e.preventDefault();
@@ -339,13 +287,13 @@ export default function LocalDataExplorer({
   return (
     <>
       <PageTitle>Local Data</PageTitle>
-      {previousFiles ? (
-        <button onClick={() => handleFiles(previousFiles)}>
-          Reload Previous {previousFiles.length} Files
-        </button>
-      ) : null}
-      <button onClick={handleLoadClick}>load</button>
-      <button onClick={handleAddClick}>add</button>
+      {initialized ? (
+        <>
+          <button onClick={handleLoadClick}>load</button>
+          <button onClick={handleAddClick}>add</button>
+        </>
+      ) : undefined}
+
       {files ? (
         <>
           <button onClick={handleSetDatasetClick}>Set Dataset</button>
@@ -361,8 +309,8 @@ export default function LocalDataExplorer({
           </tr>
         </thead>
         <tbody>
-          {(files || []).map((f) => (
-            <tr>
+          {(files || []).map((f, i) => (
+            <tr key={i}>
               <td>{f.name}</td>
               <td>{f.size.toLocaleString()}</td>
               <td>{new Date(f.lastModified).toLocaleString()}</td>
