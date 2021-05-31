@@ -21,20 +21,38 @@ export async function drawTile(
   } else {
     const tile = await channel.sendRequest(getTile, coords);
     if (tile) {
-      drawTile2(canvas, tile);
+      drawTile2(canvas, tile, coords.z);
     }
   }
 }
 
+const highwayLevels: Record<string, number> = {
+  motorway: 3,
+  trunk: 5,
+  primary: 10,
+  secondary: 11,
+  tertiary: 13,
+  residential: 14,
+};
+
 export function drawTile2(
   canvas: HTMLCanvasElement | OffscreenCanvas,
-  tile: Tile
+  tile: Tile,
+  z: number
 ) {
   const size = canvas.width;
   const ctx = canvas.getContext('2d')!;
   const ratio = size / extent;
   const pad = 0;
-  tile.features.forEach(({ type, geometry }) => {
+  tile.features.forEach((feat) => {
+    const highway = feat.tags.highway as string;
+    if (highway) {
+      const level = highwayLevels[highway];
+      if (!level || level >= z) {
+        return;
+      }
+    }
+    const { type, geometry } = feat;
     ctx.beginPath();
     ctx.strokeStyle = 'red';
     ctx.lineWidth = 2;

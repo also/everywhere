@@ -24,6 +24,6 @@ channel.handle(getTile, ({ z, x, y }) => tileIndex?.getTile(z, x, y));
 channel.handle(renderTileInWorker, ({ canvas, coords: { z, x, y } }) => {
   const tile = tileIndex?.getTile(z, x, y);
   if (tile) {
-    drawTile2(canvas, tile);
+    drawTile2(canvas, tile, z);
   }
 });
