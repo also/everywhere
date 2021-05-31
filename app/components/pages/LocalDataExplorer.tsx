@@ -7,6 +7,7 @@ import React, {
   useState,
 } from 'react';
 import geojsonvt from 'geojson-vt';
+import L from 'leaflet';
 import { get, set } from 'idb-keyval';
 import { fileOpen, FileWithHandle } from 'browser-fs-access';
 import { Feature } from 'geojson';
@@ -216,14 +217,14 @@ type Tile = {
   features: [{ geometry: [number, number][][]; type: 2 }];
 };
 
-const size = 512;
 const extent = 4096;
-const ratio = size / extent;
-const pad = 0;
 
-function drawTile(ctx: CanvasRenderingContext2D, tile: Tile) {
+function drawTile(ctx: CanvasRenderingContext2D, tile: Tile, size: number) {
+  const ratio = size / extent;
+  const pad = 0;
   tile.features.forEach(({ type, geometry }) => {
     ctx.beginPath();
+    ctx.strokeStyle = 'red';
     // TODO handle points
     geometry.forEach((points) => {
       points.forEach(([x, y], i) => {
@@ -238,23 +239,47 @@ function drawTile(ctx: CanvasRenderingContext2D, tile: Tile) {
   });
 }
 
+const CanvasLayer = L.GridLayer.extend({
+  initialize(tileIndex: any) {
+    this.tileIndex = tileIndex;
+  },
+
+  createTile: function ({ x, y, z }) {
+    // create a <canvas> element for drawing
+    const canvas = L.DomUtil.create('canvas') as HTMLCanvasElement;
+
+    // setup tile width and height according to the options
+    const size = this.getTileSize();
+    canvas.width = size.x;
+    canvas.height = size.y;
+
+    const ctx = canvas.getContext('2d')!;
+
+    const tile = this.tileIndex.getTile(z, x, y);
+
+    if (tile) {
+      console.log(tile);
+      drawTile(ctx, tile, size.x);
+    }
+
+    // return the tile so it can be rendered on screen
+    return canvas;
+  },
+});
+
 function VectorTileView({ value }: { value: any }) {
   const ref = useRef<HTMLCanvasElement>(null);
-  const tileIndex = useMemo(() => {
+  const { customize, tileIndex } = useMemo(() => {
     const f = features(value);
-    return geojsonvt(f);
+    const tileIndex = geojsonvt(f, { maxZoom: 24 });
+
+    return {
+      customize: (l: L.Map) => new CanvasLayer(tileIndex).addTo(l),
+      tileIndex,
+    };
   }, [value]);
 
-  useEffect(() => {
-    const tile = tileIndex.getTile(14, 4955, 6057);
-
-    console.log(tile, tileIndex);
-
-    const ctx = ref.current!.getContext('2d');
-    drawTile(ctx!, tile);
-  }, [tileIndex]);
-
-  return <canvas width={size} height={size} ref={ref} />;
+  return <LeafletMap customize={customize} />;
 }
 
 function VectorTileFileView({ file }: { file: FileWithHandle }) {

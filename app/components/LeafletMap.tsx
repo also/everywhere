@@ -2,9 +2,11 @@ import { useEffect, useMemo, useRef } from 'react';
 import L from 'leaflet';
 
 export default function LeafletMap({
-  features,
+  features = [],
+  customize,
 }: {
-  features: GeoJSON.Feature[];
+  features?: GeoJSON.Feature[];
+  customize?(map: L.Map): void;
 }) {
   const mapComponent = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map>();
@@ -42,6 +44,10 @@ export default function LeafletMap({
         map.removeLayer(layer);
       }
     });
+
+    if (customize) {
+      customize(mapRef.current);
+    }
 
     features.forEach((f) =>
       L.geoJSON(f)
