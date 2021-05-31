@@ -28,8 +28,7 @@ import Table from '../Table';
 import TraverserView, { GpmfSamples } from '../data/TraverserView';
 import { useMemoAsync } from '../../hooks';
 import WorkerContext from '../WorkerContext';
-import { getTile, setWorkerFile, Tile } from '../../worker-stuff';
-import { WorkerChannel } from '../../WorkerChannel';
+import { setWorkerFile } from '../../worker-stuff';
 import CanvasLayer from '../../CanvasLayer';
 
 function FileView<T>({
@@ -299,7 +298,12 @@ export default function LocalDataExplorer({
           <button onClick={handleSetDatasetClick}>Set Dataset</button>
         </>
       ) : undefined}
-      {file ? <VectorTileFileView file={file} /> : undefined}
+      {file ? (
+        <>
+          <button onClick={() => setFile(undefined)}>Unload</button>
+          <VectorTileFileView file={file} />
+        </>
+      ) : undefined}
       <Table>
         <thead>
           <tr>

@@ -6,8 +6,7 @@ const extent = 4096;
 export async function drawTile(
   channel: WorkerChannel,
   canvas: HTMLCanvasElement,
-  coords: any,
-  size: number
+  coords: any
 ) {
   if (canvas.transferControlToOffscreen) {
     const offscreen = canvas.transferControlToOffscreen();
@@ -38,6 +37,7 @@ export function drawTile2(
   tile.features.forEach(({ type, geometry }) => {
     ctx.beginPath();
     ctx.strokeStyle = 'red';
+    ctx.lineWidth = 2;
     // TODO handle points
     geometry.forEach((points) => {
       points.forEach(([x, y], i) => {

@@ -18,7 +18,7 @@ export default L.GridLayer.extend({
     canvas.width = size.x;
     canvas.height = size.y;
 
-    drawTile(this.channel, canvas, coords, size.x).then(
+    drawTile(this.channel, canvas, coords).then(
       () => done(undefined, canvas),
       done
     );
