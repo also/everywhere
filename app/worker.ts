@@ -14,7 +14,7 @@ channel.handle(setWorkerFile, async (f) => {
   file = f;
   if (file) {
     const value = JSON.parse(await file.text());
-    const f = features(value);
+    const f = value.type === 'Topology' ? features(value) : value;
     tileIndex = geojsonvt(f, { maxZoom: 24 });
   }
 });
