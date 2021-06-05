@@ -30,6 +30,7 @@ import { useMemoAsync } from '../../hooks';
 import WorkerContext from '../WorkerContext';
 import { setWorkerFile } from '../../worker-stuff';
 import CanvasLayer from '../../CanvasLayer';
+import FullScreenPage from '../FullScreenPage';
 
 function FileView<T>({
   file,
@@ -284,7 +285,7 @@ export default function LocalDataExplorer({
     setDataSet(readToDataset(await readFiles(files || [])));
   }
   return (
-    <>
+    <FullScreenPage>
       <PageTitle>Local Data</PageTitle>
       {initialized ? (
         <>
@@ -325,6 +326,6 @@ export default function LocalDataExplorer({
           ))}
         </tbody>
       </Table>
-    </>
+    </FullScreenPage>
   );
 }

@@ -45,6 +45,7 @@ import DataPage from './components/pages/DataPage';
 import { WorkerChannel, workerHandshake } from './WorkerChannel';
 import WorkerContext from './components/WorkerContext';
 import StandardPage from './components/StandardPage';
+import FullScreenPage from './components/FullScreenPage';
 
 const worker = new Worker(new URL('./worker.ts', import.meta.url));
 
@@ -87,15 +88,10 @@ const HeaderLink = styled(Link)`
   margin-right: 2em;
 `;
 
-const Footer = styled.footer`
-  margin: 1em;
-  text-align: center;
-  font-size: 0.8em;
-  color: #cecece;
-
-  & a {
-    color: inherit;
-  }
+const Layout = styled.div`
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
 `;
 
 document.title = 'not quite everywhere';
@@ -118,27 +114,21 @@ function App({ children }: { children: ReactNode }) {
     );
   }
   return (
-    <div>
-      <Header>
-        <div>
-          <HeaderLink to="/" style={{ color: '#E05338' }}>
-            Everywhere
-          </HeaderLink>{' '}
-          <HeaderLink to="/trips">Trips</HeaderLink>{' '}
-          <HeaderLink to="/videos">Videos</HeaderLink>{' '}
-          <HeaderLink to="/ways">Streets</HeaderLink> {extras}
-        </div>
-      </Header>
-      {children}
-
-      <Footer>
-        <p>
-          Map data ©{' '}
-          <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>{' '}
-          contributors
-        </p>
-      </Footer>
-    </div>
+    <>
+      <Layout>
+        <Header>
+          <div>
+            <HeaderLink to="/" style={{ color: '#E05338' }}>
+              Everywhere
+            </HeaderLink>{' '}
+            <HeaderLink to="/trips">Trips</HeaderLink>{' '}
+            <HeaderLink to="/videos">Videos</HeaderLink>{' '}
+            <HeaderLink to="/ways">Streets</HeaderLink> {extras}
+          </div>
+        </Header>
+        {children}
+      </Layout>
+    </>
   );
 }
 
@@ -239,7 +229,11 @@ function DataSetSelector({
 
 function MapRoute() {
   const { trips } = useContext(DataSetContext);
-  return <LeafletMap features={trips} />;
+  return (
+    <FullScreenPage>
+      <LeafletMap features={trips} />
+    </FullScreenPage>
+  );
 }
 
 const div = document.createElement('div');

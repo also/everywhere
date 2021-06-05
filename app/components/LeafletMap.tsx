@@ -58,5 +58,5 @@ export default function LeafletMap({
     );
   }, [features]);
 
-  return <div ref={mapComponent} style={{ width: 1800, height: 1000 }} />;
+  return <div ref={mapComponent} style={{ flex: 1 }} />;
 }
