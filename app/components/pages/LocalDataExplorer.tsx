@@ -28,7 +28,7 @@ import Table from '../Table';
 import TraverserView, { GpmfSamples } from '../data/TraverserView';
 import { useMemoAsync } from '../../hooks';
 import WorkerContext from '../WorkerContext';
-import { setWorkerFile } from '../../worker-stuff';
+import { lookup, setWorkerFile } from '../../worker-stuff';
 import CanvasLayer from '../../CanvasLayer';
 import FullScreenPage from '../FullScreenPage';
 
@@ -219,7 +219,19 @@ function readToDataset(newFiles: SomeFile[]) {
 function VectorTileView({ file }: { file: File }) {
   const { channel } = useContext(WorkerContext);
   const customize = useMemo(() => {
-    return (l: L.Map) => new CanvasLayer(channel).addTo(l);
+    return (l: L.Map) => {
+      l.on(
+        'mousemove',
+        async ({ latlng: { lat, lng } }: L.LeafletMouseEvent) => {
+          const start = Date.now();
+          const nearest = await channel.sendRequest(lookup, {
+            coords: [lng, lat],
+          });
+          console.log('lookup in ' + (Date.now() - start), nearest);
+        }
+      );
+      new CanvasLayer(channel).addTo(l);
+    };
   }, [file]);
 
   return <LeafletMap customize={customize} />;
@@ -229,6 +241,7 @@ function VectorTileFileView({ file }: { file: FileWithHandle }) {
   const { channel } = useContext(WorkerContext);
   const loaded = useMemoAsync(async () => {
     await channel.sendRequest(setWorkerFile, file);
+
     return true;
   }, [file]);
   if (loaded) {
