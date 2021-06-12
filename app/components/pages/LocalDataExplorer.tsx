@@ -9,7 +9,7 @@ import React, {
 import L from 'leaflet';
 import { get, set } from 'idb-keyval';
 import { fileOpen, FileWithHandle } from 'browser-fs-access';
-import { Feature } from 'geojson';
+import { Feature, GeoJsonProperties } from 'geojson';
 import PageTitle from '../PageTitle';
 import MapComponent from '../Map';
 import MapContext from '../MapContext';
@@ -218,6 +218,7 @@ function readToDataset(newFiles: SomeFile[]) {
 
 function VectorTileView({ file }: { file: File }) {
   const { channel } = useContext(WorkerContext);
+  const [nearest, setNearest] = useState<GeoJsonProperties>();
   const customize = useMemo(() => {
     return (l: L.Map) => {
       l.on(
@@ -228,13 +229,21 @@ function VectorTileView({ file }: { file: File }) {
             coords: [lng, lat],
           });
           console.log('lookup in ' + (Date.now() - start), nearest);
+          setNearest(nearest);
         }
       );
       new CanvasLayer(channel).addTo(l);
     };
   }, [file]);
 
-  return <LeafletMap customize={customize} />;
+  return (
+    <>
+      <p>
+        {nearest?.id} {nearest?.name}
+      </p>
+      <LeafletMap customize={customize} />
+    </>
+  );
 }
 
 function VectorTileFileView({ file }: { file: FileWithHandle }) {
