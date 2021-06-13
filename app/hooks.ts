@@ -1,10 +1,19 @@
 import { useEffect, useState } from 'react';
 
+export function useAsyncError(): (v: any) => void {
+  const [error, setError] = useState();
+  if (error) {
+    throw error;
+  }
+  return setError;
+}
+
 export function useMemoAsync<T>(
   f: (opts: { signal: AbortSignal }) => Promise<T>,
   deps?: any[]
 ): T | undefined {
   const [state, setState] = useState<T>();
+  const handleAsyncError = useAsyncError();
 
   useEffect(() => {
     const ac = new AbortController();
@@ -19,7 +28,7 @@ export function useMemoAsync<T>(
           throw e;
         }
       }
-    })();
+    })().catch(handleAsyncError);
     return () => ac.abort();
   }, deps);
 

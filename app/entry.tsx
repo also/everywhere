@@ -44,6 +44,7 @@ import LeafletMap from './components/LeafletMap';
 import DataPage from './components/pages/DataPage';
 import StandardPage from './components/StandardPage';
 import FullScreenPage from './components/FullScreenPage';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 const GlobalStyle = createGlobalStyle`
 body {
@@ -119,7 +120,7 @@ function App({ children }: { children: ReactNode }) {
             <HeaderLink to="/ways">Streets</HeaderLink> {extras}
           </div>
         </Header>
-        {children}
+        <ErrorBoundary>{children}</ErrorBoundary>
       </Layout>
     </>
   );
