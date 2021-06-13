@@ -1,5 +1,5 @@
 import { GeoJsonProperties } from 'geojson';
-import { key } from './WorkerChannel';
+import { key, WorkerChannel, workerHandshake } from './WorkerChannel';
 
 export type Tile = {
   features: [
@@ -22,3 +22,11 @@ export const renderTileInWorker =
 
 export const lookup =
   key<{ coords: [number, number] }, GeoJsonProperties>('lookup');
+
+export async function create() {
+  const worker = new Worker(new URL('./worker.ts', import.meta.url));
+
+  const channel = WorkerChannel.forWorker(worker);
+  await channel.sendRequest(workerHandshake, 'ping');
+  return { worker, channel };
+}

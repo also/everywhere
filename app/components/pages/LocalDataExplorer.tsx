@@ -27,10 +27,10 @@ import LeafletMap from '../LeafletMap';
 import Table from '../Table';
 import TraverserView, { GpmfSamples } from '../data/TraverserView';
 import { useMemoAsync } from '../../hooks';
-import WorkerContext from '../WorkerContext';
-import { lookup, setWorkerFile } from '../../worker-stuff';
+import { create, lookup, setWorkerFile } from '../../worker-stuff';
 import CanvasLayer from '../../CanvasLayer';
 import FullScreenPage from '../FullScreenPage';
+import { WorkerChannel } from '../../WorkerChannel';
 
 function FileView<T>({
   file,
@@ -216,8 +216,7 @@ function readToDataset(newFiles: SomeFile[]) {
   return buildDataSet(trips, videoChapters);
 }
 
-function VectorTileView({ file }: { file: File }) {
-  const { channel } = useContext(WorkerContext);
+function VectorTileView({ channel }: { channel: WorkerChannel }) {
   const [nearest, setNearest] = useState<GeoJsonProperties>();
   const customize = useMemo(() => {
     return (l: L.Map) => {
@@ -234,7 +233,7 @@ function VectorTileView({ file }: { file: File }) {
       );
       new CanvasLayer(channel).addTo(l);
     };
-  }, [file]);
+  }, [channel]);
 
   return (
     <>
@@ -253,14 +252,21 @@ function VectorTileFileView({
   file: FileWithHandle;
   type: 'osm' | 'generic';
 }) {
-  const { channel } = useContext(WorkerContext);
-  const loaded = useMemoAsync(async () => {
-    await channel.sendRequest(setWorkerFile, { file, type });
+  const channel = useMemoAsync(
+    async ({ signal }) => {
+      const { channel, worker } = await create();
+      signal.addEventListener('abort', () => {
+        console.log('terminating worker');
+        worker.terminate();
+      });
+      await channel.sendRequest(setWorkerFile, { file, type });
 
-    return true;
-  }, [file]);
-  if (loaded) {
-    return <VectorTileView file={file} />;
+      return channel;
+    },
+    [file]
+  );
+  if (channel) {
+    return <VectorTileView channel={channel} />;
   } else {
     return <>loading</>;
   }
