@@ -11,7 +11,8 @@ export type Tile = {
   ];
 };
 
-export const setWorkerFile = key<File | undefined, void>('setFile');
+export const setWorkerFile =
+  key<{ file: File | undefined; type: 'osm' | 'generic' }, void>('setFile');
 export const getTile =
   key<{ x: number; y: number; z: number }, Tile>('getTile');
 export const renderTileInWorker =

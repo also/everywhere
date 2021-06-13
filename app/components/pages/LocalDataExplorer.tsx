@@ -246,10 +246,16 @@ function VectorTileView({ file }: { file: File }) {
   );
 }
 
-function VectorTileFileView({ file }: { file: FileWithHandle }) {
+function VectorTileFileView({
+  file,
+  type,
+}: {
+  file: FileWithHandle;
+  type: 'osm' | 'generic';
+}) {
   const { channel } = useContext(WorkerContext);
   const loaded = useMemoAsync(async () => {
-    await channel.sendRequest(setWorkerFile, file);
+    await channel.sendRequest(setWorkerFile, { file, type });
 
     return true;
   }, [file]);
@@ -267,6 +273,7 @@ export default function LocalDataExplorer({
 }) {
   const [files, setFiles] = useState<FileWithHandle[] | undefined>();
   const [file, setFile] = useState<FileWithHandle>();
+  const [type, setType] = useState('osm');
   const initialized = useMemoAsync<boolean>(async () => {
     setFiles(await get('files'));
     return true;
@@ -296,7 +303,6 @@ export default function LocalDataExplorer({
       e.preventDefault();
       const result = await fileOpen({
         multiple: true,
-        // mimeTypes: ['video/mp4'],
       });
 
       await handleFiles(result, files);
@@ -309,6 +315,10 @@ export default function LocalDataExplorer({
   return (
     <FullScreenPage>
       <PageTitle>Local Data</PageTitle>
+      <select value={type} onChange={(e) => setType(e.target.value)}>
+        <option>osm</option>
+        <option>generic</option>
+      </select>
       {initialized ? (
         <>
           <button onClick={handleLoadClick}>load</button>
@@ -324,7 +334,7 @@ export default function LocalDataExplorer({
       {file ? (
         <>
           <button onClick={() => setFile(undefined)}>Unload</button>
-          <VectorTileFileView file={file} />
+          <VectorTileFileView file={file} type={type as any} />
         </>
       ) : undefined}
       <Table>

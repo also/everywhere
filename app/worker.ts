@@ -28,7 +28,8 @@ let tileIndex: any = undefined;
 let featureTree:
   | Node<Feature<LineString | MultiLineString, GeoJsonProperties>>
   | undefined = undefined;
-channel.handle(setWorkerFile, async (f) => {
+
+channel.handle(setWorkerFile, async ({ file: f, type: fileType }) => {
   file = f;
   if (file) {
     const value = JSON.parse(await file.text());
@@ -43,9 +44,12 @@ channel.handle(setWorkerFile, async (f) => {
           properties,
         } = f;
         if (type === 'LineString' || type === 'MultiLineString') {
-          return Object.prototype.hasOwnProperty.call(
-            highwayLevels,
-            properties?.highway
+          return (
+            fileType !== 'osm' ||
+            Object.prototype.hasOwnProperty.call(
+              highwayLevels,
+              properties?.highway
+            )
           );
         } else {
           return false;
