@@ -40,6 +40,8 @@ function mouse(e: MouseEvent<SVGElement>, node: Element) {
   }
 }
 
+const selectedColor = '#116aa9';
+
 const MapSvg = styled.svg`
   & {
     .roads {
@@ -50,7 +52,7 @@ const MapSvg = styled.svg`
 
         &.selected {
           stroke-width: 5px;
-          stroke: #116aa9;
+          stroke: ${selectedColor};
         }
       }
 
@@ -192,6 +194,30 @@ export default function Map({
         }
         ref={svgNode}
       >
+        <defs>
+          <marker
+            id="selected-arrow"
+            markerWidth="10"
+            markerHeight="10"
+            refX="0"
+            refY="3"
+            orient="auto"
+            markerUnits="strokeWidth"
+            viewBox="0 0 20 20"
+          >
+            <path d="M0,0 L0,6 L9,3 z" fill={selectedColor} />
+          </marker>
+
+          <marker
+            id="selected-circle"
+            markerWidth="4"
+            markerHeight="4"
+            refX="2"
+            refY="2"
+          >
+            <circle cx="2" cy="2" r="1" stroke="none" fill={selectedColor} />
+          </marker>
+        </defs>
         <BaseMap showWays={showWays} />
         {typeof children === 'function' ? children() : children}
       </MapSvg>
