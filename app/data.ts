@@ -5,7 +5,9 @@ import { ways, groupedWays, intersections, wayTree } from './ways';
 
 import { CoverageFeature, StravaTripFeature, TripTree } from './trips';
 
+// @ts-expect-error
 import boundaryGeojson from 'compact-json!../app-data/somerville-topo.geojson';
+// @ts-expect-error
 import contoursTopojson from 'compact-json!../app-data/contour.geojson';
 
 const boundary = feature(boundaryGeojson);
