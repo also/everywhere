@@ -169,7 +169,7 @@ type SummaryActivity = {
   name: string;
 };
 
-export async function getTrips(): Promise<SummaryActivity[]> {
+export async function* getTrips(): AsyncGenerator<SummaryActivity> {
   const result: SummaryActivity[] = [];
 
   let page = 1;
@@ -182,9 +182,10 @@ export async function getTrips(): Promise<SummaryActivity[]> {
     if (current.length === 0) {
       break;
     }
-    result.push(...current);
+    for (const activity of current) {
+      yield activity;
+    }
   }
-  return result;
 }
 
 function getTrip(id: string) {
@@ -282,8 +283,8 @@ async function fetchTrip(id: string) {
   }
 }
 
-async function fetchAllTrips() {
-  for (const trip of await getTrips()) {
+async function fetchAllTrips(breakOnExisting = false) {
+  for await (const trip of getTrips()) {
     const { id, name, type } = trip;
     const filename = path.join(
       'app-data',
@@ -299,7 +300,12 @@ async function fetchAllTrips() {
       continue;
     }
 
-    if (!fs.existsSync(filename)) {
+    if (fs.existsSync(filename)) {
+      console.log(`already fetched ${id}`);
+      if (breakOnExisting) {
+        break;
+      }
+    } else {
       console.log(`fetching ${id}`);
 
       try {
@@ -314,14 +320,14 @@ async function fetchAllTrips() {
         console.log(e);
         throw e;
       }
-    } else {
-      console.log(`already fetched ${id}`);
     }
   }
 }
 
 export default async function ({ _: [id] }: { _: string[] }) {
-  if (id) {
+  if (id === 'new') {
+    await fetchAllTrips(true);
+  } else if (id) {
     const result = fetchTrip(id);
     console.log(JSON.stringify(result));
   } else {
