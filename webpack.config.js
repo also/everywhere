@@ -65,5 +65,21 @@ module.exports = {
       key: fs.readFileSync(path.join(__dirname, 'key.pem')),
       cert: fs.readFileSync(path.join(__dirname, 'cert.pem')),
     },
+    onBeforeSetupMiddleware(devServer) {
+      devServer.app.get('/strava-auth', async (req, res) => {
+        try {
+          require('ts-node').register({ transpileOnly: true });
+          const { loginHandler } = require('./tools/strava-creds');
+          const redirectUrl = await loginHandler(req.query);
+          if (redirectUrl) {
+            res.redirect(redirectUrl);
+          } else {
+            res.send('ok');
+          }
+        } catch (e) {
+          res.status(500).send(e.stack);
+        }
+      });
+    },
   },
 };
