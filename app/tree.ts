@@ -86,7 +86,10 @@ export class Node<T> {
     let minDistance = Infinity;
     const heap = minHeap<HeapEntry<T>>(compareDistance);
     let node: TreeNode<T> = this;
-    let candidate: HeapEntry<T> = { distance: node.distance(point), node };
+    let candidate: HeapEntry<T> | null = {
+      distance: node.distance(point),
+      node,
+    };
 
     do {
       node = candidate.node;

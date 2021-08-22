@@ -9,7 +9,7 @@ import React, {
 import L from 'leaflet';
 import { get, set } from 'idb-keyval';
 import { fileOpen, FileWithHandle } from 'browser-fs-access';
-import { Feature } from 'geojson';
+import { Feature, GeoJsonProperties } from 'geojson';
 import PageTitle from '../PageTitle';
 import MapComponent from '../Map';
 import MapContext from '../MapContext';
@@ -27,9 +27,10 @@ import LeafletMap from '../LeafletMap';
 import Table from '../Table';
 import TraverserView, { GpmfSamples } from '../data/TraverserView';
 import { useMemoAsync } from '../../hooks';
-import WorkerContext from '../WorkerContext';
-import { setWorkerFile } from '../../worker-stuff';
+import { create, lookup, setWorkerFile } from '../../worker-stuff';
 import CanvasLayer from '../../CanvasLayer';
+import FullScreenPage from '../FullScreenPage';
+import { WorkerChannel } from '../../WorkerChannel';
 
 function FileView<T>({
   file,
@@ -215,23 +216,57 @@ function readToDataset(newFiles: SomeFile[]) {
   return buildDataSet(trips, videoChapters);
 }
 
-function VectorTileView({ file }: { file: File }) {
-  const { channel } = useContext(WorkerContext);
+function VectorTileView({ channel }: { channel: WorkerChannel }) {
+  const [nearest, setNearest] = useState<GeoJsonProperties>();
   const customize = useMemo(() => {
-    return (l: L.Map) => new CanvasLayer(channel).addTo(l);
-  }, [file]);
+    return (l: L.Map) => {
+      l.on(
+        'mousemove',
+        async ({ latlng: { lat, lng } }: L.LeafletMouseEvent) => {
+          const start = Date.now();
+          const nearest = await channel.sendRequest(lookup, {
+            coords: [lng, lat],
+          });
+          console.log('lookup in ' + (Date.now() - start), nearest);
+          setNearest(nearest);
+        }
+      );
+      new CanvasLayer(channel).addTo(l);
+    };
+  }, [channel]);
 
-  return <LeafletMap customize={customize} />;
+  return (
+    <>
+      <p>
+        {nearest?.id} {nearest?.name}
+      </p>
+      <LeafletMap customize={customize} />
+    </>
+  );
 }
 
-function VectorTileFileView({ file }: { file: FileWithHandle }) {
-  const { channel } = useContext(WorkerContext);
-  const loaded = useMemoAsync(async () => {
-    await channel.sendRequest(setWorkerFile, file);
-    return true;
-  }, [file]);
-  if (loaded) {
-    return <VectorTileView file={file} />;
+function VectorTileFileView({
+  file,
+  type,
+}: {
+  file: FileWithHandle;
+  type: 'osm' | 'generic';
+}) {
+  const channel = useMemoAsync(
+    async ({ signal }) => {
+      const { channel, worker } = await create();
+      signal.addEventListener('abort', () => {
+        console.log('terminating worker');
+        worker.terminate();
+      });
+      await channel.sendRequest(setWorkerFile, { file, type });
+
+      return channel;
+    },
+    [file]
+  );
+  if (channel) {
+    return <VectorTileView channel={channel} />;
   } else {
     return <>loading</>;
   }
@@ -244,6 +279,7 @@ export default function LocalDataExplorer({
 }) {
   const [files, setFiles] = useState<FileWithHandle[] | undefined>();
   const [file, setFile] = useState<FileWithHandle>();
+  const [type, setType] = useState('osm');
   const initialized = useMemoAsync<boolean>(async () => {
     setFiles(await get('files'));
     return true;
@@ -273,7 +309,6 @@ export default function LocalDataExplorer({
       e.preventDefault();
       const result = await fileOpen({
         multiple: true,
-        // mimeTypes: ['video/mp4'],
       });
 
       await handleFiles(result, files);
@@ -284,8 +319,12 @@ export default function LocalDataExplorer({
     setDataSet(readToDataset(await readFiles(files || [])));
   }
   return (
-    <>
+    <FullScreenPage>
       <PageTitle>Local Data</PageTitle>
+      <select value={type} onChange={(e) => setType(e.target.value)}>
+        <option>osm</option>
+        <option>generic</option>
+      </select>
       {initialized ? (
         <>
           <button onClick={handleLoadClick}>load</button>
@@ -301,7 +340,7 @@ export default function LocalDataExplorer({
       {file ? (
         <>
           <button onClick={() => setFile(undefined)}>Unload</button>
-          <VectorTileFileView file={file} />
+          <VectorTileFileView file={file} type={type as any} />
         </>
       ) : undefined}
       <Table>
@@ -325,6 +364,6 @@ export default function LocalDataExplorer({
           ))}
         </tbody>
       </Table>
-    </>
+    </FullScreenPage>
   );
 }

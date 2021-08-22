@@ -14,13 +14,16 @@ download:
 	curl -o data/raw/map.xml "https://overpass-api.de/api/interpreter?data=%5Bdate%3A%222015-07-05T12%3A00%3A00Z%22%5D%3B(node(42.3589%2C-71.1631%2C42.427%2C-71.0417)%3B%3C%3B)%3Bout%20meta%3B"
 
 download-metro:
-	curl -o data/raw/map.xml "https://overpass-api.de/api/interpreter?data=way%5Bhighway%5D%2842.19596877629178%2C-71.52374267578125%2C42.5379038984207%2C-70.83503723144531%29%3B%0A%28._%3B%3E%3B%29%3B%0Aout%3B"
+	curl -o data/raw/map-metro.xml "https://overpass-api.de/api/interpreter?data=way%5Bhighway%5D%2842.19596877629178%2C-71.52374267578125%2C42.5379038984207%2C-70.83503723144531%29%3B%0A%28._%3B%3E%3B%29%3B%0Aout%3B"
 
 # data/build/map.geojson: data/raw/map.xml
 # 	node --max_old_space_size=8192 ./node_modules/.bin/osmtogeojson data/raw/map.xml > data/build/map.geojson
 
 data/build/map.geojson: data/raw/map.xml
 	node --max_old_space_size=8192 tools osm-to-geojson data/raw/map.xml > data/build/map.geojson
+
+data/build/map-metro.geojson: data/raw/map-metro.xml
+	node --max_old_space_size=8192 tools osm-to-geojson data/raw/map-metro.xml > data/build/map-metro.geojson
 
 data/build/highways.geojson: data/build/map.geojson
 	jq '{type, features: (.features | map(select((.properties | objects | .bikeable))))}' data/build/map.geojson > data/build/highways.geojson

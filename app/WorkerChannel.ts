@@ -42,6 +42,7 @@ export class WorkerChannel {
             result = await handler(input);
           } catch (e) {
             status = 'failure';
+            // FIXME only chrome can send errors
             result = e;
           }
         } else {
