@@ -1,3 +1,6 @@
+const fs = require('fs');
+const path = require('path');
+
 module.exports = {
   context: __dirname + '/app',
   entry: './entry',
@@ -55,5 +58,9 @@ module.exports = {
   },
   devServer: {
     publicPath: '/build',
+    https: {
+      key: fs.readFileSync(path.join(__dirname, 'key.pem')),
+      cert: fs.readFileSync(path.join(__dirname, 'cert.pem')),
+    },
   },
 };
