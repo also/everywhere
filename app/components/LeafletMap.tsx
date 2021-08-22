@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef } from 'react';
 import L from 'leaflet';
+import React from 'react';
 
-export default function LeafletMap({
+export default React.memo(function LeafletMap({
   features = [],
   customize,
 }: {
@@ -58,5 +59,5 @@ export default function LeafletMap({
     );
   }, [features]);
 
-  return <div ref={mapComponent} style={{ width: 1800, height: 1000 }} />;
-}
+  return <div ref={mapComponent} style={{ flex: 1 }} />;
+});

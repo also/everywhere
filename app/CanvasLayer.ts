@@ -2,16 +2,12 @@ import L from 'leaflet';
 import { drawTile } from './vector-tiles';
 import { WorkerChannel } from './WorkerChannel';
 
-export default L.GridLayer.extend({
-  initialize(channel: WorkerChannel) {
-    this.channel = channel;
-  },
+export default class CanvasLayer extends L.GridLayer {
+  constructor(private channel: WorkerChannel) {
+    super();
+  }
 
-  createTile(
-    this: { channel: WorkerChannel } & L.GridLayer,
-    coords: L.Coords,
-    done: L.DoneCallback
-  ) {
+  createTile(coords: L.Coords, done: L.DoneCallback) {
     const canvas = L.DomUtil.create('canvas') as HTMLCanvasElement;
 
     const size = this.getTileSize();
@@ -24,5 +20,5 @@ export default L.GridLayer.extend({
     );
 
     return canvas;
-  },
-});
+  }
+}

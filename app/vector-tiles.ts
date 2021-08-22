@@ -1,3 +1,4 @@
+import { highwayLevels } from './osm';
 import { getTile, renderTileInWorker, Tile } from './worker-stuff';
 import { WorkerChannel } from './WorkerChannel';
 
@@ -25,15 +26,6 @@ export async function drawTile(
     }
   }
 }
-
-const highwayLevels: Record<string, number> = {
-  motorway: 3,
-  trunk: 5,
-  primary: 10,
-  secondary: 11,
-  tertiary: 11,
-  residential: 12,
-};
 
 export function drawTile2(
   canvas: HTMLCanvasElement | OffscreenCanvas,
