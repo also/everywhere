@@ -328,7 +328,7 @@ export default async function ({ _: [id] }: { _: string[] }) {
   if (id === 'new') {
     await fetchAllTrips(true);
   } else if (id) {
-    const result = fetchTrip(id);
+    const result = await fetchTrip(id);
     console.log(JSON.stringify(result));
   } else {
     await fetchAllTrips();
