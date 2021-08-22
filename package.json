@@ -52,9 +52,9 @@
     "topojson": "3.0.2",
     "ts-node": "^9.1.1",
     "typescript": "^4.2.4",
-    "webpack": "^5.37.1",
-    "webpack-cli": "^4.7.0",
-    "webpack-dev-server": "^3.11.2"
+    "webpack": "5.51.1",
+    "webpack-cli": "4.8.0",
+    "webpack-dev-server": "4.0.0"
   },
   "scripts": {
     "start": "webpack serve --mode development",
