@@ -283,14 +283,14 @@ async function fetchTrip(id: string) {
   }
 }
 
+function getTripFilename(id: string) {
+  return path.join('app-data', 'strava-trips', `strava-${id}.geojson`);
+}
+
 async function fetchAllTrips(breakOnExisting = false) {
   for await (const trip of getTrips()) {
     const { id, name, type } = trip;
-    const filename = path.join(
-      'app-data',
-      'strava-trips',
-      `strava-${id}.geojson`
-    );
+    const filename = getTripFilename(id);
     if (trip.type === 'Workout') {
       console.error(`skipping ${type} ${id}`);
       continue;
@@ -328,8 +328,12 @@ export default async function ({ _: [id] }: { _: string[] }) {
   if (id === 'new') {
     await fetchAllTrips(true);
   } else if (id) {
-    const result = await fetchTrip(id);
-    console.log(JSON.stringify(result));
+    const topojson = await fetchTrip(id);
+    if (topojson) {
+      fs.writeFileSync(getTripFilename(id), JSON.stringify(topojson));
+    } else {
+      console.error(`no geo info in "${name}" ${id}`);
+    }
   } else {
     await fetchAllTrips();
   }
