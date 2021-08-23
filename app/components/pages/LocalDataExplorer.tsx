@@ -217,28 +217,27 @@ function readToDataset(newFiles: SomeFile[]) {
 }
 
 function VectorTileView({ channel }: { channel: WorkerChannel }) {
-  const [nearest, setNearest] = useState<GeoJsonProperties>();
+  const [selected, setSelected] = useState<any>();
   const customize = useMemo(() => {
     return (l: L.Map) => {
-      l.on(
-        'mousemove',
-        async ({ latlng: { lat, lng } }: L.LeafletMouseEvent) => {
-          const start = Date.now();
-          const nearest = await channel.sendRequest(lookup, {
-            coords: [lng, lat],
-          });
-          console.log('lookup in ' + (Date.now() - start), nearest);
-          setNearest(nearest);
-        }
-      );
-      new CanvasLayer(channel).addTo(l);
+      const layer = new CanvasLayer(channel).addTo(l);
+
+      l.on('click', async ({ latlng: { lat, lng } }: L.LeafletMouseEvent) => {
+        const selected = await channel.sendRequest(lookup, {
+          coords: [lng, lat],
+        });
+        setSelected(selected);
+        layer.setSelectedId(selected?.id);
+
+        console.log({ selected });
+      });
     };
   }, [channel]);
 
   return (
     <>
       <p>
-        {nearest?.id} {nearest?.name}
+        {selected?.id} {selected?.name}
       </p>
       <LeafletMap customize={customize} />
     </>

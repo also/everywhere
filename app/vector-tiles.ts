@@ -7,7 +7,8 @@ const extent = 4096;
 export async function drawTile(
   channel: WorkerChannel,
   canvas: HTMLCanvasElement,
-  coords: any
+  coords: any,
+  selectedId: number | undefined
 ) {
   if (canvas.transferControlToOffscreen) {
     const offscreen = canvas.transferControlToOffscreen();
@@ -16,13 +17,14 @@ export async function drawTile(
       {
         canvas: offscreen,
         coords,
+        selectedId,
       },
       [offscreen]
     );
   } else {
     const tile = await channel.sendRequest(getTile, coords);
     if (tile) {
-      drawTile2(canvas, tile, coords.z);
+      drawTile2(canvas, tile, coords.z, selectedId);
     }
   }
 }
@@ -30,13 +32,17 @@ export async function drawTile(
 export function drawTile2(
   canvas: HTMLCanvasElement | OffscreenCanvas,
   tile: Tile,
-  z: number
+  z: number,
+  selectedId: number | undefined
 ) {
   const size = canvas.width;
   const ctx = canvas.getContext('2d')!;
   const ratio = size / extent;
   const pad = 0;
-  tile.features.forEach((feat) => {
+
+  let selectedFeature;
+
+  function drawFeature(feat: Tile['features'][0], isSelected = false) {
     const highway = feat.tags.highway as string;
     const { type, geometry } = feat;
     if (type !== 2) {
@@ -49,8 +55,9 @@ export function drawTile2(
       }
     }
     ctx.beginPath();
-    ctx.strokeStyle = 'red';
-    ctx.lineWidth = 2;
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = isSelected ? 'blue' : 'red';
+    ctx.lineWidth = isSelected ? 2 : 1;
     // TODO handle points
     geometry.forEach((points) => {
       points.forEach(([x, y], i) => {
@@ -62,5 +69,15 @@ export function drawTile2(
       });
     });
     ctx.stroke();
+  }
+  tile.features.forEach((feat) => {
+    if (feat.id == selectedId) {
+      selectedFeature = feat;
+    } else {
+      drawFeature(feat);
+    }
   });
+  if (selectedFeature) {
+    drawFeature(selectedFeature, true);
+  }
 }

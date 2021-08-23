@@ -67,12 +67,15 @@ channel.handle(setWorkerFile, async ({ file: f, type: fileType }) => {
 
 channel.handle(getTile, ({ z, x, y }) => tileIndex?.getTile(z, x, y));
 
-channel.handle(renderTileInWorker, ({ canvas, coords: { z, x, y } }) => {
+channel.handle(
+  renderTileInWorker,
+  ({ canvas, coords: { z, x, y }, selectedId }) => {
   const tile = tileIndex?.getTile(z, x, y);
   if (tile) {
-    drawTile2(canvas, tile, z);
+      drawTile2(canvas, tile, z, selectedId);
   }
-});
+  }
+);
 
 channel.handle(lookup, ({ coords }) => {
   const start = Date.now();

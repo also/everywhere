@@ -3,6 +3,8 @@ import { drawTile } from './vector-tiles';
 import { WorkerChannel } from './WorkerChannel';
 
 export default class CanvasLayer extends L.GridLayer {
+  selectedId: number | undefined;
+
   constructor(private channel: WorkerChannel) {
     super();
   }
@@ -14,11 +16,16 @@ export default class CanvasLayer extends L.GridLayer {
     canvas.width = size.x;
     canvas.height = size.y;
 
-    drawTile(this.channel, canvas, coords).then(
+    drawTile(this.channel, canvas, coords, this.selectedId).then(
       () => done(undefined, canvas),
       done
     );
 
     return canvas;
+  }
+
+  setSelectedId(v: number | undefined) {
+    this.selectedId = v;
+    this.redraw();
   }
 }
