@@ -320,28 +320,28 @@ export default function LocalDataExplorer({
   return (
     <FullScreenPage>
       <PageTitle>Local Data</PageTitle>
-      <select value={type} onChange={(e) => setType(e.target.value)}>
-        <option>osm</option>
-        <option>generic</option>
-      </select>
-      {initialized ? (
-        <>
-          <button onClick={handleLoadClick}>load</button>
-          <button onClick={handleAddClick}>add</button>
-        </>
-      ) : undefined}
+      <div>
+        <select value={type} onChange={(e) => setType(e.target.value)}>
+          <option>osm</option>
+          <option>generic</option>
+        </select>
+        {initialized ? (
+          <>
+            <button onClick={handleLoadClick}>load</button>
+            <button onClick={handleAddClick}>add</button>
+          </>
+        ) : undefined}
 
-      {files ? (
-        <>
-          <button onClick={handleSetDatasetClick}>Set Dataset</button>
-        </>
-      ) : undefined}
-      {file ? (
-        <>
+        {files ? (
+          <>
+            <button onClick={handleSetDatasetClick}>Set Dataset</button>
+          </>
+        ) : undefined}
+        {file ? (
           <button onClick={() => setFile(undefined)}>Unload</button>
-          <VectorTileFileView file={file} type={type as any} />
-        </>
-      ) : undefined}
+        ) : undefined}
+      </div>
+      {file ? <VectorTileFileView file={file} type={type as any} /> : undefined}
       <Table>
         <thead>
           <tr>
