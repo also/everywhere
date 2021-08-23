@@ -78,8 +78,6 @@ channel.handle(
 );
 
 channel.handle(lookup, ({ coords }) => {
-  const start = Date.now();
-  const result = featureTree?.nearest(coords)?.data.properties;
-  console.log('lookup in ' + (Date.now() - start));
+  const result = featureTree?.nearest(coords)?.data;
   return result;
 });
