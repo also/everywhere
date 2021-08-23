@@ -283,6 +283,23 @@ async function fetchTrip(id: string) {
   }
 }
 
+export async function cacheTripList() {
+  const trips = [];
+  for await (const trip of getTrips()) {
+    trips.push(trip);
+  }
+  fs.writeFileSync(
+    path.join('app-data', 'strava-trips-list.json'),
+    JSON.stringify(trips)
+  );
+}
+
+function readCachedTripList() {
+  return JSON.parse(
+    fs.readFileSync(path.join('app-data', 'strava-trips-list.json'), 'utf8')
+  );
+}
+
 function getTripFilename(id: string) {
   return path.join('app-data', 'strava-trips', `strava-${id}.geojson`);
 }
@@ -293,6 +310,10 @@ async function fetchAllTrips(breakOnExisting = false) {
     const filename = getTripFilename(id);
     if (trip.type === 'Workout') {
       console.error(`skipping ${type} ${id}`);
+      continue;
+    }
+    if (trip.manual === true) {
+      console.error(`skipping manual trip ${id}`);
       continue;
     }
     if (name.match(/^\d+ min /)) {

@@ -1,23 +1,8 @@
 import fs from 'fs';
 import path from 'path';
+import { stravaTopologies } from './strava';
 
 import { combineTolologies, SimpleTopology } from './topojson-utils';
-
-const appDataPath = path.join(__dirname, '../app-data/');
-
-function* stravaTopologies() {
-  const tripsPath = path.join(appDataPath, 'strava-trips');
-  for (const tripFile of fs.readdirSync(tripsPath)) {
-    const match = tripFile.match(/strava-(\d+)\.geojson/);
-    if (match) {
-      const trip: SimpleTopology = JSON.parse(
-        fs.readFileSync(path.join(tripsPath, tripFile), 'utf8')
-      );
-
-      yield trip;
-    }
-  }
-}
 
 export default function () {
   const bigTopo = combineTolologies(stravaTopologies());
