@@ -7,7 +7,7 @@ import * as topojson from 'topojson';
 
 import { distance } from '../app/distance';
 
-import stravaAuth from '../creds/strava.json';
+import { getAccessToken } from './strava-creds';
 
 const streamNames = [
   'latlng',
@@ -150,10 +150,11 @@ type StreamsByType = {
 } & SBT;
 
 async function get(path: string) {
+  const accessToken = await getAccessToken();
   const { data: result } = await axios.get(
     `https://www.strava.com/api/v3/${path}`,
     {
-      headers: { Authorization: `Bearer ${stravaAuth.access_token}` },
+      headers: { Authorization: `Bearer ${accessToken}` },
     }
   );
   if (result.errors && result.errors.length > 0) {
