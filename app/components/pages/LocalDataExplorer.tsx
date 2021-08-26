@@ -322,8 +322,8 @@ export default function LocalDataExplorer({
       <PageTitle>Local Data</PageTitle>
       <div>
         <select value={type} onChange={(e) => setType(e.target.value)}>
-          <option>osm</option>
           <option>generic</option>
+          <option>osm</option>
         </select>
         {initialized ? (
           <>
