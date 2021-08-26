@@ -278,7 +278,7 @@ export default function LocalDataExplorer({
 }) {
   const [files, setFiles] = useState<FileWithHandle[] | undefined>();
   const [file, setFile] = useState<FileWithHandle>();
-  const [type, setType] = useState('osm');
+  const [type, setType] = useState('generic');
   const initialized = useMemoAsync<boolean>(async () => {
     setFiles(await get('files'));
     return true;
