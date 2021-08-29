@@ -2,16 +2,10 @@ import fs from 'fs';
 import path from 'path';
 
 import axios from 'axios';
-import { FeatureCollection, MultiLineString } from 'geojson';
-import * as topojson from 'topojson';
-
-import { distance } from '../app/distance';
 
 import { getAccessToken } from './strava-creds';
 import {
   Activity,
-  otherStreamNames,
-  StravaCoord,
   Stream,
   streamNames,
   StreamsByType,
@@ -56,9 +50,7 @@ function getTrip(id: string) {
   return get(`activities/${id}`);
 }
 
-async function getStreams(
-  activity: Activity
-): Promise<StreamsByType | undefined> {
+async function getStreams(activity: Activity): Promise<StreamsByType> {
   let streams: Stream[];
   try {
     streams = await get(
@@ -66,7 +58,7 @@ async function getStreams(
     );
   } catch (e) {
     if (e?.response?.status === 404) {
-      return;
+      streams = [];
     }
     throw e;
   }
@@ -76,75 +68,9 @@ async function getStreams(
   return streamsByType;
 }
 
-type TripGeoJSON = FeatureCollection<
-  MultiLineString,
-  {
-    activity: Activity;
-  }
->;
-
-function streamsToGeoJson(streams: StreamsByType): TripGeoJSON | undefined {
-  if (!streams.latlng) {
-    return;
-  }
-  const orderedStreams: Stream['data'][] = [];
-  otherStreamNames.forEach((type) => {
-    const v = streams[type];
-    if (v) {
-      orderedStreams.push(v);
-    }
-  });
-
-  const coordinates: StravaCoord[][] = [];
-  let currentCoordinates: StravaCoord[] | null = null;
-
-  let currentPosition: [number, number] | null = null;
-
-  streams.latlng.forEach(([lat, lng], i) => {
-    if (!currentPosition || distance(lng, lat, ...currentPosition) > 100) {
-      currentCoordinates = [];
-      coordinates.push(currentCoordinates);
-    }
-
-    currentPosition = [lng, lat];
-
-    currentCoordinates!.push([
-      lng,
-      lat,
-      ...orderedStreams.map((stream) => stream[i]),
-    ]);
-  });
-
-  return {
-    type: 'FeatureCollection',
-    features: [
-      {
-        type: 'Feature',
-        id: streams.activity.id,
-        properties: { activity: streams.activity },
-        geometry: {
-          type: 'MultiLineString',
-          coordinates: coordinates,
-        },
-      },
-    ],
-  };
-}
-
-function geoJsonToTopoJson(geoJson: TripGeoJSON) {
-  return topojson.topology({ geoJson });
-}
-
-async function fetchTrip(id: string) {
+async function fetchTrip(id: string): Promise<StreamsByType> {
   const activity = await getTrip(id);
-  const streams = await getStreams(activity);
-  if (!streams) {
-    return;
-  }
-  const gj = streamsToGeoJson(streams);
-  if (gj) {
-    return geoJsonToTopoJson(gj);
-  }
+  return await getStreams(activity);
 }
 
 export async function cacheTripList() {
@@ -165,13 +91,12 @@ function readCachedTripList() {
 }
 
 function getTripFilename(id: string) {
-  return path.join('app-data', 'strava-trips', `strava-${id}.geojson`);
+  return path.join('data', 'strava-activities', `${id}.json`);
 }
 
 async function fetchAllTrips(breakOnExisting = false) {
   for await (const trip of getTripSummaries()) {
     const { id, name, type } = trip;
-    const filename = getTripFilename(id);
     if (trip.type === 'Workout') {
       console.error(`skipping ${type} ${id}`);
       continue;
@@ -184,6 +109,8 @@ async function fetchAllTrips(breakOnExisting = false) {
       console.log(`skipping probably peloton "${name}" ${id}`);
       continue;
     }
+
+    const filename = getTripFilename(id);
 
     if (fs.existsSync(filename)) {
       console.log(`already fetched ${id}`);

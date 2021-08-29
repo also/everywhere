@@ -1,18 +1,13 @@
 import fs from 'fs';
 import path from 'path';
+import { stravaTopologies } from './strava';
 
 export default function () {
   const appDataPath = path.join(__dirname, '../app-data/');
-  const tripsPath = path.join(appDataPath, 'trips');
 
   const trips = [];
-  for (const tripFile of fs.readdirSync(tripsPath)) {
-    const match = tripFile.match(/strava-(\d+)\.geojson/);
-    if (match) {
-      trips.push(
-        JSON.parse(fs.readFileSync(path.join(tripsPath, tripFile), 'utf8'))
-      );
-    }
+  for (const trip of stravaTopologies()) {
+    trips.push(trip);
   }
 
   const videoDataPath = path.join(appDataPath, 'video-metadata');
