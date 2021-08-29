@@ -5,7 +5,7 @@ module.exports = (env) => ({
   context: __dirname + '/app',
   entry: './entry',
   output: {
-    path: __dirname + '/build',
+    path: __dirname + '/site/build',
     filename: 'app.js',
     chunkFilename: 'app-[name].js',
   },
@@ -60,7 +60,7 @@ module.exports = (env) => ({
     ? {
         devMiddleware: { publicPath: '/build' },
         static: {
-          directory: __dirname,
+          directory: __dirname + '/site',
         },
         client: {
           overlay: false,
