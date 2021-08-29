@@ -33,7 +33,7 @@ async function get(path: string) {
   }
 }
 
-export async function* getTrips(): AsyncGenerator<SummaryActivity> {
+export async function* getTripSummaries(): AsyncGenerator<SummaryActivity> {
   const result: SummaryActivity[] = [];
 
   let page = 1;
@@ -149,7 +149,7 @@ async function fetchTrip(id: string) {
 
 export async function cacheTripList() {
   const trips = [];
-  for await (const trip of getTrips()) {
+  for await (const trip of getTripSummaries()) {
     trips.push(trip);
   }
   fs.writeFileSync(
@@ -169,7 +169,7 @@ function getTripFilename(id: string) {
 }
 
 async function fetchAllTrips(breakOnExisting = false) {
-  for await (const trip of getTrips()) {
+  for await (const trip of getTripSummaries()) {
     const { id, name, type } = trip;
     const filename = getTripFilename(id);
     if (trip.type === 'Workout') {

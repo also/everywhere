@@ -1,6 +1,6 @@
-import { getTrips } from './fetch-strava-trips';
+import { getTripSummaries } from './fetch-strava-trips';
 
 export default async function () {
-  const trips = await getTrips();
+  const trips = await getTripSummaries();
   console.log(trips);
 }
