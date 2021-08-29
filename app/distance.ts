@@ -23,6 +23,11 @@ function calculateLength(lineString: Position[]): number {
   return result;
 }
 
+export function positionDistance(a: Position, b: Position) {
+  return distance(a[0], a[1], b[0], b[1]);
+}
+
+// https://www.movable-type.co.uk/scripts/latlong.html
 export function distance(λ1: number, φ1: number, λ2: number, φ2: number) {
   const R = 6371000;
   const Δλ = ((λ2 - λ1) * Math.PI) / 180;
