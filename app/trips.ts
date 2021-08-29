@@ -5,24 +5,14 @@ import moment from 'moment';
 
 import { CoverageTree, groupChapters, Video, VideoChapter } from './videos';
 import { Feature, LineString, MultiLineString } from 'geojson';
+import { Activity } from '../tools/strava-api';
 
 export type RawStravaTripProperties = {
-  activity: {
-    id: string;
-    start_date: string;
-    elapsed_time: number;
-    moving_time: number;
-    type: string;
-  };
+  activity: Activity;
 };
 
 export type StravaTripProperties = {
-  activity: {
-    id: string;
-    start_date: string;
-    elapsed_time: number;
-    moving_time: number;
-  };
+  activity: Activity;
   // we assign these
   id: string;
   start: moment.Moment;
