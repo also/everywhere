@@ -1,16 +1,6 @@
 import { GeoJsonProperties } from 'geojson';
+import { Tile } from 'geojson-vt';
 import { key, WorkerChannel, workerHandshake } from './WorkerChannel';
-
-export type Tile = {
-  features: [
-    {
-      id: number | undefined;
-      geometry: [number, number][][];
-      type: 2;
-      tags: Record<string, string | number>;
-    }
-  ];
-};
 
 export const setWorkerFile =
   key<{ file: File | undefined; type: 'osm' | 'generic' }, void>('setFile');

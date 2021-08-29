@@ -1,6 +1,6 @@
 import { WorkerChannel, workerHandshake } from './WorkerChannel';
 
-import geojsonvt from 'geojson-vt';
+import geojsonvt, { GeoJSONVT } from 'geojson-vt';
 import {
   getTile,
   lookup,
@@ -24,7 +24,7 @@ const channel = new WorkerChannel(self.postMessage.bind(self), self);
 channel.handle(workerHandshake, () => 'pong');
 
 let file: File | undefined = undefined;
-let tileIndex: any = undefined;
+let tileIndex: GeoJSONVT | undefined = undefined;
 let featureTree:
   | Node<Feature<LineString | MultiLineString, GeoJsonProperties>>
   | undefined = undefined;

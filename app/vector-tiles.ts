@@ -1,5 +1,6 @@
+import { Tile } from 'geojson-vt';
 import { highwayLevels } from './osm';
-import { getTile, renderTileInWorker, Tile } from './worker-stuff';
+import { getTile, renderTileInWorker } from './worker-stuff';
 import { WorkerChannel } from './WorkerChannel';
 
 const extent = 4096;
