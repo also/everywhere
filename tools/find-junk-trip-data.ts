@@ -14,21 +14,23 @@ export default async function () {
 
   for (const trip of stravaTopologies()) {
     const feat = feature<MultiLineString, RawStravaTripProperties>(trip);
+    const firstCoord = feat.geometry.coordinates[0][0];
     const lastCoords =
       feat.geometry.coordinates[feat.geometry.coordinates.length - 1];
     const lastCoord = lastCoords[lastCoords.length - 1];
     let count = 0;
     feat.geometry.coordinates.forEach((coords) => {
       coords.forEach((coord) => {
-        const dist = positionDistance(lastCoord, coord);
+        const dist = Math.min(
+          positionDistance(firstCoord, coord),
+          positionDistance(lastCoord, coord)
+        );
         if (dist < 15) {
           count++;
         }
       });
     });
-    // if (feat.id === 1238347896) {
     heap.push({ feat, count });
-    // }
   }
 
   for (let i = 0; i < 30; i++) {
