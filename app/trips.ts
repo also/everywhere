@@ -12,6 +12,7 @@ export type RawStravaTripProperties = {
     start_date: string;
     elapsed_time: number;
     moving_time: number;
+    type: string;
   };
 };
 
