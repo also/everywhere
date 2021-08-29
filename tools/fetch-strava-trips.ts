@@ -168,6 +168,7 @@ type SummaryActivity = {
   id: string;
   type: ActivityType;
   name: string;
+  manual: boolean;
 };
 
 export async function* getTrips(): AsyncGenerator<SummaryActivity> {
