@@ -130,6 +130,11 @@ export type Stream =
   | MovingStream
   | SmoothGradeStream;
 
+export type CompleteActivity = {
+  activity: Activity;
+  streams?: Stream[];
+};
+
 type SBT = {
   [K in Stream['type']]?: Extract<Stream, { type: K }>['data'];
 };

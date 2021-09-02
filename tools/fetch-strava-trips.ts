@@ -6,6 +6,7 @@ import axios from 'axios';
 import { getAccessToken } from './strava-creds';
 import {
   Activity,
+  CompleteActivity,
   Stream,
   streamNames,
   StreamsByType,
@@ -50,27 +51,23 @@ function getTrip(id: string) {
   return get(`activities/${id}`);
 }
 
-async function getStreams(activity: Activity): Promise<StreamsByType> {
+async function getStreams(id: string): Promise<Stream[] | undefined> {
   let streams: Stream[];
   try {
-    streams = await get(
-      `activities/${activity.id}/streams/${streamNames.join(',')}`
-    );
+    return await get(`activities/${id}/streams/${streamNames.join(',')}`);
   } catch (e) {
     if (e?.response?.status === 404) {
-      streams = [];
+      return;
     }
     throw e;
   }
-  const streamsByType: StreamsByType = { activity };
-  // @ts-expect-error not sure if there's a right way to do this
-  streams.forEach((s) => (streamsByType[s.type] = s.data));
-  return streamsByType;
 }
 
-async function fetchTrip(id: string): Promise<StreamsByType> {
-  const activity = await getTrip(id);
-  return await getStreams(activity);
+async function fetchTrip(id: string): Promise<CompleteActivity> {
+  return {
+    activity: await getTrip(id),
+    streams: await getStreams(id),
+  };
 }
 
 export async function cacheTripList() {

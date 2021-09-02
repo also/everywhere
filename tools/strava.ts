@@ -3,6 +3,7 @@ import fs from 'fs';
 import { FeatureCollection, MultiLineString } from 'geojson';
 import {
   Activity,
+  CompleteActivity,
   otherStreamNames,
   StravaCoord,
   Stream,
@@ -19,6 +20,17 @@ type TripGeoJSON = FeatureCollection<
     activity: Activity;
   }
 >;
+
+function streamsByType({ streams, activity }: CompleteActivity): StreamsByType {
+  const streamsByType: StreamsByType = { activity: activity };
+
+  (streams || []).forEach(
+    (s) =>
+      // @ts-expect-error not sure if there's a right way to do this
+      (streamsByType[s.type] = s.data)
+  );
+  return streamsByType;
+}
 
 function streamsToGeoJson(streams: StreamsByType): TripGeoJSON | undefined {
   if (!streams.latlng) {
@@ -76,11 +88,11 @@ export function* stravaTopologies() {
   for (const activitiesFile of fs.readdirSync(tripsPath)) {
     const match = activitiesFile.match(/(\d+)\.json/);
     if (match) {
-      const activity: StreamsByType = JSON.parse(
+      const activity: CompleteActivity = JSON.parse(
         fs.readFileSync(path.join(tripsPath, activitiesFile), 'utf8')
       );
 
-      const geoJson = streamsToGeoJson(activity);
+      const geoJson = streamsToGeoJson(streamsByType(activity));
       if (geoJson) {
         yield geoJsonToTopoJson(geoJson);
       }
