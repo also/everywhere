@@ -28,7 +28,7 @@ export default function LocationDetails({
 }) {
   const history = useHistory();
 
-  function onClick({ geo }) {
+  function onClick({ geo }: { geo: [number, number] }) {
     history.push(`/locations/${geo.join(',')}`);
   }
 
