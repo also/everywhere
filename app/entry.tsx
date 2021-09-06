@@ -128,12 +128,14 @@ function App({ children }: { children: ReactNode }) {
 
 function CityMapRoute() {
   const { trips } = useContext(DataSetContext);
-  // TODO what's the right way to pass this in?
-  const tripsLength = d3.sum(
-    trips.map(geoLines).reduce((a, b) => a.concat(b)),
-    // @ts-expect-error the d3.sum type is wrong. d3.sum ignores null
-    geometryLength
-  );
+  const tripsLength =
+    trips.length === 0
+      ? 0
+      : d3.sum(
+          trips.map(geoLines).reduce((a, b) => a.concat(b)),
+          // @ts-expect-error the d3.sum type is wrong. d3.sum ignores null
+          geometryLength
+        );
   return (
     <StandardPage>
       <CityMap
