@@ -32,6 +32,17 @@ function streamsByType({ streams, activity }: CompleteActivity): StreamsByType {
   return streamsByType;
 }
 
+function extractProperties(activity: Activity): Activity {
+  return {
+    id: activity.id,
+    name: activity.name,
+    moving_time: activity.moving_time,
+    elapsed_time: activity.elapsed_time,
+    start_date: activity.start_date,
+    type: activity.type,
+  };
+}
+
 function streamsToGeoJson(streams: StreamsByType): TripGeoJSON | undefined {
   if (!streams.latlng) {
     return;
@@ -60,7 +71,7 @@ function streamsToGeoJson(streams: StreamsByType): TripGeoJSON | undefined {
     currentCoordinates!.push([
       lng,
       lat,
-      ...orderedStreams.map((stream) => stream[i]),
+      // ...orderedStreams.map((stream) => stream[i]),
     ]);
   });
 
@@ -70,7 +81,7 @@ function streamsToGeoJson(streams: StreamsByType): TripGeoJSON | undefined {
       {
         type: 'Feature',
         id: streams.activity.id,
-        properties: { activity: streams.activity },
+        properties: { activity: extractProperties(streams.activity) },
         geometry: {
           type: 'MultiLineString',
           coordinates: coordinates,
