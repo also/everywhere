@@ -102,6 +102,9 @@ export function* stravaTopologies() {
       const activity: CompleteActivity = JSON.parse(
         fs.readFileSync(path.join(tripsPath, activitiesFile), 'utf8')
       );
+      if (activity.activity.type !== 'Ride') {
+        continue;
+      }
 
       const geoJson = streamsToGeoJson(streamsByType(activity));
       if (geoJson) {

@@ -21,7 +21,6 @@ export function writeCreds(body: any) {
     path.join(__dirname, '..', 'creds', 'strava.json'),
     JSON.stringify(body)
   );
-  console.log(body);
 }
 
 type AppConfig = {
