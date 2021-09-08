@@ -82,7 +82,7 @@ export class Node<T> {
   }
 
   nearest(point: Position): Leaf<T> {
-    let minNode;
+    let minNode: Leaf<T>;
     let minDistance = Infinity;
     const heap = minHeap<HeapEntry<T>>(compareDistance);
     let node: TreeNode<T> = this;
@@ -111,7 +111,7 @@ export class Node<T> {
       }
     } while ((candidate = heap.pop()) && candidate.distance <= minDistance);
 
-    return minNode;
+    return minNode!;
   }
 
   within(
