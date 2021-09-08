@@ -29,6 +29,7 @@ export default function TripDetails({ trip }: { trip: StravaTripFeature }) {
     const {
       coordinates: [position],
     } = nearest;
+    // @ts-expect-error Position isn't a tuple for some reason
     dot = <Dot position={position} r={4} className="position" />;
   }
 
