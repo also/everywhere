@@ -45,6 +45,7 @@ import DataPage from './components/pages/DataPage';
 import StandardPage from './components/StandardPage';
 import FullScreenPage from './components/FullScreenPage';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { buildDataSet } from './trips';
 
 const GlobalStyle = createGlobalStyle`
 body {
@@ -234,14 +235,16 @@ function MapRoute() {
 
 const div = document.createElement('div');
 document.body.appendChild(div);
+const datasetPromise = loadDataset();
 
-Promise.all([loadDataset()]).then(([dataset]) => {
-  ReactDOM.render(
-    <>
-      <GlobalStyle />
-      <DataContext.Provider value={{ boundary, contours, ways }}>
-        <DataSetSelector initialDataSet={dataset}>
-          {(setDataSet) => (
+ReactDOM.render(
+  <>
+    <GlobalStyle />
+    <DataContext.Provider value={{ boundary, contours, ways }}>
+      <DataSetSelector initialDataSet={buildDataSet([], [])}>
+        {(setDataSet) => {
+          datasetPromise.then(setDataSet);
+          return (
             <Router>
               <App>
                 <Switch>
@@ -269,10 +272,10 @@ Promise.all([loadDataset()]).then(([dataset]) => {
                 </Switch>
               </App>
             </Router>
-          )}
-        </DataSetSelector>
-      </DataContext.Provider>
-    </>,
-    div
-  );
-});
+          );
+        }}
+      </DataSetSelector>
+    </DataContext.Provider>
+  </>,
+  div
+);
