@@ -22,7 +22,7 @@ export default memo(function VideoPlayer({
   }>({});
   const [seekingTo, setSeekingTo] = useState<number>();
 
-  const videoNode = useRef<HTMLVideoElement>();
+  const videoNode = useRef<HTMLVideoElement>(null);
 
   function seekTo(time: number) {
     const newChapterIndex = video.chapters.findIndex(

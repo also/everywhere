@@ -6,7 +6,7 @@ import { StravaTripFeature } from '../trips';
 
 function AnimTrip({ trip }: { trip: StravaTripFeature }) {
   const { path } = useContext(MapContext);
-  const ref = useRef<SVGPathElement>();
+  const ref = useRef<SVGPathElement>(null);
   const running = useRef(true);
   useEffect(() => {
     const duration = 7000;

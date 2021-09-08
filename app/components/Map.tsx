@@ -165,7 +165,7 @@ export default function Map({
     setMapContext(compute({ width, height, zoomFeature, zoom, boundary }));
   }, [width, height, zoomFeature, zoom, boundary]);
 
-  const svgNode = useRef<SVGSVGElement>();
+  const svgNode = useRef<SVGSVGElement>(null);
 
   return (
     <MapContext.Provider value={mapContext}>
@@ -177,7 +177,7 @@ export default function Map({
             ? (e) =>
                 onMouseMove({
                   mouse,
-                  geo: mapContext.projection.invert(mouse(e, svgNode.current)),
+                  geo: mapContext.projection.invert(mouse(e, svgNode.current!)),
                 })
             : undefined
         }
@@ -186,7 +186,7 @@ export default function Map({
             ? (e) =>
                 onClick({
                   mouse,
-                  geo: mapContext.projection.invert(mouse(e, svgNode.current)),
+                  geo: mapContext.projection.invert(mouse(e, svgNode.current!)),
                 })
             : undefined
         }
