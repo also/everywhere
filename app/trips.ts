@@ -6,6 +6,7 @@ import moment from 'moment';
 import { CoverageTree, groupChapters, Video, VideoChapter } from './videos';
 import { Feature, LineString, MultiLineString } from 'geojson';
 import { Activity } from '../tools/strava-api';
+import { DataSet } from './data';
 
 export type RawStravaTripProperties = {
   activity: Activity;
@@ -125,7 +126,7 @@ export type TripTree = Node<StravaTripFeature>;
 export function buildDataSet(
   rawTrips: RawStravaTripFeature[],
   videoChapters: VideoChapter[]
-) {
+): DataSet {
   const videos = groupChapters(videoChapters);
   const trips = rawTrips.map(load);
 
@@ -146,5 +147,12 @@ export function buildDataSet(
       .filter((n) => n)
   );
 
-  return { trips, videoCoverage, tripTree, videoTree, videos };
+  return {
+    trips,
+    videoCoverage,
+    tripTree,
+    videoTree,
+    videos,
+    tripsById: new Map(trips.map((t) => [`${t.id}`, t])),
+  };
 }

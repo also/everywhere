@@ -18,6 +18,7 @@ export { ways, boundary, contours, groupedWays, intersections, wayTree };
 export type DataSet = {
   videos: Map<string, Video>;
   trips: StravaTripFeature[];
+  tripsById: Map<string, StravaTripFeature>;
   videoCoverage: CoverageFeature[];
   tripTree: TripTree;
   videoTree: CoverageTree;
