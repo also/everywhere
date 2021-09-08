@@ -46,6 +46,7 @@ import StandardPage from './components/StandardPage';
 import FullScreenPage from './components/FullScreenPage';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { buildDataSet } from './trips';
+import PageTitle from './components/PageTitle';
 
 const GlobalStyle = createGlobalStyle`
 body {
@@ -157,15 +158,23 @@ function WayDetailsRoute({ match: { params } }: RouteComponentProps<[string]>) {
   return way ? <WayDetails way={way} /> : null;
 }
 
+function NotFoundRoute() {
+  return (
+    <StandardPage>
+      <PageTitle>Not Found</PageTitle>
+    </StandardPage>
+  );
+}
+
 function VideoDetailsRoute({
   match: { params },
 }: RouteComponentProps<{ seek: string; name: string }>) {
   const { videos } = useContext(DataSetContext);
-  return (
-    <VideoDetails
-      video={videos.get(params.name)}
-      seek={parseInt(params.seek, 10)}
-    />
+  const video = videos.get(params.name);
+  return video ? (
+    <VideoDetails video={video} seek={parseInt(params.seek, 10)} />
+  ) : (
+    <NotFoundRoute />
   );
 }
 
@@ -189,8 +198,9 @@ function TripDetailsRoute({
     params: { id },
   },
 }: RouteComponentProps<{ id: string }>) {
-  const { trips } = useContext(DataSetContext);
-  return <TripDetails trip={trips.filter((t) => `${t.id}` === id)[0]} />;
+  const { tripsById } = useContext(DataSetContext);
+  const trip = tripsById.get(id);
+  return trip ? <TripDetails trip={trip} /> : <NotFoundRoute />;
 }
 
 function VideosRoute() {
