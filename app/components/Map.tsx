@@ -16,14 +16,20 @@ import Contours from './Contours';
 import Ways from './Ways';
 import DataContext from './DataContext';
 
-const BaseMap = memo(function BaseMap({ showWays }: { showWays: boolean }) {
-  const { boundary, ways } = useContext(DataContext);
+const BaseMap = memo(function BaseMap({
+  showWays,
+  showContours,
+}: {
+  showWays: boolean;
+  showContours: boolean;
+}) {
+  const { contours, boundary, ways } = useContext(DataContext);
   const { path } = useContext(MapContext);
 
   return (
     <g>
       <path className="boundary" d={path(boundary)} />
-      {/*<Contours features={contours.features}/>*/}
+      {showContours && <Contours features={contours.features} />}
       {showWays ? <Ways features={ways.features} /> : null}
     </g>
   );
@@ -139,6 +145,7 @@ export default function Map({
   zoomFeature,
   zoom,
   showWays = true,
+  showContours = false,
   onMouseMove,
   onClick,
   children,
@@ -148,6 +155,7 @@ export default function Map({
   zoomFeature?: Feature | FeatureCollection;
   zoom?: number;
   showWays?: boolean;
+  showContours?: boolean;
   onMouseMove?: MapMouseHandler;
   onClick?: MapMouseHandler;
   children: ReactNode | (() => ReactNode);
@@ -188,7 +196,7 @@ export default function Map({
         }
         ref={svgNode}
       >
-        <BaseMap showWays={showWays} />
+        <BaseMap showWays={showWays} showContours={showContours} />
         {typeof children === 'function' ? children() : children}
       </MapSvg>
     </MapContext.Provider>
