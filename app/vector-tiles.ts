@@ -58,7 +58,7 @@ export function drawTile2(
     ctx.beginPath();
     ctx.lineJoin = 'round';
     ctx.strokeStyle = isSelected ? 'blue' : 'red';
-    ctx.lineWidth = isSelected ? 2 : 1;
+    ctx.lineWidth = isSelected ? 4 : 2;
     // TODO handle points
     geometry.forEach((points) => {
       points.forEach(([x, y], i) => {
