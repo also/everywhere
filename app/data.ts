@@ -1,4 +1,4 @@
-import { feature } from './geo';
+import { feature, features } from './geo';
 
 import { CoverageTree, Video } from './videos';
 import { ways, groupedWays, intersections, wayTree } from './ways';
@@ -11,7 +11,7 @@ import boundaryGeojson from 'compact-json!../app-data/somerville-topo.geojson';
 import contoursTopojson from 'compact-json!../app-data/contour.geojson';
 
 const boundary = feature(boundaryGeojson);
-const contours = feature(contoursTopojson);
+const contours = features(contoursTopojson);
 
 export { ways, boundary, contours, groupedWays, intersections, wayTree };
 

@@ -72,12 +72,6 @@ const MapSvg = styled.svg`
       stroke-linejoin: round;
     }
 
-    path.contour {
-      fill: none;
-      stroke-width: 1px;
-      stroke: lighten(#00dcc2, 3%);
-    }
-
     circle.position {
       fill: #fff;
       stroke-width: 1px;

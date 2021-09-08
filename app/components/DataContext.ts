@@ -10,5 +10,5 @@ import { WayProperties } from '../ways';
 export default React.createContext<{
   ways: FeatureCollection<LineString | MultiLineString, WayProperties>;
   boundary: Feature;
-  contours: Feature;
+  contours: FeatureCollection;
 }>(undefined as any);
