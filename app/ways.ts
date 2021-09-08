@@ -24,6 +24,7 @@ export type WayProperties = {
   id: string;
 
   highway: string;
+  oneway: string;
 
   // we're writing this one
   displayName: string;
