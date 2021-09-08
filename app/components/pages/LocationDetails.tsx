@@ -51,6 +51,7 @@ export default function LocationDetails({
       <PageTitle>{location.join(', ')}</PageTitle>
       <MapComponent width={1000} height={1000} onClick={onClick}>
         <Ways features={nearbyWays} selected={true} />
+        {/* @ts-expect-error Position isn't a tuple for some reason */}
         <Dot r={4} className="position" position={location} />
       </MapComponent>
       <h2>Videos</h2>

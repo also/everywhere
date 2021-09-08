@@ -2,7 +2,7 @@ import { useHistory } from 'react-router';
 
 import Position from '../Position';
 import Trips from '../Trips';
-import MapComponent from '../Map';
+import MapComponent, { MapMouseEvent } from '../Map';
 import { StravaTripFeature } from '../../trips';
 
 export default function CityMap({
@@ -16,7 +16,7 @@ export default function CityMap({
 }) {
   const history = useHistory();
 
-  function onClick({ geo }) {
+  function onClick({ geo }: MapMouseEvent) {
     history.push(`/locations/${geo.join(',')}`);
   }
 
