@@ -20,7 +20,6 @@ export default async function ({ _: [dir = 'video'] }) {
   if (first) {
     const basename = `${first}.MP4`;
     const Key = `everywhere/video/raw/${basename}`;
-    // FIXME update to use the aws client instead of s3 package
     const upload = new Upload({
       client,
       params: {

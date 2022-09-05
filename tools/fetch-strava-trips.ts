@@ -5,11 +5,9 @@ import axios from 'axios';
 
 import { getAccessToken } from './strava-creds';
 import {
-  Activity,
   CompleteActivity,
   Stream,
   streamNames,
-  StreamsByType,
   SummaryActivity,
 } from './strava-api';
 
@@ -29,8 +27,6 @@ async function get(path: string) {
 }
 
 export async function* getTripSummaries(): AsyncGenerator<SummaryActivity> {
-  const result: SummaryActivity[] = [];
-
   let page = 1;
 
   while (true) {
@@ -52,7 +48,6 @@ function getTrip(id: string) {
 }
 
 async function getStreams(id: string): Promise<Stream[] | undefined> {
-  let streams: Stream[];
   try {
     return await get(`activities/${id}/streams/${streamNames.join(',')}`);
   } catch (e) {
