@@ -20,7 +20,12 @@ import {
 import { Node } from './tree';
 import { highwayLevels } from './osm';
 
-const channel = new WorkerChannel(self.postMessage.bind(self), self);
+// https://github.com/Microsoft/TypeScript/issues/20595
+// self is a WorkerGlobalScope, but TypeScript doesn't know that
+const ctx: Worker = self as any;
+
+const channel = new WorkerChannel(ctx.postMessage.bind(ctx), ctx);
+
 channel.handle(workerHandshake, () => 'pong');
 
 let file: File | undefined = undefined;
