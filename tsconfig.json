@@ -7,6 +7,8 @@
     "esModuleInterop": true,
     "downlevelIteration": true,
     "resolveJsonModule": true,
-    "lib": ["es2019", "dom"]
+    "moduleResolution": "node",
+    "lib": ["es2019", "dom"],
+    "module": "es2020"
   }
 }
