@@ -1,7 +1,7 @@
 import { listVids, simpleNames } from './list-s3-videos';
 import { encode } from './zencoder';
 
-export default async function (argv) {
+export default async function () {
   const rawPromise = listVids('raw').then(simpleNames);
   const encodedPromise = listVids('mp4-low').then(simpleNames);
 
