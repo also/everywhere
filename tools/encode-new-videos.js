@@ -14,6 +14,7 @@ export default async function (argv) {
     `${raw.length} total, ${encoded.length} already encoded, ${toEncode.size} to encode`
   );
   throw new Error('remove this line'); // running this costs money
+  // eslint-disable-next-line no-unreachable
   toEncode.forEach((name) => {
     console.log(`submitting ${name}`);
     encode(name).then(() => `finished ${name}`);
