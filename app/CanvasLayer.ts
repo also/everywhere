@@ -6,7 +6,10 @@ export default class CanvasLayer extends L.GridLayer {
   selectedId: number | undefined;
 
   constructor(private channel: WorkerChannel) {
-    super();
+    // by default, GridLayer goes in the same pane as TileLayer and can end up behid the tiles
+    // https://leafletjs.com/reference.html#map-pane
+    // https://leafletjs.com/examples/map-panes/
+    super({ pane: 'overlayPane' });
   }
 
   createTile(coords: L.Coords, done: L.DoneCallback) {
