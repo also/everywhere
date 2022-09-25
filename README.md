@@ -10,6 +10,12 @@ node tools <command>
 
 #### `fetch-strava-trips`
 
+```shell
+node tools fetch-strava-trips       # fetch all trips
+node tools fetch-strava-trips new   # stops fetching after the first trip that already exists
+node tools fetch-strava-trips <id>  # fetch a single trip
+```
+
 #### `list-s3-videos`
 
 Display a list of videos in the S3 bucket.
