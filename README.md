@@ -30,6 +30,14 @@ Finds strava trips that have many points very close together. This is often due 
 
 ![forgot](docs/forgot-to-stop-trip.png)
 
+`encode-new-videos`
+
+Using the Brightcove Zencoder API, encode videos that have been uploaded to S3 but not yet encoded.
+
+`list-trips`
+
+Logs every trip object available from Strava.
+
 ## Datasets
 
 `everywhere-2015-v1`

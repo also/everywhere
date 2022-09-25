@@ -2,5 +2,7 @@ import { getTripSummaries } from './fetch-strava-trips';
 
 export default async function () {
   const trips = await getTripSummaries();
-  console.log(trips);
+  for await (const trip of trips) {
+    console.log(trip);
+  }
 }
