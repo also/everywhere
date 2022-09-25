@@ -16,6 +16,14 @@ node tools fetch-strava-trips new   # stops fetching after the first trip that a
 node tools fetch-strava-trips <id>  # fetch a single trip
 ```
 
+#### `build-combined-strava-dataset`
+
+Creates a single topojson file with all Strava trips.
+
+#### `build-combined-video-dataset`
+
+Creates a single topojson file with all videos.
+
 #### `list-s3-videos`
 
 Display a list of videos in the S3 bucket.
