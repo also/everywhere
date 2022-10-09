@@ -6,12 +6,13 @@ import {
 } from 'topojson-specification';
 
 // the type of topolojy used for strava trips
-export type SimpleTopology<T extends GeometryObject = GeometryObject> =
+export type SimpleTopology<T extends GeometryObject<any> = GeometryObject> =
   Topology<{ geoJson: T }>;
 
-export type CombinedTrips<P extends Properties = {}> = Topology<{
-  geoJson: GeometryCollection<P>;
-}>;
+export type CombinedTrips<P extends Properties = Record<string, any>> =
+  Topology<{
+    geoJson: GeometryCollection<P>;
+  }>;
 
 /**
  * A negative arc index indicates that the arc at the ones’ complement of the index must be reversed to reconstruct the geometry: -1 refers to the reversed first arc, -2 refers to the reversed second arc, and so on. In JavaScript, you can negate a negative arc index i using the [bitwise NOT operator](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Bitwise_Operators#Bitwise_NOT), `~i`.
@@ -22,22 +23,33 @@ export function addArcOffset(n: number, offset: number): number {
   return n < 0 ? ~(~n + offset) : n + offset;
 }
 
-export function combineTolologies(
-  topologies: Iterable<SimpleTopology>
-): CombinedTrips {
-  const result: SimpleTopology<TopoJSON.GeometryCollection> = {
+type PropsOf<T> = T extends GeometryObject<infer P> ? P : never;
+
+export function combineTolologies<
+  PropsOut extends Properties,
+  T extends GeometryObject<any>,
+  P extends PropsOf<T>
+>(
+  topologies: Iterable<SimpleTopology<T>>,
+  transformProps: (input: P) => PropsOut
+): CombinedTrips<PropsOut> {
+  const result: CombinedTrips<PropsOut> = {
     type: 'Topology',
     arcs: [],
     objects: { geoJson: { type: 'GeometryCollection', geometries: [] } },
   };
 
   for (const t of topologies) {
-    addTopology(result, t);
+    addTopology(result, t, transformProps(t.objects.geoJson.properties));
   }
   return result;
 }
 
-export function addTopology(target: CombinedTrips, toploogy: SimpleTopology) {
+export function addTopology<P extends Properties>(
+  target: CombinedTrips<P>,
+  toploogy: SimpleTopology<any>,
+  props: P
+): void {
   const arcStart = target.arcs.length;
   const coll = toploogy.objects.geoJson;
   let obj: GeometryObject;
@@ -53,12 +65,14 @@ export function addTopology(target: CombinedTrips, toploogy: SimpleTopology) {
     target.objects.geoJson.geometries.push({
       type: 'MultiLineString',
       id: obj.id,
+      properties: props,
       arcs: obj.arcs.map((arcs) => arcs.map((i) => addArcOffset(i, arcStart))),
     });
   } else if (obj.type === 'LineString') {
     target.objects.geoJson.geometries.push({
       type: 'LineString',
       id: obj.id,
+      properties: props,
       arcs: obj.arcs.map((i) => addArcOffset(i, arcStart)),
     });
   } else {

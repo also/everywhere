@@ -39,7 +39,7 @@ function* videoTopoJson() {
 }
 
 export default function () {
-  const bigTopo = combineTolologies(videoTopoJson());
+  const bigTopo = combineTolologies(videoTopoJson(), () => ({ type: 'video' }));
 
   console.log(JSON.stringify(bigTopo, null, 2));
 }

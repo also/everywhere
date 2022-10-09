@@ -216,6 +216,18 @@ function readToDataset(newFiles: SomeFile[]) {
   return buildDataSet(trips, videoChapters);
 }
 
+function StravaTripDetails({ id }: { id: string }) {
+  return (
+    <a
+      href={`https://www.strava.com/activities/${id}`}
+      target="_blank"
+      rel="noreferrer"
+    >
+      View on Strava
+    </a>
+  );
+}
+
 function VectorTileView({ channel }: { channel: WorkerChannel }) {
   const [selected, setSelected] = useState<any>();
   const customize = useMemo(() => {
@@ -237,7 +249,13 @@ function VectorTileView({ channel }: { channel: WorkerChannel }) {
   return (
     <>
       <p>
-        {selected?.id} {selected?.name}
+        {selected?.properties?.type === 'strava-trip' ? (
+          <StravaTripDetails id={selected.id} />
+        ) : (
+          <>
+            {selected?.id} {selected?.name}{' '}
+          </>
+        )}
       </p>
       <LeafletMap customize={customize} />
     </>
