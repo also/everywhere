@@ -24,6 +24,14 @@ Creates a single topojson file with all Strava trips.
 
 Creates a single topojson file with all videos.
 
+#### `extract-video-metadata`
+
+Extracts metadata from videos.
+
+```shell
+node tools extract-video-metadata <file or directory>
+```
+
 #### `list-s3-videos`
 
 Display a list of videos in the S3 bucket.
@@ -51,3 +59,7 @@ Logs every trip object available from Strava.
 `everywhere-2015-v1`
 
 The original dataset from riding every street in Somerville in 2015.
+
+```
+
+```
