@@ -12,9 +12,11 @@ function* videoGeoJson() {
   for (const basename of fs.readdirSync(videoDataPath)) {
     if (basename.endsWith('.geojson')) {
       const filename = path.join(videoDataPath, basename);
+      const geoJson = JSON.parse(fs.readFileSync(filename, 'utf8')) as Feature;
+      geoJson.id = basename.replace(/\.geojson$/, '');
       yield {
         filename,
-        geoJson: JSON.parse(fs.readFileSync(filename, 'utf8')) as Feature,
+        geoJson,
       };
     }
   }
