@@ -1,8 +1,17 @@
-import { GeometryObject, Topology } from 'topojson-specification';
+import {
+  GeometryCollection,
+  GeometryObject,
+  Properties,
+  Topology,
+} from 'topojson-specification';
 
 // the type of topolojy used for strava trips
 export type SimpleTopology<T extends GeometryObject = GeometryObject> =
   Topology<{ geoJson: T }>;
+
+export type CombinedTrips<P extends Properties = {}> = Topology<{
+  geoJson: GeometryCollection<P>;
+}>;
 
 /**
  * A negative arc index indicates that the arc at the ones’ complement of the index must be reversed to reconstruct the geometry: -1 refers to the reversed first arc, -2 refers to the reversed second arc, and so on. In JavaScript, you can negate a negative arc index i using the [bitwise NOT operator](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Bitwise_Operators#Bitwise_NOT), `~i`.
@@ -15,7 +24,7 @@ export function addArcOffset(n: number, offset: number): number {
 
 export function combineTolologies(
   topologies: Iterable<SimpleTopology>
-): SimpleTopology<TopoJSON.GeometryCollection> {
+): CombinedTrips {
   const result: SimpleTopology<TopoJSON.GeometryCollection> = {
     type: 'Topology',
     arcs: [],
@@ -28,10 +37,7 @@ export function combineTolologies(
   return result;
 }
 
-export function addTopology(
-  target: SimpleTopology<TopoJSON.GeometryCollection>,
-  toploogy: SimpleTopology
-) {
+export function addTopology(target: CombinedTrips, toploogy: SimpleTopology) {
   const arcStart = target.arcs.length;
   const coll = toploogy.objects.geoJson;
   let obj: GeometryObject;

@@ -1,7 +1,7 @@
 import path from 'path';
 import fs from 'fs';
 import * as geojson from 'geojson';
-import { Topology, MultiLineString } from 'topojson-specification';
+import { MultiLineString } from 'topojson-specification';
 import { topology } from 'topojson';
 import {
   Activity,
@@ -12,6 +12,7 @@ import {
   StreamsByType,
 } from './strava-api';
 import { distance } from '../app/distance';
+import { SimpleTopology } from './topojson-utils';
 
 const tripsPath = path.join(__dirname, '..', 'data', 'strava-activities');
 
@@ -92,16 +93,16 @@ function streamsToGeoJson(streams: StreamsByType): TripGeoJSON | undefined {
   };
 }
 
-function geoJsonToTopoJson(geoJson: TripGeoJSON): Topology<{
-  geoJson: MultiLineString<{
-    activity: Activity;
-  }>;
-}> {
+function geoJsonToTopoJson(
+  geoJson: TripGeoJSON
+): SimpleTopology<MultiLineString<{ activity: Activity }>> {
   // @ts-expect-error topojson.topology returns a generic record
   return topology({ geoJson });
 }
 
-export function* stravaTopologies() {
+export function* stravaTopologies(): Generator<
+  SimpleTopology<MultiLineString<{ activity: Activity }>>
+> {
   for (const activitiesFile of fs.readdirSync(tripsPath)) {
     const match = activitiesFile.match(/(\d+)\.json/);
     if (match) {
