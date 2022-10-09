@@ -1,11 +1,21 @@
+import { LineString } from 'geojson';
 import { Traverser } from '.';
 import { iterateMetadataSamples, extractGpsSample, Metadata } from './gpmf';
 import { Box } from './mp4';
 
+export interface VideoProperties {
+  creationTime: number;
+  duration: number;
+  cameraModelName: string | undefined;
+  mediaUID: string;
+  firmware: string;
+  dropped: boolean | undefined;
+}
+
 export async function extractGps(
   track: Metadata,
   mp4: Traverser<Box>
-): Promise<GeoJSON.Feature> {
+): Promise<GeoJSON.Feature<LineString, VideoProperties>> {
   const {
     cameraModelName,
     mediaUID,

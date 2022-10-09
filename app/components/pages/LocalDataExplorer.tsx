@@ -9,13 +9,13 @@ import React, {
 import L from 'leaflet';
 import { get, set } from 'idb-keyval';
 import { fileOpen, FileWithHandle } from 'browser-fs-access';
-import { Feature, GeoJsonProperties } from 'geojson';
+import { Feature } from 'geojson';
 import PageTitle from '../PageTitle';
 import MapComponent from '../Map';
 import MapContext from '../MapContext';
 import MapBox from '../MapBox';
 import { SeekableBlobBuffer } from '../../../tools/parse/buffers';
-import { extractGps } from '../../../tools/parse/gopro-gps';
+import { extractGps, VideoProperties } from '../../../tools/parse/gopro-gps';
 import { bind, fileRoot, Traverser } from '../../../tools/parse';
 import { Box, parser as mp4Parser } from '../../../tools/parse/mp4';
 import { getMeta, Metadata } from '../../../tools/parse/gpmf';
@@ -216,17 +216,52 @@ function readToDataset(newFiles: SomeFile[]) {
   return buildDataSet(trips, videoChapters);
 }
 
-function StravaTripDetails({ id }: { id: string }) {
+function GoProVideoDetails({
+  id,
+  properties,
+}: {
+  id: string;
+  properties: VideoProperties;
+}) {
   return (
-    <a
-      href={`https://www.strava.com/activities/${id}`}
-      target="_blank"
-      rel="noreferrer"
-    >
-      View on Strava
-    </a>
+    <div>
+      <h2>{id}</h2>
+      <p>Start: {new Date(properties.creationTime * 1000).toISOString()}</p>
+      <p>Camera: {properties.cameraModelName}</p>
+    </div>
   );
 }
+
+function StravaTripDetails({ id }: { id: string }) {
+  return (
+    <p>
+      <a
+        href={`https://www.strava.com/activities/${id}`}
+        target="_blank"
+        rel="noreferrer"
+      >
+        View on Strava
+      </a>
+    </p>
+  );
+}
+
+const GenericFeatureDetails = ({
+  id,
+  properties,
+}: {
+  id?: string;
+  properties?: Record<string, any>;
+}) => (
+  <p>
+    ID: {id ?? '(none'}, type: {properties?.type ?? '(none)'}
+  </p>
+);
+
+const componentsByType: Record<string, React.ComponentType<any>> = {
+  video: GoProVideoDetails,
+  strava: StravaTripDetails,
+};
 
 function VectorTileView({ channel }: { channel: WorkerChannel }) {
   const [selected, setSelected] = useState<any>();
@@ -246,16 +281,13 @@ function VectorTileView({ channel }: { channel: WorkerChannel }) {
     };
   }, [channel]);
 
+  const ComponentForType =
+    componentsByType[selected?.properties?.type] ?? GenericFeatureDetails;
+
   return (
     <>
       <p>
-        {selected?.properties?.type === 'strava-trip' ? (
-          <StravaTripDetails id={selected.id} />
-        ) : (
-          <>
-            {selected?.id} {selected?.name}{' '}
-          </>
-        )}
+        <ComponentForType {...selected} />
       </p>
       <LeafletMap customize={customize} />
     </>

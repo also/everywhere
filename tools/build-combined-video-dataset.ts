@@ -1,8 +1,10 @@
 import fs from 'fs';
 import path from 'path';
-import { Feature } from 'geojson';
+import { Feature, Geometry } from 'geojson';
 import * as topojson from 'topojson';
 import { combineTolologies, SimpleTopology } from './topojson-utils';
+import { VideoProperties } from './parse/gopro-gps';
+import { GeometryObject } from 'topojson-specification';
 
 const appDataPath = path.join(__dirname, '../app-data/');
 
@@ -12,7 +14,10 @@ function* videoGeoJson() {
   for (const basename of fs.readdirSync(videoDataPath)) {
     if (basename.endsWith('.geojson')) {
       const filename = path.join(videoDataPath, basename);
-      const geoJson = JSON.parse(fs.readFileSync(filename, 'utf8')) as Feature;
+      const geoJson = JSON.parse(fs.readFileSync(filename, 'utf8')) as Feature<
+        Geometry,
+        VideoProperties
+      >;
       geoJson.id = basename.replace(/\.geojson$/, '');
       yield {
         filename,
@@ -33,7 +38,9 @@ function* videoTopoJson() {
       continue;
     }
     try {
-      yield topojson.topology({ geoJson }) as SimpleTopology;
+      yield topojson.topology({ geoJson }) as SimpleTopology<
+        GeometryObject<VideoProperties>
+      >;
     } catch (e) {
       console.error(`error processing ${filename}`);
     }
@@ -41,7 +48,10 @@ function* videoTopoJson() {
 }
 
 export default function () {
-  const bigTopo = combineTolologies(videoTopoJson(), () => ({ type: 'video' }));
+  const bigTopo = combineTolologies(videoTopoJson(), (properties) => ({
+    type: 'video',
+    ...properties,
+  }));
 
   console.log(JSON.stringify(bigTopo, null, 2));
 }
