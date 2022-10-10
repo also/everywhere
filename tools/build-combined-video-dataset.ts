@@ -38,9 +38,13 @@ function* videoTopoJson() {
       continue;
     }
     try {
-      yield topojson.topology({ geoJson }) as SimpleTopology<
+      const topology = topojson.topology({ geoJson }) as SimpleTopology<
         GeometryObject<VideoProperties>
       >;
+      const simplified = topojson.presimplify(topology);
+      // TODO is there a good general minWeight value based on the level of detail expected? this value was chosen with minimal trial and error
+      const minWeight = topojson.quantile(simplified, 0.07);
+      yield topojson.simplify(simplified, minWeight);
     } catch (e) {
       console.error(`error processing ${filename}`);
     }
