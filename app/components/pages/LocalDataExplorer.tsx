@@ -31,6 +31,7 @@ import { create, lookup, setWorkerFile } from '../../worker-stuff';
 import CanvasLayer from '../../CanvasLayer';
 import FullScreenPage from '../FullScreenPage';
 import { WorkerChannel } from '../../WorkerChannel';
+import StandardPage from '../StandardPage';
 
 function FileView<T>({
   file,
@@ -234,7 +235,7 @@ function GoProVideoDetails({
 
 function StravaTripDetails({ id }: { id: string }) {
   return (
-    <p>
+    <div>
       <a
         href={`https://www.strava.com/activities/${id}`}
         target="_blank"
@@ -242,7 +243,7 @@ function StravaTripDetails({ id }: { id: string }) {
       >
         View on Strava
       </a>
-    </p>
+    </div>
   );
 }
 
@@ -253,17 +254,23 @@ const GenericFeatureDetails = ({
   id?: string;
   properties?: Record<string, any>;
 }) => (
-  <p>
+  <div>
     ID: {id ?? '(none'}, type: {properties?.type ?? '(none)'}
-  </p>
+  </div>
 );
 
 const componentsByType: Record<string, React.ComponentType<any>> = {
   video: GoProVideoDetails,
-  strava: StravaTripDetails,
+  'strava-trip': StravaTripDetails,
 };
 
-function VectorTileView({ channel }: { channel: WorkerChannel }) {
+function VectorTileView({
+  channel,
+  controls,
+}: {
+  channel: WorkerChannel;
+  controls: JSX.Element;
+}) {
   const [selected, setSelected] = useState<any>();
   const customize = useMemo(() => {
     return (l: L.Map) => {
@@ -286,9 +293,10 @@ function VectorTileView({ channel }: { channel: WorkerChannel }) {
 
   return (
     <>
-      <p>
+      <div>
+        {controls}
         <ComponentForType {...selected} />
-      </p>
+      </div>
       <LeafletMap customize={customize} />
     </>
   );
@@ -297,9 +305,11 @@ function VectorTileView({ channel }: { channel: WorkerChannel }) {
 function VectorTileFileView({
   file,
   type,
+  controls,
 }: {
   file: FileWithHandle;
   type: 'osm' | 'generic';
+  controls: JSX.Element;
 }) {
   const channel = useMemoAsync(
     async ({ signal }) => {
@@ -315,7 +325,7 @@ function VectorTileFileView({
     [file]
   );
   if (channel) {
-    return <VectorTileView channel={channel} />;
+    return <VectorTileView channel={channel} controls={controls} />;
   } else {
     return <>loading</>;
   }
@@ -367,8 +377,16 @@ export default function LocalDataExplorer({
   async function handleSetDatasetClick() {
     setDataSet(readToDataset(await readFiles(files || [])));
   }
-  return (
+  return file ? (
     <FullScreenPage>
+      <VectorTileFileView
+        file={file}
+        type={type as any}
+        controls={<button onClick={() => setFile(undefined)}>Unload</button>}
+      />
+    </FullScreenPage>
+  ) : (
+    <StandardPage>
       <PageTitle>Local Data</PageTitle>
       <div>
         <select value={type} onChange={(e) => setType(e.target.value)}>
@@ -387,11 +405,8 @@ export default function LocalDataExplorer({
             <button onClick={handleSetDatasetClick}>Set Dataset</button>
           </>
         ) : undefined}
-        {file ? (
-          <button onClick={() => setFile(undefined)}>Unload</button>
-        ) : undefined}
       </div>
-      {file ? <VectorTileFileView file={file} type={type as any} /> : undefined}
+
       <Table>
         <thead>
           <tr>
@@ -413,6 +428,6 @@ export default function LocalDataExplorer({
           ))}
         </tbody>
       </Table>
-    </FullScreenPage>
+    </StandardPage>
   );
 }
