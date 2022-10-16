@@ -1,4 +1,9 @@
-import { GeoJsonProperties } from 'geojson';
+import {
+  Feature,
+  GeoJsonProperties,
+  LineString,
+  MultiLineString,
+} from 'geojson';
 import { Tile } from 'geojson-vt';
 import { key, WorkerChannel, workerHandshake } from './WorkerChannel';
 
@@ -14,7 +19,10 @@ export const renderTileInWorker =
   }>('renderTileInWorker');
 
 export const lookup =
-  key<{ coords: [number, number] }, GeoJsonProperties>('lookup');
+  key<
+    { coords: [number, number] },
+    Feature<LineString | MultiLineString, GeoJsonProperties>
+  >('lookup');
 
 export async function create() {
   const worker = new Worker(new URL('./worker.ts', import.meta.url));

@@ -9,7 +9,12 @@ import React, {
 import L from 'leaflet';
 import { get, set } from 'idb-keyval';
 import { fileOpen, FileWithHandle } from 'browser-fs-access';
-import { Feature } from 'geojson';
+import {
+  Feature,
+  GeoJsonProperties,
+  LineString,
+  MultiLineString,
+} from 'geojson';
 import PageTitle from '../PageTitle';
 import MapComponent from '../Map';
 import MapContext from '../MapContext';
@@ -226,9 +231,11 @@ function GoProVideoDetails({
 }) {
   return (
     <div>
-      <h2>{id}</h2>
-      <p>Start: {new Date(properties.creationTime * 1000).toISOString()}</p>
-      <p>Camera: {properties.cameraModelName}</p>
+      <strong>{id}</strong>{' '}
+      <span>
+        Start: {new Date(properties.creationTime * 1000).toISOString()}
+      </span>{' '}
+      <span>Camera: {properties.cameraModelName}</span>
     </div>
   );
 }
@@ -271,7 +278,12 @@ function VectorTileView({
   channel: WorkerChannel;
   controls: JSX.Element;
 }) {
-  const [selected, setSelected] = useState<any>();
+  const [selected, setSelected] =
+    useState<{
+      feature: Feature<MultiLineString | LineString, GeoJsonProperties>;
+      lng: number;
+      lat: number;
+    }>();
   const customize = useMemo(() => {
     return (l: L.Map) => {
       const layer = new CanvasLayer(channel).addTo(l);
@@ -280,7 +292,7 @@ function VectorTileView({
         const selected = await channel.sendRequest(lookup, {
           coords: [lng, lat],
         });
-        setSelected(selected);
+        setSelected({ feature: selected, lng, lat });
         layer.setSelectedId(selected?.id);
 
         console.log({ selected });
@@ -289,13 +301,19 @@ function VectorTileView({
   }, [channel]);
 
   const ComponentForType =
-    componentsByType[selected?.properties?.type] ?? GenericFeatureDetails;
+    componentsByType[selected?.feature.properties?.type] ??
+    GenericFeatureDetails;
 
   return (
     <>
       <div>
         {controls}
-        <ComponentForType {...selected} />
+        {selected && (
+          <>
+            {selected?.lat}, {selected?.lng}
+          </>
+        )}
+        <ComponentForType {...selected?.feature} />
       </div>
       <LeafletMap customize={customize} />
     </>

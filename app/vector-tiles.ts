@@ -9,7 +9,7 @@ export async function drawTile(
   channel: WorkerChannel,
   canvas: HTMLCanvasElement,
   coords: any,
-  selectedId: number | undefined
+  selectedId: string | number | undefined
 ) {
   if (canvas.transferControlToOffscreen) {
     const offscreen = canvas.transferControlToOffscreen();
@@ -34,7 +34,7 @@ export function drawTile2(
   canvas: HTMLCanvasElement | OffscreenCanvas,
   tile: Tile,
   z: number,
-  selectedId: number | undefined
+  selectedId: string | number | undefined
 ) {
   const size = canvas.width;
   const ctx = canvas.getContext('2d')!;
