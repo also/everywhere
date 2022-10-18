@@ -3,7 +3,7 @@ import { drawTile } from './vector-tiles';
 import { WorkerChannel } from './WorkerChannel';
 
 export default class CanvasLayer extends L.GridLayer {
-  selectedId: number | undefined;
+  selectedId: string | number | undefined;
 
   constructor(private channel: WorkerChannel) {
     // by default, GridLayer goes in the same pane as TileLayer and can end up behid the tiles
@@ -27,7 +27,7 @@ export default class CanvasLayer extends L.GridLayer {
     return canvas;
   }
 
-  setSelectedId(v: number | undefined) {
+  setSelectedId(v: string | number | undefined) {
     this.selectedId = v;
     this.redraw();
   }
