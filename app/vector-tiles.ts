@@ -7,9 +7,10 @@ import {
 import { Tile, TileCoords } from 'geojson-vt';
 import { positionDistance } from './distance';
 import { highwayLevels } from './osm';
-import { Leaf, Node, pointDistance } from './tree';
+import { Leaf, Node } from './tree';
 import { getTile, renderTileInWorker } from './worker-stuff';
 import { WorkerChannel } from './WorkerChannel';
+import { interpolateTurbo as interpolate } from 'd3-scale-chromatic';
 
 export interface TileRenderOpts {
   selectedId: string | number | undefined;
@@ -81,7 +82,7 @@ export function drawDistanceTile(
   const size = canvas.width;
   const ctx = canvas.getContext('2d')!;
 
-  const squareSize = 10;
+  const squareSize = 5;
   let prev:
     | {
         node: Leaf<Feature<LineString | MultiLineString, GeoJsonProperties>>;
@@ -115,11 +116,15 @@ export function drawDistanceTile(
         [lng, lat],
         [-71.03517293930055, 42.33059904560688]
       );
-      ctx.fillStyle = `rgba(0, 0, 155, ${clamp(
-        mapRange(d, minDistance, maxDistance, minOpacity, maxOpacity),
-        minOpacity,
-        maxOpacity
-      )})`;
+      ctx.fillStyle = interpolate(
+        clamp(
+          mapRange(d, minDistance, maxDistance, minOpacity, maxOpacity),
+          minOpacity,
+          maxOpacity
+        )
+      )
+        .replace('rgb', 'rgba')
+        .replace(')', ', 0.5)');
       ctx.fillRect(x, y, squareSize, squareSize);
     }
   }
