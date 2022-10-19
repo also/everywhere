@@ -10,6 +10,7 @@ import { useMemo, useState } from 'react';
 import { VideoProperties } from '../../tools/parse/gopro-gps';
 import CanvasLayer from '../CanvasLayer';
 import { useMemoAsync } from '../hooks';
+import { pointLineSegmentDistance } from '../tree';
 
 import { create, lookup, setWorkerFile } from '../worker-stuff';
 import { WorkerChannel } from '../WorkerChannel';
@@ -73,7 +74,10 @@ function VectorTileView({
 }) {
   const [selected, setSelected] =
     useState<{
-      feature: Feature<MultiLineString | LineString, GeoJsonProperties>;
+      feature:
+        | Feature<MultiLineString | LineString, GeoJsonProperties>
+        | undefined;
+      distance: number | undefined;
       lng: number;
       lat: number;
     }>();
@@ -82,11 +86,29 @@ function VectorTileView({
       const layer = new CanvasLayer(channel).addTo(l);
 
       l.on('click', async ({ latlng: { lat, lng } }: L.LeafletMouseEvent) => {
+        // TODO leaflet calls this handler twice? maybe https://github.com/Leaflet/Leaflet/issues/7255
         const selected = await channel.sendRequest(lookup, {
           coords: [lng, lat],
         });
-        setSelected({ feature: selected, lng, lat });
-        layer.setSelectedId(selected?.id);
+        setSelected({
+          feature: selected?.node.data,
+          distance: selected?.distance,
+          lng,
+          lat,
+        });
+        layer.setOpts({ selectedId: selected?.node.data.id });
+        if (selected) {
+          console.log({
+            dist: pointLineSegmentDistance(
+              [lng, lat],
+              ...selected.node.coordinates
+            ),
+            distFixed: pointLineSegmentDistance(
+              [-71.03517293930055, 42.33059904560688],
+              ...selected.node.coordinates
+            ),
+          });
+        }
 
         console.log({ selected });
       });
@@ -94,7 +116,7 @@ function VectorTileView({
   }, [channel]);
 
   const ComponentForType =
-    componentsByType[selected?.feature.properties?.type] ??
+    componentsByType[selected?.feature?.properties?.type] ??
     GenericFeatureDetails;
 
   return (
@@ -103,7 +125,7 @@ function VectorTileView({
         {controls}
         {selected && (
           <>
-            {selected?.lat}, {selected?.lng}
+            {selected.lat}, {selected.lng}; distance: {selected.distance}
           </>
         )}
         <ComponentForType {...selected?.feature} />

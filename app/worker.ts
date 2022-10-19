@@ -8,7 +8,7 @@ import {
   setWorkerFile,
 } from './worker-stuff';
 import { features } from './geo';
-import { drawTile2 } from './vector-tiles';
+import { drawDistanceTile, drawTile2 } from './vector-tiles';
 import { tree } from './geo';
 import {
   Feature,
@@ -72,17 +72,15 @@ channel.handle(setWorkerFile, async ({ file: f, type: fileType }) => {
 
 channel.handle(getTile, ({ z, x, y }) => tileIndex?.getTile(z, x, y));
 
-channel.handle(
-  renderTileInWorker,
-  ({ canvas, coords: { z, x, y }, selectedId }) => {
-    const tile = tileIndex?.getTile(z, x, y);
-    if (tile) {
-      drawTile2(canvas, tile, z, selectedId);
-    }
+channel.handle(renderTileInWorker, ({ canvas, coords: { z, x, y }, opts }) => {
+  const tile = tileIndex?.getTile(z, x, y);
+  drawDistanceTile(canvas, { z, x, y }, featureTree);
+  if (tile) {
+    drawTile2(canvas, tile, z, opts);
   }
-);
+});
 
 channel.handle(lookup, ({ coords }) => {
-  const result = featureTree?.nearest(coords)?.data;
+  const result = featureTree?.nearestWithDistance(coords);
   return result;
 });

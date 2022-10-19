@@ -1,15 +1,26 @@
-import { Tile } from 'geojson-vt';
+import {
+  Feature,
+  GeoJsonProperties,
+  LineString,
+  MultiLineString,
+} from 'geojson';
+import { Tile, TileCoords } from 'geojson-vt';
 import { highwayLevels } from './osm';
+import { Node, pointDistance } from './tree';
 import { getTile, renderTileInWorker } from './worker-stuff';
 import { WorkerChannel } from './WorkerChannel';
+
+export interface TileRenderOpts {
+  selectedId: string | number | undefined;
+}
 
 const extent = 4096;
 
 export async function drawTile(
   channel: WorkerChannel,
   canvas: HTMLCanvasElement,
-  coords: any,
-  selectedId: string | number | undefined
+  coords: { x: number; y: number; z: number },
+  opts: TileRenderOpts | undefined
 ) {
   if (canvas.transferControlToOffscreen) {
     const offscreen = canvas.transferControlToOffscreen();
@@ -18,14 +29,52 @@ export async function drawTile(
       {
         canvas: offscreen,
         coords,
-        selectedId,
+        opts,
       },
       [offscreen]
     );
   } else {
     const tile = await channel.sendRequest(getTile, coords);
     if (tile) {
-      drawTile2(canvas, tile, coords.z, selectedId);
+      // TODO support feature tree rendering in safari?
+      drawTile2(canvas, tile, coords.z, opts);
+    }
+  }
+}
+
+function tile2long(x: number, z: number) {
+  return (x / Math.pow(2, z)) * 360 - 180;
+}
+function tile2lat(y: number, z: number) {
+  const n = Math.PI - (2 * Math.PI * y) / Math.pow(2, z);
+  return (180 / Math.PI) * Math.atan(0.5 * (Math.exp(n) - Math.exp(-n)));
+}
+
+export function drawDistanceTile(
+  canvas: HTMLCanvasElement | OffscreenCanvas,
+  coords: TileCoords,
+  featureTree:
+    | Node<Feature<LineString | MultiLineString, GeoJsonProperties>>
+    | undefined
+) {
+  const size = canvas.width;
+  const ctx = canvas.getContext('2d')!;
+
+  const squareSize = 20;
+
+  for (let x = 0; x < size; x += squareSize) {
+    for (let y = 0; y < size; y += squareSize) {
+      const lat = tile2lat(coords.y + (y + squareSize / 2) / size, coords.z);
+      const lng = tile2long(coords.x + (x + squareSize / 2) / size, coords.z);
+
+      const d =
+        featureTree?.nearestWithDistance([lng, lat]).distance ?? 1 / 10000;
+      const v = pointDistance(
+        [lng, lat],
+        [-71.03517293930055, 42.33059904560688]
+      );
+      ctx.fillStyle = `rgba(0, 0, 155, ${d * 10000})`;
+      ctx.fillRect(x, y, squareSize, squareSize);
     }
   }
 }
@@ -34,7 +83,7 @@ export function drawTile2(
   canvas: HTMLCanvasElement | OffscreenCanvas,
   tile: Tile,
   z: number,
-  selectedId: string | number | undefined
+  opts: TileRenderOpts | undefined
 ) {
   const size = canvas.width;
   const ctx = canvas.getContext('2d')!;
@@ -55,6 +104,7 @@ export function drawTile2(
         return;
       }
     }
+
     ctx.beginPath();
     ctx.lineJoin = 'round';
     ctx.strokeStyle = isSelected ? 'blue' : 'red';
@@ -72,7 +122,7 @@ export function drawTile2(
     ctx.stroke();
   }
   tile.features.forEach((feat) => {
-    if (feat.id == selectedId) {
+    if (feat.id == opts?.selectedId) {
       selectedFeature = feat;
     } else {
       drawFeature(feat);
@@ -81,4 +131,15 @@ export function drawTile2(
   if (selectedFeature) {
     drawFeature(selectedFeature, true);
   }
+
+  // const text = `${z} ${tile.x} ${tile.y}: ${tile.features.length} features`;
+
+  // ctx.font = '14px monospace';
+  // ctx.fillStyle = 'white';
+  // ctx.fillText(text, 12, 22);
+  // ctx.fillStyle = 'black';
+  // ctx.fillText(text, 10, 20);
+
+  // ctx.strokeStyle = 'black';
+  // ctx.strokeRect(0, 0, size, size);
 }

@@ -1,9 +1,9 @@
 import L from 'leaflet';
-import { drawTile } from './vector-tiles';
+import { drawTile, TileRenderOpts } from './vector-tiles';
 import { WorkerChannel } from './WorkerChannel';
 
 export default class CanvasLayer extends L.GridLayer {
-  selectedId: string | number | undefined;
+  opts: TileRenderOpts | undefined;
 
   constructor(private channel: WorkerChannel) {
     // by default, GridLayer goes in the same pane as TileLayer and can end up behid the tiles
@@ -19,7 +19,7 @@ export default class CanvasLayer extends L.GridLayer {
     canvas.width = size.x;
     canvas.height = size.y;
 
-    drawTile(this.channel, canvas, coords, this.selectedId).then(
+    drawTile(this.channel, canvas, coords, this.opts).then(
       () => done(undefined, canvas),
       done
     );
@@ -27,8 +27,8 @@ export default class CanvasLayer extends L.GridLayer {
     return canvas;
   }
 
-  setSelectedId(v: string | number | undefined) {
-    this.selectedId = v;
+  setOpts(v: TileRenderOpts | undefined) {
+    this.opts = v;
     this.redraw();
   }
 }

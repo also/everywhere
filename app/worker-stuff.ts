@@ -5,6 +5,8 @@ import {
   MultiLineString,
 } from 'geojson';
 import { Tile } from 'geojson-vt';
+import { Leaf } from './tree';
+import { TileRenderOpts } from './vector-tiles';
 import { key, WorkerChannel, workerHandshake } from './WorkerChannel';
 
 export const setWorkerFile =
@@ -15,13 +17,18 @@ export const renderTileInWorker =
   key<{
     coords: { x: number; y: number; z: number };
     canvas: OffscreenCanvas;
-    selectedId: number | undefined;
+    opts: TileRenderOpts | undefined;
   }>('renderTileInWorker');
 
 export const lookup =
   key<
     { coords: [number, number] },
-    Feature<LineString | MultiLineString, GeoJsonProperties>
+    // TODO don't return the whole feature, just the id?
+    | {
+        node: Leaf<Feature<LineString | MultiLineString, GeoJsonProperties>>;
+        distance: number;
+      }
+    | undefined
   >('lookup');
 
 export async function create() {

@@ -10,13 +10,17 @@ function compareDistance(a: { distance: number }, b: { distance: number }) {
   return a.distance - b.distance;
 }
 
-function pointDistance(a: Position, b: Position) {
+export function pointDistance(a: Position, b: Position) {
   const dx = a[0] - b[0];
   const dy = a[1] - b[1];
   return dx * dx + dy * dy;
 }
 
-function pointLineSegmentDistance(c: Position, a: Position, b: Position) {
+export function pointLineSegmentDistance(
+  c: Position,
+  a: Position,
+  b: Position
+) {
   const dx = b[0] - a[0],
     dy = b[1] - a[1],
     d2 = dx * dx + dy * dy,
@@ -81,7 +85,10 @@ export class Node<T> {
       : 0;
   }
 
-  nearest(point: Position): Leaf<T> {
+  nearestWithDistance(
+    point: Position,
+    closeEnough = -Infinity
+  ): { node: Leaf<T>; distance: number } {
     let minNode: Leaf<T>;
     let minDistance = Infinity;
     const heap = minHeap<HeapEntry<T>>(compareDistance);
@@ -104,6 +111,9 @@ export class Node<T> {
         });
       } else {
         const distance = node.distance(point);
+        if (distance <= closeEnough) {
+          return { node, distance };
+        }
         if (distance < minDistance) {
           minDistance = distance;
           minNode = node;
@@ -111,7 +121,11 @@ export class Node<T> {
       }
     } while ((candidate = heap.pop()) && candidate.distance <= minDistance);
 
-    return minNode!;
+    return { node: minNode!, distance: minDistance };
+  }
+
+  nearest(point: Position): Leaf<T> {
+    return this.nearestWithDistance(point).node;
   }
 
   within(
