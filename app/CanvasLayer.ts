@@ -5,7 +5,7 @@ import { WorkerChannel } from './WorkerChannel';
 export default class CanvasLayer extends L.GridLayer {
   opts: TileRenderOpts | undefined;
 
-  constructor(private channel: WorkerChannel) {
+  constructor(private channel: WorkerChannel, private draw: typeof drawTile) {
     // by default, GridLayer goes in the same pane as TileLayer and can end up behid the tiles
     // https://leafletjs.com/reference.html#map-pane
     // https://leafletjs.com/examples/map-panes/
@@ -19,7 +19,7 @@ export default class CanvasLayer extends L.GridLayer {
     canvas.width = size.x;
     canvas.height = size.y;
 
-    drawTile(this.channel, canvas, coords, this.opts).then(
+    this.draw(this.channel, canvas, coords, this.opts).then(
       () => done(undefined, canvas),
       done
     );

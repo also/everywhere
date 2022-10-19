@@ -4,6 +4,7 @@ import geojsonvt, { GeoJSONVT } from 'geojson-vt';
 import {
   getTile,
   lookup,
+  renderFeatureTileInWorker,
   renderTileInWorker,
   setWorkerFile,
 } from './worker-stuff';
@@ -74,11 +75,17 @@ channel.handle(getTile, ({ z, x, y }) => tileIndex?.getTile(z, x, y));
 
 channel.handle(renderTileInWorker, ({ canvas, coords: { z, x, y }, opts }) => {
   const tile = tileIndex?.getTile(z, x, y);
-  drawDistanceTile(canvas, { z, x, y }, featureTree);
   if (tile) {
     drawTile2(canvas, tile, z, opts);
   }
 });
+
+channel.handle(
+  renderFeatureTileInWorker,
+  ({ canvas, coords: { z, x, y }, opts }) => {
+    drawDistanceTile(canvas, { z, x, y }, featureTree);
+  }
+);
 
 channel.handle(lookup, ({ coords }) => {
   const result = featureTree?.nearestWithDistance(coords);

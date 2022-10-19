@@ -11,6 +11,7 @@ import { VideoProperties } from '../../tools/parse/gopro-gps';
 import CanvasLayer from '../CanvasLayer';
 import { useMemoAsync } from '../hooks';
 import { pointLineSegmentDistance } from '../tree';
+import { drawFeatureTile, drawTile } from '../vector-tiles';
 
 import { create, lookup, setWorkerFile } from '../worker-stuff';
 import { WorkerChannel } from '../WorkerChannel';
@@ -83,7 +84,8 @@ function VectorTileView({
     }>();
   const customize = useMemo(() => {
     return (l: L.Map) => {
-      const layer = new CanvasLayer(channel).addTo(l);
+      new CanvasLayer(channel, drawFeatureTile).addTo(l);
+      const layer = new CanvasLayer(channel, drawTile).addTo(l);
 
       l.on('click', async ({ latlng: { lat, lng } }: L.LeafletMouseEvent) => {
         // TODO leaflet calls this handler twice? maybe https://github.com/Leaflet/Leaflet/issues/7255

@@ -8,7 +8,11 @@ import { Tile, TileCoords } from 'geojson-vt';
 import { positionDistance } from './distance';
 import { highwayLevels } from './osm';
 import { Leaf, Node } from './tree';
-import { getTile, renderTileInWorker } from './worker-stuff';
+import {
+  getTile,
+  renderFeatureTileInWorker,
+  renderTileInWorker,
+} from './worker-stuff';
 import { WorkerChannel } from './WorkerChannel';
 import { interpolateTurbo as interpolate } from 'd3-scale-chromatic';
 
@@ -42,6 +46,23 @@ export async function drawTile(
       drawTile2(canvas, tile, coords.z, opts);
     }
   }
+}
+export async function drawFeatureTile(
+  channel: WorkerChannel,
+  canvas: HTMLCanvasElement,
+  coords: { x: number; y: number; z: number },
+  opts: TileRenderOpts | undefined
+) {
+  const offscreen = canvas.transferControlToOffscreen();
+  await channel.sendRequest(
+    renderFeatureTileInWorker,
+    {
+      canvas: offscreen,
+      coords,
+      opts,
+    },
+    [offscreen]
+  );
 }
 
 function tile2long(x: number, z: number) {

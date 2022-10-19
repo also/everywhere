@@ -20,6 +20,12 @@ export const renderTileInWorker =
     opts: TileRenderOpts | undefined;
   }>('renderTileInWorker');
 
+export const renderFeatureTileInWorker = key<{
+  coords: { x: number; y: number; z: number };
+  canvas: OffscreenCanvas;
+  opts: TileRenderOpts | undefined;
+}>('renderFeatureTileInWorker');
+
 export const lookup =
   key<
     { coords: [number, number] },
