@@ -19,16 +19,14 @@ export function pointDistance(a: Position, b: Position) {
 export function pointLineSegmentDistance(
   c: Position,
   a: Position,
-  b: Position
+  b: Position,
+  d: typeof pointDistance = pointDistance
 ) {
   const dx = b[0] - a[0],
     dy = b[1] - a[1],
     d2 = dx * dx + dy * dy,
     t = d2 && ((c[0] - a[0]) * dx + (c[1] - a[1]) * (b[1] - a[1])) / d2;
-  return pointDistance(
-    c,
-    t <= 0 ? a : t >= 1 ? b : [a[0] + t * dx, a[1] + t * dy]
-  );
+  return d(c, t <= 0 ? a : t >= 1 ? b : [a[0] + t * dx, a[1] + t * dy]);
 }
 
 export function group<T>(children: TreeNode<T>[]): Node<T> {
@@ -70,47 +68,49 @@ export class Node<T> {
     ];
   }
 
-  distance(point: Position): number {
+  distance(point: Position, d: typeof pointDistance): number {
     const [x, y] = point;
     const [[x0, y0], [x1, y1]] = this.extent;
 
     return x < x0
-      ? pointLineSegmentDistance(point, [x0, y0], [x0, y1])
+      ? pointLineSegmentDistance(point, [x0, y0], [x0, y1], d)
       : x > x1
-      ? pointLineSegmentDistance(point, [x1, y0], [x1, y1])
+      ? pointLineSegmentDistance(point, [x1, y0], [x1, y1], d)
       : y < y0
-      ? pointLineSegmentDistance(point, [x0, y0], [x1, y0])
+      ? pointLineSegmentDistance(point, [x0, y0], [x1, y0], d)
       : y > y1
-      ? pointLineSegmentDistance(point, [x0, y1], [x1, y1])
+      ? pointLineSegmentDistance(point, [x0, y1], [x1, y1], d)
       : 0;
   }
 
   nearestWithDistance(
     point: Position,
-    closeEnough = -Infinity
+    d: typeof pointDistance = pointDistance,
+    closeEnough = -Infinity,
+    tooFar = Infinity
   ): { node: Leaf<T>; distance: number } {
     let minNode: Leaf<T>;
     let minDistance = Infinity;
     const heap = minHeap<HeapEntry<T>>(compareDistance);
     let node: TreeNode<T> = this;
     let candidate: HeapEntry<T> | null = {
-      distance: node.distance(point),
+      distance: node.distance(point, d),
       node,
     };
 
     do {
       node = candidate.node;
       if (node.children) {
-        heap.push({
-          distance: node.children[0].distance(point),
-          node: node.children[0],
-        });
-        heap.push({
-          distance: node.children[1].distance(point),
-          node: node.children[1],
-        });
+        let distance = node.children[0].distance(point, d);
+        if (distance < tooFar) {
+          heap.push({ node: node.children[0], distance });
+        }
+        distance = node.children[1].distance(point, d);
+        if (distance < tooFar) {
+          heap.push({ node: node.children[1], distance });
+        }
       } else {
-        const distance = node.distance(point);
+        const distance = node.distance(point, d);
         if (distance <= closeEnough) {
           return { node, distance };
         }
@@ -124,17 +124,18 @@ export class Node<T> {
     return { node: minNode!, distance: minDistance };
   }
 
-  nearest(point: Position): Leaf<T> {
-    return this.nearestWithDistance(point).node;
+  nearest(point: Position, d: typeof pointDistance = pointDistance): Leaf<T> {
+    return this.nearestWithDistance(point, d).node;
   }
 
   within(
     point: Position,
-    maxDistance: number
+    maxDistance: number,
+    d: typeof pointDistance = pointDistance
   ): { node: Leaf<T>; distance: number }[] {
     const result: { node: Leaf<T>; distance: number }[] = [];
     const visit = (node: TreeNode<T>) => {
-      const distance = node.distance(point);
+      const distance = node.distance(point, d);
       if (distance <= maxDistance) {
         if (!isLeaf(node)) {
           node.children.map(visit);
@@ -171,11 +172,12 @@ export class Leaf<T> {
     ];
   }
 
-  distance(point: Position): number {
+  distance(point: Position, d: typeof pointDistance): number {
     return pointLineSegmentDistance(
       point,
       this.coordinates[0],
-      this.coordinates[1]
+      this.coordinates[1],
+      d
     );
   }
 }
