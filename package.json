@@ -63,5 +63,9 @@
     "lint": "eslint app",
     "build": "webpack",
     "create-cert": "mkcert -key-file key.pem -cert-file cert.pem localhost"
+  },
+  "devDependencies": {
+    "@types/send": "^0.17.1",
+    "send": "^0.18.0"
   }
 }
