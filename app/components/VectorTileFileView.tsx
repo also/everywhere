@@ -26,7 +26,13 @@ function GoProVideoDetails({
 }) {
   return (
     <div>
-      <strong>{id}</strong>{' '}
+      <strong>
+        {localStorage.videoBaseUrl ? (
+          <a href={localStorage.videoBaseUrl + id}>{id}</a>
+        ) : (
+          id
+        )}
+      </strong>{' '}
       <span>
         Start: {new Date(properties.creationTime * 1000).toISOString()}
       </span>{' '}
