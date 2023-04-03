@@ -90,8 +90,8 @@ function mapRange(
 const minOpacity = 0.8;
 const maxOpacity = 0.0;
 
-const minDistance = 200;
-const maxDistance = 300;
+const minDistance = 100;
+const maxDistance = 500;
 
 export function drawDistanceTile(
   canvas: HTMLCanvasElement | OffscreenCanvas,
@@ -133,16 +133,12 @@ export function drawDistanceTile(
         d = p?.distance ?? maxDistance;
         prev = p;
       }
-      const v = positionDistance(
-        [lng, lat],
-        [-71.03517293930055, 42.33059904560688]
-      );
       ctx.fillStyle = interpolate(
-        clamp(
+        -clamp(
           mapRange(d, minDistance, maxDistance, minOpacity, maxOpacity),
           minOpacity,
           maxOpacity
-        )
+        ) + 1
       )
         .replace('rgb', 'rgba')
         .replace(')', ', 0.5)');

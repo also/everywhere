@@ -20,6 +20,10 @@ node tools fetch-strava-trips <id>  # fetch a single trip
 
 Creates a single topojson file with all Strava trips.
 
+```shell
+node tools build-combined-strava-dataset > trips.json
+```
+
 #### `build-combined-video-dataset`
 
 Creates a single topojson file with all videos.
