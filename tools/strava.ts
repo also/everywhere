@@ -62,8 +62,17 @@ function streamsToGeoJson(streams: StreamsByType): TripGeoJSON | undefined {
 
   let currentPosition: [number, number] | null = null;
 
-  streams.latlng.forEach(([lat, lng], i) => {
-    if (!currentPosition || distance(lng, lat, ...currentPosition) > 100) {
+  streams.latlng.forEach(([lat, lng]) => {
+    const gapThreshold = 100;
+    if (
+      !currentPosition ||
+      distance(lng, lat, ...currentPosition) > gapThreshold
+    ) {
+      if (currentPosition) {
+        console.error(
+          `distance greater than ${gapThreshold}m in ${streams.activity.id}, starting new line`
+        );
+      }
       currentCoordinates = [];
       coordinates.push(currentCoordinates);
     }
