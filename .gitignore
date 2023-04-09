@@ -8,3 +8,4 @@ app-data/video-metadata/
 app-data/strava-trips
 cert.pem
 key.pem
+scratch/
