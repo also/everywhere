@@ -9,7 +9,7 @@ import {
   setWorkerFile,
 } from './worker-stuff';
 import { features } from './geo';
-import { drawDistanceTile, drawTile2 } from './vector-tiles';
+import { drawDistanceTile, drawTile2 } from './tile-drawing';
 import { tree } from './geo';
 import {
   Feature,
