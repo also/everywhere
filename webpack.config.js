@@ -40,7 +40,7 @@ module.exports = (env) => ({
       },
       {
         test: /\.json$/,
-        type: 'javascript/auto',
+        type: 'json',
       },
       {
         test: /\.s[ac]ss$/,
