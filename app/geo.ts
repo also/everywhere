@@ -12,7 +12,8 @@ import * as topojson from 'topojson';
 import * as TopoJSON from 'topojson-specification';
 import RBush from 'rbush';
 
-import makeTree, { Node } from './tree';
+import makeTree, { Node, pointLineSegmentDistance } from './tree';
+import { nearestUsingRTree } from './geometry';
 
 export type FeatureOrCollection<
   G extends Geometry,
@@ -114,6 +115,8 @@ export interface RTreeItem<T> {
   minY: number;
   maxX: number;
   maxY: number;
+  p0: Position;
+  p1: Position;
   data: T;
 }
 
@@ -143,6 +146,8 @@ function makeRTree<G extends LineString | MultiLineString | Polygon, T>(
         minY,
         maxX,
         maxY,
+        p0,
+        p1,
         data,
       });
     }
@@ -151,4 +156,13 @@ function makeRTree<G extends LineString | MultiLineString | Polygon, T>(
   tree.load(items);
 
   return tree;
+}
+
+export function nearestLineSegmentUsingRtree<T>(
+  tree: RBush<RTreeItem<T>>,
+  point: [number, number]
+) {
+  return nearestUsingRTree(tree, point, (node) =>
+    pointLineSegmentDistance(point, node.p0, node.p1)
+  );
 }

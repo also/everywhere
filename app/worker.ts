@@ -1,7 +1,6 @@
 import { WorkerChannel, workerHandshake } from './WorkerChannel';
 
 import RBush from 'rbush';
-import knn from 'rbush-knn';
 
 import geojsonvt, { GeoJSONVT } from 'geojson-vt';
 import {
@@ -11,7 +10,12 @@ import {
   renderTileInWorker,
   setWorkerFile,
 } from './worker-stuff';
-import { RTreeItem, features, trees } from './geo';
+import {
+  RTreeItem,
+  features,
+  nearestLineSegmentUsingRtree,
+  trees,
+} from './geo';
 import { drawDistanceTile, drawTile2 } from './tile-drawing';
 import {
   Feature,
@@ -93,15 +97,16 @@ channel.handle(
 );
 
 channel.handle(lookup, ({ coords }) => {
+  console.log({ coords });
   console.time('lookup');
   const result = featureTree?.nearestWithDistance(coords);
   console.log({ result });
   console.timeEnd('lookup');
 
-  console.time('knn');
-  const result2 = knn(featureRtree, coords[0], coords[1], 1);
+  console.time('rtreeLookup');
+  const result2 = nearestLineSegmentUsingRtree(featureRtree!, coords);
   console.log({ result2 });
-  console.timeEnd('knn');
-  return result2[0]?.data;
+  console.timeEnd('rtreeLookup');
+  return result2?.data;
   // return result?.node.data;
 });
