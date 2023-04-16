@@ -98,6 +98,24 @@ export function drawDistanceTile(
   }
 }
 
+function drawDebugInfo(
+  ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D,
+  size: number,
+  tile: Tile,
+  z: number
+) {
+  const text = `${z} ${tile.x} ${tile.y}: ${tile.features.length} features`;
+
+  ctx.font = '14px monospace';
+  ctx.fillStyle = 'white';
+  ctx.fillText(text, 12, 22);
+  ctx.fillStyle = 'black';
+  ctx.fillText(text, 10, 20);
+
+  ctx.strokeStyle = 'black';
+  ctx.strokeRect(0, 0, size, size);
+}
+
 export function drawTile2(
   canvas: HTMLCanvasElement | OffscreenCanvas,
   tile: Tile,
@@ -151,14 +169,5 @@ export function drawTile2(
     drawFeature(selectedFeature, true);
   }
 
-  // const text = `${z} ${tile.x} ${tile.y}: ${tile.features.length} features`;
-
-  // ctx.font = '14px monospace';
-  // ctx.fillStyle = 'white';
-  // ctx.fillText(text, 12, 22);
-  // ctx.fillStyle = 'black';
-  // ctx.fillText(text, 10, 20);
-
-  // ctx.strokeStyle = 'black';
-  // ctx.strokeRect(0, 0, size, size);
+  //   drawDebugInfo(ctx, size, tile, z);
 }
