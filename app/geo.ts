@@ -10,6 +10,7 @@ import {
 } from 'geojson';
 import * as topojson from 'topojson';
 import * as TopoJSON from 'topojson-specification';
+import RBush from 'rbush';
 
 import makeTree, { Node } from './tree';
 
@@ -76,9 +77,9 @@ function coordses(
     : [geometry.coordinates];
 }
 
-export function tree<G extends LineString | MultiLineString | Polygon, T>(
+export function trees<G extends LineString | MultiLineString | Polygon, T>(
   feat: Feature<G, T> | FeatureCollection<G, T>
-): Node<Feature<G, T>> {
+): { tree: Node<Feature<G, T>>; rtree: RBush<RTreeItem<Feature<G, T>>> } {
   const arcs: {
     arc: Position[];
     data: Feature<G, T>;
@@ -92,7 +93,62 @@ export function tree<G extends LineString | MultiLineString | Polygon, T>(
     }
   );
 
-  return makeTree<Feature<G, T>>({
-    arcs,
+  console.time('rtree');
+  const rtree = makeRTree(arcs);
+  console.timeEnd('rtree');
+
+  console.time('tree');
+  const tree = makeTree<Feature<G, T>>(arcs);
+  console.timeEnd('tree');
+  return { tree, rtree };
+}
+
+export function tree<G extends LineString | MultiLineString | Polygon, T>(
+  feat: Feature<G, T> | FeatureCollection<G, T>
+): Node<Feature<G, T>> {
+  return trees(feat).tree;
+}
+
+export interface RTreeItem<T> {
+  minX: number;
+  minY: number;
+  maxX: number;
+  maxY: number;
+  data: T;
+}
+
+function makeRTree<G extends LineString | MultiLineString | Polygon, T>(
+  arcs: {
+    arc: Position[];
+    data: Feature<G, T>;
+  }[]
+) {
+  const tree = new RBush<RTreeItem<Feature<G, T>>>();
+  const items: RTreeItem<Feature<G, T>>[] = [];
+  arcs.forEach(({ arc, data }) => {
+    let i = 0;
+    const n = arc.length;
+    let p0;
+    let p1 = arc[0];
+
+    while (++i < n) {
+      p0 = p1;
+      p1 = arc[i];
+      const minX = Math.min(p0[0], p1[0]);
+      const minY = Math.min(p0[1], p1[1]);
+      const maxX = Math.max(p0[0], p1[0]);
+      const maxY = Math.max(p0[1], p1[1]);
+      items.push({
+        minX,
+        minY,
+        maxX,
+        maxY,
+        data,
+      });
+    }
   });
+
+  tree.load(items);
+
+  return tree;
 }

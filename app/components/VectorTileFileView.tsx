@@ -84,7 +84,6 @@ function VectorTileView({
       feature:
         | Feature<MultiLineString | LineString, GeoJsonProperties>
         | undefined;
-      distance: number | undefined;
       lng: number;
       lat: number;
     }>();
@@ -96,29 +95,15 @@ function VectorTileView({
       l.on('click', async ({ latlng: { lat, lng } }: L.LeafletMouseEvent) => {
         // TODO leaflet calls this handler twice? maybe https://github.com/Leaflet/Leaflet/issues/7255
         const selected = await channel.sendRequest(lookup, {
+          // coords: [-71.12068176269533, 42.38598201524725],
           coords: [lng, lat],
         });
         setSelected({
-          feature: selected?.node.data,
-          distance: selected?.distance,
+          feature: selected,
           lng,
           lat,
         });
-        layer.setOpts({ selectedId: selected?.node.data.id });
-        if (selected) {
-          console.log({
-            dist: pointLineSegmentDistance(
-              [lng, lat],
-              ...selected.node.coordinates
-            ),
-            distFixed: pointLineSegmentDistance(
-              [-71.03517293930055, 42.33059904560688],
-              ...selected.node.coordinates
-            ),
-          });
-        }
-
-        console.log({ selected });
+        layer.setOpts({ selectedId: selected?.id });
       });
     };
   }, [channel]);

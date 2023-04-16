@@ -182,11 +182,9 @@ export class Leaf<T> {
   }
 }
 
-export default function <T>(topology: {
-  arcs: { arc: Position[]; data: T }[];
-}): Node<T> {
+export default function <T>(arcs: { arc: Position[]; data: T }[]): Node<T> {
   return group(
-    topology.arcs.map(({ arc, data }) => {
+    arcs.map(({ arc, data }) => {
       let i = 0;
       const n = arc.length;
       let p0;

@@ -5,9 +5,8 @@ import {
   MultiLineString,
 } from 'geojson';
 import { Tile } from 'geojson-vt';
-import { Leaf } from './tree';
-import { TileRenderOpts } from './vector-tiles';
 import { key, WorkerChannel, workerHandshake } from './WorkerChannel';
+import { TileRenderOpts } from './tile-drawing';
 
 export const setWorkerFile =
   key<{ file: File | undefined; type: 'osm' | 'generic' }, void>('setFile');
@@ -30,11 +29,7 @@ export const lookup =
   key<
     { coords: [number, number] },
     // TODO don't return the whole feature, just the id?
-    | {
-        node: Leaf<Feature<LineString | MultiLineString, GeoJsonProperties>>;
-        distance: number;
-      }
-    | undefined
+    Feature<LineString | MultiLineString, GeoJsonProperties> | undefined
   >('lookup');
 
 export async function create() {

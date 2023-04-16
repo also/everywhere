@@ -1,5 +1,8 @@
 import { WorkerChannel, workerHandshake } from './WorkerChannel';
 
+import RBush from 'rbush';
+import knn from 'rbush-knn';
+
 import geojsonvt, { GeoJSONVT } from 'geojson-vt';
 import {
   getTile,
@@ -8,9 +11,8 @@ import {
   renderTileInWorker,
   setWorkerFile,
 } from './worker-stuff';
-import { features } from './geo';
+import { RTreeItem, features, trees } from './geo';
 import { drawDistanceTile, drawTile2 } from './tile-drawing';
-import { tree } from './geo';
 import {
   Feature,
   FeatureCollection,
@@ -33,6 +35,9 @@ let file: File | undefined = undefined;
 let tileIndex: GeoJSONVT | undefined = undefined;
 let featureTree:
   | Node<Feature<LineString | MultiLineString, GeoJsonProperties>>
+  | undefined = undefined;
+let featureRtree:
+  | RBush<RTreeItem<Feature<LineString | MultiLineString, GeoJsonProperties>>>
   | undefined = undefined;
 
 channel.handle(setWorkerFile, async ({ file: f, type: fileType }) => {
@@ -64,10 +69,10 @@ channel.handle(setWorkerFile, async ({ file: f, type: fileType }) => {
     };
 
     tileIndex = geojsonvt(f, { maxZoom: 24 });
-    featureTree = tree({
+    ({ tree: featureTree, rtree: featureRtree } = trees({
       type: 'FeatureCollection',
       features: f.features,
-    });
+    }));
   }
 });
 
@@ -88,6 +93,15 @@ channel.handle(
 );
 
 channel.handle(lookup, ({ coords }) => {
+  console.time('lookup');
   const result = featureTree?.nearestWithDistance(coords);
-  return result;
+  console.log({ result });
+  console.timeEnd('lookup');
+
+  console.time('knn');
+  const result2 = knn(featureRtree, coords[0], coords[1], 1);
+  console.log({ result2 });
+  console.timeEnd('knn');
+  return result2[0]?.data;
+  // return result?.node.data;
 });

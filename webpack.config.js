@@ -50,6 +50,9 @@ module.exports = (env) => ({
   },
   resolve: {
     extensions: ['.ts', '.tsx', '.js'],
+    alias: {
+      tinyqueue$: require.resolve('tinyqueue/tinyqueue.js'),
+    },
   },
   resolveLoader: {
     alias: {
