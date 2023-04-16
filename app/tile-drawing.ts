@@ -44,6 +44,15 @@ const maxOpacity = 0.0;
 const minDistance = 100;
 const maxDistance = 500;
 
+function computeSquareSize(
+  initialSize: number,
+  referenceZ: number,
+  targetZ: number
+) {
+  const scaleFactor = Math.pow(2, targetZ - referenceZ);
+  return initialSize * scaleFactor;
+}
+
 export function drawDistanceTile(
   canvas: HTMLCanvasElement | OffscreenCanvas,
   coords: TileCoords,
@@ -54,7 +63,8 @@ export function drawDistanceTile(
   const size = canvas.width;
   const ctx = canvas.getContext('2d')!;
 
-  const squareSize = 5;
+  // TODO still looks better with just "5" - probably want a nonlinear scale
+  const squareSize = computeSquareSize(4, 11, coords.z);
   let prev:
     | {
         node: Leaf<Feature<LineString | MultiLineString, GeoJsonProperties>>;
