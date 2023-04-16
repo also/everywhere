@@ -15,7 +15,6 @@ export default function ({ _: directories }: { _: string[] }) {
       for (const dir of directories) {
         const filename = path.join(dir, req.url);
         if (fs.existsSync(filename)) {
-          console.log('send', filename);
           send(req, filename).pipe(res);
           return;
         }
