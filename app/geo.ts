@@ -13,7 +13,7 @@ import * as TopoJSON from 'topojson-specification';
 import RBush from 'rbush';
 
 import makeTree, { Node, pointLineSegmentDistance } from './tree';
-import { boxDist, euclideanDistance, nearestUsingRTree } from './geometry';
+import { boxDist, nearestUsingRTree } from './geometry';
 import { positionDistance } from './distance';
 
 export type FeatureOrCollection<

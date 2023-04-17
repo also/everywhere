@@ -66,6 +66,7 @@ export function drawDistanceTile(
     | undefined
 ) {
   const size = canvas.width;
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const ctx = canvas.getContext('2d')!;
 
   // TODO still looks better with just "5" - probably want a nonlinear scale
@@ -143,6 +144,7 @@ export function drawTile2(
   opts: TileRenderOpts | undefined
 ) {
   const size = canvas.width;
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const ctx = canvas.getContext('2d')!;
   const ratio = size / extent;
   const pad = 0;
