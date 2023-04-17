@@ -160,7 +160,14 @@ export function findNearbyVideos(
   location: Position,
   maxDistance: number
 ) {
-  const nearbyVideoCoverageByName = new Map();
+  // FIXME what type should this have?
+  const nearbyVideoCoverageByName = new Map<
+    any,
+    {
+      item: RTreeItem<CoverageFeature>;
+      distance: number;
+    }
+  >();
   lineSegmentsWithinDistance(videoTree, location, maxDistance).forEach(
     (result) => {
       const name = result.item.data.properties.video;
@@ -172,13 +179,13 @@ export function findNearbyVideos(
   );
 
   return Array.from(nearbyVideoCoverageByName.values()).map(
-    ({ node, distance }) => {
+    ({ item, distance }) => {
       const {
         data: {
           properties: { video },
         },
-      } = node;
-      const time = calculateSeekPosition(node);
+      } = item;
+      const time = calculateSeekPosition(item);
       return { video, time, distance };
     }
   );
