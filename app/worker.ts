@@ -12,7 +12,7 @@ import {
   LineSegmentRTree,
   features,
   nearestLineSegmentUsingRtree,
-  trees,
+  tree,
 } from './geo';
 import { drawDistanceTile, drawTile2 } from './tile-drawing';
 import {
@@ -68,10 +68,10 @@ channel.handle(setWorkerFile, async ({ file: f, type: fileType }) => {
     };
 
     tileIndex = geojsonvt(f, { maxZoom: 24 });
-    ({ rtree: featureRtree } = trees({
+    featureRtree = tree({
       type: 'FeatureCollection',
       features: f.features,
-    }));
+    });
   }
 });
 

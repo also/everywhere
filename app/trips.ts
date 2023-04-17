@@ -1,5 +1,5 @@
 /* eslint-disable camelcase */
-import { groupRTrees, LineSegmentRTree, trees } from './geo';
+import { groupRTrees, LineSegmentRTree, tree } from './geo';
 import moment from 'moment';
 
 import { CoverageTree, groupChapters, Video, VideoChapter } from './videos';
@@ -64,7 +64,7 @@ function load(trip: RawStravaTripFeature): StravaTripFeature {
     },
   };
 
-  result.properties.tree = trees(result).rtree;
+  result.properties.tree = tree(result);
 
   return result;
 }
@@ -109,7 +109,7 @@ function calculateVideoCoverage(
             },
           };
           // TODO is the type right?
-          coverage.properties.tree = trees(coverage).rtree;
+          coverage.properties.tree = tree(coverage);
 
           videoCoverage.push(coverage);
           video.coverage.push(coverage);

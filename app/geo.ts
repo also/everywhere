@@ -12,8 +12,12 @@ import * as topojson from 'topojson';
 import * as TopoJSON from 'topojson-specification';
 import RBush from 'rbush';
 
-import makeTree, { Node, pointLineSegmentDistance } from './tree';
-import { boxDist, nearestUsingRTree, withinUsingRTree } from './geometry';
+import {
+  boxDist,
+  nearestUsingRTree,
+  pointLineSegmentDistance,
+  withinUsingRTree,
+} from './geometry';
 import { positionDistance } from './distance';
 
 export type FeatureOrCollection<
@@ -80,9 +84,9 @@ function coordses(
     : [geometry.coordinates];
 }
 
-export function trees<G extends LineString | MultiLineString | Polygon, T>(
+export function tree<G extends LineString | MultiLineString | Polygon, T>(
   feat: Feature<G, T> | FeatureCollection<G, T>
-): { tree: Node<Feature<G, T>>; rtree: LineSegmentRTree<Feature<G, T>> } {
+): LineSegmentRTree<Feature<G, T>> {
   const arcs: {
     arc: Position[];
     data: Feature<G, T>;
@@ -100,17 +104,7 @@ export function trees<G extends LineString | MultiLineString | Polygon, T>(
   const rtree = makeRTree(arcs);
   console.timeEnd('rtree');
 
-  console.time('tree');
-  const tree = makeTree<Feature<G, T>>(arcs);
-  console.timeEnd('tree');
-  return { tree, rtree };
-}
-
-/* @deprecated */
-export function tree<G extends LineString | MultiLineString | Polygon, T>(
-  feat: Feature<G, T> | FeatureCollection<G, T>
-): Node<Feature<G, T>> {
-  return trees(feat).tree;
+  return rtree;
 }
 
 export function groupRTrees<T>(trees: LineSegmentRTree<T>[]) {

@@ -7,13 +7,13 @@ import {
 import { Tile, TileCoords } from 'geojson-vt';
 import { positionDistance } from './distance';
 import { highwayLevels } from './osm';
-import { pointLineSegmentDistance } from './tree';
 import { interpolateTurbo as interpolate } from 'd3-scale-chromatic';
 import {
   LineSegmentRTree,
   RTreeItem,
   nearestLineSegmentUsingRtree,
 } from './geo';
+import { pointLineSegmentDistance } from './geometry';
 
 export interface TileRenderOpts {
   selectedId: string | number | undefined;
