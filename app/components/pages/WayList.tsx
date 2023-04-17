@@ -4,7 +4,7 @@ import { useHistory } from 'react-router';
 import styled from 'styled-components';
 
 import PageTitle from '../PageTitle';
-import MapComponent from '../Map';
+import MapComponent, { MapMouseHandler } from '../Map';
 import Ways from '../Ways';
 import WayListColumns from '../WayListColumns';
 import { GroupedWays, WayFeature, WayTree } from '../../ways';
@@ -31,12 +31,12 @@ const WayHoverInfo = styled.div`
 const HoverStreetMap = function WayList({ wayTree }: { wayTree: WayTree }) {
   const history = useHistory();
   const [hoveredStreet, setHoveredStreet] = useState<WayFeature>();
-  const onMouseMove = useCallback(
+  const onMouseMove: MapMouseHandler = useCallback(
     ({ geo }) =>
       setHoveredStreet(nearestLineSegmentUsingRtree(wayTree, geo)!.item.data),
     [wayTree]
   );
-  const onClick = useCallback(
+  const onClick: MapMouseHandler = useCallback(
     ({ geo }) => {
       const way = nearestLineSegmentUsingRtree(wayTree, geo)!.item.data;
       history.push(`/ways/${way.properties.displayName}`);

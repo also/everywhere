@@ -4,13 +4,12 @@ import { useCallback, useState } from 'react';
 import PageTitle from '../PageTitle';
 import VideoList from '../VideoList';
 import Trips from '../Trips';
-import MapComponent from '../Map';
+import MapComponent, { MapMouseHandler } from '../Map';
 import Dot from '../Dot';
 import { CoverageTree, Video } from '../../videos';
 import { CoverageFeature } from '../../trips';
 import StandardPage from '../StandardPage';
 import { RTreeItem, nearestLineSegmentUsingRtree } from '../../geo';
-import { MapMouseHandler } from '../Map';
 
 export default function VideoListPage({
   videos,
