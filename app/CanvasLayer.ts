@@ -1,6 +1,7 @@
 import L from 'leaflet';
-import { drawTile, TileRenderOpts } from './vector-tiles';
+import { drawTile } from './vector-tiles';
 import { WorkerChannel } from './WorkerChannel';
+import { TileRenderOpts } from './tile-drawing';
 
 export default class CanvasLayer extends L.GridLayer {
   opts: TileRenderOpts | undefined;

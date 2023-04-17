@@ -6,7 +6,7 @@ import {
 } from 'geojson';
 import { Tile } from 'geojson-vt';
 import { Leaf } from './tree';
-import { TileRenderOpts } from './vector-tiles';
+import { TileRenderOpts } from './tile-drawing';
 import { key, WorkerChannel, workerHandshake } from './WorkerChannel';
 
 export const setWorkerFile =
