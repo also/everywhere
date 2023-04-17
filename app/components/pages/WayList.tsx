@@ -9,6 +9,7 @@ import Ways from '../Ways';
 import WayListColumns from '../WayListColumns';
 import { GroupedWays, WayFeature, WayTree } from '../../ways';
 import StandardPage from '../StandardPage';
+import { nearestLineSegmentUsingRtree } from '../../geo';
 
 const WayMap = styled.div`
   position: relative;
@@ -31,12 +32,13 @@ const HoverStreetMap = function WayList({ wayTree }: { wayTree: WayTree }) {
   const history = useHistory();
   const [hoveredStreet, setHoveredStreet] = useState<WayFeature>();
   const onMouseMove = useCallback(
-    ({ geo }) => setHoveredStreet(wayTree.nearest(geo).data),
+    ({ geo }) =>
+      setHoveredStreet(nearestLineSegmentUsingRtree(wayTree, geo)!.item.data),
     [wayTree]
   );
   const onClick = useCallback(
     ({ geo }) => {
-      const way = wayTree.nearest(geo).data;
+      const way = nearestLineSegmentUsingRtree(wayTree, geo)!.item.data;
       history.push(`/ways/${way.properties.displayName}`);
     },
     [wayTree]

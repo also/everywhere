@@ -1,13 +1,14 @@
 import sortBy from 'lodash/sortBy';
 
-import { features, tree } from './geo';
-import { Node } from './tree';
+import { LineSegmentRTree, features, trees } from './geo';
 
 const waysGeojson =
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
   require('compact-json!../app-data/highways-clipped-topo.geojson') as TopoJSON.Topology<{
     'highways-clipped': TopoJSON.GeometryCollection<WayProperties>;
   }>;
 const intersectionsTopojson =
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
   require('compact-json!../app-data/intersections-clipped-topo.geojson') as TopoJSON.Topology<{
     'intersections-clipped': TopoJSON.GeometryCollection<IntersectionProperties>;
   }>;
@@ -92,8 +93,8 @@ intersections.features.forEach((intersection) => {
   });
 });
 
-export type WayTree = Node<WayFeature>;
+export type WayTree = LineSegmentRTree<WayFeature>;
 
-const wayTree: WayTree = tree(ways);
+const wayTree: WayTree = trees(ways).rtree;
 
 export { ways, groupedWays, intersections, wayTree, waysById };

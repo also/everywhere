@@ -34,9 +34,11 @@ export default function LocationDetails({
 
   const maxDistance = 0.0000005;
 
-  const nearbyWays = wayTree
-    .within(location, maxDistance)
-    .map(({ node: { data } }) => data);
+  const nearbyWays = lineSegmentsWithinDistance(
+    wayTree,
+    location,
+    maxDistance
+  ).map(({ item: { data } }) => data);
   const nearbyGroupedWays = group(nearbyWays);
   const nearbyTrips: StravaTripFeature[] = Array.from(
     new Set(
