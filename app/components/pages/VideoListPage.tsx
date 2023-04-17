@@ -4,7 +4,7 @@ import { useCallback, useState } from 'react';
 import PageTitle from '../PageTitle';
 import VideoList from '../VideoList';
 import Trips from '../Trips';
-import MapComponent from '../Map';
+import MapComponent, { MapMouseHandler } from '../Map';
 import Dot from '../Dot';
 import { Leaf } from '../../tree';
 import { CoverageTree, Video } from '../../videos';
@@ -24,12 +24,12 @@ export default function VideoListPage({
   const [nearest, setNearest] =
     useState<Leaf<CoverageFeature> | undefined>(undefined);
 
-  const onMouseMove = useCallback(
+  const onMouseMove: MapMouseHandler = useCallback(
     ({ geo }) => setNearest(videoTree.nearest(geo)),
     [videoTree]
   );
 
-  const onClick = useCallback(
+  const onClick: MapMouseHandler = useCallback(
     ({ geo }) => {
       const nearest = videoTree.nearest(geo);
       const {
