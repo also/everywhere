@@ -13,7 +13,7 @@ import * as TopoJSON from 'topojson-specification';
 import RBush from 'rbush';
 
 import makeTree, { Node, pointLineSegmentDistance } from './tree';
-import { boxDist, nearestUsingRTree } from './geometry';
+import { boxDist, nearestUsingRTree, withinUsingRTree } from './geometry';
 import { positionDistance } from './distance';
 
 export type FeatureOrCollection<
@@ -106,10 +106,19 @@ export function trees<G extends LineString | MultiLineString | Polygon, T>(
   return { tree, rtree };
 }
 
+/* @deprecated */
 export function tree<G extends LineString | MultiLineString | Polygon, T>(
   feat: Feature<G, T> | FeatureCollection<G, T>
 ): Node<Feature<G, T>> {
   return trees(feat).tree;
+}
+
+export function groupRTrees<T>(trees: LineSegmentRTree<T>[]) {
+  const result = new RBush<RTreeItem<T>>();
+  for (const tree of trees) {
+    result.load(tree.all());
+  }
+  return result;
 }
 
 export interface RTreeItem<T> {
@@ -165,10 +174,36 @@ function makeRTree<G extends LineString | MultiLineString | Polygon, T>(
 export function nearestLineSegmentUsingRtree<T>(
   tree: LineSegmentRTree<T>,
   point: [number, number]
-) {
+):
+  | {
+      item: RTreeItem<T>;
+      distance: number;
+    }
+  | undefined {
   return nearestUsingRTree(
     tree,
     point,
+    (node) =>
+      pointLineSegmentDistance(point, node.p0, node.p1, positionDistance),
+    (box, p) =>
+      boxDist(p[0], p[1], box, (x1, y1, x2, y2) =>
+        positionDistance([x1, y1], [x2, y2])
+      )
+  );
+}
+
+export function lineSegmentsWithinDistance<T>(
+  tree: LineSegmentRTree<T>,
+  point: [number, number],
+  distance: number
+): {
+  item: RTreeItem<T>;
+  distance: number;
+}[] {
+  return withinUsingRTree(
+    tree,
+    point,
+    distance,
     (node) =>
       pointLineSegmentDistance(point, node.p0, node.p1, positionDistance),
     (box, p) =>

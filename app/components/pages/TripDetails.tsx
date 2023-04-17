@@ -7,11 +7,12 @@ import MapComponent, { MapMouseHandler } from '../Map';
 import Dot from '../Dot';
 import { useCallback, useMemo, useState } from 'react';
 import { StravaTripFeature } from '../../trips';
-import { Leaf } from '../../tree';
 import StandardPage from '../StandardPage';
+import { RTreeItem, nearestLineSegmentUsingRtree } from '../../geo';
 
 export default function TripDetails({ trip }: { trip: StravaTripFeature }) {
-  const [nearest, setNearest] = useState<Leaf<unknown> | undefined>(undefined);
+  const [nearest, setNearest] =
+    useState<RTreeItem<unknown> | undefined>(undefined);
 
   const {
     properties: { tree, id, start, movingTime, videos },
@@ -20,15 +21,13 @@ export default function TripDetails({ trip }: { trip: StravaTripFeature }) {
   const trips = useMemo(() => [trip], [trip]);
 
   const onMouseMove: MapMouseHandler = useCallback(
-    ({ geo }) => setNearest(tree.nearest(geo)),
+    ({ geo }) => setNearest(nearestLineSegmentUsingRtree(tree, geo)?.item),
     [trip]
   );
 
   let dot = null;
   if (nearest) {
-    const {
-      coordinates: [position],
-    } = nearest;
+    const { p0: position } = nearest;
     // @ts-expect-error Position isn't a tuple for some reason
     dot = <Dot position={position} r={4} className="position" />;
   }

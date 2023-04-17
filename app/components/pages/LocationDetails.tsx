@@ -4,7 +4,7 @@ import { useHistory } from 'react-router-dom';
 import * as format from '../../format';
 import { CoverageTree, findNearbyVideos } from '../../videos';
 import { wayTree, group } from '../../ways';
-import { featureCollection } from '../../geo';
+import { featureCollection, lineSegmentsWithinDistance } from '../../geo';
 
 import StandardPage from '../StandardPage';
 import PageTitle from '../PageTitle';
@@ -40,7 +40,9 @@ export default function LocationDetails({
   const nearbyGroupedWays = group(nearbyWays);
   const nearbyTrips: StravaTripFeature[] = Array.from(
     new Set(
-      tripTree.within(location, maxDistance).map(({ node: { data } }) => data)
+      lineSegmentsWithinDistance(tripTree, location, maxDistance).map(
+        ({ item: { data } }) => data
+      )
     )
   );
 

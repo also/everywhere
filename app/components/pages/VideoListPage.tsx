@@ -6,10 +6,11 @@ import VideoList from '../VideoList';
 import Trips from '../Trips';
 import MapComponent from '../Map';
 import Dot from '../Dot';
-import { Leaf } from '../../tree';
 import { CoverageTree, Video } from '../../videos';
 import { CoverageFeature } from '../../trips';
 import StandardPage from '../StandardPage';
+import { RTreeItem, nearestLineSegmentUsingRtree } from '../../geo';
+import { MapMouseHandler } from '../Map';
 
 export default function VideoListPage({
   videos,
@@ -22,21 +23,21 @@ export default function VideoListPage({
 }) {
   const history = useHistory();
   const [nearest, setNearest] =
-    useState<Leaf<CoverageFeature> | undefined>(undefined);
+    useState<RTreeItem<CoverageFeature> | undefined>(undefined);
 
-  const onMouseMove = useCallback(
-    ({ geo }) => setNearest(videoTree.nearest(geo)),
+  const onMouseMove: MapMouseHandler = useCallback(
+    ({ geo }) => setNearest(nearestLineSegmentUsingRtree(videoTree, geo)?.item),
     [videoTree]
   );
 
-  const onClick = useCallback(
+  const onClick: MapMouseHandler = useCallback(
     ({ geo }) => {
-      const nearest = videoTree.nearest(geo);
+      const nearest = nearestLineSegmentUsingRtree(videoTree, geo)!.item;
       const {
         data: {
           properties: { start, video },
         },
-        coordinates: [coord],
+        p0: coord,
       } = nearest;
 
       const [, , , timeOffsetSecs] = coord;
@@ -49,9 +50,7 @@ export default function VideoListPage({
 
   let dot = null;
   if (nearest) {
-    const {
-      coordinates: [position],
-    } = nearest;
+    const { p0: position } = nearest;
     // @ts-expect-error Position isn't a tuple for some reason
     dot = <Dot position={position} r={4} className="position" />;
   }

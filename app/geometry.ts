@@ -94,3 +94,37 @@ export function nearestUsingRTree<T>(
 
   return result ? { item: result, distance: maxDistance } : undefined;
 }
+
+export function withinUsingRTree<T>(
+  tree: RBush<T>,
+  p: [number, number],
+  maxDistance: number,
+  itemDist: (a: T, b: [number, number]) => number,
+  bboxDist: (a: BBox, b: [number, number]) => number
+) {
+  let node: RBushNode<T> | undefined = (tree as any).data;
+  const queue: RBushNode<T>[] = [];
+  const result: { distance: number; item: T }[] = [];
+
+  while (node) {
+    if (node.leaf) {
+      for (const item of node.children) {
+        const d = itemDist(item, p);
+        if (d < maxDistance) {
+          result.push({ distance: d, item });
+        }
+      }
+    } else {
+      for (const child of node.children) {
+        const d = bboxDist(child, p);
+        if (d < maxDistance) {
+          queue.push(child);
+        }
+      }
+    }
+
+    node = queue.pop();
+  }
+
+  return result;
+}

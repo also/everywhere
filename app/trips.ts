@@ -1,6 +1,5 @@
 /* eslint-disable camelcase */
-import { tree } from './geo';
-import { group, Node } from './tree';
+import { groupRTrees, LineSegmentRTree, trees } from './geo';
 import moment from 'moment';
 
 import { CoverageTree, groupChapters, Video, VideoChapter } from './videos';
@@ -65,7 +64,7 @@ function load(trip: RawStravaTripFeature): StravaTripFeature {
     },
   };
 
-  result.properties.tree = tree(result);
+  result.properties.tree = trees(result).rtree;
 
   return result;
 }
@@ -109,7 +108,8 @@ function calculateVideoCoverage(
               coordinates,
             },
           };
-          coverage.properties.tree = tree(coverage);
+          // TODO is the type right?
+          coverage.properties.tree = trees(coverage).rtree;
 
           videoCoverage.push(coverage);
           video.coverage.push(coverage);
@@ -121,7 +121,7 @@ function calculateVideoCoverage(
   return videoCoverage;
 }
 
-export type TripTree = Node<StravaTripFeature>;
+export type TripTree = LineSegmentRTree<StravaTripFeature>;
 
 export function buildDataSet(
   rawTrips: RawStravaTripFeature[],
@@ -132,14 +132,14 @@ export function buildDataSet(
 
   const videoCoverage = calculateVideoCoverage(trips, videos);
 
-  const tripTree: TripTree = group(
+  const tripTree: TripTree = groupRTrees(
     trips.map(({ properties: { tree } }) => tree)
   );
 
-  const videoTree = group(
+  const videoTree = groupRTrees(
     Array.from(videos.values())
       .map((video) => {
-        video.coverageTree = group(
+        video.coverageTree = groupRTrees(
           video.coverage.map(({ properties: { tree } }) => tree)
         );
         return video.coverageTree;
