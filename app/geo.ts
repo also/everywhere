@@ -13,7 +13,8 @@ import * as TopoJSON from 'topojson-specification';
 import RBush from 'rbush';
 
 import makeTree, { Node, pointLineSegmentDistance } from './tree';
-import { nearestUsingRTree } from './geometry';
+import { boxDist, euclideanDistance, nearestUsingRTree } from './geometry';
+import { positionDistance } from './distance';
 
 export type FeatureOrCollection<
   G extends Geometry,
@@ -162,7 +163,14 @@ export function nearestLineSegmentUsingRtree<T>(
   tree: RBush<RTreeItem<T>>,
   point: [number, number]
 ) {
-  return nearestUsingRTree(tree, point, (node) =>
-    pointLineSegmentDistance(point, node.p0, node.p1)
+  return nearestUsingRTree(
+    tree,
+    point,
+    (node) =>
+      pointLineSegmentDistance(point, node.p0, node.p1, positionDistance),
+    (box, p) =>
+      boxDist(p[0], p[1], box, (x1, y1, x2, y2) =>
+        positionDistance([x1, y1], [x2, y2])
+      )
   );
 }

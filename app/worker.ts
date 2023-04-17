@@ -92,7 +92,7 @@ channel.handle(renderTileInWorker, ({ canvas, coords: { z, x, y }, opts }) => {
 channel.handle(
   renderFeatureTileInWorker,
   ({ canvas, coords: { z, x, y }, opts }) => {
-    drawDistanceTile(canvas, { z, x, y }, featureTree);
+    drawDistanceTile(canvas, { z, x, y }, featureRtree);
   }
 );
 
@@ -107,6 +107,6 @@ channel.handle(lookup, ({ coords }) => {
   const result2 = nearestLineSegmentUsingRtree(featureRtree!, coords);
   console.log({ result2 });
   console.timeEnd('rtreeLookup');
-  return result2?.data;
+  return result2?.item.data;
   // return result?.node.data;
 });

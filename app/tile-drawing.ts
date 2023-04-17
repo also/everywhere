@@ -7,8 +7,10 @@ import {
 import { Tile, TileCoords } from 'geojson-vt';
 import { positionDistance } from './distance';
 import { highwayLevels } from './osm';
-import { Leaf, Node } from './tree';
+import { Leaf, Node, pointLineSegmentDistance } from './tree';
 import { interpolateTurbo as interpolate } from 'd3-scale-chromatic';
+import RBush from 'rbush';
+import { RTreeItem, nearestLineSegmentUsingRtree } from './geo';
 
 export interface TileRenderOpts {
   selectedId: string | number | undefined;
@@ -57,17 +59,20 @@ export function drawDistanceTile(
   canvas: HTMLCanvasElement | OffscreenCanvas,
   coords: TileCoords,
   featureTree:
-    | Node<Feature<LineString | MultiLineString, GeoJsonProperties>>
+    | RBush<RTreeItem<Feature<LineString | MultiLineString, GeoJsonProperties>>>
     | undefined
 ) {
   const size = canvas.width;
   const ctx = canvas.getContext('2d')!;
 
   // TODO still looks better with just "5" - probably want a nonlinear scale
-  const squareSize = computeSquareSize(4, 11, coords.z);
+  // const squareSize = computeSquareSize(4, 11, coords.z);
+  const squareSize = 16;
   let prev:
     | {
-        node: Leaf<Feature<LineString | MultiLineString, GeoJsonProperties>>;
+        item: RTreeItem<
+          Feature<LineString | MultiLineString, GeoJsonProperties>
+        >;
         distance: number;
       }
     | undefined;
@@ -80,17 +85,19 @@ export function drawDistanceTile(
       let d: number;
 
       if (
-        prev?.node &&
-        prev.node.distance([lng, lat], positionDistance) <= minDistance
+        prev &&
+        pointLineSegmentDistance(
+          [lng, lat],
+          prev.item.p0,
+          prev.item.p1,
+          positionDistance
+        ) <= minDistance
       ) {
         d = minDistance;
       } else {
-        const p = featureTree?.nearestWithDistance(
-          [lng, lat],
-          positionDistance,
-          minDistance,
-          maxDistance
-        );
+        const p = featureTree
+          ? nearestLineSegmentUsingRtree(featureTree, [lng, lat])
+          : undefined;
         d = p?.distance ?? maxDistance;
         prev = p;
       }
