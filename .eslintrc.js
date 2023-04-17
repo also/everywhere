@@ -16,5 +16,6 @@ module.exports = {
     '@typescript-eslint/no-this-alias': 0,
     // FIXME
     '@typescript-eslint/explicit-module-boundary-types': 0,
+    '@typescript-eslint/no-inferrable-types': 0,
   },
 };
