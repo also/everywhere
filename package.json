@@ -46,7 +46,6 @@
     "osmtogeojson": "^2.2.5",
     "prettier": "2.3.0",
     "rbush": "^3.0.1",
-    "rbush-knn": "^3.0.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-intersection-observer": "^8.32.0",
