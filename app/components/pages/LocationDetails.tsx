@@ -32,7 +32,7 @@ export default function LocationDetails({
     history.push(`/locations/${geo.join(',')}`);
   }
 
-  const maxDistance = 0.0000005;
+  const maxDistance = 40;
 
   const nearbyWays = lineSegmentsWithinDistance(
     wayTree,
