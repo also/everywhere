@@ -1,7 +1,5 @@
 import { WorkerChannel, workerHandshake } from './WorkerChannel';
 
-import RBush from 'rbush';
-
 import geojsonvt, { GeoJSONVT } from 'geojson-vt';
 import {
   getTile,
@@ -11,7 +9,7 @@ import {
   setWorkerFile,
 } from './worker-stuff';
 import {
-  RTreeItem,
+  LineSegmentRTree,
   features,
   nearestLineSegmentUsingRtree,
   trees,
@@ -24,7 +22,6 @@ import {
   LineString,
   MultiLineString,
 } from 'geojson';
-import { Node } from './tree';
 import { highwayLevels } from './osm';
 
 // https://github.com/Microsoft/TypeScript/issues/20595
@@ -37,11 +34,9 @@ channel.handle(workerHandshake, () => 'pong');
 
 let file: File | undefined = undefined;
 let tileIndex: GeoJSONVT | undefined = undefined;
-let featureTree:
-  | Node<Feature<LineString | MultiLineString, GeoJsonProperties>>
-  | undefined = undefined;
+
 let featureRtree:
-  | RBush<RTreeItem<Feature<LineString | MultiLineString, GeoJsonProperties>>>
+  | LineSegmentRTree<Feature<LineString | MultiLineString, GeoJsonProperties>>
   | undefined = undefined;
 
 channel.handle(setWorkerFile, async ({ file: f, type: fileType }) => {
@@ -73,7 +68,7 @@ channel.handle(setWorkerFile, async ({ file: f, type: fileType }) => {
     };
 
     tileIndex = geojsonvt(f, { maxZoom: 24 });
-    ({ tree: featureTree, rtree: featureRtree } = trees({
+    ({ rtree: featureRtree } = trees({
       type: 'FeatureCollection',
       features: f.features,
     }));

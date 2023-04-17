@@ -82,7 +82,7 @@ function coordses(
 
 export function trees<G extends LineString | MultiLineString | Polygon, T>(
   feat: Feature<G, T> | FeatureCollection<G, T>
-): { tree: Node<Feature<G, T>>; rtree: RBush<RTreeItem<Feature<G, T>>> } {
+): { tree: Node<Feature<G, T>>; rtree: LineSegmentRTree<Feature<G, T>> } {
   const arcs: {
     arc: Position[];
     data: Feature<G, T>;
@@ -122,12 +122,14 @@ export interface RTreeItem<T> {
   data: T;
 }
 
+export type LineSegmentRTree<T> = RBush<RTreeItem<T>>;
+
 function makeRTree<G extends LineString | MultiLineString | Polygon, T>(
   arcs: {
     arc: Position[];
     data: Feature<G, T>;
   }[]
-) {
+): LineSegmentRTree<Feature<G, T>> {
   const tree = new RBush<RTreeItem<Feature<G, T>>>();
   const items: RTreeItem<Feature<G, T>>[] = [];
   arcs.forEach(({ arc, data }) => {
@@ -161,7 +163,7 @@ function makeRTree<G extends LineString | MultiLineString | Polygon, T>(
 }
 
 export function nearestLineSegmentUsingRtree<T>(
-  tree: RBush<RTreeItem<T>>,
+  tree: LineSegmentRTree<T>,
   point: [number, number]
 ) {
   return nearestUsingRTree(
