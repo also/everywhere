@@ -28,8 +28,12 @@ export const renderFeatureTileInWorker = key<{
 export const lookup =
   key<
     { coords: [number, number] },
-    // TODO don't return the whole feature, just the id?
-    Feature<LineString | MultiLineString, GeoJsonProperties> | undefined
+    | {
+        // TODO don't return the whole feature, just the id?
+        feature: Feature<LineString | MultiLineString, GeoJsonProperties>;
+        distance: number;
+      }
+    | undefined
   >('lookup');
 
 export async function create() {

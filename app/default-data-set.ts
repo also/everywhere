@@ -21,5 +21,6 @@ export async function loadDataset(): Promise<DataSet> {
     });
   });
 
+  // @ts-expect-error FIXME
   return buildDataSet(trips.map(feature), videoChapters);
 }

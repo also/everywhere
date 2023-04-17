@@ -13,6 +13,7 @@ function AnimTrip({ trip }: { trip: StravaTripFeature }) {
     const node = ref.current!;
     const length = node.getTotalLength();
     const ease = d3.ease('linear');
+    // @ts-expect-error FIXME
     d3.timer((elapsed) => {
       const t = elapsed / duration;
 

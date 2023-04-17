@@ -84,6 +84,7 @@ function VectorTileView({
       feature:
         | Feature<MultiLineString | LineString, GeoJsonProperties>
         | undefined;
+      distance: number | undefined;
       lng: number;
       lat: number;
     }>();
@@ -95,15 +96,15 @@ function VectorTileView({
       l.on('click', async ({ latlng: { lat, lng } }: L.LeafletMouseEvent) => {
         // TODO leaflet calls this handler twice? maybe https://github.com/Leaflet/Leaflet/issues/7255
         const selected = await channel.sendRequest(lookup, {
-          // coords: [-71.12068176269533, 42.38598201524725],
           coords: [lng, lat],
         });
         setSelected({
-          feature: selected,
+          feature: selected?.feature,
+          distance: selected?.distance,
           lng,
           lat,
         });
-        layer.setOpts({ selectedId: selected?.id });
+        layer.setOpts({ selectedId: selected?.feature.id });
       });
     };
   }, [channel]);

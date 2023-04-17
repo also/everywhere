@@ -97,16 +97,12 @@ channel.handle(
 );
 
 channel.handle(lookup, ({ coords }) => {
-  console.log({ coords });
-  console.time('lookup');
-  const result = featureTree?.nearestWithDistance(coords);
-  console.log({ result });
-  console.timeEnd('lookup');
-
   console.time('rtreeLookup');
   const result2 = nearestLineSegmentUsingRtree(featureRtree!, coords);
   console.log({ result2 });
   console.timeEnd('rtreeLookup');
-  return result2?.item.data;
+  return result2
+    ? { feature: result2.item.data, distance: result2.distance }
+    : undefined;
   // return result?.node.data;
 });
