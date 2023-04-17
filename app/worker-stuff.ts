@@ -5,8 +5,8 @@ import {
   MultiLineString,
 } from 'geojson';
 import { Tile } from 'geojson-vt';
-import { key, WorkerChannel, workerHandshake } from './WorkerChannel';
 import { TileRenderOpts } from './tile-drawing';
+import { key, WorkerChannel, workerHandshake } from './WorkerChannel';
 
 export const setWorkerFile =
   key<{ file: File | undefined; type: 'osm' | 'generic' }, void>('setFile');
