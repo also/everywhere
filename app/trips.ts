@@ -1,5 +1,5 @@
 /* eslint-disable camelcase */
-import { groupRTrees, LineSegmentRTree, tree } from './geo';
+import { group, LineSegmentRTree, tree } from './geo';
 import moment from 'moment';
 
 import { CoverageTree, groupChapters, Video, VideoChapter } from './videos';
@@ -132,14 +132,14 @@ export function buildDataSet(
 
   const videoCoverage = calculateVideoCoverage(trips, videos);
 
-  const tripTree: TripTree = groupRTrees(
+  const tripTree: TripTree = group(
     trips.map(({ properties: { tree } }) => tree)
   );
 
-  const videoTree = groupRTrees(
+  const videoTree = group(
     Array.from(videos.values())
       .map((video) => {
-        video.coverageTree = groupRTrees(
+        video.coverageTree = group(
           video.coverage.map(({ properties: { tree } }) => tree)
         );
         return video.coverageTree;

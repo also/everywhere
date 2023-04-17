@@ -107,7 +107,7 @@ export function tree<G extends LineString | MultiLineString | Polygon, T>(
   return rtree;
 }
 
-export function groupRTrees<T>(trees: LineSegmentRTree<T>[]) {
+export function group<T>(trees: LineSegmentRTree<T>[]) {
   const result = new RBush<RTreeItem<T>>();
   for (const tree of trees) {
     result.load(tree.all());

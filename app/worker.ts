@@ -35,7 +35,7 @@ channel.handle(workerHandshake, () => 'pong');
 let file: File | undefined = undefined;
 let tileIndex: GeoJSONVT | undefined = undefined;
 
-let featureRtree:
+let featureTree:
   | LineSegmentRTree<Feature<LineString | MultiLineString, GeoJsonProperties>>
   | undefined = undefined;
 
@@ -68,7 +68,7 @@ channel.handle(setWorkerFile, async ({ file: f, type: fileType }) => {
     };
 
     tileIndex = geojsonvt(f, { maxZoom: 24 });
-    featureRtree = tree({
+    featureTree = tree({
       type: 'FeatureCollection',
       features: f.features,
     });
@@ -87,17 +87,16 @@ channel.handle(renderTileInWorker, ({ canvas, coords: { z, x, y }, opts }) => {
 channel.handle(
   renderFeatureTileInWorker,
   ({ canvas, coords: { z, x, y }, opts }) => {
-    drawDistanceTile(canvas, { z, x, y }, featureRtree);
+    drawDistanceTile(canvas, { z, x, y }, featureTree);
   }
 );
 
 channel.handle(lookup, ({ coords }) => {
   console.time('rtreeLookup');
-  const result2 = nearestLineSegmentUsingRtree(featureRtree!, coords);
-  console.log({ result2 });
+  const result = nearestLineSegmentUsingRtree(featureTree!, coords);
+  console.log({ result2: result });
   console.timeEnd('rtreeLookup');
-  return result2
-    ? { feature: result2.item.data, distance: result2.distance }
+  return result
+    ? { feature: result.item.data, distance: result.distance }
     : undefined;
-  // return result?.node.data;
 });
