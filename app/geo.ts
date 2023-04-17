@@ -33,6 +33,7 @@ export function features<
   if (object.geometries.length !== 1) {
     console.log('expected a single geometry');
   }
+  // @ts-expect-error FIXME
   return topojson.feature(geojson, object);
 }
 
