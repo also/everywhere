@@ -105,20 +105,6 @@ function VectorTileView({
           lat,
         });
         layer.setOpts({ selectedId: selected?.node.data.id });
-        if (selected) {
-          console.log({
-            dist: pointLineSegmentDistance(
-              [lng, lat],
-              ...selected.node.coordinates
-            ),
-            distFixed: pointLineSegmentDistance(
-              [-71.03517293930055, 42.33059904560688],
-              ...selected.node.coordinates
-            ),
-          });
-        }
-
-        console.log({ selected });
       });
     };
   }, [channel]);
