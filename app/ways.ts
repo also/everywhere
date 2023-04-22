@@ -4,10 +4,12 @@ import { features, tree } from './geo';
 import { Node } from './tree';
 
 const waysGeojson =
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
   require('compact-json!../app-data/highways-clipped-topo.geojson') as TopoJSON.Topology<{
     'highways-clipped': TopoJSON.GeometryCollection<WayProperties>;
   }>;
 const intersectionsTopojson =
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
   require('compact-json!../app-data/intersections-clipped-topo.geojson') as TopoJSON.Topology<{
     'intersections-clipped': TopoJSON.GeometryCollection<IntersectionProperties>;
   }>;
