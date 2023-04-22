@@ -10,7 +10,6 @@ import { useMemo, useState } from 'react';
 import { VideoProperties } from '../../tools/parse/gopro-gps';
 import CanvasLayer from '../CanvasLayer';
 import { useMemoAsync } from '../hooks';
-import { pointLineSegmentDistance } from '../tree';
 import { drawFeatureTile, drawTile } from '../vector-tiles';
 
 import { create, lookup, setWorkerFile } from '../worker-stuff';
