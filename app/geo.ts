@@ -100,11 +100,7 @@ export function tree<G extends LineString | MultiLineString | Polygon, T>(
     }
   );
 
-  console.time('rtree');
-  const rtree = makeRTree(arcs);
-  console.timeEnd('rtree');
-
-  return rtree;
+  return makeRTree(arcs);
 }
 
 export function group<T>(trees: LineSegmentRTree<T>[]) {
