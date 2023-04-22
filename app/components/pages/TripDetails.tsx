@@ -8,7 +8,7 @@ import Dot from '../Dot';
 import { useCallback, useMemo, useState } from 'react';
 import { StravaTripFeature } from '../../trips';
 import StandardPage from '../StandardPage';
-import { RTreeItem, nearestLineSegmentUsingRtree } from '../../geo';
+import { RTreeItem, nearestLine } from '../../geo';
 
 export default function TripDetails({ trip }: { trip: StravaTripFeature }) {
   const [nearest, setNearest] =
@@ -21,7 +21,7 @@ export default function TripDetails({ trip }: { trip: StravaTripFeature }) {
   const trips = useMemo(() => [trip], [trip]);
 
   const onMouseMove: MapMouseHandler = useCallback(
-    ({ geo }) => setNearest(nearestLineSegmentUsingRtree(tree, geo)?.item),
+    ({ geo }) => setNearest(nearestLine(tree, geo)?.item),
     [trip]
   );
 

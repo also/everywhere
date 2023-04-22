@@ -2,12 +2,7 @@ import sortBy from 'lodash/sortBy';
 import moment from 'moment';
 import { CoverageFeature, StravaTripFeature } from './trips';
 import { Feature, LineString, MultiLineString, Position } from 'geojson';
-import {
-  LineSegmentRTree,
-  RTreeItem,
-  lineSegmentsWithinDistance,
-  nearestLineSegmentUsingRtree,
-} from './geo';
+import { LineRTree, RTreeItem, linesWithinDistance, nearestLine } from './geo';
 
 export type Still = { small: string; large: string };
 
@@ -34,7 +29,7 @@ export type RawVideoFeature = Feature<
   RawVideoProperties
 >;
 
-export type CoverageTree = LineSegmentRTree<CoverageFeature>;
+export type CoverageTree = LineRTree<CoverageFeature>;
 
 export type Video = {
   name: string;
@@ -151,7 +146,7 @@ export function calculateSeekPosition(nearest: RTreeItem<CoverageFeature>) {
 
 export function findSeekPosition(video: Video, location: Position) {
   const { coverageTree } = video;
-  const nearest = nearestLineSegmentUsingRtree(coverageTree, location)!.item;
+  const nearest = nearestLine(coverageTree, location)!.item;
   return calculateSeekPosition(nearest);
 }
 
@@ -168,15 +163,13 @@ export function findNearbyVideos(
       distance: number;
     }
   >();
-  lineSegmentsWithinDistance(videoTree, location, maxDistance).forEach(
-    (result) => {
-      const name = result.item.data.properties.video;
-      const current = nearbyVideoCoverageByName.get(name);
-      if (!current || result.distance < current.distance) {
-        nearbyVideoCoverageByName.set(name, result);
-      }
+  linesWithinDistance(videoTree, location, maxDistance).forEach((result) => {
+    const name = result.item.data.properties.video;
+    const current = nearbyVideoCoverageByName.get(name);
+    if (!current || result.distance < current.distance) {
+      nearbyVideoCoverageByName.set(name, result);
     }
-  );
+  });
 
   return Array.from(nearbyVideoCoverageByName.values()).map(
     ({ item, distance }) => {

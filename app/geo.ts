@@ -86,7 +86,7 @@ function coordses(
 
 export function tree<G extends LineString | MultiLineString | Polygon, T>(
   feat: Feature<G, T> | FeatureCollection<G, T>
-): LineSegmentRTree<Feature<G, T>> {
+): LineRTree<Feature<G, T>> {
   const arcs: {
     arc: Position[];
     data: Feature<G, T>;
@@ -103,7 +103,7 @@ export function tree<G extends LineString | MultiLineString | Polygon, T>(
   return makeRTree(arcs);
 }
 
-export function group<T>(trees: LineSegmentRTree<T>[]) {
+export function group<T>(trees: LineRTree<T>[]) {
   const result = new RBush<RTreeItem<T>>();
   for (const tree of trees) {
     result.load(tree.all());
@@ -121,14 +121,14 @@ export interface RTreeItem<T> {
   data: T;
 }
 
-export type LineSegmentRTree<T> = RBush<RTreeItem<T>>;
+export type LineRTree<T> = RBush<RTreeItem<T>>;
 
 function makeRTree<G extends LineString | MultiLineString | Polygon, T>(
   arcs: {
     arc: Position[];
     data: Feature<G, T>;
   }[]
-): LineSegmentRTree<Feature<G, T>> {
+): LineRTree<Feature<G, T>> {
   const tree = new RBush<RTreeItem<Feature<G, T>>>();
   const items: RTreeItem<Feature<G, T>>[] = [];
   arcs.forEach(({ arc, data }) => {
@@ -161,8 +161,8 @@ function makeRTree<G extends LineString | MultiLineString | Polygon, T>(
   return tree;
 }
 
-export function nearestLineSegmentUsingRtree<T>(
-  tree: LineSegmentRTree<T>,
+export function nearestLine<T>(
+  tree: LineRTree<T>,
   point: [number, number],
   maxDistance: number = Infinity,
   minDistance: number = 0
@@ -186,8 +186,8 @@ export function nearestLineSegmentUsingRtree<T>(
   );
 }
 
-export function lineSegmentsWithinDistance<T>(
-  tree: LineSegmentRTree<T>,
+export function linesWithinDistance<T>(
+  tree: LineRTree<T>,
   point: [number, number],
   distance: number
 ): {

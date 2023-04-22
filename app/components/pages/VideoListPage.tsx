@@ -9,7 +9,7 @@ import Dot from '../Dot';
 import { CoverageTree, Video } from '../../videos';
 import { CoverageFeature } from '../../trips';
 import StandardPage from '../StandardPage';
-import { RTreeItem, nearestLineSegmentUsingRtree } from '../../geo';
+import { RTreeItem, nearestLine } from '../../geo';
 
 export default function VideoListPage({
   videos,
@@ -25,13 +25,13 @@ export default function VideoListPage({
     useState<RTreeItem<CoverageFeature> | undefined>(undefined);
 
   const onMouseMove: MapMouseHandler = useCallback(
-    ({ geo }) => setNearest(nearestLineSegmentUsingRtree(videoTree, geo)?.item),
+    ({ geo }) => setNearest(nearestLine(videoTree, geo)?.item),
     [videoTree]
   );
 
   const onClick: MapMouseHandler = useCallback(
     ({ geo }) => {
-      const nearest = nearestLineSegmentUsingRtree(videoTree, geo)!.item;
+      const nearest = nearestLine(videoTree, geo)!.item;
       const {
         data: {
           properties: { start, video },

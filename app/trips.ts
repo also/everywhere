@@ -1,5 +1,5 @@
 /* eslint-disable camelcase */
-import { group, LineSegmentRTree, tree } from './geo';
+import { group, LineRTree, tree } from './geo';
 import moment from 'moment';
 
 import { CoverageTree, groupChapters, Video, VideoChapter } from './videos';
@@ -121,7 +121,7 @@ function calculateVideoCoverage(
   return videoCoverage;
 }
 
-export type TripTree = LineSegmentRTree<StravaTripFeature>;
+export type TripTree = LineRTree<StravaTripFeature>;
 
 export function buildDataSet(
   rawTrips: RawStravaTripFeature[],

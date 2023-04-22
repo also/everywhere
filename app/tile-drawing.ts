@@ -8,11 +8,7 @@ import { Tile, TileCoords } from 'geojson-vt';
 import { positionDistance } from './distance';
 import { highwayLevels } from './osm';
 import { interpolateTurbo as interpolate } from 'd3-scale-chromatic';
-import {
-  LineSegmentRTree,
-  RTreeItem,
-  nearestLineSegmentUsingRtree,
-} from './geo';
+import { LineRTree, RTreeItem, nearestLine } from './geo';
 import { pointLineSegmentDistance } from './geometry';
 
 export interface TileRenderOpts {
@@ -62,7 +58,7 @@ export function drawDistanceTile(
   canvas: HTMLCanvasElement | OffscreenCanvas,
   coords: TileCoords,
   featureTree:
-    | LineSegmentRTree<Feature<LineString | MultiLineString, GeoJsonProperties>>
+    | LineRTree<Feature<LineString | MultiLineString, GeoJsonProperties>>
     | undefined
 ) {
   const size = canvas.width;
@@ -100,12 +96,7 @@ export function drawDistanceTile(
         d = minDistance;
       } else {
         const p = featureTree
-          ? nearestLineSegmentUsingRtree(
-              featureTree,
-              [lng, lat],
-              maxDistance,
-              minDistance
-            )
+          ? nearestLine(featureTree, [lng, lat], maxDistance, minDistance)
           : undefined;
         d = p?.distance ?? maxDistance;
         prev = p;
