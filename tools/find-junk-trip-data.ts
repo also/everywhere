@@ -1,14 +1,14 @@
 import { MultiLineString } from 'geojson';
+import TinyQueue from 'tinyqueue';
 import { positionDistance } from '../app/distance';
 import { feature } from '../app/geo';
 import { stravaTopologies } from './strava';
 
-import minHeap from '../app/min-heap';
 import { RawStravaTripFeature, RawStravaTripProperties } from '../app/trips';
 
 export default async function () {
-  // TODO heap max size?
-  const heap = minHeap<{ feat: RawStravaTripFeature; count: number }>(
+  const heap = new TinyQueue<{ feat: RawStravaTripFeature; count: number }>(
+    [],
     (a, b) => b.count - a.count
   );
 
