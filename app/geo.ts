@@ -164,7 +164,8 @@ function makeRTree<G extends LineString | MultiLineString | Polygon, T>(
 export function nearestLineSegmentUsingRtree<T>(
   tree: LineSegmentRTree<T>,
   point: [number, number],
-  maxDistance: number = Infinity
+  maxDistance: number = Infinity,
+  minDistance: number = 0
 ):
   | {
       item: RTreeItem<T>;
@@ -180,7 +181,8 @@ export function nearestLineSegmentUsingRtree<T>(
       boxDist(p[0], p[1], box, (x1, y1, x2, y2) =>
         positionDistance([x1, y1], [x2, y2])
       ),
-    maxDistance
+    maxDistance,
+    minDistance
   );
 }
 

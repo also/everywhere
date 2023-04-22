@@ -100,7 +100,12 @@ export function drawDistanceTile(
         d = minDistance;
       } else {
         const p = featureTree
-          ? nearestLineSegmentUsingRtree(featureTree, [lng, lat], maxDistance)
+          ? nearestLineSegmentUsingRtree(
+              featureTree,
+              [lng, lat],
+              maxDistance,
+              minDistance
+            )
           : undefined;
         d = p?.distance ?? maxDistance;
         prev = p;

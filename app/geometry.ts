@@ -83,7 +83,8 @@ export function nearestUsingRTree<T>(
   p: [number, number],
   itemDist: (a: T, b: [number, number]) => number,
   bboxDist: (a: BBox, b: [number, number]) => number,
-  maxDistance: number = Infinity
+  maxDistance: number = Infinity,
+  minDistance: number = 0
 ) {
   let node: RBushNode<T> = (tree as any).data;
   const nearestNeighborPriorityQueue = new Queue<{
@@ -99,6 +100,9 @@ export function nearestUsingRTree<T>(
         if (d < maxDistance) {
           maxDistance = d;
           result = item;
+        }
+        if (d < minDistance) {
+          break;
         }
       }
     } else {
