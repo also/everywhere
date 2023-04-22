@@ -12,12 +12,7 @@ import * as topojson from 'topojson';
 import * as TopoJSON from 'topojson-specification';
 import RBush from 'rbush';
 
-import {
-  boxDist,
-  nearestUsingRTree,
-  pointLineSegmentDistance,
-  withinUsingRTree,
-} from './geometry';
+import { boxDist, nearest, pointLineSegmentDistance, within } from './geometry';
 import { positionDistance } from './distance';
 
 export type FeatureOrCollection<
@@ -172,7 +167,7 @@ export function nearestLine<T>(
       distance: number;
     }
   | undefined {
-  return nearestUsingRTree(
+  return nearest(
     tree,
     point,
     (node) =>
@@ -194,7 +189,7 @@ export function linesWithinDistance<T>(
   item: RTreeItem<T>;
   distance: number;
 }[] {
-  return withinUsingRTree(
+  return within(
     tree,
     point,
     distance,

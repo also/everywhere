@@ -28,16 +28,6 @@ export function pointLineSegmentDistance(
   return d(c, t <= 0 ? a : t >= 1 ? b : [a[0] + t * dx, a[1] + t * dy]);
 }
 
-// function boxDist(x: number, y: number, box: BBox) {
-//   const dx = axisDist(x, box.minX, box.maxX),
-//     dy = axisDist(y, box.minY, box.maxY);
-//   return dx * dx + dy * dy;
-// }
-
-// function axisDist(k: number, min: number, max: number) {
-//   return k < min ? min - k : k <= max ? 0 : k - max;
-// }
-
 type DistanceFunction = (
   x1: number,
   y1: number,
@@ -66,19 +56,19 @@ function nearestCoord(k: number, min: number, max: number) {
   return k < min ? min : k <= max ? k : max;
 }
 
-type RBushNode<T> = RBushInternalNode<T> | RBushLeaflNode<T>;
+type RBushNode<T> = RBushInternalNode<T> | RBushLeafNode<T>;
 
 interface RBushInternalNode<T> extends BBox {
   leaf: false;
   children: RBushNode<T>[];
 }
 
-interface RBushLeaflNode<T> extends BBox {
+interface RBushLeafNode<T> extends BBox {
   leaf: true;
   children: T[];
 }
 
-export function nearestUsingRTree<T>(
+export function nearest<T>(
   tree: RBush<T>,
   p: [number, number],
   itemDist: (a: T, b: [number, number]) => number,
@@ -125,7 +115,7 @@ export function nearestUsingRTree<T>(
   return result ? { item: result, distance: maxDistance } : undefined;
 }
 
-export function withinUsingRTree<T>(
+export function within<T>(
   tree: RBush<T>,
   p: [number, number],
   maxDistance: number,
