@@ -12,7 +12,12 @@ import * as topojson from 'topojson';
 import * as TopoJSON from 'topojson-specification';
 import RBush from 'rbush';
 
-import { boxDist, nearest, pointLineSegmentDistance, within } from './geometry';
+import {
+  DistanceFunction,
+  nearest,
+  pointLineSegmentDistance,
+  within,
+} from './geometry';
 import { positionDistance } from './distance';
 
 export type FeatureOrCollection<
@@ -116,6 +121,14 @@ export interface RTreeItem<T> {
   data: T;
 }
 
+export function pointLineSegmentItemDistance(
+  point: Position,
+  item: { p0: Position; p1: Position },
+  d: DistanceFunction
+): number {
+  return pointLineSegmentDistance(point, item.p0, item.p1, d);
+}
+
 export type LineRTree<T> = RBush<RTreeItem<T>>;
 
 function makeRTree<G extends LineString | MultiLineString | Polygon, T>(
@@ -158,7 +171,7 @@ function makeRTree<G extends LineString | MultiLineString | Polygon, T>(
 
 export function nearestLine<T>(
   tree: LineRTree<T>,
-  point: [number, number],
+  point: Position,
   maxDistance: number = Infinity,
   minDistance: number = 0
 ):
@@ -170,12 +183,8 @@ export function nearestLine<T>(
   return nearest(
     tree,
     point,
-    (node) =>
-      pointLineSegmentDistance(point, node.p0, node.p1, positionDistance),
-    (box, p) =>
-      boxDist(p[0], p[1], box, (x1, y1, x2, y2) =>
-        positionDistance([x1, y1], [x2, y2])
-      ),
+    pointLineSegmentItemDistance,
+    positionDistance,
     maxDistance,
     minDistance
   );
@@ -183,7 +192,7 @@ export function nearestLine<T>(
 
 export function linesWithinDistance<T>(
   tree: LineRTree<T>,
-  point: [number, number],
+  point: Position,
   distance: number
 ): {
   item: RTreeItem<T>;
@@ -193,11 +202,7 @@ export function linesWithinDistance<T>(
     tree,
     point,
     distance,
-    (node) =>
-      pointLineSegmentDistance(point, node.p0, node.p1, positionDistance),
-    (box, p) =>
-      boxDist(p[0], p[1], box, (x1, y1, x2, y2) =>
-        positionDistance([x1, y1], [x2, y2])
-      )
+    pointLineSegmentItemDistance,
+    positionDistance
   );
 }

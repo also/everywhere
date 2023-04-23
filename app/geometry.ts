@@ -9,7 +9,9 @@ export function compareDistance(
   return a.distance - b.distance;
 }
 
-export function pointDistance(a: Position, b: Position) {
+export type DistanceFunction = (a: Position, b: Position) => number;
+
+export function squaredEuclideanDistance(a: Position, b: Position) {
   const dx = a[0] - b[0];
   const dy = a[1] - b[1];
   return dx * dx + dy * dy;
@@ -19,7 +21,7 @@ export function pointLineSegmentDistance(
   c: Position,
   a: Position,
   b: Position,
-  d: typeof pointDistance = pointDistance
+  d: DistanceFunction = squaredEuclideanDistance
 ) {
   const dx = b[0] - a[0];
   const dy = b[1] - a[1];
@@ -28,28 +30,16 @@ export function pointLineSegmentDistance(
   return d(c, t <= 0 ? a : t >= 1 ? b : [a[0] + t * dx, a[1] + t * dy]);
 }
 
-type DistanceFunction = (
-  x1: number,
-  y1: number,
-  x2: number,
-  y2: number
-) => number;
-
-export const euclideanDistance: DistanceFunction = (x1, y1, x2, y2) => {
-  const dx = x1 - x2;
-  const dy = y1 - y2;
-  return dx * dx + dy * dy;
-};
-
 export function boxDist(
-  x: number,
-  y: number,
+  point: Position,
   box: BBox,
   distanceFn: DistanceFunction
 ) {
+  const x = point[0];
+  const y = point[1];
   const nearestX = nearestCoord(x, box.minX, box.maxX),
     nearestY = nearestCoord(y, box.minY, box.maxY);
-  return distanceFn(x, y, nearestX, nearestY);
+  return distanceFn([x, y], [nearestX, nearestY]);
 }
 
 function nearestCoord(k: number, min: number, max: number) {
@@ -70,9 +60,9 @@ interface RBushLeafNode<T> extends BBox {
 
 export function nearest<T>(
   tree: RBush<T>,
-  p: [number, number],
-  itemDist: (a: T, b: [number, number]) => number,
-  bboxDist: (a: BBox, b: [number, number]) => number,
+  p: Position,
+  itemDist: (point: Position, item: T, dist: DistanceFunction) => number,
+  dist: DistanceFunction,
   maxDistance: number = Infinity,
   minDistance: number = 0
 ) {
@@ -86,7 +76,7 @@ export function nearest<T>(
   while (node) {
     if (node.leaf) {
       for (const item of node.children) {
-        const d = itemDist(item, p);
+        const d = itemDist(p, item, dist);
         if (d < maxDistance) {
           maxDistance = d;
           result = item;
@@ -97,7 +87,7 @@ export function nearest<T>(
       }
     } else {
       for (const child of node.children) {
-        const d = bboxDist(child, p);
+        const d = boxDist(p, child, dist);
         if (d < maxDistance) {
           nearestNeighborPriorityQueue.push({ node: child, distance: d });
         }
@@ -117,10 +107,10 @@ export function nearest<T>(
 
 export function within<T>(
   tree: RBush<T>,
-  p: [number, number],
+  p: Position,
   maxDistance: number,
-  itemDist: (a: T, b: [number, number]) => number,
-  bboxDist: (a: BBox, b: [number, number]) => number
+  itemDist: (point: Position, item: T, dist: DistanceFunction) => number,
+  dist: DistanceFunction
 ) {
   let node: RBushNode<T> | undefined = (tree as any).data;
   const queue: RBushNode<T>[] = [];
@@ -129,14 +119,14 @@ export function within<T>(
   while (node) {
     if (node.leaf) {
       for (const item of node.children) {
-        const d = itemDist(item, p);
+        const d = itemDist(p, item, dist);
         if (d < maxDistance) {
           result.push({ distance: d, item });
         }
       }
     } else {
       for (const child of node.children) {
-        const d = bboxDist(child, p);
+        const d = boxDist(p, child, dist);
         if (d < maxDistance) {
           queue.push(child);
         }

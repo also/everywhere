@@ -82,7 +82,9 @@ channel.handle(renderTileInWorker, ({ canvas, coords: { z, x, y }, opts }) => {
 channel.handle(
   renderFeatureTileInWorker,
   ({ canvas, coords: { z, x, y }, opts }) => {
+    console.time('drawDistanceTile');
     drawDistanceTile(canvas, { z, x, y }, featureTree);
+    console.timeEnd('drawDistanceTile');
   }
 );
 

@@ -67,7 +67,7 @@ export function drawDistanceTile(
 
   // TODO still looks better with just "5" - probably want a nonlinear scale
   // const squareSize = computeSquareSize(4, 11, coords.z);
-  const squareSize = 16;
+  const squareSize = 8;
   let prev:
     | {
         item: RTreeItem<
