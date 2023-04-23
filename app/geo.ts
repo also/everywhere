@@ -10,8 +10,15 @@ import {
 } from 'geojson';
 import * as topojson from 'topojson';
 import * as TopoJSON from 'topojson-specification';
+import RBush from 'rbush';
 
-import makeTree, { Node } from './tree';
+import {
+  DistanceFunction,
+  nearest,
+  pointLineSegmentDistance,
+  within,
+} from './geometry';
+import { positionDistance } from './distance';
 
 export type FeatureOrCollection<
   G extends Geometry,
@@ -79,7 +86,7 @@ function coordses(
 
 export function tree<G extends LineString | MultiLineString | Polygon, T>(
   feat: Feature<G, T> | FeatureCollection<G, T>
-): Node<Feature<G, T>> {
+): LineRTree<Feature<G, T>> {
   const arcs: {
     arc: Position[];
     data: Feature<G, T>;
@@ -93,7 +100,109 @@ export function tree<G extends LineString | MultiLineString | Polygon, T>(
     }
   );
 
-  return makeTree<Feature<G, T>>({
-    arcs,
+  return makeRTree(arcs);
+}
+
+export function group<T>(trees: LineRTree<T>[]) {
+  const result = new RBush<RTreeItem<T>>();
+  for (const tree of trees) {
+    result.load(tree.all());
+  }
+  return result;
+}
+
+export interface RTreeItem<T> {
+  minX: number;
+  minY: number;
+  maxX: number;
+  maxY: number;
+  p0: Position;
+  p1: Position;
+  data: T;
+}
+
+export function pointLineSegmentItemDistance(
+  point: Position,
+  item: { p0: Position; p1: Position },
+  d: DistanceFunction
+): number {
+  return pointLineSegmentDistance(point, item.p0, item.p1, d);
+}
+
+export type LineRTree<T> = RBush<RTreeItem<T>>;
+
+function makeRTree<G extends LineString | MultiLineString | Polygon, T>(
+  arcs: {
+    arc: Position[];
+    data: Feature<G, T>;
+  }[]
+): LineRTree<Feature<G, T>> {
+  const tree = new RBush<RTreeItem<Feature<G, T>>>();
+  const items: RTreeItem<Feature<G, T>>[] = [];
+  arcs.forEach(({ arc, data }) => {
+    let i = 0;
+    const n = arc.length;
+    let p0;
+    let p1 = arc[0];
+
+    while (++i < n) {
+      p0 = p1;
+      p1 = arc[i];
+      const minX = Math.min(p0[0], p1[0]);
+      const minY = Math.min(p0[1], p1[1]);
+      const maxX = Math.max(p0[0], p1[0]);
+      const maxY = Math.max(p0[1], p1[1]);
+      items.push({
+        minX,
+        minY,
+        maxX,
+        maxY,
+        p0,
+        p1,
+        data,
+      });
+    }
   });
+
+  tree.load(items);
+
+  return tree;
+}
+
+export function nearestLine<T>(
+  tree: LineRTree<T>,
+  point: Position,
+  maxDistance: number = Infinity,
+  minDistance: number = 0
+):
+  | {
+      item: RTreeItem<T>;
+      distance: number;
+    }
+  | undefined {
+  return nearest(
+    tree,
+    point,
+    pointLineSegmentItemDistance,
+    positionDistance,
+    maxDistance,
+    minDistance
+  );
+}
+
+export function linesWithinDistance<T>(
+  tree: LineRTree<T>,
+  point: Position,
+  distance: number
+): {
+  item: RTreeItem<T>;
+  distance: number;
+}[] {
+  return within(
+    tree,
+    point,
+    distance,
+    pointLineSegmentItemDistance,
+    positionDistance
+  );
 }

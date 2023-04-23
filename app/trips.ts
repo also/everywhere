@@ -1,6 +1,5 @@
 /* eslint-disable camelcase */
-import { tree } from './geo';
-import { group, Node } from './tree';
+import { group, LineRTree, tree } from './geo';
 import moment from 'moment';
 
 import { CoverageTree, groupChapters, Video, VideoChapter } from './videos';
@@ -109,6 +108,7 @@ function calculateVideoCoverage(
               coordinates,
             },
           };
+          // TODO is the type right?
           coverage.properties.tree = tree(coverage);
 
           videoCoverage.push(coverage);
@@ -121,7 +121,7 @@ function calculateVideoCoverage(
   return videoCoverage;
 }
 
-export type TripTree = Node<StravaTripFeature>;
+export type TripTree = LineRTree<StravaTripFeature>;
 
 export function buildDataSet(
   rawTrips: RawStravaTripFeature[],

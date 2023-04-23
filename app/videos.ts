@@ -1,8 +1,8 @@
 import sortBy from 'lodash/sortBy';
 import moment from 'moment';
 import { CoverageFeature, StravaTripFeature } from './trips';
-import { Leaf, Node } from './tree';
 import { Feature, LineString, MultiLineString, Position } from 'geojson';
+import { LineRTree, RTreeItem, linesWithinDistance, nearestLine } from './geo';
 
 export type Still = { small: string; large: string };
 
@@ -29,7 +29,7 @@ export type RawVideoFeature = Feature<
   RawVideoProperties
 >;
 
-export type CoverageTree = Node<CoverageFeature>;
+export type CoverageTree = LineRTree<CoverageFeature>;
 
 export type Video = {
   name: string;
@@ -133,12 +133,12 @@ export function groupChapters(videos: VideoChapter[]): Map<string, Video> {
   );
 }
 
-export function calculateSeekPosition(nearest: Leaf<CoverageFeature>) {
+export function calculateSeekPosition(nearest: RTreeItem<CoverageFeature>) {
   const {
     data: {
       properties: { start },
     },
-    coordinates: [coord],
+    p0: coord,
   } = nearest;
   const [, , , timeOffsetSecs] = coord;
   return +start.clone().add(timeOffsetSecs, 's');
@@ -146,7 +146,7 @@ export function calculateSeekPosition(nearest: Leaf<CoverageFeature>) {
 
 export function findSeekPosition(video: Video, location: Position) {
   const { coverageTree } = video;
-  const nearest = coverageTree.nearest(location);
+  const nearest = nearestLine(coverageTree, location)!.item;
   return calculateSeekPosition(nearest);
 }
 
@@ -155,9 +155,16 @@ export function findNearbyVideos(
   location: Position,
   maxDistance: number
 ) {
-  const nearbyVideoCoverageByName = new Map();
-  videoTree.within(location, maxDistance).forEach((result) => {
-    const name = result.node.data.properties.video;
+  // FIXME what type should this have?
+  const nearbyVideoCoverageByName = new Map<
+    any,
+    {
+      item: RTreeItem<CoverageFeature>;
+      distance: number;
+    }
+  >();
+  linesWithinDistance(videoTree, location, maxDistance).forEach((result) => {
+    const name = result.item.data.properties.video;
     const current = nearbyVideoCoverageByName.get(name);
     if (!current || result.distance < current.distance) {
       nearbyVideoCoverageByName.set(name, result);
@@ -165,13 +172,13 @@ export function findNearbyVideos(
   });
 
   return Array.from(nearbyVideoCoverageByName.values()).map(
-    ({ node, distance }) => {
+    ({ item, distance }) => {
       const {
         data: {
           properties: { video },
         },
-      } = node;
-      const time = calculateSeekPosition(node);
+      } = item;
+      const time = calculateSeekPosition(item);
       return { video, time, distance };
     }
   );

@@ -98,12 +98,12 @@ function VectorTileView({
           coords: [lng, lat],
         });
         setSelected({
-          feature: selected?.node.data,
+          feature: selected?.feature,
           distance: selected?.distance,
           lng,
           lat,
         });
-        layer.setOpts({ selectedId: selected?.node.data.id });
+        layer.setOpts({ selectedId: selected?.feature.id });
       });
     };
   }, [channel]);

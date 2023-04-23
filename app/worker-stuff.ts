@@ -5,7 +5,6 @@ import {
   MultiLineString,
 } from 'geojson';
 import { Tile } from 'geojson-vt';
-import { Leaf } from './tree';
 import { TileRenderOpts } from './tile-drawing';
 import { key, WorkerChannel, workerHandshake } from './WorkerChannel';
 
@@ -31,7 +30,7 @@ export const lookup =
     { coords: [number, number] },
     // TODO don't return the whole feature, just the id?
     | {
-        node: Leaf<Feature<LineString | MultiLineString, GeoJsonProperties>>;
+        feature: Feature<LineString | MultiLineString, GeoJsonProperties>;
         distance: number;
       }
     | undefined

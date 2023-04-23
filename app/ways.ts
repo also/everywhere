@@ -1,7 +1,6 @@
 import sortBy from 'lodash/sortBy';
 
-import { features, tree } from './geo';
-import { Node } from './tree';
+import { LineRTree, features, tree } from './geo';
 
 const waysGeojson =
   // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -94,7 +93,7 @@ intersections.features.forEach((intersection) => {
   });
 });
 
-export type WayTree = Node<WayFeature>;
+export type WayTree = LineRTree<WayFeature>;
 
 const wayTree: WayTree = tree(ways);
 

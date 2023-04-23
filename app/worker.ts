@@ -8,9 +8,8 @@ import {
   renderTileInWorker,
   setWorkerFile,
 } from './worker-stuff';
-import { features } from './geo';
+import { LineRTree, features, nearestLine, tree } from './geo';
 import { drawDistanceTile, drawTile2 } from './tile-drawing';
-import { tree } from './geo';
 import {
   Feature,
   FeatureCollection,
@@ -18,7 +17,6 @@ import {
   LineString,
   MultiLineString,
 } from 'geojson';
-import { Node } from './tree';
 import { highwayLevels } from './osm';
 
 // https://github.com/Microsoft/TypeScript/issues/20595
@@ -31,8 +29,9 @@ channel.handle(workerHandshake, () => 'pong');
 
 let file: File | undefined = undefined;
 let tileIndex: GeoJSONVT | undefined = undefined;
+
 let featureTree:
-  | Node<Feature<LineString | MultiLineString, GeoJsonProperties>>
+  | LineRTree<Feature<LineString | MultiLineString, GeoJsonProperties>>
   | undefined = undefined;
 
 channel.handle(setWorkerFile, async ({ file: f, type: fileType }) => {
@@ -83,11 +82,15 @@ channel.handle(renderTileInWorker, ({ canvas, coords: { z, x, y }, opts }) => {
 channel.handle(
   renderFeatureTileInWorker,
   ({ canvas, coords: { z, x, y }, opts }) => {
+    console.time('drawDistanceTile');
     drawDistanceTile(canvas, { z, x, y }, featureTree);
+    console.timeEnd('drawDistanceTile');
   }
 );
 
 channel.handle(lookup, ({ coords }) => {
-  const result = featureTree?.nearestWithDistance(coords);
-  return result;
+  const result = nearestLine(featureTree!, coords);
+  return result
+    ? { feature: result.item.data, distance: result.distance }
+    : undefined;
 });
