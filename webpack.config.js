@@ -46,6 +46,12 @@ module.exports = (env) => ({
         test: /\.s[ac]ss$/,
         loader: 'sass-loader',
       },
+      {
+        test: /\.m?js$/,
+        resolve: {
+          fullySpecified: false,
+        },
+      },
     ],
   },
   resolve: {

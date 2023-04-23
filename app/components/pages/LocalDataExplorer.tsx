@@ -3,6 +3,7 @@ import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { get, set } from 'idb-keyval';
 import { fileOpen, FileWithHandle } from 'browser-fs-access';
 import { Feature } from 'geojson';
+import { Button, Select } from 'evergreen-ui';
 import PageTitle from '../PageTitle';
 import MapComponent from '../Map';
 import MapContext from '../MapContext';
@@ -259,27 +260,41 @@ export default function LocalDataExplorer({
       <VectorTileFileView
         file={file}
         type={type as any}
-        controls={<button onClick={() => setFile(undefined)}>Unload</button>}
+        controls={
+          <Button size="small" onClick={() => setFile(undefined)}>
+            Unload
+          </Button>
+        }
       />
     </FullScreenPage>
   ) : (
     <StandardPage>
       <PageTitle>Local Data</PageTitle>
       <div>
-        <select value={type} onChange={(e) => setType(e.target.value)}>
+        <Select
+          size="small"
+          value={type}
+          onChange={(e) => setType(e.target.value)}
+        >
           <option>generic</option>
           <option>osm</option>
-        </select>
+        </Select>
         {initialized ? (
           <>
-            <button onClick={handleLoadClick}>load</button>
-            <button onClick={handleAddClick}>add</button>
+            <Button size="small" onClick={handleLoadClick}>
+              load
+            </Button>
+            <Button size="small" onClick={handleAddClick}>
+              add
+            </Button>
           </>
         ) : undefined}
 
         {files ? (
           <>
-            <button onClick={handleSetDatasetClick}>Set Dataset</button>
+            <Button size="small" onClick={handleSetDatasetClick}>
+              Set Dataset
+            </Button>
           </>
         ) : undefined}
       </div>
@@ -299,7 +314,9 @@ export default function LocalDataExplorer({
               <td>{f.size.toLocaleString()}</td>
               <td>{new Date(f.lastModified).toLocaleString()}</td>
               <td>
-                <button onClick={() => setFile(f)}>load</button>
+                <Button size="small" onClick={() => setFile(f)}>
+                  load
+                </Button>
               </td>
             </tr>
           ))}
