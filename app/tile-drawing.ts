@@ -8,8 +8,12 @@ import { Tile, TileCoords } from 'geojson-vt';
 import { positionDistance } from './distance';
 import { highwayLevels } from './osm';
 import { interpolateTurbo as interpolate } from 'd3-scale-chromatic';
-import { LineRTree, RTreeItem, nearestLine } from './geo';
-import { pointLineSegmentDistance } from './geometry';
+import {
+  LineRTree,
+  RTreeItem,
+  nearestLine,
+  pointLineSegmentItemDistance,
+} from './geo';
 
 export interface TileRenderOpts {
   selectedId: string | number | undefined;
@@ -84,19 +88,17 @@ export function drawDistanceTile(
 
       let d: number;
 
+      const point = [lng, lat];
+
       if (
         prev &&
-        pointLineSegmentDistance(
-          [lng, lat],
-          prev.item.p0,
-          prev.item.p1,
-          positionDistance
-        ) <= minDistance
+        pointLineSegmentItemDistance(point, prev.item, positionDistance) <=
+          minDistance
       ) {
         d = minDistance;
       } else {
         const p = featureTree
-          ? nearestLine(featureTree, [lng, lat], maxDistance, minDistance)
+          ? nearestLine(featureTree, point, maxDistance, minDistance)
           : undefined;
         d = p?.distance ?? maxDistance;
         prev = p;
