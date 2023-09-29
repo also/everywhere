@@ -33,6 +33,16 @@ function clamp(value: number, a: number, b: number) {
   return Math.max(Math.min(value, Math.max(a, b)), Math.min(a, b));
 }
 
+export function color(d: number) {
+  return interpolate(
+    -clamp(
+      mapRange(d, minDistance, maxDistance, minOpacity, maxOpacity),
+      minOpacity,
+      maxOpacity
+    ) + 1
+  );
+}
+
 function mapRange(
   value: number,
   inMin: number,
@@ -103,15 +113,7 @@ export function drawDistanceTile(
         d = p?.distance ?? maxDistance;
         prev = p;
       }
-      ctx.fillStyle = interpolate(
-        -clamp(
-          mapRange(d, minDistance, maxDistance, minOpacity, maxOpacity),
-          minOpacity,
-          maxOpacity
-        ) + 1
-      )
-        .replace('rgb', 'rgba')
-        .replace(')', ', 0.5)');
+      ctx.fillStyle = color(d).replace('rgb', 'rgba').replace(')', ', 0.5)');
       ctx.fillRect(x, y, squareSize, squareSize);
     }
   }

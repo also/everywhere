@@ -25,6 +25,8 @@ import TripDetails from './components/pages/TripDetails';
 
 import LocationDetails from './components/pages/LocationDetails';
 
+import DocsPage from './components/pages/DocsPage';
+
 import { geoLines } from './geo';
 
 import {
@@ -278,6 +280,7 @@ ReactDOM.render(
                     path="/locations/:coords"
                     component={LocationDetailsRoute}
                   />
+                  <Route path="/docs" component={DocsPage} />
                   <Route path="/" component={CityMapRoute} />
                 </Switch>
               </App>

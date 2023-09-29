@@ -46,6 +46,16 @@ module.exports = (env) => ({
         test: /\.s[ac]ss$/,
         loader: 'sass-loader',
       },
+      {
+        test: /\.mdx?$/,
+        use: [
+          {
+            loader: '@mdx-js/loader',
+            /** @type {import('@mdx-js/loader').Options} */
+            options: {},
+          },
+        ],
+      },
     ],
   },
   resolve: {
