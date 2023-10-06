@@ -1,5 +1,19 @@
 import Scale from './docs/Scale';
+import LeafletMapExample from './docs/LeafletMapExample';
+import { interpolateViridis } from 'd3-scale-chromatic';
 
 ## Heatmap Scale
 
 <Scale />
+
+## Other Scale
+
+<Scale scale={interpolateViridis} />
+
+## Leaflet Map of Trips
+
+<LeafletMapExample data="trips" />
+
+## Leaflet Map of Videos
+
+<LeafletMapExample data="videoCoverage" />

@@ -1,8 +1,9 @@
-import { color } from '../tile-drawing';
+import { color, minDistance, maxDistance } from '../tile-drawing';
 
-export default function Scale() {
+export default function Scale({ scale }: { scale?: (v: number) => string }) {
   return (
-    <span>
+    <>
+      <p>{JSON.stringify({ minDistance, maxDistance })}</p>
       {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => (
         <span
           key={i}
@@ -13,7 +14,7 @@ export default function Scale() {
             textAlign: 'center',
             padding: '0.25em 0.5em',
             fontWeight: 'bold',
-            backgroundColor: color(i * 50)
+            backgroundColor: color(i * 50, scale)
               .replace('rgb', 'rgba')
               .replace(')', ', 0.5)'),
           }}
@@ -21,6 +22,6 @@ export default function Scale() {
           {i * 50}
         </span>
       ))}
-    </span>
+    </>
   );
 }

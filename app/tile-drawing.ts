@@ -33,8 +33,8 @@ function clamp(value: number, a: number, b: number) {
   return Math.max(Math.min(value, Math.max(a, b)), Math.min(a, b));
 }
 
-export function color(d: number) {
-  return interpolate(
+export function color(d: number, scale = interpolate) {
+  return scale(
     -clamp(
       mapRange(d, minDistance, maxDistance, minOpacity, maxOpacity),
       minOpacity,
@@ -56,8 +56,8 @@ function mapRange(
 const minOpacity = 0.8;
 const maxOpacity = 0.0;
 
-const minDistance = 100;
-const maxDistance = 500;
+export const minDistance = 100;
+export const maxDistance = 500;
 
 function computeSquareSize(
   initialSize: number,
