@@ -34,6 +34,7 @@
     "d3-scale-chromatic": "^3.0.0",
     "eslint": "^7.26.0",
     "eslint-plugin-react": "^7.23.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
     "geojson-length": "^0.1.1",
     "geojson-vt": "^3.2.1",
     "glob": "^5.0.10",
