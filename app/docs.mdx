@@ -21,3 +21,10 @@ import { interpolateViridis } from 'd3-scale-chromatic';
 ## Centered Differently
 
 <LeafletMapExample center={[40.7128, -74.006]} zoom={10} />
+
+## The worst ride of the original project
+
+<LeafletMapExample
+  data={(dataSet) => dataSet.tripsById.get('329517677')}
+  zoom={13}
+/>
