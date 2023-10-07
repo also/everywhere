@@ -46,7 +46,7 @@ export default memo(function Trips({ trips }: { trips: StravaTripFeature[] }) {
   return (
     <g>
       {trips.map((trip) => (
-        <Trip trip={trip} />
+        <Trip key={trip.properties.id} trip={trip} />
       ))}
     </g>
   );
