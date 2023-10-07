@@ -1,17 +1,17 @@
 import { useContext, useMemo } from 'react';
 import DataSetContext from '../components/DataSetContext';
 import LeafletMap from '../components/LeafletMap';
-import { DataSet } from '../data';
+import {
+  DataSetFeatureExtractor,
+  extractFeaturesFromDataSet,
+} from './dataset-utils';
 
 export default function LeafletMapExample({
   data,
   zoom,
   center,
 }: {
-  data?:
-    | 'trips'
-    | 'videoCoverage'
-    | ((dataset: DataSet) => GeoJSON.Feature[] | GeoJSON.Feature | undefined);
+  data?: 'trips' | 'videoCoverage' | DataSetFeatureExtractor;
   zoom?: number;
   center?: [number, number];
 }) {
@@ -19,8 +19,7 @@ export default function LeafletMapExample({
 
   const features = useMemo(() => {
     if (typeof data === 'function') {
-      const result = data(dataset);
-      return result && !Array.isArray(result) ? [result] : result;
+      return extractFeaturesFromDataSet(dataset, data);
     }
     return data ? dataset[data] : undefined;
   }, [data, dataset]);

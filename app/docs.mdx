@@ -1,5 +1,6 @@
 import Scale from './docs/Scale';
 import LeafletMapExample from './docs/LeafletMapExample';
+import StylizedMapExample from './docs/StylizedMapExample';
 import { interpolateViridis } from 'd3-scale-chromatic';
 
 ## Heatmap Scale
@@ -28,3 +29,7 @@ import { interpolateViridis } from 'd3-scale-chromatic';
   data={(dataSet) => dataSet.tripsById.get('329517677')}
   zoom={13}
 />
+
+### As a stylized map
+
+<StylizedMapExample data={(dataSet) => dataSet.tripsById.get('329517677')} />
