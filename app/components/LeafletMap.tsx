@@ -26,7 +26,11 @@ const mapboxOpts = {
     'pk.eyJ1IjoicmJlcmRlZW4iLCJhIjoiZTU1YjNmOWU4MWExNDJhNWNlMTAxYjA2NjFlODBiNWUifQ.AHJ0I8wQi1pJekXfAaPxLw',
 };
 
-function createMap(element: HTMLElement) {
+function createMap(
+  element: HTMLElement,
+  center: [number, number],
+  zoom: number
+) {
   const streets = L.tileLayer(
     'https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}',
     mapboxOpts
@@ -52,7 +56,7 @@ function createMap(element: HTMLElement) {
       streets,
       ...heatmaps.filter((l) => (l.options as any).enabledByDefault !== false),
     ],
-  }).setView([42.389118, -71.097153], 11);
+  }).setView(center, zoom);
 
   control.addTo(map);
 
@@ -65,16 +69,20 @@ function createMap(element: HTMLElement) {
 export default React.memo(function LeafletMap({
   features = [],
   customize,
+  center = [42.389118, -71.097153],
+  zoom = 11,
 }: {
   features?: GeoJSON.Feature[];
   customize?(map: L.Map): void;
+  center?: [number, number];
+  zoom?: number;
 }) {
   const mapComponent = useRef<HTMLDivElement>(null);
   const mapRef = useRef<{ map: L.Map; defaultLayers: Set<L.Layer> }>();
 
   useEffect(() => {
     if (!mapRef.current) {
-      mapRef.current = createMap(mapComponent.current!);
+      mapRef.current = createMap(mapComponent.current!, center, zoom);
     }
 
     const { map, defaultLayers } = mapRef.current;

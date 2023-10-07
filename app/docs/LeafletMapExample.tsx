@@ -4,10 +4,15 @@ import LeafletMap from '../components/LeafletMap';
 
 export default function LeafletMapExample({
   data,
+  zoom,
+  center,
 }: {
-  data: 'trips' | 'videoCoverage';
+  data?: 'trips' | 'videoCoverage';
+  zoom?: number;
+  center?: [number, number];
 }) {
   const dataset = useContext(DataSetContext);
+
   return (
     <div
       style={{
@@ -17,7 +22,11 @@ export default function LeafletMapExample({
         height: 300,
       }}
     >
-      <LeafletMap features={dataset[data]} />
+      <LeafletMap
+        features={data ? dataset[data] : undefined}
+        center={center}
+        zoom={zoom}
+      />
     </div>
   );
 }
