@@ -1,8 +1,10 @@
 import sortedIndexBy from 'lodash/sortedIndexBy';
-import { memo, useEffect, useRef, useState } from 'react';
+import React, { memo, useEffect, useRef, useState } from 'react';
 import { Video } from '../videos';
 import moment from 'moment';
 import { Position } from 'geojson';
+
+type ReactVideoEvent = React.SyntheticEvent<HTMLVideoElement>;
 
 export default memo(function VideoPlayer({
   video,
@@ -58,9 +60,9 @@ export default memo(function VideoPlayer({
     }
   }, [seek]);
 
-  function onLoadedMetadata() {
+  function onLoadedMetadata(e: ReactVideoEvent) {
     if (seekingTo) {
-      videoNode.current!.currentTime = seekingTo;
+      e.currentTarget.currentTime = seekingTo;
     }
   }
 
@@ -74,10 +76,10 @@ export default memo(function VideoPlayer({
 
   const chapter = video.chapters[chapterIndex];
 
-  function onTimeUpdate() {
+  function onTimeUpdate(e: ReactVideoEvent) {
     const time = chapter.start
       .clone()
-      .add(videoNode.current!.currentTime, 'second');
+      .add(e.currentTarget.currentTime, 'second');
     const coverage = video.coverage.find(
       ({ properties: { start, end } }) => time >= start && time < end
     );
