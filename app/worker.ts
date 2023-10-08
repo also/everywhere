@@ -4,7 +4,7 @@ import geojsonvt, { GeoJSONVT } from 'geojson-vt';
 import {
   getTile,
   lookup,
-  renderFeatureTileInWorker,
+  renderDistanceTileInWorker,
   renderTileInWorker,
   setWorkerFile,
 } from './worker-stuff';
@@ -80,7 +80,7 @@ channel.handle(renderTileInWorker, ({ canvas, coords: { z, x, y }, opts }) => {
 });
 
 channel.handle(
-  renderFeatureTileInWorker,
+  renderDistanceTileInWorker,
   ({ canvas, coords: { z, x, y }, opts }) => {
     console.time('drawDistanceTile');
     drawDistanceTile(canvas, { z, x, y }, featureTree);

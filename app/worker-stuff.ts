@@ -19,11 +19,11 @@ export const renderTileInWorker =
     opts: TileRenderOpts | undefined;
   }>('renderTileInWorker');
 
-export const renderFeatureTileInWorker = key<{
+export const renderDistanceTileInWorker = key<{
   coords: { x: number; y: number; z: number };
   canvas: OffscreenCanvas;
   opts: TileRenderOpts | undefined;
-}>('renderFeatureTileInWorker');
+}>('renderDistanceTileInWorker');
 
 export const lookup =
   key<

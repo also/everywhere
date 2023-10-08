@@ -1,7 +1,7 @@
 import { drawTile2, TileRenderOpts } from './tile-drawing';
 import {
   getTile,
-  renderFeatureTileInWorker,
+  renderDistanceTileInWorker,
   renderTileInWorker,
 } from './worker-stuff';
 import { WorkerChannel } from './WorkerChannel';
@@ -31,7 +31,7 @@ export async function drawTile(
     }
   }
 }
-export async function drawFeatureTile(
+export async function drawDistanceTile(
   channel: WorkerChannel,
   canvas: HTMLCanvasElement,
   coords: { x: number; y: number; z: number },
@@ -39,7 +39,7 @@ export async function drawFeatureTile(
 ) {
   const offscreen = canvas.transferControlToOffscreen();
   await channel.sendRequest(
-    renderFeatureTileInWorker,
+    renderDistanceTileInWorker,
     {
       canvas: offscreen,
       coords,

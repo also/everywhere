@@ -10,7 +10,7 @@ import { useMemo, useState } from 'react';
 import { VideoProperties } from '../../tools/parse/gopro-gps';
 import CanvasLayer from '../CanvasLayer';
 import { useMemoAsync } from '../hooks';
-import { drawFeatureTile, drawTile } from '../vector-tiles';
+import { drawDistanceTile, drawTile } from '../vector-tiles';
 
 import { create, lookup, setWorkerFile } from '../worker-stuff';
 import { WorkerChannel } from '../WorkerChannel';
@@ -89,7 +89,7 @@ function VectorTileView({
     }>();
   const customize = useMemo(() => {
     return (l: L.Map) => {
-      new CanvasLayer(channel, drawFeatureTile).addTo(l);
+      new CanvasLayer(channel, drawDistanceTile).addTo(l);
       const layer = new CanvasLayer(channel, drawTile).addTo(l);
 
       l.on('click', async ({ latlng: { lat, lng } }: L.LeafletMouseEvent) => {
