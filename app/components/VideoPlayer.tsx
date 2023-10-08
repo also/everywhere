@@ -8,10 +8,12 @@ type ReactVideoEvent = React.SyntheticEvent<HTMLVideoElement>;
 
 export default memo(function VideoPlayer({
   video,
+  showChapterSelect = false,
   seek,
   onLocationChange,
 }: {
   video: Video;
+  showChapterSelect?: boolean;
   seek?: number;
   onLocationChange: (
     loc: [number, number] | undefined,
@@ -108,19 +110,34 @@ export default memo(function VideoPlayer({
   }
 
   return (
-    <video
-      controls={true}
-      width="640"
-      height="360"
-      style={style}
-      src={chapter ? chapter.low : undefined}
-      poster={chapter ? chapter.stills[0].large : undefined}
-      autoPlay={state.autoPlay}
-      ref={videoNode}
-      onEnded={onEnded}
-      onTimeUpdate={onTimeUpdate}
-      onLoadedMetadata={onLoadedMetadata}
-      onSeeked={onSeeked}
-    />
+    <>
+      {showChapterSelect && (
+        <div>
+          {video.chapters.map((chapter, i) => (
+            <span
+              key={chapter.fileNumber}
+              onClick={() => setChapterIndex(i)}
+              style={{ cursor: 'pointer' }}
+            >
+              {chapterIndex === i ? <b>{i} </b> : `${i} `}
+            </span>
+          ))}
+        </div>
+      )}
+      <video
+        controls={true}
+        width="640"
+        height="360"
+        style={style}
+        src={chapter ? chapter.low : undefined}
+        poster={chapter ? chapter.stills[0].large : undefined}
+        autoPlay={state.autoPlay}
+        ref={videoNode}
+        onEnded={onEnded}
+        onTimeUpdate={onTimeUpdate}
+        onLoadedMetadata={onLoadedMetadata}
+        onSeeked={onSeeked}
+      />
+    </>
   );
 });

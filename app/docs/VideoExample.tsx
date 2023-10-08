@@ -8,5 +8,12 @@ export default function VideoExample({ name }: { name: string }) {
   if (!video) {
     return <div>Video not found</div>;
   }
-  return <VideoPlayer video={video} seek={0} onLocationChange={() => {}} />;
+  return (
+    <VideoPlayer
+      video={video}
+      seek={0}
+      onLocationChange={() => {}}
+      showChapterSelect
+    />
+  );
 }
