@@ -63,6 +63,7 @@ function createMap(
   return {
     map,
     defaultLayers: new Set([streets, satellite, ...heatmaps]),
+    control,
   };
 }
 
@@ -73,19 +74,24 @@ export default React.memo(function LeafletMap({
   zoom = 11,
 }: {
   features?: GeoJSON.Feature[];
-  customize?(map: L.Map): void;
+  customize?(map: L.Map, control: L.Control.Layers): void;
   center?: [number, number];
   zoom?: number;
 }) {
   const mapComponent = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<{ map: L.Map; defaultLayers: Set<L.Layer> }>();
+  const mapRef =
+    useRef<{
+      map: L.Map;
+      defaultLayers: Set<L.Layer>;
+      control: L.Control.Layers;
+    }>();
 
   useEffect(() => {
     if (!mapRef.current) {
       mapRef.current = createMap(mapComponent.current!, center, zoom);
     }
 
-    const { map, defaultLayers } = mapRef.current;
+    const { map, defaultLayers, control } = mapRef.current;
     map.eachLayer((layer) => {
       if (!defaultLayers.has(layer)) {
         map.removeLayer(layer);
@@ -93,7 +99,7 @@ export default React.memo(function LeafletMap({
     });
 
     if (customize) {
-      customize(map);
+      customize(map, control);
     }
 
     features.forEach((f) =>

@@ -88,9 +88,13 @@ function VectorTileView({
       lat: number;
     }>();
   const customize = useMemo(() => {
-    return (l: L.Map) => {
-      new CanvasLayer(channel, drawDistanceTile).addTo(l);
+    return (l: L.Map, control: L.Control.Layers) => {
+      control.addOverlay(
+        new CanvasLayer(channel, drawDistanceTile),
+        'Distance Heatmap'
+      );
       const layer = new CanvasLayer(channel, drawTile).addTo(l);
+      control.addOverlay(layer, 'Data');
 
       l.on('click', async ({ latlng: { lat, lng } }: L.LeafletMouseEvent) => {
         // TODO leaflet calls this handler twice? maybe https://github.com/Leaflet/Leaflet/issues/7255
