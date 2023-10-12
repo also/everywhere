@@ -8,7 +8,7 @@ import {
   renderTileInWorker,
   setWorkerFile,
 } from './worker-stuff';
-import { LineRTree, features, nearestLine, tree } from './geo';
+import { LineRTree, features, tree, filteredNearestLine } from './geo';
 import { drawDistanceTile, drawTile2 } from './tile-drawing';
 import {
   Feature,
@@ -91,7 +91,13 @@ channel.handle(
 );
 
 channel.handle(lookup, ({ coords }) => {
-  const result = nearestLine(featureTree!, coords);
+  const result = filteredNearestLine(featureTree!, coords, (i) => {
+    if (i.data.properties?.highway) {
+      return !!highwayLevels[i.data.properties.highway];
+    } else {
+      return true;
+    }
+  });
   return result
     ? { feature: result.item.data, distance: result.distance }
     : undefined;

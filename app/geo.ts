@@ -172,6 +172,7 @@ function makeRTree<G extends LineString | MultiLineString | Polygon, T>(
 export function nearestLine<T>(
   tree: LineRTree<T>,
   point: Position,
+  // TODO most uses of nearestLine don't need to filter by distance - make a separate function?
   maxDistance: number = Infinity,
   minDistance: number = 0
 ):
@@ -187,6 +188,24 @@ export function nearestLine<T>(
     positionDistance,
     maxDistance,
     minDistance
+  );
+}
+
+export function filteredNearestLine<T>(
+  tree: LineRTree<T>,
+  point: Position,
+  filter: (item: RTreeItem<T>) => boolean
+):
+  | {
+      item: RTreeItem<T>;
+      distance: number;
+    }
+  | undefined {
+  return nearest(
+    tree,
+    point,
+    (p, i, d) => (filter(i) ? pointLineSegmentItemDistance(p, i, d) : Infinity),
+    positionDistance
   );
 }
 

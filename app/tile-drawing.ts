@@ -137,6 +137,11 @@ function drawDebugInfo(
   ctx.strokeRect(0, 0, size, size);
 }
 
+function shouldShowHighwayAtZoom(highway: string, z: number) {
+  const level = highwayLevels[highway];
+  return level && level < z;
+}
+
 export function drawTile2(
   canvas: HTMLCanvasElement | OffscreenCanvas,
   tile: Tile,
@@ -156,16 +161,14 @@ export function drawTile2(
     isStroke = false,
     isSelected = false
   ) {
-    const highway = feat.tags.highway as string;
     const { type, geometry } = feat;
     if (type !== 2) {
       return;
     }
-    if (highway) {
-      const level = highwayLevels[highway];
-      if (!level || level >= z) {
-        return;
-      }
+
+    const highway = feat.tags.highway as string;
+    if (highway && !shouldShowHighwayAtZoom(highway, z)) {
+      return;
     }
 
     ctx.beginPath();
