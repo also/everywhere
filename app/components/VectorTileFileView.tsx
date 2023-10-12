@@ -87,13 +87,7 @@ const componentsByType: Record<string, React.ComponentType<any>> = {
   'strava-trip': StravaTripDetails,
 };
 
-function VectorTileView({
-  channel,
-  controls,
-}: {
-  channel: WorkerChannel;
-  controls?: JSX.Element;
-}) {
+function VectorTileView({ channel }: { channel: WorkerChannel }) {
   const [selected, setSelected] =
     useState<{
       feature:
@@ -136,7 +130,6 @@ function VectorTileView({
   return (
     <>
       <div>
-        {controls}
         {selected && (
           <>
             {selected.lat}, {selected.lng}; distance: {selected.distance}
@@ -152,11 +145,9 @@ function VectorTileView({
 export function VectorTileFileView({
   file,
   type,
-  controls,
 }: {
   file: FileWithHandle;
   type: 'osm' | 'generic';
-  controls?: JSX.Element;
 }) {
   const channel = useMemoAsync(
     async ({ signal }) => {
@@ -172,7 +163,7 @@ export function VectorTileFileView({
     [file]
   );
   if (channel) {
-    return <VectorTileView channel={channel} controls={controls} />;
+    return <VectorTileView channel={channel} />;
   } else {
     return <>loading</>;
   }
