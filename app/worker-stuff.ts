@@ -33,7 +33,7 @@ export const renderDistanceTileInWorker = key<
 
 export const lookup =
   key<
-    { coords: [number, number] },
+    { coords: [number, number]; zoom: number },
     // TODO don't return the whole feature, just the id?
     | {
         feature: Feature<LineString | MultiLineString, GeoJsonProperties>;

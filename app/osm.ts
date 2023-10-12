@@ -17,3 +17,8 @@ export const highwayLevels = Object.fromEntries(
     )
   )
 );
+
+export function shouldShowHighwayAtZoom(highway: string, z: number): boolean {
+  const level = highwayLevels[highway];
+  return level != null && level < z;
+}

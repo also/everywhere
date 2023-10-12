@@ -116,6 +116,7 @@ function VectorTileView({
         // TODO leaflet calls this handler twice? maybe https://github.com/Leaflet/Leaflet/issues/7255
         const selected = await channel.sendRequest(lookup, {
           coords: [lng, lat],
+          zoom: l.getZoom(),
         });
         setSelected({
           feature: selected?.feature,

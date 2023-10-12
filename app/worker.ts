@@ -17,7 +17,7 @@ import {
   LineString,
   MultiLineString,
 } from 'geojson';
-import { highwayLevels } from './osm';
+import { highwayLevels, shouldShowHighwayAtZoom } from './osm';
 
 // https://github.com/Microsoft/TypeScript/issues/20595
 // self is a WorkerGlobalScope, but TypeScript doesn't know that
@@ -90,10 +90,10 @@ channel.handle(
   }
 );
 
-channel.handle(lookup, ({ coords }) => {
+channel.handle(lookup, ({ coords, zoom }) => {
   const result = filteredNearestLine(featureTree!, coords, (i) => {
     if (i.data.properties?.highway) {
-      return !!highwayLevels[i.data.properties.highway];
+      return shouldShowHighwayAtZoom(i.data.properties.highway, zoom);
     } else {
       return true;
     }

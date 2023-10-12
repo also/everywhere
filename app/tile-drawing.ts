@@ -6,7 +6,7 @@ import {
 } from 'geojson';
 import { Tile, TileCoords } from 'geojson-vt';
 import { positionDistance } from './distance';
-import { highwayLevels } from './osm';
+import { shouldShowHighwayAtZoom } from './osm';
 import { interpolateTurbo as interpolate } from 'd3-scale-chromatic';
 import {
   LineRTree,
@@ -135,11 +135,6 @@ function drawDebugInfo(
 
   ctx.strokeStyle = 'black';
   ctx.strokeRect(0, 0, size, size);
-}
-
-function shouldShowHighwayAtZoom(highway: string, z: number) {
-  const level = highwayLevels[highway];
-  return level && level < z;
 }
 
 export function drawTile2(
