@@ -38,7 +38,7 @@ import {
   DataSet,
 } from './data';
 import DataContext from './components/DataContext';
-import { ReactNode, useContext, useState } from 'react';
+import { ReactNode, useContext, useRef, useState } from 'react';
 import LocalDataExplorer from './components/pages/LocalDataExplorer';
 import DataSetContext from './components/DataSetContext';
 import { loadDataset } from './default-data-set';
@@ -49,6 +49,7 @@ import FullScreenPage from './components/FullScreenPage';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { buildDataSet } from './trips';
 import PageTitle from './components/PageTitle';
+import { NavExtensionContext } from './components/Nav';
 
 const GlobalStyle = createGlobalStyle`
 body {
@@ -77,6 +78,9 @@ const Header = styled.header`
   padding: 1em 2em;
 
   font-size: 1.2em;
+
+  display: flex;
+  justify-content: space-between;
 `;
 
 const HeaderLink = styled(Link)`
@@ -100,8 +104,17 @@ const waysLength = d3.sum(
   geometryLength
 );
 
-function App({ children }: { children: ReactNode }) {
+function App({
+  children,
+  pageControl,
+}: {
+  children: ReactNode;
+  pageControl?: ReactNode;
+}) {
   let extras = undefined;
+  const { setValue: setNavExtensionDiv } = useContext(
+    NavExtensionContext.Context
+  );
   if (localStorage.getItem('enableExtras') === 'true') {
     extras = (
       <>
@@ -123,6 +136,7 @@ function App({ children }: { children: ReactNode }) {
             <HeaderLink to="/videos">Videos</HeaderLink>{' '}
             <HeaderLink to="/ways">Streets</HeaderLink> {extras}
           </div>
+          <div ref={setNavExtensionDiv} />
         </Header>
         <ErrorBoundary>{children}</ErrorBoundary>
       </Layout>
@@ -252,43 +266,47 @@ const datasetPromise = loadDataset();
 ReactDOM.render(
   <>
     <GlobalStyle />
-    <DataContext.Provider value={{ boundary, contours, ways }}>
-      <DataSetSelector initialDataSet={buildDataSet([], [])}>
-        {(setDataSet) => {
-          datasetPromise.then(setDataSet);
-          return (
-            <Router>
-              <App>
-                <Switch>
-                  <Route
-                    path="/local"
-                    render={() => <LocalDataExplorer setDataSet={setDataSet} />}
-                  />
-                  <Route path="/data" component={DataPage} />
-                  <Route path="/map" component={MapRoute} />
-                  <Route path="/ways/*" component={WayDetailsRoute} />
-                  <Route path="/ways" component={WayListRoute} />
-                  <Route
-                    path="/videos/:name/:seek"
-                    component={VideoDetailsRoute}
-                  />
-                  <Route path="/videos/:name" component={VideoDetailsRoute} />
-                  <Route path="/videos" component={VideosRoute} />
-                  <Route path="/trips/:id" component={TripDetailsRoute} />
-                  <Route path="/trips" component={TripsRoute} />
-                  <Route
-                    path="/locations/:coords"
-                    component={LocationDetailsRoute}
-                  />
-                  <Route path="/docs" component={DocsPage} />
-                  <Route path="/" component={CityMapRoute} />
-                </Switch>
-              </App>
-            </Router>
-          );
-        }}
-      </DataSetSelector>
-    </DataContext.Provider>
+    <NavExtensionContext.Provider>
+      <DataContext.Provider value={{ boundary, contours, ways }}>
+        <DataSetSelector initialDataSet={buildDataSet([], [])}>
+          {(setDataSet) => {
+            datasetPromise.then(setDataSet);
+            return (
+              <Router>
+                <App>
+                  <Switch>
+                    <Route
+                      path="/local"
+                      render={() => (
+                        <LocalDataExplorer setDataSet={setDataSet} />
+                      )}
+                    />
+                    <Route path="/data" component={DataPage} />
+                    <Route path="/map" component={MapRoute} />
+                    <Route path="/ways/*" component={WayDetailsRoute} />
+                    <Route path="/ways" component={WayListRoute} />
+                    <Route
+                      path="/videos/:name/:seek"
+                      component={VideoDetailsRoute}
+                    />
+                    <Route path="/videos/:name" component={VideoDetailsRoute} />
+                    <Route path="/videos" component={VideosRoute} />
+                    <Route path="/trips/:id" component={TripDetailsRoute} />
+                    <Route path="/trips" component={TripsRoute} />
+                    <Route
+                      path="/locations/:coords"
+                      component={LocationDetailsRoute}
+                    />
+                    <Route path="/docs" component={DocsPage} />
+                    <Route path="/" component={CityMapRoute} />
+                  </Switch>
+                </App>
+              </Router>
+            );
+          }}
+        </DataSetSelector>
+      </DataContext.Provider>
+    </NavExtensionContext.Provider>
   </>,
   div
 );

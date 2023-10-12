@@ -23,6 +23,7 @@ import { useMemoAsync } from '../../hooks';
 import FullScreenPage from '../FullScreenPage';
 import StandardPage from '../StandardPage';
 import { VectorTileFileView } from '../VectorTileFileView';
+import { NavExtension } from '../Nav';
 
 function FileView<T>({
   file,
@@ -256,11 +257,10 @@ export default function LocalDataExplorer({
   }
   return file ? (
     <FullScreenPage>
-      <VectorTileFileView
-        file={file}
-        type={type as any}
-        controls={<button onClick={() => setFile(undefined)}>Unload</button>}
-      />
+      <VectorTileFileView file={file} type={type as any} />
+      <NavExtension>
+        {file.name} <button onClick={() => setFile(undefined)}>Unload</button>
+      </NavExtension>
     </FullScreenPage>
   ) : (
     <StandardPage>

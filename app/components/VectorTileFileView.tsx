@@ -92,7 +92,7 @@ function VectorTileView({
   controls,
 }: {
   channel: WorkerChannel;
-  controls: JSX.Element;
+  controls?: JSX.Element;
 }) {
   const [selected, setSelected] =
     useState<{
@@ -156,7 +156,7 @@ export function VectorTileFileView({
 }: {
   file: FileWithHandle;
   type: 'osm' | 'generic';
-  controls: JSX.Element;
+  controls?: JSX.Element;
 }) {
   const channel = useMemoAsync(
     async ({ signal }) => {
