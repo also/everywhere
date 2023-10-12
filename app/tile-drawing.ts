@@ -151,7 +151,11 @@ export function drawTile2(
 
   let selectedFeature;
 
-  function drawFeature(feat: Tile['features'][0], isSelected = false) {
+  function drawFeature(
+    feat: Tile['features'][0],
+    isStroke = false,
+    isSelected = false
+  ) {
     const highway = feat.tags.highway as string;
     const { type, geometry } = feat;
     if (type !== 2) {
@@ -166,8 +170,8 @@ export function drawTile2(
 
     ctx.beginPath();
     ctx.lineJoin = 'round';
-    ctx.strokeStyle = isSelected ? 'blue' : 'red';
-    ctx.lineWidth = isSelected ? 4 : 2;
+    ctx.strokeStyle = isSelected ? 'blue' : isStroke ? 'white' : '#00dcc2';
+    ctx.lineWidth = isSelected || isStroke ? 8 : 2;
     // TODO handle points
     geometry.forEach((points) => {
       points.forEach(([x, y], i) => {
@@ -182,13 +186,20 @@ export function drawTile2(
   }
   tile.features.forEach((feat) => {
     if (feat.id == opts?.selectedId) {
+      //
+    } else {
+      drawFeature(feat, true);
+    }
+  });
+  tile.features.forEach((feat) => {
+    if (feat.id == opts?.selectedId) {
       selectedFeature = feat;
     } else {
       drawFeature(feat);
     }
   });
   if (selectedFeature) {
-    drawFeature(selectedFeature, true);
+    drawFeature(selectedFeature, false, true);
   }
 
   //   drawDebugInfo(ctx, size, tile, z);
