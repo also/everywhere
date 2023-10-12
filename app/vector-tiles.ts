@@ -12,24 +12,16 @@ export async function drawTile(
   coords: { x: number; y: number; z: number },
   opts: TileRenderOpts | undefined
 ) {
-  if (canvas.transferControlToOffscreen) {
-    const offscreen = canvas.transferControlToOffscreen();
-    await channel.sendRequest(
-      renderTileInWorker,
-      {
-        canvas: offscreen,
-        coords,
-        opts,
-      },
-      [offscreen]
-    );
-  } else {
-    const tile = await channel.sendRequest(getTile, coords);
-    if (tile) {
-      // TODO support feature tree rendering in safari?
-      drawTile2(canvas, tile, coords.z, opts);
-    }
-  }
+  const offscreen = canvas.transferControlToOffscreen();
+  await channel.sendRequest(
+    renderTileInWorker,
+    {
+      canvas: offscreen,
+      coords,
+      opts,
+    },
+    [offscreen]
+  );
 }
 export async function drawDistanceTile(
   channel: WorkerChannel,
