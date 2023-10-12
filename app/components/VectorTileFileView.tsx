@@ -54,6 +54,10 @@ function StravaTripDetails({ id }: { id: string }) {
   );
 }
 
+function isProbablyOsmId(id: string) {
+  return id.startsWith('node/') || id.startsWith('way/');
+}
+
 const GenericFeatureDetails = ({
   id,
   properties,
@@ -63,6 +67,18 @@ const GenericFeatureDetails = ({
 }) => (
   <div>
     ID: {id ?? '(none'}, type: {properties?.type ?? '(none)'}
+    {id && isProbablyOsmId(id) && (
+      <>
+        {' '}
+        <a
+          href={`https://www.openstreetmap.org/${id}`}
+          target="_blank"
+          rel="noreferrer"
+        >
+          View on OSM
+        </a>
+      </>
+    )}
   </div>
 );
 
