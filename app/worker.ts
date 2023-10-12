@@ -72,19 +72,21 @@ channel.handle(setWorkerFile, async ({ file: f, type: fileType }) => {
 
 channel.handle(getTile, ({ z, x, y }) => tileIndex?.getTile(z, x, y));
 
-channel.handle(renderTileInWorker, ({ canvas, coords: { z, x, y }, opts }) => {
+channel.handle(renderTileInWorker, ({ size, coords: { z, x, y }, opts }) => {
   const tile = tileIndex?.getTile(z, x, y);
   if (tile) {
-    drawTile2(canvas, tile, z, opts);
+    const offscreen = new OffscreenCanvas(size, size);
+    drawTile2(offscreen, tile, z, opts);
+    return offscreen.transferToImageBitmap();
   }
 });
 
 channel.handle(
   renderDistanceTileInWorker,
-  ({ canvas, coords: { z, x, y }, opts }) => {
-    console.time('drawDistanceTile');
-    drawDistanceTile(canvas, { z, x, y }, featureTree);
-    console.timeEnd('drawDistanceTile');
+  ({ size, coords: { z, x, y }, opts }) => {
+    const offscreen = new OffscreenCanvas(size, size);
+    drawDistanceTile(offscreen, { z, x, y }, featureTree);
+    return offscreen.transferToImageBitmap();
   }
 );
 

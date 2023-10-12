@@ -1,9 +1,5 @@
-import { drawTile2, TileRenderOpts } from './tile-drawing';
-import {
-  getTile,
-  renderDistanceTileInWorker,
-  renderTileInWorker,
-} from './worker-stuff';
+import { TileRenderOpts } from './tile-drawing';
+import { renderDistanceTileInWorker, renderTileInWorker } from './worker-stuff';
 import { WorkerChannel } from './WorkerChannel';
 
 export async function drawTile(
@@ -12,16 +8,12 @@ export async function drawTile(
   coords: { x: number; y: number; z: number },
   opts: TileRenderOpts | undefined
 ) {
-  const offscreen = canvas.transferControlToOffscreen();
-  await channel.sendRequest(
-    renderTileInWorker,
-    {
-      canvas: offscreen,
-      coords,
-      opts,
-    },
-    [offscreen]
-  );
+  const bitmap = await channel.sendRequest(renderTileInWorker, {
+    size: canvas.width,
+    coords,
+    opts,
+  });
+  canvas.getContext('bitmaprenderer')!.transferFromImageBitmap(bitmap);
 }
 export async function drawDistanceTile(
   channel: WorkerChannel,
@@ -29,14 +21,10 @@ export async function drawDistanceTile(
   coords: { x: number; y: number; z: number },
   opts: TileRenderOpts | undefined
 ) {
-  const offscreen = canvas.transferControlToOffscreen();
-  await channel.sendRequest(
-    renderDistanceTileInWorker,
-    {
-      canvas: offscreen,
-      coords,
-      opts,
-    },
-    [offscreen]
-  );
+  const bitmap = await channel.sendRequest(renderDistanceTileInWorker, {
+    size: canvas.width,
+    coords,
+    opts,
+  });
+  canvas.getContext('bitmaprenderer')!.transferFromImageBitmap(bitmap);
 }

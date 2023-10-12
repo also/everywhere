@@ -13,17 +13,23 @@ export const setWorkerFile =
 export const getTile =
   key<{ x: number; y: number; z: number }, Tile>('getTile');
 export const renderTileInWorker =
-  key<{
-    coords: { x: number; y: number; z: number };
-    canvas: OffscreenCanvas;
-    opts: TileRenderOpts | undefined;
-  }>('renderTileInWorker');
+  key<
+    {
+      coords: { x: number; y: number; z: number };
+      size: number;
+      opts: TileRenderOpts | undefined;
+    },
+    ImageBitmap
+  >('renderTileInWorker');
 
-export const renderDistanceTileInWorker = key<{
-  coords: { x: number; y: number; z: number };
-  canvas: OffscreenCanvas;
-  opts: TileRenderOpts | undefined;
-}>('renderDistanceTileInWorker');
+export const renderDistanceTileInWorker = key<
+  {
+    coords: { x: number; y: number; z: number };
+    size: number;
+    opts: TileRenderOpts | undefined;
+  },
+  ImageBitmap
+>('renderDistanceTileInWorker');
 
 export const lookup =
   key<
