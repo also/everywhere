@@ -15,6 +15,8 @@ import { drawDistanceTile, drawTile } from '../vector-tiles';
 import { create, lookup, setWorkerFile } from '../worker-stuff';
 import { WorkerChannel } from '../WorkerChannel';
 import LeafletMap from './LeafletMap';
+import L from 'leaflet';
+import { createPortal } from 'react-dom';
 
 function GoProVideoDetails({
   id,
@@ -97,6 +99,8 @@ function VectorTileView({ channel }: { channel: WorkerChannel }) {
       lng: number;
       lat: number;
     }>();
+  const popupDiv = useMemo(() => document.createElement('div'), []);
+
   const customize = useMemo(() => {
     return (l: L.Map, control: L.Control.Layers) => {
       control.addOverlay(
@@ -118,6 +122,14 @@ function VectorTileView({ channel }: { channel: WorkerChannel }) {
           lng,
           lat,
         });
+
+        L.popup()
+          // TODO by putting the popup at the location of the click, it
+          // often covers the feature. maybe put it at the top of the feature?
+          .setLatLng({ lat, lng })
+          .setContent(() => popupDiv)
+          .openOn(l);
+
         layer.setOpts({ selectedId: selected?.feature.id });
       });
     };
@@ -129,14 +141,14 @@ function VectorTileView({ channel }: { channel: WorkerChannel }) {
 
   return (
     <>
-      <div>
-        {selected && (
+      {selected &&
+        createPortal(
           <>
             {selected.lat}, {selected.lng}; distance: {selected.distance}
-          </>
+            <ComponentForType {...selected?.feature} />
+          </>,
+          popupDiv
         )}
-        <ComponentForType {...selected?.feature} />
-      </div>
       <LeafletMap customize={customize} />
     </>
   );
