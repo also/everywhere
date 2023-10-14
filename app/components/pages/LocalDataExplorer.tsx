@@ -82,14 +82,36 @@ type SomeFile = {
   raw: FileWithHandle;
 };
 
-function FileComponent({ file: { geojson, mp4, track } }: { file: SomeFile }) {
-  return mp4 ? (
-    <>
+function FileComponentWrapper({
+  file,
+  asMap,
+}: {
+  file: FileWithHandle;
+  asMap?: boolean;
+}) {
+  const loaded = useMemoAsync<SomeFile>(() => readFile(file), [file]);
+
+  return loaded ? (
+    <FileComponent file={loaded} asMap={asMap} />
+  ) : (
+    <StandardPage>loading</StandardPage>
+  );
+}
+
+function FileComponent({
+  file: { geojson, mp4, track },
+  asMap,
+}: {
+  file: SomeFile;
+  asMap?: boolean;
+}) {
+  return !asMap && mp4 ? (
+    <StandardPage>
       <TraverserView traverser={mp4} />
       {track?.samples ? (
         <GpmfSamples sampleMetadata={track.samples} mp4={mp4} />
       ) : null}
-    </>
+    </StandardPage>
   ) : (
     <LeafletMap
       features={geojson.type === 'Feature' ? [geojson] : geojson.features}
@@ -112,16 +134,16 @@ function GeoJSONFileView({ value }: { value: GeoJSON.Feature }) {
 
 function File({ file }: { file: File }) {
   return (
-    <div>
+    <StandardPage>
       <p>
         <strong>Name:</strong> {file.name}
       </p>
       <FileView
         file={file}
-        parse={async (f) => JSON.parse(await f.text()) as GeoJSON.Feature}
+        parse={(f) => readFile(f).then(({ geojson }) => geojson)}
         component={GeoJSONFileView}
       />
-    </div>
+    </StandardPage>
   );
 }
 
@@ -137,38 +159,37 @@ function FilesComponent({ files }: { files: SomeFile[] }) {
   );
 }
 
-function readFiles(files: FileWithHandle[]): Promise<SomeFile[]> {
-  return Promise.all(
-    files.map(async (file) => {
-      let geojson: GeoJSON.Feature | GeoJSON.FeatureCollection;
-      let mp4;
-      let track;
-      if (file.name.toLowerCase().endsWith('.mp4')) {
-        const data = new SeekableBlobBuffer(file, 1024000);
-        mp4 = bind(mp4Parser, data, fileRoot(data));
-        track = await getMeta(mp4);
-        geojson = await extractGps(track, mp4);
-      } else {
-        const text = await file.text();
-        const json = JSON.parse(text);
-        if (json.type === 'Topology') {
-          geojson = features(json);
-        } else {
-          geojson = json as GeoJSON.Feature;
-        }
+async function readFile(file: File): Promise<SomeFile> {
+  let geojson: GeoJSON.Feature | GeoJSON.FeatureCollection;
+  let mp4;
+  let track;
+  if (file.name.toLowerCase().endsWith('.mp4')) {
+    const data = new SeekableBlobBuffer(file, 1024000);
+    mp4 = bind(mp4Parser, data, fileRoot(data));
+    track = await getMeta(mp4);
+    geojson = await extractGps(track, mp4);
+  } else {
+    const text = await file.text();
+    const json = JSON.parse(text);
+    if (json.type === 'Topology') {
+      geojson = features(json);
+    } else {
+      geojson = json as GeoJSON.Feature;
+    }
+  }
+  (geojson.type === 'FeatureCollection' ? geojson.features : [geojson]).forEach(
+    (feat) => {
+      if (!feat.properties) {
+        feat.properties = {};
       }
-      (geojson.type === 'FeatureCollection'
-        ? geojson.features
-        : [geojson]
-      ).forEach((feat) => {
-        if (!feat.properties) {
-          feat.properties = {};
-        }
-        feat.properties.filename = file.name;
-      });
-      return { geojson, mp4, track, raw: file };
-    })
+      feat.properties.filename = file.name;
+    }
   );
+  return { geojson, mp4, track, raw: file };
+}
+
+function readFiles(files: FileWithHandle[]): Promise<SomeFile[]> {
+  return Promise.all(files.map((file) => readFile(file)));
 }
 
 function isProbablyStravaTrip(
@@ -215,7 +236,14 @@ export default function LocalDataExplorer({
   setDataSet(dataSet: DataSet): void;
 }) {
   const [files, setFiles] = useState<FileWithHandle[] | undefined>();
-  const [file, setFile] = useState<FileWithHandle>();
+  const [file, setFile] =
+    useState<{
+      file: FileWithHandle;
+      reason: 'map' | 'data' | 'extract-map' | 'stylized-map';
+    }>();
+  const [openedFiles, setOpenedFiles] =
+    useState<SomeFile[] | undefined>(undefined);
+
   const [type, setType] = useState('generic');
   const initialized = useMemoAsync<boolean>(async () => {
     setFiles(await get('files'));
@@ -255,13 +283,38 @@ export default function LocalDataExplorer({
   async function handleSetDatasetClick() {
     setDataSet(readToDataset(await readFiles(files || [])));
   }
-  return file ? (
-    <FullScreenPage>
-      <VectorTileFileView file={file} type={type as any} />
+
+  async function handleLoadAllIntoMapClick() {
+    setOpenedFiles(await readFiles(files || []));
+  }
+
+  return openedFiles ? (
+    <>
       <NavExtension>
-        {file.name} <button onClick={() => setFile(undefined)}>Unload</button>
+        {openedFiles.length} files{' '}
+        <button onClick={() => setOpenedFiles(undefined)}>Unload</button>
       </NavExtension>
-    </FullScreenPage>
+      <FilesComponent files={openedFiles} />
+    </>
+  ) : file ? (
+    <>
+      <NavExtension>
+        {file.file.name}{' '}
+        <button onClick={() => setFile(undefined)}>Unload</button>
+      </NavExtension>
+      {file.reason === 'map' ? (
+        <FullScreenPage>
+          <VectorTileFileView file={file.file} type={type as any} />
+        </FullScreenPage>
+      ) : file.reason === 'stylized-map' ? (
+        <File file={file.file} />
+      ) : (
+        <FileComponentWrapper
+          file={file.file}
+          asMap={file.reason === 'extract-map'}
+        />
+      )}
+    </>
   ) : (
     <StandardPage>
       <PageTitle>Local Data</PageTitle>
@@ -280,10 +333,12 @@ export default function LocalDataExplorer({
         {files ? (
           <>
             <button onClick={handleSetDatasetClick}>Set Dataset</button>
+            <button onClick={handleLoadAllIntoMapClick}>
+              Load All Into Map
+            </button>
           </>
         ) : undefined}
       </div>
-
       <Table>
         <thead>
           <tr>
@@ -299,12 +354,52 @@ export default function LocalDataExplorer({
               <td>{f.size.toLocaleString()}</td>
               <td>{new Date(f.lastModified).toLocaleString()}</td>
               <td>
-                <button onClick={() => setFile(f)}>load</button>
+                <button onClick={() => setFile({ file: f, reason: 'map' })}>
+                  load map
+                </button>
+                <button onClick={() => setFile({ file: f, reason: 'data' })}>
+                  load data
+                </button>
+                <button
+                  onClick={() => setFile({ file: f, reason: 'extract-map' })}
+                >
+                  load as map
+                </button>
+                <button
+                  onClick={() => setFile({ file: f, reason: 'stylized-map' })}
+                >
+                  load as stylized map
+                </button>
               </td>
             </tr>
           ))}
         </tbody>
       </Table>
+      <p>
+        <strong>load:</strong> replace the current list of files with the
+        selected files
+      </p>
+      <p>
+        <strong>add:</strong> add the selected files to the current list of
+        files
+      </p>
+      <h2>For each file</h2>
+      <p>
+        <strong>load map:</strong> Assuming the file is a geojson file, load it
+        in a map view using geojson-vt to render it with reasonable performance
+      </p>
+      <p>
+        <strong>load data:</strong> Show data about a video file. Just shows a
+        map for geojson
+      </p>
+      <p>
+        <strong>load as map:</strong> Show a video file as a map, or geojson
+        file using a pure leaflet map
+      </p>
+      <p>
+        <strong>load as stylized map:</strong> Same as "load as map", but using
+        the everywhere.bike style
+      </p>
     </StandardPage>
   );
 }
