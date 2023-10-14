@@ -9,7 +9,7 @@ import { TileRenderOpts } from './tile-drawing';
 import { key, WorkerChannel, workerHandshake } from './WorkerChannel';
 
 export const setWorkerFile =
-  key<{ file: File | undefined; type: 'osm' | 'generic' }, void>('setFile');
+  key<{ file: File; type: 'osm' | 'generic' }, void>('setFile');
 export const getTile =
   key<{ x: number; y: number; z: number }, Tile>('getTile');
 export const renderTileInWorker =
@@ -26,7 +26,6 @@ export const renderDistanceTileInWorker = key<
   {
     coords: { x: number; y: number; z: number };
     size: number;
-    opts: TileRenderOpts | undefined;
   },
   ImageBitmap
 >('renderDistanceTileInWorker');

@@ -27,47 +27,40 @@ const channel = new WorkerChannel(ctx.postMessage.bind(ctx), ctx);
 
 channel.handle(workerHandshake, () => 'pong');
 
-let file: File | undefined = undefined;
 let tileIndex: GeoJSONVT | undefined = undefined;
 
 let featureTree:
   | LineRTree<Feature<LineString | MultiLineString, GeoJsonProperties>>
   | undefined = undefined;
 
-channel.handle(setWorkerFile, async ({ file: f, type: fileType }) => {
-  file = f;
-  if (file) {
-    const value = JSON.parse(await file.text());
-    const f: FeatureCollection<LineString | MultiLineString> = {
-      type: 'FeatureCollection',
-      features: (value.type === 'Topology'
-        ? features(value)
-        : (value as FeatureCollection)
-      ).features.filter((f): f is Feature<LineString | MultiLineString> => {
-        const {
-          geometry: { type },
-          properties,
-        } = f;
-        if (type === 'LineString' || type === 'MultiLineString') {
-          return (
-            fileType !== 'osm' ||
-            Object.prototype.hasOwnProperty.call(
-              highwayLevels,
-              properties?.highway
-            )
-          );
-        } else {
-          return false;
-        }
-      }),
-    };
+channel.handle(setWorkerFile, async ({ file, type: fileType }) => {
+  const value = JSON.parse(await file.text());
+  const f: FeatureCollection<LineString | MultiLineString> = {
+    type: 'FeatureCollection',
+    features: (value.type === 'Topology'
+      ? features(value)
+      : (value as FeatureCollection)
+    ).features.filter((f): f is Feature<LineString | MultiLineString> => {
+      const {
+        geometry: { type },
+        properties,
+      } = f;
+      if (type === 'LineString' || type === 'MultiLineString') {
+        return (
+          fileType !== 'osm' ||
+          Object.prototype.hasOwnProperty.call(
+            highwayLevels,
+            properties?.highway
+          )
+        );
+      } else {
+        return false;
+      }
+    }),
+  };
 
-    tileIndex = geojsonvt(f, { maxZoom: 24 });
-    featureTree = tree({
-      type: 'FeatureCollection',
-      features: f.features,
-    });
-  }
+  tileIndex = geojsonvt(f, { maxZoom: 24 });
+  featureTree = tree(f);
 });
 
 channel.handle(getTile, ({ z, x, y }) => tileIndex?.getTile(z, x, y));
@@ -81,14 +74,11 @@ channel.handle(renderTileInWorker, ({ size, coords: { z, x, y }, opts }) => {
   }
 });
 
-channel.handle(
-  renderDistanceTileInWorker,
-  ({ size, coords: { z, x, y }, opts }) => {
-    const offscreen = new OffscreenCanvas(size, size);
-    drawDistanceTile(offscreen, { z, x, y }, featureTree);
-    return offscreen.transferToImageBitmap();
-  }
-);
+channel.handle(renderDistanceTileInWorker, ({ size, coords }) => {
+  const offscreen = new OffscreenCanvas(size, size);
+  drawDistanceTile(offscreen, coords, featureTree);
+  return offscreen.transferToImageBitmap();
+});
 
 channel.handle(lookup, ({ coords, zoom }) => {
   const result = filteredNearestLine(featureTree!, coords, (i) => {
