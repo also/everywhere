@@ -166,9 +166,20 @@ export function drawTile2(
       return;
     }
 
+    let defaultColor = '#00dcc2';
+    // TODO the type of tags is wrong - values can be objects?
+    const visited = feat.tags.everywhere?.visited;
+    if (visited != null) {
+      if (visited) {
+        defaultColor = '#00ff00';
+      } else {
+        defaultColor = '#ff0000';
+      }
+    }
+
     ctx.beginPath();
     ctx.lineJoin = 'round';
-    ctx.strokeStyle = isSelected ? 'blue' : isStroke ? 'white' : '#00dcc2';
+    ctx.strokeStyle = isSelected ? 'blue' : isStroke ? 'white' : defaultColor;
     ctx.lineWidth = isSelected || isStroke ? 8 : 2;
     // TODO handle points
     geometry.forEach((points) => {
