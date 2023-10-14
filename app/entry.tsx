@@ -38,7 +38,7 @@ import {
   DataSet,
 } from './data';
 import DataContext from './components/DataContext';
-import { ReactNode, useContext, useRef, useState } from 'react';
+import { ReactNode, useContext, useEffect, useState } from 'react';
 import LocalDataExplorer from './components/pages/LocalDataExplorer';
 import DataSetContext from './components/DataSetContext';
 import { loadDataset } from './default-data-set';
@@ -243,6 +243,9 @@ function DataSetSelector({
   children: (renderProp: (dataset: DataSet) => void) => JSX.Element;
 }) {
   const [dataset, setDataSet] = useState(initialDataSet);
+  useEffect(() => {
+    datasetPromise.then(setDataSet);
+  }, []);
   return (
     <DataSetContext.Provider value={dataset}>
       {children(setDataSet)}
@@ -270,7 +273,6 @@ ReactDOM.render(
       <DataContext.Provider value={{ boundary, contours, ways }}>
         <DataSetSelector initialDataSet={buildDataSet([], [])}>
           {(setDataSet) => {
-            datasetPromise.then(setDataSet);
             return (
               <Router>
                 <App>
