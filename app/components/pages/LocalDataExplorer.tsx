@@ -25,6 +25,8 @@ import StandardPage from '../StandardPage';
 import { VectorTileFileView } from '../VectorTileFileView';
 import { NavExtension } from '../Nav';
 import LoadingPage from './LoadingPage';
+import { CompleteActivity } from '../../../tools/strava-api';
+import { completeActivityToGeoJson } from '../../../tools/strava';
 
 function FileView<T>({
   file,
@@ -160,8 +162,12 @@ function FilesComponent({ files }: { files: SomeFile[] }) {
   );
 }
 
+function isProbablyStravaCompleteActivity(json: any): json is CompleteActivity {
+  return json.activity && json.streams;
+}
+
 async function readFile(file: File): Promise<SomeFile> {
-  let geojson: GeoJSON.Feature | GeoJSON.FeatureCollection;
+  let geojson: GeoJSON.Feature | GeoJSON.FeatureCollection | undefined;
   let mp4;
   let track;
   if (file.name.toLowerCase().endsWith('.mp4')) {
@@ -172,11 +178,19 @@ async function readFile(file: File): Promise<SomeFile> {
   } else {
     const text = await file.text();
     const json = JSON.parse(text);
-    if (json.type === 'Topology') {
+    if (isProbablyStravaCompleteActivity(json)) {
+      geojson = completeActivityToGeoJson(json);
+    } else if (json.type === 'Topology') {
       geojson = features(json);
     } else {
       geojson = json as GeoJSON.Feature;
     }
+  }
+  if (!geojson) {
+    geojson = {
+      type: 'FeatureCollection',
+      features: [],
+    };
   }
   (geojson.type === 'FeatureCollection' ? geojson.features : [geojson]).forEach(
     (feat) => {

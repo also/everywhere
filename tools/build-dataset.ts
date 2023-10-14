@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { stravaTopologies } from './strava';
+import { stravaTopologies } from './strava-files';
 
 export default function () {
   const appDataPath = path.join(__dirname, '../app-data/');

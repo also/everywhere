@@ -1,4 +1,4 @@
-import { stravaTopologies } from './strava';
+import { stravaTopologies } from './strava-files';
 
 import { combineTolologies } from './topojson-utils';
 

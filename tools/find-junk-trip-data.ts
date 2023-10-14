@@ -2,7 +2,7 @@ import { MultiLineString } from 'geojson';
 import TinyQueue from 'tinyqueue';
 import { positionDistance } from '../app/distance';
 import { feature } from '../app/geo';
-import { stravaTopologies } from './strava';
+import { stravaTopologies } from './strava-files';
 
 import { RawStravaTripFeature, RawStravaTripProperties } from '../app/trips';
 
