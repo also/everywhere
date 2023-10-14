@@ -57,15 +57,17 @@ function StravaTripDetails({ id }: { id: string }) {
   );
 }
 
-function isProbablyOsmId(id: string) {
-  return id.startsWith('node/') || id.startsWith('way/');
+function isProbablyOsmId(id: string | number) {
+  return (
+    typeof id === 'string' && (id.startsWith('node/') || id.startsWith('way/'))
+  );
 }
 
 const GenericFeatureDetails = ({
   id,
   properties,
 }: {
-  id?: string;
+  id?: string | number;
   properties?: Record<string, any>;
 }) => (
   <div>
