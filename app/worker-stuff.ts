@@ -42,7 +42,7 @@ export const lookup =
   >('lookup');
 
 export async function create() {
-  const worker = new Worker(new URL('./worker.ts', import.meta.url));
+  const worker = new Worker(new URL('./tile-worker.ts', import.meta.url));
 
   const channel = WorkerChannel.forWorker(worker);
   await channel.sendRequest(workerHandshake, 'ping');
