@@ -17,6 +17,7 @@ import { WorkerChannel } from '../WorkerChannel';
 import LeafletMap from './LeafletMap';
 import L from 'leaflet';
 import { createPortal } from 'react-dom';
+import LoadingPage from './pages/LoadingPage';
 
 function GoProVideoDetails({
   id,
@@ -177,6 +178,6 @@ export function VectorTileFileView({
   if (channel) {
     return <VectorTileView channel={channel} />;
   } else {
-    return <>loading</>;
+    return <LoadingPage />;
   }
 }

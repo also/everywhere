@@ -24,6 +24,7 @@ import FullScreenPage from '../FullScreenPage';
 import StandardPage from '../StandardPage';
 import { VectorTileFileView } from '../VectorTileFileView';
 import { NavExtension } from '../Nav';
+import LoadingPage from './LoadingPage';
 
 function FileView<T>({
   file,
@@ -94,7 +95,7 @@ function FileComponentWrapper({
   return loaded ? (
     <FileComponent file={loaded} asMap={asMap} />
   ) : (
-    <StandardPage>loading</StandardPage>
+    <LoadingPage />
   );
 }
 

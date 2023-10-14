@@ -6,6 +6,7 @@ import {
   useRef,
   MouseEvent,
   memo,
+  PropsWithChildren,
 } from 'react';
 import d3 from 'd3';
 import { Feature, FeatureCollection } from 'geojson';
@@ -89,6 +90,22 @@ const MapSvg = styled.svg`
       stroke: #333;
       shape-rendering: crispEdges;
     }
+
+    &.loading-animation {
+      opacity: 0.3;
+
+      path {
+        stroke-dashoffset: 1000;
+        stroke-dasharray: 100;
+        animation: dash 10s linear;
+      }
+
+      @keyframes dash {
+        to {
+          stroke-dashoffset: 0;
+        }
+      }
+    }
   }
 `;
 
@@ -149,7 +166,8 @@ export default function Map({
   onMouseMove,
   onClick,
   children,
-}: {
+  asLoadingAnimation = false,
+}: PropsWithChildren<{
   width: number;
   height: number;
   zoomFeature?: Feature | FeatureCollection;
@@ -158,8 +176,8 @@ export default function Map({
   showContours?: boolean;
   onMouseMove?: MapMouseHandler;
   onClick?: MapMouseHandler;
-  children: ReactNode | (() => ReactNode);
-}) {
+  asLoadingAnimation?: boolean;
+}>) {
   const { boundary } = useContext(DataContext);
   const [mapContext, setMapContext] = useState(() =>
     compute({ width, height, zoomFeature, zoom, boundary })
@@ -174,6 +192,7 @@ export default function Map({
   return (
     <MapContext.Provider value={mapContext}>
       <MapSvg
+        className={asLoadingAnimation ? 'loading-animation' : undefined}
         width={width}
         height={height}
         onMouseMove={
