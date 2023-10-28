@@ -51,7 +51,7 @@ function MdxComponentWrapper({
   type: any;
   mdxFocusKey: string;
 }>) {
-  const { focus, showUI } = useContext(MdxOptionsContext);
+  const { focus, showUI, showSimpleTags } = useContext(MdxOptionsContext);
   const existing = useContext(Context);
   if (existing) {
     return children;
@@ -79,12 +79,19 @@ function MdxComponentWrapper({
   }
   return (
     <>
-      {showUI && (
+      {showUI && (typeof type !== 'string' || showSimpleTags) && (
         <div style={{ background: '#eee', padding: '.5em' }}>
           <a href={`vscode://file/${sourceKey}`}>open in vs code</a> focus on:{' '}
           {focusKeys.map((k) => (
             <>
-              <Link key={k} to={`?focus=${encodeURIComponent(k)}&ui=${showUI}`}>
+              <Link
+                key={k}
+                to={(location) => {
+                  const params = new URLSearchParams(location.search);
+                  params.set('focus', k);
+                  return { search: params.toString() };
+                }}
+              >
                 {k}
               </Link>{' '}
             </>
@@ -99,4 +106,5 @@ function MdxComponentWrapper({
 export const MdxOptionsContext = createContext<{
   focus: Set<string>;
   showUI: boolean;
-}>({ focus: new Set(), showUI: false });
+  showSimpleTags: boolean;
+}>({ focus: new Set(), showUI: false, showSimpleTags: false });
