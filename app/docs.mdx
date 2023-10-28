@@ -3,6 +3,8 @@ import LeafletMapExample from './docs/LeafletMapExample';
 import StylizedMapExample from './docs/StylizedMapExample';
 import VideoExample from './docs/VideoExample';
 import { interpolateViridis } from 'd3-scale-chromatic';
+import WayPointRatioExample from './docs/WayPointRatioExample';
+import WayInterpolationExample from './docs/WayInterpolationExample';
 
 ## Heatmap Scale
 
@@ -38,3 +40,11 @@ import { interpolateViridis } from 'd3-scale-chromatic';
 ### One of the videos
 
 <VideoExample name="0010" />
+
+## Line Interpolation
+
+In my map data from 2015 ish, https://www.openstreetmap.org/way/9430174 is the longest street with two points. There's one longer way - the bike path from Assembly Row to the train tracks.
+
+<WayPointRatioExample />
+
+<WayInterpolationExample mdxFocusKey="xyz" />
