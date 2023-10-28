@@ -1,26 +1,45 @@
+// @ts-expect-error untyped
 import { Fragment } from 'react/jsx-dev-runtime';
-export { Fragment };
+// @ts-expect-error untyped
+import { jsxDEV as _original } from 'react/jsx-dev-runtime';
 
-import { createContext, PropsWithChildren, useContext } from 'react';
-import { jsxDEV as original } from 'react/jsx-dev-runtime';
+import {
+  createContext,
+  PropsWithChildren,
+  ReactElement,
+  useContext,
+} from 'react';
+
 import { Link } from 'react-router-dom';
 
+export { Fragment };
+
+interface Source {
+  fileName: string;
+  lineNumber: string;
+  columnNumber: string;
+}
+
+const original = _original as typeof jsxDEV;
+
+// https://mdxjs.com/packages/mdx/#parameters-8
+// https://github.com/facebook/react/blob/3e09c27b880e1fecdb1eca5db510ecce37ea6be2/packages/react/src/jsx/ReactJSXElementValidator.js#L305
 export function jsxDEV(
-  type,
-  originalProps,
-  key,
-  isStaticChildren,
-  source,
-  self
-) {
+  type: unknown,
+  originalProps: Record<string, unknown>,
+  key: string | undefined,
+  isStaticChildren: boolean,
+  source: Source,
+  self: unknown
+): ReactElement | null {
   if (type === Fragment) {
     return original(type, originalProps, key, isStaticChildren, source, self);
   } else {
     const { mdxFocusKey, ...props } = originalProps ?? {};
 
-    if (typeof type === 'string') {
-      originalProps['data-also-mdx-source'] = JSON.stringify(source);
-    }
+    // if (typeof type === 'string') {
+    //   props['data-also-mdx-source'] = JSON.stringify(source);
+    // }
 
     const children = original(type, props, key, isStaticChildren, source, self);
     return original(
@@ -29,7 +48,7 @@ export function jsxDEV(
         children,
         source,
         type,
-        mdxFocusKey,
+        mdxFocusKey: typeof mdxFocusKey === 'string' ? mdxFocusKey : undefined,
       },
       key,
       false,
@@ -39,7 +58,7 @@ export function jsxDEV(
   }
 }
 
-const Context = createContext();
+const Context = createContext<Source | undefined>(undefined);
 
 function MdxComponentWrapper({
   children,
@@ -47,8 +66,8 @@ function MdxComponentWrapper({
   type,
   mdxFocusKey,
 }: PropsWithChildren<{
-  source: { fileName: string; lineNumber: string; columnNumber: string };
-  type: any;
+  source: Source;
+  type: unknown;
   mdxFocusKey: string;
 }>) {
   const { focus, showUI, showSimpleTags } = useContext(MdxOptionsContext);
