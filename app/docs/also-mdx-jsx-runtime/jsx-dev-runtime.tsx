@@ -83,7 +83,7 @@ function MdxComponentWrapper({
         <div style={{ background: '#eee', padding: '.5em' }}>
           <a href={`vscode://file/${sourceKey}`}>open in vs code</a> focus on:{' '}
           {focusKeys.map((k) => (
-            <>
+            <Fragment key={k}>
               <Link
                 key={k}
                 to={(location) => {
@@ -94,7 +94,7 @@ function MdxComponentWrapper({
               >
                 {k}
               </Link>{' '}
-            </>
+            </Fragment>
           ))}
         </div>
       )}
