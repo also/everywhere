@@ -4,6 +4,7 @@ import { Fragment } from 'react/jsx-dev-runtime';
 import { jsxDEV as _original } from 'react/jsx-dev-runtime';
 
 import {
+  Component,
   createContext,
   PropsWithChildren,
   ReactElement,
@@ -55,6 +56,33 @@ export function jsxDEV(
       source,
       self
     );
+  }
+}
+
+class MdxComponentErrorBoundary extends Component<
+  PropsWithChildren<unknown>,
+  { hasError: boolean }
+> {
+  constructor(props: PropsWithChildren<unknown>) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError() {
+    // Update state so the next render will show the fallback UI.
+    return { hasError: true };
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ background: '#f55', color: 'white', padding: '1em' }}>
+          <strong>An error was thrown by a component.</strong>
+        </div>
+      );
+    }
+
+    return this.props.children;
   }
 }
 
@@ -121,7 +149,9 @@ function MdxComponentWrapper({
           ))}
         </div>
       )}
-      <Context.Provider value={source}>{children}</Context.Provider>
+      <Context.Provider value={source}>
+        <MdxComponentErrorBoundary>{children}</MdxComponentErrorBoundary>
+      </Context.Provider>
     </>
   );
 }
