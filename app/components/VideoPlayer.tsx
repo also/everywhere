@@ -115,7 +115,7 @@ export default memo(function VideoPlayer({
         <div>
           {video.chapters.map((chapter, i) => (
             <span
-              key={chapter.fileNumber}
+              key={i}
               onClick={() => setChapterIndex(i)}
               style={{ cursor: 'pointer' }}
             >
