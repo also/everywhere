@@ -19,21 +19,25 @@ export default function DocsPage() {
       <PageTitle>Docs</PageTitle>
       {mdxOptions.showUI && (
         <div>
-          <label>
-            <input
-              type="checkbox"
-              name="showSimpleTags"
-              onChange={() => {
-                params.set(
-                  'showSimpleTags',
-                  (!mdxOptions.showSimpleTags).toString()
-                );
-                history.push({ search: params.toString() });
-              }}
-              checked={mdxOptions.showSimpleTags}
-            />{' '}
-            Show simple tags
-          </label>{' '}
+          {mdxOptions.focus.size === 0 && (
+            <>
+              <label>
+                <input
+                  type="checkbox"
+                  name="showSimpleTags"
+                  onChange={() => {
+                    params.set(
+                      'showSimpleTags',
+                      (!mdxOptions.showSimpleTags).toString()
+                    );
+                    history.push({ search: params.toString() });
+                  }}
+                  checked={mdxOptions.showSimpleTags}
+                />{' '}
+                Show simple tags
+              </label>
+            </>
+          )}
           {mdxOptions.focus.size > 0 && (
             <button
               onClick={() => {
