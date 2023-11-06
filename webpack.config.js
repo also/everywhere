@@ -54,7 +54,7 @@ module.exports = (env) => ({
           {
             loader: '@mdx-js/loader',
             /** @type {import('@mdx-js/loader').Options} */
-            options: {},
+            options: { jsxImportSource: 'also-mdx-jsx-runtime' },
           },
         ],
       },
@@ -62,6 +62,12 @@ module.exports = (env) => ({
   },
   resolve: {
     extensions: ['.ts', '.tsx', '.js'],
+    alias: {
+      'also-mdx-jsx-runtime': path.resolve(
+        __dirname,
+        'app/docs/also-mdx-jsx-runtime'
+      ),
+    },
   },
   resolveLoader: {
     alias: {
