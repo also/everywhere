@@ -104,10 +104,6 @@ function MdxComponentWrapper({
     return children;
   }
 
-  if (typeof type === 'string' && !showSimpleTags) {
-    return children;
-  }
-
   const sourceKey = `${source.fileName}:${source.lineNumber}:${source.columnNumber}`;
 
   const focusKeys = [];
@@ -128,9 +124,10 @@ function MdxComponentWrapper({
   if (focus.size > 0 && !focusKeys.some((k) => focus.has(k))) {
     return null;
   }
+
   return (
     <>
-      {showUI && (
+      {showUI && (typeof type !== 'string' || showSimpleTags) && (
         <div style={{ background: '#eee', padding: '.5em' }}>
           <a href={`vscode://file/${sourceKey}`}>open in vs code</a> focus on:{' '}
           {focusKeys.map((k) => (
