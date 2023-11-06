@@ -19,8 +19,6 @@ function euclideanDistance(pt1: GoodPosition, pt2: GoodPosition) {
  * @param {int} number The number of points to interpolate along the line; this
  *      includes the endpoints, and has an effective minimum value of 2 (if a
  *      smaller number is given, then the endpoints will still be returned).
- * @param {number} [offsetDist] An optional perpendicular distance to offset
- *      each point from the line-segment it would otherwise lie on.
  * @param {int} [minGap] An optional minimum gap to maintain between subsequent
  *      interpolated points; if the projected gap between subsequent points for
  *      a set of `number` points is lower than this value, `number` will be
@@ -36,8 +34,7 @@ export function interpolateLineRange(
   minGap: number = 0
 ) {
   // Calculate path distance from each control point (vertex) to the beginning
-  // of the line, and also the ratio of `offsetDist` to the length of every
-  // line segment, for use in computing offsets.
+  // of the line.
   let totalDist = 0;
   const ctrlPtDists = [0];
   for (let pt = 1; pt < ctrlPoints.length; pt++) {
