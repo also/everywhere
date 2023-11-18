@@ -54,7 +54,7 @@ export default function (opts: {
     let visitedSome = false;
     let visitedAll = true;
     for (const line of interpolatedLines) {
-      for (const point of line) {
+      for (const { point } of line) {
         const near = linesWithinDistance(tripTree, point, distanceThreshold);
         if (near.length === 0) {
           visitedAll = false;
