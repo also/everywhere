@@ -32,11 +32,12 @@ export default function WayInterpolationExample() {
       ? [way.geometry.coordinates]
       : way.geometry.coordinates;
 
-  const interpolatedLines = lines.map((coordinates) => [
-    ...interpolateLineRange(coordinates, 50, positionDistance, 100).map(
+  const interpolatedLines: GoodPosition[][] = lines.map((coordinates) =>
+    Array.from(
+      interpolateLineRange(coordinates, 50, positionDistance, 100),
       ({ point }) => point
-    ),
-  ]);
+    )
+  );
 
   return (
     <MapComponent width={500} height={500} zoomFeature={way}>

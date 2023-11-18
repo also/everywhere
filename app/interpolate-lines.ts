@@ -24,7 +24,7 @@ function euclideanDistance(pt1: GoodPosition, pt2: GoodPosition) {
  *      a set of `number` points is lower than this value, `number` will be
  *      decreased to a suitable value.
  */
-export function interpolateLineRange(
+export function* interpolateLineRange(
   ctrlPoints: GoodPosition[],
   number: number,
   distance: (
@@ -32,7 +32,7 @@ export function interpolateLineRange(
     pt2: GoodPosition
   ) => number = euclideanDistance,
   minGap: number = 0
-) {
+): Generator<{ point: GoodPosition; index: number }> {
   // Calculate path distance from each control point (vertex) to the beginning
   // of the line.
   let totalDist = 0;
@@ -49,9 +49,9 @@ export function interpolateLineRange(
 
   // Variables used to control interpolation.
   const step = totalDist / (number - 1);
-  const interpPoints: { point: GoodPosition; index: number }[] = [
-    { point: ctrlPoints[0], index: 0 },
-  ];
+
+  yield { point: ctrlPoints[0], index: 0 };
+
   let prevCtrlPtInd = 0;
   let currDist = 0;
   let currPoint = ctrlPoints[0];
@@ -80,15 +80,14 @@ export function interpolateLineRange(
       currPoint[1] + ctrlPtsDeltaY * distRatio,
     ];
 
-    interpPoints.push({ point: currPoint, index: prevCtrlPtInd });
+    yield { point: currPoint, index: prevCtrlPtInd };
 
     currDist = nextDist;
     nextDist += step;
   }
 
-  interpPoints.push({
+  yield {
     point: ctrlPoints[ctrlPoints.length - 1],
     index: ctrlPoints.length - 1,
-  });
-  return interpPoints;
+  };
 }
