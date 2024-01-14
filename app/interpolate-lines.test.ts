@@ -14,7 +14,9 @@ function test2(
   expected?: { point: GoodPosition; index: number }[]
 ) {
   if (expected) {
-    assert.deepStrictEqual([...actual], expected);
+    const actualArray = [...actual];
+    console.log(actualArray);
+    assert.deepStrictEqual(actualArray, expected);
   } else {
     console.log(JSON.stringify([...actual]));
   }
@@ -158,6 +160,26 @@ export default function () {
       { point: [1, 0], index: 0 },
       { point: [2, 0], index: 0 },
       { point: [3, 0], index: 2 },
+    ]
+  );
+
+  test2(
+    interpolateLineRange(
+      [
+        [0, 0],
+        [2, 0],
+        [2.5, 0],
+        [3, 0],
+      ],
+      50,
+      undefined,
+      1
+    ),
+    [
+      { point: [0, 0], index: 0 },
+      { point: [1, 0], index: 0 },
+      { point: [2, 0], index: 0 },
+      { point: [3, 0], index: 3 },
     ]
   );
 }

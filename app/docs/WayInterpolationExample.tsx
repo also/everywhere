@@ -20,7 +20,7 @@ function Coordinates({ coordinates }: { coordinates: GoodPosition[] }) {
 
 export default function WayInterpolationExample() {
   const way = useContext(DataContext).ways.features.find(
-    (w) => w.properties.id === 'way/9430174'
+    (w) => w.properties.id === 'way/46785938'
   );
 
   if (!way) {
@@ -31,6 +31,8 @@ export default function WayInterpolationExample() {
     way.geometry.type === 'LineString'
       ? [way.geometry.coordinates]
       : way.geometry.coordinates;
+
+  console.log(JSON.stringify(lines[0]));
 
   const interpolatedLines: GoodPosition[][] = lines.map((coordinates) =>
     Array.from(

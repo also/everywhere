@@ -26,53 +26,62 @@ function euclideanDistance(pt1: GoodPosition, pt2: GoodPosition) {
  */
 export function* interpolateLineRange(
   ctrlPoints: GoodPosition[],
-  number: number,
+  __number: number,
   distance: (
     pt1: GoodPosition,
     pt2: GoodPosition
   ) => number = euclideanDistance,
-  minGap: number = 0
+  step: number = 0
 ): Generator<{ point: GoodPosition; index: number }> {
-  // Calculate path distance from each control point (vertex) to the beginning
-  // of the line.
-  let totalDist = 0;
-  const ctrlPtDists = [0];
-  for (let pt = 1; pt < ctrlPoints.length; pt++) {
-    const dist = distance(ctrlPoints[pt], ctrlPoints[pt - 1]);
-    totalDist += dist;
-    ctrlPtDists.push(totalDist);
-  }
-
-  if (totalDist / (number - 1) < minGap) {
-    number = totalDist / minGap + 1;
-  }
-
-  // Variables used to control interpolation.
-  const step = totalDist / (number - 1);
-
   yield { point: ctrlPoints[0], index: 0 };
 
   let prevCtrlPtInd = 0;
-  let currDist = 0;
-  let currPoint = ctrlPoints[0];
-  let nextDist = step;
+  let nextCtrlPtDist = 0;
+  let currDist!: number;
+  let currPoint!: GoodPosition;
+  let ctrlPtsDist!: number;
+  let ctrlPtsDeltaX!: number;
+  let ctrlPtsDeltaY!: number;
 
-  for (let pt = 0; pt < number - 2; pt++) {
-    // Find the segment in which the next interpolated point lies.
-    while (nextDist > ctrlPtDists[prevCtrlPtInd + 1]) {
-      prevCtrlPtInd++;
-      currDist = ctrlPtDists[prevCtrlPtInd];
-      currPoint = ctrlPoints[prevCtrlPtInd];
+  let nextInterpDist = step;
+
+  function advance() {
+    const prevCtrlPtDist = nextCtrlPtDist;
+    currPoint = ctrlPoints[prevCtrlPtInd];
+    const nextPoint = ctrlPoints[prevCtrlPtInd + 1];
+    nextCtrlPtDist += distance(nextPoint, currPoint);
+    currDist = prevCtrlPtDist;
+    ctrlPtsDist = nextCtrlPtDist - prevCtrlPtDist;
+    ctrlPtsDeltaX = nextPoint[0] - currPoint[0];
+    ctrlPtsDeltaY = nextPoint[1] - currPoint[1];
+  }
+
+  advance();
+
+  outer: while (true) {
+    if (nextInterpDist < nextCtrlPtDist) {
+      // don't need to advance control point
+    } else {
+      // Find the segment in which the next interpolated point lies.
+      while (nextCtrlPtDist < nextInterpDist) {
+        if (prevCtrlPtInd === ctrlPoints.length - 2) {
+          break outer;
+        }
+        prevCtrlPtInd++;
+
+        advance();
+      }
+
+      if (
+        prevCtrlPtInd === ctrlPoints.length - 2 &&
+        nextInterpDist === nextCtrlPtDist
+      ) {
+        break;
+      }
     }
 
     // Interpolate the coordinates of the next point along the current segment.
-    const remainingDist = nextDist - currDist;
-    const ctrlPtsDeltaX =
-      ctrlPoints[prevCtrlPtInd + 1][0] - ctrlPoints[prevCtrlPtInd][0];
-    const ctrlPtsDeltaY =
-      ctrlPoints[prevCtrlPtInd + 1][1] - ctrlPoints[prevCtrlPtInd][1];
-    const ctrlPtsDist =
-      ctrlPtDists[prevCtrlPtInd + 1] - ctrlPtDists[prevCtrlPtInd];
+    const remainingDist = nextInterpDist - currDist;
     const distRatio = remainingDist / ctrlPtsDist;
 
     currPoint = [
@@ -82,8 +91,8 @@ export function* interpolateLineRange(
 
     yield { point: currPoint, index: prevCtrlPtInd };
 
-    currDist = nextDist;
-    nextDist += step;
+    currDist = nextInterpDist;
+    nextInterpDist += step;
   }
 
   yield {

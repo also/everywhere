@@ -1,8 +1,8 @@
 import { readFileSync, writeFileSync } from 'fs';
-import { FeatureCollection } from 'geojson';
+import { Feature, FeatureCollection, MultiLineString } from 'geojson';
 import { positionDistance } from '../app/distance';
 import { features, linesWithinDistance, tree } from '../app/geo';
-import { interpolateLineRange } from '../app/interpolate-lines';
+import { GoodPosition, interpolateLineRange } from '../app/interpolate-lines';
 import { stravaTopologies } from './strava-files';
 import { combineTolologies } from './topojson-utils';
 
@@ -33,7 +33,7 @@ export default function (opts: {
   let visitedCount = 0;
   let unvisitedCount = 0;
 
-  let resultFeatures = [];
+  const resultFeatures = [];
 
   for (const street of streetsGeojson.features) {
     const { geometry } = street;
@@ -42,21 +42,56 @@ export default function (opts: {
       continue;
     }
 
-    const lines =
-      geometry.type === 'LineString'
-        ? [geometry.coordinates]
-        : geometry.coordinates;
-
-    const interpolatedLines = lines.map((coordinates) => [
-      ...interpolateLineRange(coordinates, 5000, positionDistance, 5),
-    ]);
-
     let visitedSome = false;
     let visitedAll = true;
-    for (const line of interpolatedLines) {
-      for (const { point } of line) {
+
+    const visitedLines = [];
+    const unvisitedLines = [];
+
+    let currentLine: GoodPosition[] | undefined = undefined;
+
+    let previousVisited: boolean | undefined = undefined;
+
+    let previousStartIndex = 0;
+
+    for (const line of geometry.type === 'LineString'
+      ? [geometry.coordinates]
+      : geometry.coordinates) {
+      const interpolatedLine = interpolateLineRange(
+        line,
+        5000,
+        positionDistance,
+        5
+      );
+      for (const { point, index } of interpolatedLine) {
         const near = linesWithinDistance(tripTree, point, distanceThreshold);
-        if (near.length === 0) {
+        const visitedPoint = near.length > 0;
+
+        if (!currentLine) {
+          currentLine = [];
+          if (visitedPoint) {
+            visitedLines.push(currentLine);
+          } else {
+            unvisitedLines.push(currentLine);
+          }
+        } else if (
+          visitedPoint !== previousVisited ||
+          index === line.length - 1
+        ) {
+          currentLine.push(...line.slice(previousStartIndex, index));
+          previousStartIndex = index;
+          currentLine.push(point);
+          currentLine = [];
+          if (visitedPoint) {
+            visitedLines.push(currentLine);
+          } else {
+            unvisitedLines.push(currentLine);
+          }
+        }
+
+        previousVisited = visitedPoint;
+
+        if (!visitedPoint) {
           visitedAll = false;
           break;
         } else {
@@ -68,16 +103,45 @@ export default function (opts: {
         }
       }
     }
-    // TODO check every n meters along a street, rather than each point
-    // if there's a trip down either end of a two-point street, it'll be
-    // marked as visited, even if the middle is not
+
+    if (visitedLines.length > 0) {
+      const visitedFeature: Feature<MultiLineString> = {
+        ...street,
+        properties: {
+          ...street.properties,
+          visited: true,
+        },
+        geometry: {
+          type: 'MultiLineString',
+          coordinates: visitedLines,
+        },
+      };
+
+      resultFeatures.push(visitedFeature);
+    }
+
+    if (unvisitedLines.length > 0) {
+      const unvisitedFeature: Feature<MultiLineString> = {
+        ...street,
+        properties: {
+          ...street.properties,
+          visited: false,
+          someVisited: visitedLines.length > 0,
+        },
+        geometry: {
+          type: 'MultiLineString',
+          coordinates: unvisitedLines,
+        },
+      };
+      resultFeatures.push(unvisitedFeature);
+    }
 
     const visited = visitedSome && visitedAll;
 
-    street.properties!.everywhere = {
-      visited,
-      distanceThreshold,
-    };
+    // street.properties!.everywhere = {
+    //   visited,
+    //   distanceThreshold,
+    // };
 
     if (visited) {
       visitedCount++;
@@ -85,17 +149,17 @@ export default function (opts: {
       unvisitedCount++;
     }
 
-    if (onlyUnvisited) {
-      if (!visited) {
-        resultFeatures.push(street);
-      }
-    } else if (onlyVisited) {
-      if (visited) {
-        resultFeatures.push(street);
-      }
-    } else {
-      resultFeatures.push(street);
-    }
+    // if (onlyUnvisited) {
+    //   if (!visited) {
+    //     resultFeatures.push(street);
+    //   }
+    // } else if (onlyVisited) {
+    //   if (visited) {
+    //     resultFeatures.push(street);
+    //   }
+    // } else {
+    //   resultFeatures.push(street);
+    // }
   }
 
   streetsGeojson.features = resultFeatures;
