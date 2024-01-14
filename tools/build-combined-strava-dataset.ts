@@ -1,9 +1,9 @@
 import { stravaTopologies } from './strava-files';
 
-import { combineTolologies } from './topojson-utils';
+import { combineTopologies } from './topojson-utils';
 
 export default function () {
-  const bigTopo = combineTolologies(stravaTopologies(), () => ({
+  const bigTopo = combineTopologies(stravaTopologies(), () => ({
     type: 'strava-trip',
   }));
 

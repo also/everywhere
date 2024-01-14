@@ -5,7 +5,7 @@ import {
   Topology,
 } from 'topojson-specification';
 
-// the type of topolojy used for strava trips
+// the type of topology used for strava trips
 export type SimpleTopology<T extends GeometryObject<any> = GeometryObject> =
   Topology<{ geoJson: T }>;
 
@@ -25,7 +25,7 @@ export function addArcOffset(n: number, offset: number): number {
 
 type PropsOf<T> = T extends GeometryObject<infer P> ? P : never;
 
-export function combineTolologies<
+export function combineTopologies<
   PropsOut extends Properties,
   T extends GeometryObject<any>,
   P extends PropsOf<T>
@@ -47,11 +47,11 @@ export function combineTolologies<
 
 export function addTopology<P extends Properties>(
   target: CombinedTrips<P>,
-  toploogy: SimpleTopology<any>,
+  topology: SimpleTopology<any>,
   props: P
 ): void {
   const arcStart = target.arcs.length;
-  const coll = toploogy.objects.geoJson;
+  const coll = topology.objects.geoJson;
   let obj: GeometryObject;
   if (coll.type !== 'GeometryCollection') {
     obj = coll;
@@ -76,8 +76,8 @@ export function addTopology<P extends Properties>(
       arcs: obj.arcs.map((i) => addArcOffset(i, arcStart)),
     });
   } else {
-    throw new Error(`unxpected ${obj.type}`);
+    throw new Error(`unexpected ${obj.type}`);
   }
 
-  target.arcs.push(...toploogy.arcs);
+  target.arcs.push(...topology.arcs);
 }

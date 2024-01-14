@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { Feature, Geometry } from 'geojson';
 import * as topojson from 'topojson';
-import { combineTolologies, SimpleTopology } from './topojson-utils';
+import { combineTopologies, SimpleTopology } from './topojson-utils';
 import { VideoProperties } from './parse/gopro-gps';
 import { GeometryObject } from 'topojson-specification';
 
@@ -52,7 +52,7 @@ function* videoTopoJson() {
 }
 
 export default function () {
-  const bigTopo = combineTolologies(videoTopoJson(), (properties) => ({
+  const bigTopo = combineTopologies(videoTopoJson(), (properties) => ({
     type: 'video',
     ...properties,
   }));

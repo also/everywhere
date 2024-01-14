@@ -2,7 +2,7 @@ import { readFileSync, writeFileSync } from 'fs';
 import { FeatureCollection } from 'geojson';
 import { features, linesWithinDistance, tree } from '../app/geo';
 import { stravaTopologies } from './strava-files';
-import { combineTolologies } from './topojson-utils';
+import { combineTopologies } from './topojson-utils';
 
 const distanceThreshold = 10;
 
@@ -15,7 +15,7 @@ export default function ({
     readFileSync(streetsFilename, 'utf8')
   );
 
-  const bigTopo = combineTolologies(stravaTopologies(), () => ({
+  const bigTopo = combineTopologies(stravaTopologies(), () => ({
     type: 'strava-trip',
   }));
 
