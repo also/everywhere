@@ -40,11 +40,16 @@ channel.handle(setWorkerFile, async ({ file, type: fileType }) => {
     features: (value.type === 'Topology'
       ? features(value)
       : (value as FeatureCollection)
-    ).features.filter((f): f is Feature<LineString | MultiLineString> => {
+    ).features.filter((f, i): f is Feature<LineString | MultiLineString> => {
       const {
         geometry: { type },
-        properties,
       } = f;
+      let { properties } = f;
+      // TODO don't do this in filter
+      if (!properties) {
+        properties = f.properties = {};
+      }
+      properties.everywhereFeatureIndex = i;
       if (type === 'LineString' || type === 'MultiLineString') {
         return (
           fileType !== 'osm' ||

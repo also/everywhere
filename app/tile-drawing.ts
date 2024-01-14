@@ -16,7 +16,7 @@ import {
 } from './geo';
 
 export interface TileRenderOpts {
-  selectedId: string | number | undefined;
+  selectedIndex: string | number | undefined;
 }
 
 const extent = 4096;
@@ -191,14 +191,14 @@ export function drawTile2(
     ctx.stroke();
   }
   tile.features.forEach((feat) => {
-    if (feat.id == opts?.selectedId) {
+    if (feat.tags.everywhereFeatureIndex == opts?.selectedIndex) {
       //
     } else {
       drawFeature(feat, true);
     }
   });
   tile.features.forEach((feat) => {
-    if (feat.id == opts?.selectedId) {
+    if (feat.tags.everywhereFeatureIndex == opts?.selectedIndex) {
       selectedFeature = feat;
     } else {
       drawFeature(feat);

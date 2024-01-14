@@ -133,7 +133,10 @@ function VectorTileView({ channel }: { channel: WorkerChannel }) {
           .setContent(() => popupDiv)
           .openOn(l);
 
-        layer.setOpts({ selectedId: selected?.feature.id });
+        layer.setOpts({
+          // TODO create a type that includes properties and everywhereFeatureIndex
+          selectedIndex: selected?.feature.properties.everywhereFeatureIndex,
+        });
       });
     };
   }, [channel]);
