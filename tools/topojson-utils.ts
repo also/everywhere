@@ -57,7 +57,9 @@ export function addTopology<P extends Properties>(
     obj = coll;
   } else {
     if (coll.geometries.length !== 1) {
-      throw new Error('expected a single geometry');
+      throw new Error(
+        `expected a single geometry, got ${coll.geometries.length}`
+      );
     }
     obj = coll.geometries[0];
   }
