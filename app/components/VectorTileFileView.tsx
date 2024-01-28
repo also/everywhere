@@ -71,7 +71,7 @@ const GenericFeatureDetails = ({
   properties?: Record<string, any>;
 }) => (
   <div>
-    ID: {id ?? '(none'}, type: {properties?.type ?? '(none)'}
+    ID: {id ?? '(none)'}, type: {properties?.type ?? '(none)'}
     {id && isProbablyOsmId(id) && (
       <>
         {' '}
