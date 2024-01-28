@@ -8,7 +8,8 @@ export function stravaActivityGeoJson() {
   return mapGen(
     readAllJson<CompleteActivity>('strava-activities'),
     (activity) =>
-      activity.activity.type === 'Ride'
+      activity.activity.type === 'Ride' ||
+      activity.activity.type === 'EBikeRide'
         ? completeActivityToGeoJson(activity)
         : undefined
   );
