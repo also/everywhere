@@ -1,40 +1,58 @@
-import { readdirSync, readFileSync } from 'fs';
 import * as GeoJSON from 'geojson';
 import { Checkin, Venue } from './swarm';
 import { topology } from 'topojson';
 import { combineTopologies, SimpleTopology } from './topojson-utils';
+import { readAllJson } from './data';
+
+export type SimpleVenue = Pick<Venue, 'id' | 'name'>;
+export type SimpleCheckin = Pick<Checkin, 'id' | 'createdAt'>;
+
+type VenueFeature = GeoJSON.Feature<
+  GeoJSON.Point,
+  { type: 'swarm-venue'; venue: SimpleVenue; checkins: SimpleCheckin[] }
+>;
 
 export default function () {
-  const files = readdirSync('data/swarm');
+  const checkins = readAllJson<Checkin>('swarm');
 
-  const venues = new Map<string, Venue>();
+  const venues = new Map<string, { venue: Venue; checkins: Checkin[] }>();
   const topologies: SimpleTopology[] = [];
 
-  for (const filename of files) {
-    const checkin: Checkin = JSON.parse(
-      readFileSync(`data/swarm/${filename}`, 'utf8')
-    );
-    const venue = checkin.venue;
-    if (!venue) {
-      console.log('no venue', checkin);
+  for (const checkin of checkins) {
+    const existing = venues.get(checkin.venue.id);
+    if (existing) {
+      existing.checkins.push(checkin);
     } else {
-      venues.set(venue.id, venue);
+      venues.set(checkin.venue.id, {
+        venue: checkin.venue,
+        checkins: [checkin],
+      });
     }
   }
 
-  for (const venue of venues.values()) {
-    const point: GeoJSON.Point = {
-      type: 'Point',
-      coordinates: [venue.location.lng, venue.location.lat],
+  for (const { venue, checkins } of venues.values()) {
+    const point: VenueFeature = {
+      type: 'Feature',
+      geometry: {
+        type: 'Point',
+        coordinates: [venue.location.lng, venue.location.lat],
+      },
+      properties: {
+        type: 'swarm-venue',
+        venue: {
+          id: venue.id,
+          name: venue.name,
+        },
+        checkins: checkins.map((c) => ({
+          id: c.id,
+          createdAt: c.createdAt,
+        })),
+      },
     };
 
     const topo = topology({ geoJson: point }) as SimpleTopology;
     topologies.push(topo);
   }
 
-  console.log(
-    JSON.stringify(
-      combineTopologies(topologies, () => ({ type: 'swarm-venue' }))
-    )
-  );
+  console.log(JSON.stringify(combineTopologies(topologies, (p) => p)));
 }

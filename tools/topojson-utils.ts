@@ -5,14 +5,22 @@ import {
   Topology,
 } from 'topojson-specification';
 
+// TODO the GeometryCollection is not very good. you're not going to have Points and Lines with the same properties.
+// try something like this:
+// export interface EGeometryCollection<
+//   T extends GeometryObject<any> = GeometryObject,
+//   P extends Properties = {}
+// > extends GeometryObjectA<P> {
+//   type: 'GeometryCollection';
+//   geometries: Array<T>;
+// }
+
 // the type of topology used for strava trips
 export type SimpleTopology<T extends GeometryObject<any> = GeometryObject> =
   Topology<{ geoJson: T }>;
 
-export type CombinedTrips<P extends Properties = Record<string, any>> =
-  Topology<{
-    geoJson: GeometryCollection<P>;
-  }>;
+export type SimpleCombinedTopology<P extends Properties = Record<string, any>> =
+  SimpleTopology<GeometryCollection<P>>;
 
 /**
  * A negative arc index indicates that the arc at the ones’ complement of the index must be reversed to reconstruct the geometry: -1 refers to the reversed first arc, -2 refers to the reversed second arc, and so on. In JavaScript, you can negate a negative arc index i using the [bitwise NOT operator](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Bitwise_Operators#Bitwise_NOT), `~i`.
@@ -25,6 +33,14 @@ export function addArcOffset(n: number, offset: number): number {
 
 type PropsOf<T> = T extends GeometryObject<infer P> ? P : never;
 
+export function createMutableSimpleCombinedTopology<P>() {
+  return {
+    type: 'Topology',
+    arcs: [],
+    objects: { geoJson: { type: 'GeometryCollection', geometries: [] } },
+  } as SimpleCombinedTopology<P>;
+}
+
 export function combineTopologies<
   PropsOut extends Properties,
   T extends GeometryObject<any>,
@@ -32,12 +48,8 @@ export function combineTopologies<
 >(
   topologies: Iterable<SimpleTopology<T>>,
   transformProps: (input: P) => PropsOut
-): CombinedTrips<PropsOut> {
-  const result: CombinedTrips<PropsOut> = {
-    type: 'Topology',
-    arcs: [],
-    objects: { geoJson: { type: 'GeometryCollection', geometries: [] } },
-  };
+): SimpleCombinedTopology<PropsOut> {
+  const result = createMutableSimpleCombinedTopology<PropsOut>();
 
   for (const t of topologies) {
     addTopology(result, t, transformProps(t.objects.geoJson.properties));
@@ -46,7 +58,7 @@ export function combineTopologies<
 }
 
 export function addTopology<P extends Properties>(
-  target: CombinedTrips<P>,
+  target: SimpleCombinedTopology<P>,
   topology: SimpleTopology<any>,
   props: P
 ): void {

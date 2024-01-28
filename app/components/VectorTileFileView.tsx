@@ -43,6 +43,30 @@ function GoProVideoDetails({
   );
 }
 
+export function SwarmVenueDetails({
+  properties: {
+    venue: { id, name },
+    checkins,
+  },
+}: {
+  properties: { venue: { id: string; name: string }; checkins: any[] };
+}) {
+  return (
+    <>
+      <div>
+        <a
+          href={`https://foursquare.com/v/v/${id}`}
+          target="_blank"
+          rel="noreferrer"
+        >
+          <strong>{name}</strong>
+        </a>{' '}
+      </div>
+      <div>{checkins.length} checkins</div>
+    </>
+  );
+}
+
 function StravaTripDetails({ id }: { id: string }) {
   return (
     <div>
@@ -90,6 +114,7 @@ const GenericFeatureDetails = ({
 const componentsByType: Record<string, React.ComponentType<any>> = {
   video: GoProVideoDetails,
   'strava-trip': StravaTripDetails,
+  'swarm-venue': SwarmVenueDetails,
 };
 
 function VectorTileView({ channel }: { channel: WorkerChannel }) {
