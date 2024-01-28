@@ -5,6 +5,7 @@ import {
   Geometry,
   LineString,
   MultiLineString,
+  Point,
   Polygon,
   Position,
 } from 'geojson';
@@ -77,16 +78,20 @@ export function featureCollection<T extends Geometry>(
 }
 
 function coordses(
-  geometry: LineString | MultiLineString | Polygon
+  geometry: LineString | MultiLineString | Polygon | Point
 ): Position[][] {
+  if (geometry.type === 'Point') {
+    return [[geometry.coordinates, geometry.coordinates]];
+  }
   return geometry.type === 'MultiLineString' || geometry.type === 'Polygon'
     ? geometry.coordinates
     : [geometry.coordinates];
 }
 
-export function tree<G extends LineString | MultiLineString | Polygon, T>(
-  feat: Feature<G, T> | FeatureCollection<G, T>
-): LineRTree<Feature<G, T>> {
+export function tree<
+  G extends LineString | MultiLineString | Polygon | Point,
+  T
+>(feat: Feature<G, T> | FeatureCollection<G, T>): LineRTree<Feature<G, T>> {
   const arcs: {
     arc: Position[];
     data: Feature<G, T>;
@@ -131,7 +136,7 @@ export function pointLineSegmentItemDistance(
 
 export type LineRTree<T> = RBush<RTreeItem<T>>;
 
-function makeRTree<G extends LineString | MultiLineString | Polygon, T>(
+function makeRTree<G extends LineString | MultiLineString | Polygon | Point, T>(
   arcs: {
     arc: Position[];
     data: Feature<G, T>;

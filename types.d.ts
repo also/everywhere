@@ -5,15 +5,22 @@ declare module 'geojson-vt' {
     x: number;
   }
 
-  export interface Tile extends TileCoords {
-    features: [
-      {
+  export type Feature =
+    | {
+        type: 1;
         id: number | undefined;
-        geometry: [number, number][][];
-        type: 2;
+        geometry: [number, number][];
         tags: Record<string, string | number>;
       }
-    ];
+    | {
+        type: 2;
+        id: number | undefined;
+        geometry: [number, number][][];
+        tags: Record<string, string | number>;
+      };
+
+  export interface Tile extends TileCoords {
+    features: Feature[];
   }
 
   export class GeoJSONVT {

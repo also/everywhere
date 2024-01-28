@@ -77,6 +77,13 @@ export function addTopology<P extends Properties>(
       properties: props,
       arcs: obj.arcs.map((i) => addArcOffset(i, arcStart)),
     });
+  } else if (obj.type === 'Point') {
+    target.objects.geoJson.geometries.push({
+      type: 'Point',
+      id: obj.id,
+      properties: props,
+      coordinates: obj.coordinates,
+    });
   } else {
     throw new Error(`unexpected ${obj.type}`);
   }

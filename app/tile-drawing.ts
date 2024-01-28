@@ -157,14 +157,6 @@ export function drawTile2(
     isSelected = false
   ) {
     const { type, geometry } = feat;
-    if (type !== 2) {
-      return;
-    }
-
-    const highway = feat.tags.highway as string;
-    if (highway && !shouldShowHighwayAtZoom(highway, z)) {
-      return;
-    }
 
     let defaultColor = '#00dcc2';
     // TODO the type of tags is wrong - values can be objects?
@@ -174,11 +166,40 @@ export function drawTile2(
       defaultColor = '#eee';
     }
 
+    const color = isSelected ? 'blue' : isStroke ? 'white' : defaultColor;
+
+    if (isSelected) {
+      console.log(feat);
+    }
+
+    if (type === 1) {
+      const [point] = geometry;
+      const [x, y] = point;
+      ctx.beginPath();
+      ctx.arc(x * ratio + pad, y * ratio + pad, 5, 0, Math.PI * 2);
+      if (isStroke) {
+        ctx.lineWidth = 4;
+        ctx.strokeStyle = color;
+        ctx.stroke();
+      } else {
+        ctx.fillStyle = color;
+        ctx.fill();
+      }
+    }
+    if (type !== 2) {
+      return;
+    }
+
+    ctx.strokeStyle = color;
+
+    const highway = feat.tags.highway as string;
+    if (highway && !shouldShowHighwayAtZoom(highway, z)) {
+      return;
+    }
+
     ctx.beginPath();
     ctx.lineJoin = 'round';
-    ctx.strokeStyle = isSelected ? 'blue' : isStroke ? 'white' : defaultColor;
     ctx.lineWidth = isSelected || isStroke ? 8 : 2;
-    // TODO handle points
     geometry.forEach((points) => {
       points.forEach(([x, y], i) => {
         if (i > 0) {

@@ -59,7 +59,7 @@ channel.handle(setWorkerFile, async ({ file, type: fileType }) => {
           )
         );
       } else {
-        return false;
+        return type === 'Point';
       }
     }),
   };
