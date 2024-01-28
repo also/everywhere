@@ -6,7 +6,7 @@ import {
   lookup,
   renderDistanceTileInWorker,
   renderTileInWorker,
-  setWorkerFile,
+  setWorkerFiles,
 } from './worker-stuff';
 import { LineRTree, features, tree, filteredNearestLine } from './geo';
 import { drawDistanceTile, drawTile2 } from './tile-drawing';
@@ -33,36 +33,42 @@ let featureTree:
   | LineRTree<Feature<LineString | MultiLineString, GeoJsonProperties>>
   | undefined = undefined;
 
-channel.handle(setWorkerFile, async ({ file, type: fileType }) => {
-  const value = JSON.parse(await file.text());
+channel.handle(setWorkerFiles, async (files) => {
   const f: FeatureCollection<LineString | MultiLineString> = {
     type: 'FeatureCollection',
-    features: (value.type === 'Topology'
-      ? features(value)
-      : (value as FeatureCollection)
-    ).features.filter((f, i): f is Feature<LineString | MultiLineString> => {
-      const {
-        geometry: { type },
-      } = f;
-      let { properties } = f;
-      // TODO don't do this in filter
-      if (!properties) {
-        properties = f.properties = {};
-      }
-      properties.everywhereFeatureIndex = i;
-      if (type === 'LineString' || type === 'MultiLineString') {
-        return (
-          fileType !== 'osm' ||
-          Object.prototype.hasOwnProperty.call(
-            highwayLevels,
-            properties?.highway
-          )
-        );
-      } else {
-        return type === 'Point';
-      }
-    }),
+    features: [],
   };
+  let i = 0;
+  for (const { file, type: fileType } of files) {
+    const value = JSON.parse(await file.text());
+    f.features.push(
+      ...(value.type === 'Topology'
+        ? features(value)
+        : (value as FeatureCollection)
+      ).features.filter((f): f is Feature<LineString | MultiLineString> => {
+        const {
+          geometry: { type },
+        } = f;
+        let { properties } = f;
+        // TODO don't do this in filter
+        if (!properties) {
+          properties = f.properties = {};
+        }
+        properties.everywhereFeatureIndex = i++;
+        if (type === 'LineString' || type === 'MultiLineString') {
+          return (
+            fileType !== 'osm' ||
+            Object.prototype.hasOwnProperty.call(
+              highwayLevels,
+              properties?.highway
+            )
+          );
+        } else {
+          return type === 'Point';
+        }
+      })
+    );
+  }
 
   tileIndex = geojsonvt(f, { maxZoom: 24 });
   featureTree = tree(f);

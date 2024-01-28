@@ -12,7 +12,7 @@ import CanvasLayer from '../CanvasLayer';
 import { useMemoAsync } from '../hooks';
 import { drawDistanceTile, drawTile } from '../vector-tiles';
 
-import { create, lookup, setWorkerFile } from '../worker-stuff';
+import { create, lookup, setWorkerFiles } from '../worker-stuff';
 import { WorkerChannel } from '../WorkerChannel';
 import LeafletMap from './LeafletMap';
 import L from 'leaflet';
@@ -186,11 +186,12 @@ function VectorTileView({ channel }: { channel: WorkerChannel }) {
 }
 
 export function VectorTileFileView({
-  file,
-  type,
+  files,
 }: {
-  file: FileWithHandle;
-  type: 'osm' | 'generic';
+  files: {
+    file: FileWithHandle;
+    type: 'osm' | 'generic';
+  }[];
 }) {
   const channel = useMemoAsync(
     async ({ signal }) => {
@@ -199,11 +200,11 @@ export function VectorTileFileView({
         console.log('terminating worker');
         worker.terminate();
       });
-      await channel.sendRequest(setWorkerFile, { file, type });
+      await channel.sendRequest(setWorkerFiles, files);
 
       return channel;
     },
-    [file]
+    [files]
   );
   if (channel) {
     return <VectorTileView channel={channel} />;

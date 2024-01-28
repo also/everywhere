@@ -8,8 +8,8 @@ import { Tile } from 'geojson-vt';
 import { TileRenderOpts } from './tile-drawing';
 import { key, WorkerChannel, workerHandshake } from './WorkerChannel';
 
-export const setWorkerFile =
-  key<{ file: File; type: 'osm' | 'generic' }, void>('setFile');
+export const setWorkerFiles =
+  key<{ file: File; type: 'osm' | 'generic' }[], void>('setFiles');
 export const getTile =
   key<{ x: number; y: number; z: number }, Tile>('getTile');
 export const renderTileInWorker =

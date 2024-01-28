@@ -27,6 +27,7 @@ import { NavExtension } from '../Nav';
 import LoadingPage from './LoadingPage';
 import { CompleteActivity } from '../../../tools/strava-api';
 import { completeActivityToGeoJson } from '../../../tools/strava';
+import Map from '../Map';
 
 function FileView<T>({
   file,
@@ -150,16 +151,45 @@ function File({ file }: { file: File }) {
   );
 }
 
-function FilesComponent({ files }: { files: SomeFile[] }) {
-  return (
+function FilesComponent({ files }: { files: FileWithHandle[] }) {
+  const loadedFiles = useMemoAsync(() => readFiles(files), [files]);
+  return loadedFiles ? (
     <LeafletMap
       features={([] as Feature[]).concat(
-        ...files.map(({ geojson }) =>
+        ...loadedFiles.map(({ geojson }) =>
           geojson.type === 'Feature' ? [geojson] : geojson.features
         )
       )}
     />
+  ) : (
+    <Map width={600} height={600} asLoadingAnimation={true} />
   );
+}
+
+function DataSetLoader({
+  files,
+  setDataSet,
+}: {
+  files: FileWithHandle[];
+  setDataSet(dataSet: DataSet): void;
+}) {
+  const dataset = useMemoAsync(
+    async () => readToDataset(await readFiles(files)),
+    [files]
+  );
+
+  if (dataset) {
+    return (
+      <>
+        <div>
+          Trips: {dataset.trips.length}, Videos: {dataset.videos.size}
+        </div>
+        <button onClick={() => setDataSet(dataset)}>Set Dataset</button>
+      </>
+    );
+  } else {
+    return <Map width={600} height={600} asLoadingAnimation={true} />;
+  }
 }
 
 function isProbablyStravaCompleteActivity(json: any): json is CompleteActivity {
@@ -251,13 +281,17 @@ export default function LocalDataExplorer({
   setDataSet(dataSet: DataSet): void;
 }) {
   const [files, setFiles] = useState<FileWithHandle[] | undefined>();
-  const [file, setFile] =
+  const [selectedFiles, setSelectedFiles] =
     useState<{
-      file: FileWithHandle;
-      reason: 'map' | 'data' | 'extract-map' | 'stylized-map';
+      files: FileWithHandle[];
+      reason:
+        | 'map'
+        | 'map2'
+        | 'data'
+        | 'extract-map'
+        | 'stylized-map'
+        | 'dataset';
     }>();
-  const [openedFiles, setOpenedFiles] =
-    useState<SomeFile[] | undefined>(undefined);
 
   const [type, setType] = useState('generic');
   const initialized = useMemoAsync<boolean>(async () => {
@@ -295,38 +329,37 @@ export default function LocalDataExplorer({
     },
     [files]
   );
-  async function handleSetDatasetClick() {
-    setDataSet(readToDataset(await readFiles(files || [])));
-  }
 
-  async function handleLoadAllIntoMapClick() {
-    setOpenedFiles(await readFiles(files || []));
-  }
-
-  return openedFiles ? (
+  return selectedFiles ? (
     <>
       <NavExtension>
-        {openedFiles.length} files{' '}
-        <button onClick={() => setOpenedFiles(undefined)}>Unload</button>
+        {selectedFiles.files[0].name}
+        {selectedFiles.files.length > 1
+          ? ` + ${selectedFiles.files.length - 1} `
+          : ' '}
+        <button onClick={() => setSelectedFiles(undefined)}>Unload</button>
       </NavExtension>
-      <FilesComponent files={openedFiles} />
-    </>
-  ) : file ? (
-    <>
-      <NavExtension>
-        {file.file.name}{' '}
-        <button onClick={() => setFile(undefined)}>Unload</button>
-      </NavExtension>
-      {file.reason === 'map' ? (
+      {selectedFiles.reason === 'map' ? (
         <FullScreenPage>
-          <VectorTileFileView file={file.file} type={type as any} />
+          <VectorTileFileView
+            files={selectedFiles.files.map((f) => ({
+              file: f,
+              type: type as any,
+            }))}
+          />
         </FullScreenPage>
-      ) : file.reason === 'stylized-map' ? (
-        <File file={file.file} />
+      ) : selectedFiles.reason === 'map2' ? (
+        <FilesComponent files={selectedFiles.files} />
+      ) : selectedFiles.reason === 'stylized-map' ? (
+        <File file={selectedFiles.files[0]} />
+      ) : selectedFiles.reason === 'dataset' ? (
+        <StandardPage>
+          <DataSetLoader files={selectedFiles.files} setDataSet={setDataSet} />
+        </StandardPage>
       ) : (
         <FileComponentWrapper
-          file={file.file}
-          asMap={file.reason === 'extract-map'}
+          file={selectedFiles.files[0]}
+          asMap={selectedFiles.reason === 'extract-map'}
         />
       )}
     </>
@@ -342,15 +375,6 @@ export default function LocalDataExplorer({
           <>
             <button onClick={handleLoadClick}>load</button>
             <button onClick={handleAddClick}>add</button>
-          </>
-        ) : undefined}
-
-        {files ? (
-          <>
-            <button onClick={handleSetDatasetClick}>Set Dataset</button>
-            <button onClick={handleLoadAllIntoMapClick}>
-              Load All Into Map
-            </button>
           </>
         ) : undefined}
       </div>
@@ -369,19 +393,31 @@ export default function LocalDataExplorer({
               <td>{f.size.toLocaleString()}</td>
               <td>{new Date(f.lastModified).toLocaleString()}</td>
               <td>
-                <button onClick={() => setFile({ file: f, reason: 'map' })}>
+                <button
+                  onClick={() =>
+                    setSelectedFiles({ files: [f], reason: 'map' })
+                  }
+                >
                   load map
                 </button>
-                <button onClick={() => setFile({ file: f, reason: 'data' })}>
+                <button
+                  onClick={() =>
+                    setSelectedFiles({ files: [f], reason: 'data' })
+                  }
+                >
                   load data
                 </button>
                 <button
-                  onClick={() => setFile({ file: f, reason: 'extract-map' })}
+                  onClick={() =>
+                    setSelectedFiles({ files: [f], reason: 'extract-map' })
+                  }
                 >
                   load as map
                 </button>
                 <button
-                  onClick={() => setFile({ file: f, reason: 'stylized-map' })}
+                  onClick={() =>
+                    setSelectedFiles({ files: [f], reason: 'stylized-map' })
+                  }
                 >
                   load as stylized map
                 </button>
@@ -390,6 +426,24 @@ export default function LocalDataExplorer({
           ))}
         </tbody>
       </Table>
+      <div>
+        {' '}
+        {files ? (
+          <>
+            <button
+              onClick={() => setSelectedFiles({ files, reason: 'dataset' })}
+            >
+              Load For Dataset
+            </button>
+            <button onClick={() => setSelectedFiles({ files, reason: 'map' })}>
+              load map
+            </button>
+            <button onClick={() => setSelectedFiles({ files, reason: 'map2' })}>
+              Load All Into Map
+            </button>
+          </>
+        ) : undefined}
+      </div>
       <p>
         <strong>load:</strong> replace the current list of files with the
         selected files
