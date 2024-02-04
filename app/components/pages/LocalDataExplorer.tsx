@@ -29,6 +29,11 @@ import { CompleteActivity } from '../../../tools/strava-api';
 import { completeActivityToGeoJson } from '../../../tools/strava';
 import Map from '../Map';
 
+interface FileWithDetails {
+  file: FileWithHandle;
+  inferredType?: string;
+}
+
 function FileView<T>({
   file,
   parse,
@@ -90,10 +95,10 @@ function FileComponentWrapper({
   file,
   asMap,
 }: {
-  file: FileWithHandle;
+  file: FileWithDetails;
   asMap?: boolean;
 }) {
-  const loaded = useMemoAsync<SomeFile>(() => readFile(file), [file]);
+  const loaded = useMemoAsync<SomeFile>(() => readFile(file.file), [file]);
 
   return loaded ? (
     <FileComponent file={loaded} asMap={asMap} />
@@ -151,7 +156,7 @@ function File({ file }: { file: File }) {
   );
 }
 
-function FilesComponent({ files }: { files: FileWithHandle[] }) {
+function FilesComponent({ files }: { files: FileWithDetails[] }) {
   const loadedFiles = useMemoAsync(() => readFiles(files), [files]);
   return loadedFiles ? (
     <LeafletMap
@@ -170,7 +175,7 @@ function DataSetLoader({
   files,
   setDataSet,
 }: {
-  files: FileWithHandle[];
+  files: FileWithDetails[];
   setDataSet(dataSet: DataSet): void;
 }) {
   const dataset = useMemoAsync(
@@ -233,8 +238,8 @@ async function readFile(file: File): Promise<SomeFile> {
   return { geojson, mp4, track, raw: file };
 }
 
-function readFiles(files: FileWithHandle[]): Promise<SomeFile[]> {
-  return Promise.all(files.map((file) => readFile(file)));
+function readFiles(files: FileWithDetails[]): Promise<SomeFile[]> {
+  return Promise.all(files.map((file) => readFile(file.file)));
 }
 
 function isProbablyStravaTrip(
@@ -275,15 +280,28 @@ function readToDataset(newFiles: SomeFile[]) {
   return buildDataSet(trips, videoChapters);
 }
 
+async function peekFile(file: FileWithHandle) {
+  const head = file.slice(0, 100);
+  const value = await head.arrayBuffer();
+  const array = new Uint8Array(value);
+  // if json
+  if (array[0] === 123) {
+    const s = new TextDecoder('ascii').decode(array);
+    const type = s.match(/{\s*"type"\s*:\s*"([^"]+)"/)?.[1];
+    return type ?? 'json';
+  }
+  return 'unknown';
+}
+
 export default function LocalDataExplorer({
   setDataSet,
 }: {
   setDataSet(dataSet: DataSet): void;
 }) {
-  const [files, setFiles] = useState<FileWithHandle[] | undefined>();
+  const [files, setFiles] = useState<FileWithDetails[] | undefined>();
   const [selectedFiles, setSelectedFiles] =
     useState<{
-      files: FileWithHandle[];
+      files: FileWithDetails[];
       reason:
         | 'map'
         | 'map2'
@@ -301,9 +319,12 @@ export default function LocalDataExplorer({
 
   async function handleFiles(
     result: FileWithHandle[],
-    existingFiles: FileWithHandle[] = []
+    existingFiles: FileWithDetails[] = []
   ) {
-    const allFiles = [...result, ...existingFiles];
+    const newFiles: FileWithDetails[] = await Promise.all(
+      result.map(async (file) => ({ file, inferredType: await peekFile(file) }))
+    );
+    const allFiles = [...newFiles, ...existingFiles];
     setFiles(allFiles);
     // for safari, it seems to be important that you don't remove the files from indexDB before you read them.
     // removing them drops the reference or something
@@ -333,7 +354,7 @@ export default function LocalDataExplorer({
   return selectedFiles ? (
     <>
       <NavExtension>
-        {selectedFiles.files[0].name}
+        {selectedFiles.files[0].file.name}
         {selectedFiles.files.length > 1
           ? ` + ${selectedFiles.files.length - 1} `
           : ' '}
@@ -343,7 +364,7 @@ export default function LocalDataExplorer({
         <FullScreenPage>
           <VectorTileFileView
             files={selectedFiles.files.map((f) => ({
-              file: f,
+              file: f.file,
               type: type as any,
             }))}
           />
@@ -351,7 +372,7 @@ export default function LocalDataExplorer({
       ) : selectedFiles.reason === 'map2' ? (
         <FilesComponent files={selectedFiles.files} />
       ) : selectedFiles.reason === 'stylized-map' ? (
-        <File file={selectedFiles.files[0]} />
+        <File file={selectedFiles.files[0].file} />
       ) : selectedFiles.reason === 'dataset' ? (
         <StandardPage>
           <DataSetLoader files={selectedFiles.files} setDataSet={setDataSet} />
@@ -384,14 +405,16 @@ export default function LocalDataExplorer({
             <th>Name</th>
             <th>Size</th>
             <th>Last Modified</th>
+            <th>Inferred Type</th>
           </tr>
         </thead>
         <tbody>
           {(files || []).map((f, i) => (
             <tr key={i}>
-              <td>{f.name}</td>
-              <td>{f.size.toLocaleString()}</td>
-              <td>{new Date(f.lastModified).toLocaleString()}</td>
+              <td>{f.file.name}</td>
+              <td>{f.file.size.toLocaleString()}</td>
+              <td>{new Date(f.file.lastModified).toLocaleString()}</td>
+              <td>{f.inferredType}</td>
               <td>
                 <button
                   onClick={() =>
