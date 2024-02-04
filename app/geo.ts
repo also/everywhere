@@ -77,7 +77,7 @@ export function featureCollection<T extends Geometry>(
   return { type: 'FeatureCollection', features: features };
 }
 
-function coordses(
+export function coordses(
   geometry: LineString | MultiLineString | Polygon | Point
 ): Position[][] {
   if (geometry.type === 'Point') {
