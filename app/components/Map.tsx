@@ -108,7 +108,7 @@ const MapSvg = styled.svg`
   }
 `;
 
-function compute({
+export function compute({
   width,
   height,
   zoomFeature,

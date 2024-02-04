@@ -50,6 +50,7 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { buildDataSet } from './trips';
 import PageTitle from './components/PageTitle';
 import { NavExtensionContext } from './components/Nav';
+import ImmersivePage from './components/pages/ImmersivePage';
 
 const GlobalStyle = createGlobalStyle`
 body {
@@ -262,6 +263,14 @@ function MapRoute() {
   );
 }
 
+function ImmersiveRoute() {
+  return (
+    <FullScreenPage>
+      <ImmersivePage />
+    </FullScreenPage>
+  );
+}
+
 const div = document.createElement('div');
 document.body.appendChild(div);
 const datasetPromise = loadDataset();
@@ -283,6 +292,7 @@ ReactDOM.render(
                         <LocalDataExplorer setDataSet={setDataSet} />
                       )}
                     />
+                    <Route path="/3d" component={ImmersiveRoute} />
                     <Route path="/data" component={DataPage} />
                     <Route path="/map" component={MapRoute} />
                     <Route path="/ways/*" component={WayDetailsRoute} />

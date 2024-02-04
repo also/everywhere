@@ -9,6 +9,7 @@
     "@babel/preset-react": "^7.8.3",
     "@babel/preset-typescript": "^7.13.0",
     "@babel/register": "^7.8.7",
+    "@babylonjs/core": "^6.41.0",
     "@mdx-js/loader": "^2.3.0",
     "@tmcw/togeojson": "^5.8.1",
     "@types/d3": "^3.5.5",
