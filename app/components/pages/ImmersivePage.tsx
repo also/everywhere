@@ -37,7 +37,6 @@ export default function ImmersivePage() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { boundary, ways } = useContext(DataContext);
   const { trips } = useContext(DataSetContext);
-  console.log({ trips });
 
   useEffect(() => {
     (async () => {
@@ -48,6 +47,10 @@ export default function ImmersivePage() {
         );
         const engine = new Engine(canvasRef.current, true);
         const scene = new Scene(engine);
+        const camera = new FreeCamera('camera', new Vector3(0, 7, -5), scene);
+        camera.setTarget(Vector3.Zero());
+        camera.attachControl(canvasRef.current, true);
+
         if (canXr) {
           const xr = await WebXRDefaultExperience.CreateAsync(scene, {
             // TODO how to get retina support in safari?
@@ -58,10 +61,6 @@ export default function ImmersivePage() {
             // },
           });
         }
-
-        const camera = new FreeCamera('camera', new Vector3(0, 5, 0), scene);
-        camera.setTarget(Vector3.Zero());
-        camera.attachControl(canvasRef.current, true);
 
         const light = new HemisphericLight(
           'light',
@@ -84,8 +83,6 @@ export default function ImmersivePage() {
         );
 
         function reposition(p: Vector3) {
-          p.z = 5;
-          // p.y = 0.5;
           p.x = -1;
         }
 
