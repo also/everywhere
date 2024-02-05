@@ -6,11 +6,7 @@ import { HemisphericLight } from '@babylonjs/core/Lights/hemisphericLight';
 import { ExtrudePolygon } from '@babylonjs/core/Meshes/Builders/polygonBuilder';
 import { Color3, Color4 } from '@babylonjs/core/Maths/math.color';
 
-// Side-effects only imports allowing the standard material to be used as default.
-// import '@babylonjs/core/Materials/standardMaterial';
-// Side-effects only imports allowing Mesh to create default shapes (to enhance tree shaking, the construction methods on mesh are not available if the meshbuilder has not been imported).
 import { CreateLineSystem } from '@babylonjs/core/Meshes/Builders/linesBuilder';
-// import '@babylonjs/core/Meshes/Builders/groundBuilder';
 
 import { WebXRSessionManager } from '@babylonjs/core/XR/webXRSessionManager';
 import { WebXRDefaultExperience } from '@babylonjs/core/XR/webXRDefaultExperience';
@@ -28,7 +24,6 @@ import { compute } from '../Map';
 import { coordses } from '../../geo';
 import DataSetContext from '../DataSetContext';
 
-// color 00dcc2
 const color = Color4.FromHexString('#00dcc2');
 const grey = Color3.FromHexString('#444444');
 const animFrames = 400;
@@ -45,7 +40,7 @@ export default function ImmersivePage() {
         const canXr = await WebXRSessionManager.IsSessionSupportedAsync(
           'immersive-vr'
         );
-        const engine = new Engine(canvasRef.current, true);
+        const engine = new Engine(canvasRef.current, true, {}, true);
         const scene = new Scene(engine);
         const camera = new FreeCamera('camera', new Vector3(0, 7, -5), scene);
         camera.setTarget(Vector3.Zero());
