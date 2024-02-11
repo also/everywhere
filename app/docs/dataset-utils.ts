@@ -1,10 +1,11 @@
+import { Feature } from 'geojson';
 import { DataSet } from '../data';
 
-export type DataSetFeatureExtractor<
-  T extends GeoJSON.Feature = GeoJSON.Feature
-> = (dataset: DataSet) => T[] | T | undefined;
+export type DataSetFeatureExtractor<T extends Feature = Feature> = (
+  dataset: DataSet
+) => T[] | T | undefined;
 
-export function extractFeaturesFromDataSet<T extends GeoJSON.Feature>(
+export function extractFeaturesFromDataSet<T extends Feature>(
   dataSet: DataSet,
   extract: DataSetFeatureExtractor<T>
 ): T[] | undefined {

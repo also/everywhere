@@ -26,10 +26,9 @@ export type FeatureOrCollection<
   P extends GeoJsonProperties
 > = Feature<G, P> | FeatureCollection<G, P>;
 
-export function features<
-  G extends GeoJSON.Geometry,
-  T extends TopoJSON.Properties
->(geojson: TopoJSON.Topology<TopoJSON.Objects<T>>): FeatureCollection<G, T> {
+export function features<G extends Geometry, T extends TopoJSON.Properties>(
+  geojson: TopoJSON.Topology<TopoJSON.Objects<T>>
+): FeatureCollection<G, T> {
   const keys = Object.keys(geojson.objects);
   if (keys.length !== 1) {
     throw new Error('expected exactly one object in Topology');
@@ -45,10 +44,9 @@ export function features<
   return topojson.feature(geojson, object);
 }
 
-export function feature<
-  G extends GeoJSON.Geometry,
-  T extends TopoJSON.Properties
->(geojson: TopoJSON.Topology<TopoJSON.Objects<T>>): Feature<G, T> {
+export function feature<G extends Geometry, T extends TopoJSON.Properties>(
+  geojson: TopoJSON.Topology<TopoJSON.Objects<T>>
+): Feature<G, T> {
   return features<G, T>(geojson).features[0];
 }
 

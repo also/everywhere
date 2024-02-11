@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import React from 'react';
+import { Feature } from 'geojson';
 
 const heatmapOpts = (() => {
   try {
@@ -73,7 +74,7 @@ export default React.memo(function LeafletMap({
   center = [42.389118, -71.097153],
   zoom = 11,
 }: {
-  features?: GeoJSON.Feature[];
+  features?: Feature[];
   customize?(map: L.Map, control: L.Control.Layers): void;
   center?: [number, number];
   zoom?: number;

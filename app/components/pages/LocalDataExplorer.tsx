@@ -2,7 +2,7 @@ import React, { useCallback, useContext, useEffect, useState } from 'react';
 
 import { get, set } from 'idb-keyval';
 import { fileOpen, FileWithHandle } from 'browser-fs-access';
-import { Feature } from 'geojson';
+import { Feature, FeatureCollection } from 'geojson';
 import PageTitle from '../PageTitle';
 import MapComponent from '../Map';
 import MapContext from '../MapContext';
@@ -78,14 +78,14 @@ function JsonComponent({ value }: { value: any }) {
   return <pre>{JSON.stringify(value, null, 2)}</pre>;
 }
 
-function Path({ feature }: { feature: GeoJSON.Feature }) {
+function Path({ feature }: { feature: Feature }) {
   const { path } = useContext(MapContext);
 
   return <path className="trip" d={path(feature)} />;
 }
 
 type SomeFile = {
-  geojson: GeoJSON.Feature | GeoJSON.FeatureCollection;
+  geojson: Feature | FeatureCollection;
   mp4?: Traverser<Box>;
   track?: Metadata;
   raw: FileWithHandle;
@@ -128,7 +128,7 @@ function FileComponent({
   );
 }
 
-function GeoJSONFileView({ value }: { value: GeoJSON.Feature }) {
+function GeoJSONFileView({ value }: { value: Feature }) {
   return (
     <>
       <JsonComponent value={value.properties} />
@@ -202,7 +202,7 @@ function isProbablyStravaCompleteActivity(json: any): json is CompleteActivity {
 }
 
 async function readFile(file: File): Promise<SomeFile> {
-  let geojson: GeoJSON.Feature | GeoJSON.FeatureCollection | undefined;
+  let geojson: Feature | FeatureCollection | undefined;
   let mp4;
   let track;
   if (file.name.toLowerCase().endsWith('.mp4')) {
@@ -218,7 +218,7 @@ async function readFile(file: File): Promise<SomeFile> {
     } else if (json.type === 'Topology') {
       geojson = features(json);
     } else {
-      geojson = json as GeoJSON.Feature;
+      geojson = json as Feature;
     }
   }
   if (!geojson) {
