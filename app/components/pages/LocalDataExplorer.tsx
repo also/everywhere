@@ -34,50 +34,6 @@ interface FileWithDetails {
   inferredType?: string;
 }
 
-function FileView<T>({
-  file,
-  parse,
-  component: Component,
-}: {
-  file: File;
-  parse: (f: File) => Promise<T>;
-  component: React.ComponentType<{ value: T }>;
-}) {
-  const [value, setValue] = useState<
-    | { state: 'loading' }
-    | { state: 'error'; error: any }
-    | { state: 'loaded'; value: T }
-  >(() => {
-    return { state: 'loading' };
-  });
-
-  useEffect(() => {
-    setValue({ state: 'loading' });
-    (async () => {
-      try {
-        setValue({ state: 'loaded', value: await parse(file) });
-      } catch (error) {
-        console.log(error);
-        setValue({ state: 'error', error });
-      }
-    })();
-  }, [file, parse]);
-
-  return (
-    <>
-      {value.state === 'loaded' ? (
-        <Component value={value.value} />
-      ) : value.state === 'error' ? (
-        <pre>{value.error.toString()}</pre>
-      ) : null}
-    </>
-  );
-}
-
-function JsonComponent({ value }: { value: any }) {
-  return <pre>{JSON.stringify(value, null, 2)}</pre>;
-}
-
 function Path({ feature }: { feature: Feature }) {
   const { path } = useContext(MapContext);
 
@@ -91,77 +47,71 @@ type SomeFile = {
   raw: FileWithHandle;
 };
 
-function FileComponentWrapper({
-  file,
-  asMap,
-}: {
-  file: FileWithDetails;
-  asMap?: boolean;
-}) {
+function DataView({ file }: { file: FileWithDetails }) {
   const loaded = useMemoAsync<SomeFile>(() => readFile(file.file), [file]);
 
-  return loaded ? (
-    <FileComponent file={loaded} asMap={asMap} />
-  ) : (
-    <LoadingPage />
-  );
-}
-
-function FileComponent({
-  file: { geojson, mp4, track },
-  asMap,
-}: {
-  file: SomeFile;
-  asMap?: boolean;
-}) {
-  return !asMap && mp4 ? (
-    <StandardPage>
-      <TraverserView traverser={mp4} />
-      {track?.samples ? (
-        <GpmfSamples sampleMetadata={track.samples} mp4={mp4} />
-      ) : null}
-    </StandardPage>
-  ) : (
-    <LeafletMap
-      features={geojson.type === 'Feature' ? [geojson] : geojson.features}
-    />
-  );
-}
-
-function GeoJSONFileView({ value }: { value: Feature }) {
+  if (!loaded) {
+    return <LoadingPage />;
+  }
+  const { geojson, mp4, track } = loaded;
   return (
-    <>
-      <JsonComponent value={value.properties} />
+    <StandardPage>
+      {mp4 ? (
+        <>
+          <h2>MP4</h2>
+          <TraverserView traverser={mp4} />
+          {track?.samples ? (
+            <>
+              <h2>GMPF Samples</h2>
+              <GpmfSamples sampleMetadata={track.samples} mp4={mp4} />
+            </>
+          ) : null}
+        </>
+      ) : (
+        <div>TODO: show JSON</div>
+      )}
+    </StandardPage>
+  );
+}
+
+function StylizedMap({ files }: { files: FileWithDetails[] }) {
+  const features = useMemoAsync(async () => {
+    const loadedFiles = await readFiles(files);
+    return loadedFiles
+      .map(({ geojson }) =>
+        geojson.type === 'Feature' ? [geojson] : geojson.features
+      )
+      .flat();
+  }, [files]);
+
+  return features ? (
+    <StandardPage>
       <MapBox>
-        <MapComponent width={1000} height={1000} zoomFeature={value}>
-          <Path feature={value} />
+        <MapComponent
+          width={1000}
+          height={1000}
+          zoomFeature={features.length === 1 ? features[0] : undefined}
+        >
+          {features.map((f, i) => (
+            <Path feature={f} key={i} />
+          ))}
         </MapComponent>
       </MapBox>
-    </>
-  );
-}
-
-function File({ file }: { file: File }) {
-  return (
-    <StandardPage>
-      <FileView
-        file={file}
-        parse={(f) => readFile(f).then(({ geojson }) => geojson)}
-        component={GeoJSONFileView}
-      />
     </StandardPage>
+  ) : (
+    <Map width={600} height={600} asLoadingAnimation={true} />
   );
 }
 
-function FilesComponent({ files }: { files: FileWithDetails[] }) {
+function SimpleLeafletMap({ files }: { files: FileWithDetails[] }) {
   const loadedFiles = useMemoAsync(() => readFiles(files), [files]);
   return loadedFiles ? (
     <LeafletMap
-      features={([] as Feature[]).concat(
-        ...loadedFiles.map(({ geojson }) =>
+      features={loadedFiles
+        .map(({ geojson }) =>
           geojson.type === 'Feature' ? [geojson] : geojson.features
         )
-      )}
+        .flat()}
     />
   ) : (
     <Map width={600} height={600} asLoadingAnimation={true} />
@@ -301,7 +251,7 @@ export default function LocalDataExplorer({
       files: FileWithDetails[];
       reason:
         | 'map'
-        | 'map2'
+        | 'simple-leaflet-map'
         | 'data'
         | 'extract-map'
         | 'stylized-map'
@@ -372,19 +322,16 @@ export default function LocalDataExplorer({
             }))}
           />
         </FullScreenPage>
-      ) : selectedFiles.reason === 'map2' ? (
-        <FilesComponent files={selectedFiles.files} />
+      ) : selectedFiles.reason === 'simple-leaflet-map' ? (
+        <SimpleLeafletMap files={selectedFiles.files} />
       ) : selectedFiles.reason === 'stylized-map' ? (
-        <File file={selectedFiles.files[0].file} />
+        <StylizedMap files={selectedFiles.files} />
       ) : selectedFiles.reason === 'dataset' ? (
         <StandardPage>
           <DataSetLoader files={selectedFiles.files} setDataSet={setDataSet} />
         </StandardPage>
       ) : (
-        <FileComponentWrapper
-          file={selectedFiles.files[0]}
-          asMap={selectedFiles.reason === 'extract-map'}
-        />
+        <DataView file={selectedFiles.files[0]} />
       )}
     </>
   ) : (
@@ -425,28 +372,31 @@ export default function LocalDataExplorer({
                     setSelectedFiles({ files: [f], reason: 'map' })
                   }
                 >
-                  load map
+                  fancy map
                 </button>
                 <button
                   onClick={() =>
                     setSelectedFiles({ files: [f], reason: 'data' })
                   }
                 >
-                  load data
+                  data
                 </button>
                 <button
                   onClick={() =>
-                    setSelectedFiles({ files: [f], reason: 'extract-map' })
+                    setSelectedFiles({
+                      files: [f],
+                      reason: 'simple-leaflet-map',
+                    })
                   }
                 >
-                  load as map
+                  simple map
                 </button>
                 <button
                   onClick={() =>
                     setSelectedFiles({ files: [f], reason: 'stylized-map' })
                   }
                 >
-                  load as stylized map
+                  stylized map
                 </button>
               </td>
             </tr>
@@ -457,16 +407,28 @@ export default function LocalDataExplorer({
         {' '}
         {files ? (
           <>
+            All files:{' '}
             <button
               onClick={() => setSelectedFiles({ files, reason: 'dataset' })}
             >
-              Load For Dataset
+              dataset
             </button>
             <button onClick={() => setSelectedFiles({ files, reason: 'map' })}>
-              load map
+              fancy map
             </button>
-            <button onClick={() => setSelectedFiles({ files, reason: 'map2' })}>
-              Load All Into Map
+            <button
+              onClick={() =>
+                setSelectedFiles({ files, reason: 'stylized-map' })
+              }
+            >
+              stylized map
+            </button>
+            <button
+              onClick={() =>
+                setSelectedFiles({ files, reason: 'simple-leaflet-map' })
+              }
+            >
+              simple map
             </button>
           </>
         ) : undefined}
@@ -481,21 +443,20 @@ export default function LocalDataExplorer({
       </p>
       <h2>For each file</h2>
       <p>
-        <strong>load map:</strong> Assuming the file is a geojson or topojson
+        <strong>fancy map:</strong> Assuming the file is a geojson or topojson
         file, load it in a map view using geojson-vt to render it with
         reasonable performance
       </p>
       <p>
-        <strong>load data:</strong> Show data about a video file. Just shows a
-        map for geojson
+        <strong>data:</strong> Show data about a video file.
       </p>
       <p>
-        <strong>load as map:</strong> Show a video file as a map, or geojson
-        file using a pure leaflet map
+        <strong>simple map:</strong> Show a video file as a map, or geojson file
+        using a pure leaflet map
       </p>
       <p>
-        <strong>load as stylized map:</strong> Same as "load as map", but using
-        the everywhere.bike style
+        <strong>stylized map:</strong> Same as "load as map", but using the
+        everywhere.bike style
       </p>
     </StandardPage>
   );
