@@ -144,9 +144,6 @@ function GeoJSONFileView({ value }: { value: Feature }) {
 function File({ file }: { file: File }) {
   return (
     <StandardPage>
-      <p>
-        <strong>Name:</strong> {file.name}
-      </p>
       <FileView
         file={file}
         parse={(f) => readFile(f).then(({ geojson }) => geojson)}
