@@ -32,7 +32,7 @@ export function features<
 >(geojson: TopoJSON.Topology<TopoJSON.Objects<T>>): FeatureCollection<G, T> {
   const keys = Object.keys(geojson.objects);
   if (keys.length !== 1) {
-    throw new Error('expected exactly one opject in Topology');
+    throw new Error('expected exactly one object in Topology');
   }
   const object = geojson.objects[keys[0]];
   if (object.type !== 'GeometryCollection') {
