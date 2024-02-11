@@ -351,6 +351,12 @@ export default function LocalDataExplorer({
     [files]
   );
 
+  const handleResetClick = useCallback(async (e) => {
+    e.preventDefault();
+    await set('files', undefined);
+    setFiles(undefined);
+  }, []);
+
   return selectedFiles ? (
     <>
       <NavExtension>
@@ -395,7 +401,8 @@ export default function LocalDataExplorer({
         {initialized ? (
           <>
             <button onClick={handleLoadClick}>load</button>
-            <button onClick={handleAddClick}>add</button>
+            <button onClick={handleAddClick}>add</button>{' '}
+            <button onClick={handleResetClick}>reset</button>
           </>
         ) : undefined}
       </div>
@@ -477,8 +484,9 @@ export default function LocalDataExplorer({
       </p>
       <h2>For each file</h2>
       <p>
-        <strong>load map:</strong> Assuming the file is a geojson file, load it
-        in a map view using geojson-vt to render it with reasonable performance
+        <strong>load map:</strong> Assuming the file is a geojson or topojson
+        file, load it in a map view using geojson-vt to render it with
+        reasonable performance
       </p>
       <p>
         <strong>load data:</strong> Show data about a video file. Just shows a
