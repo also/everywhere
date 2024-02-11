@@ -3,6 +3,7 @@ import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { get, set } from 'idb-keyval';
 import { fileOpen, FileWithHandle } from 'browser-fs-access';
 import { Feature, FeatureCollection } from 'geojson';
+import { ObjectInspector } from 'react-inspector';
 import PageTitle from '../PageTitle';
 import MapComponent from '../Map';
 import MapContext from '../MapContext';
@@ -68,7 +69,7 @@ function DataView({ file }: { file: FileWithDetails }) {
           ) : null}
         </>
       ) : (
-        <div>TODO: show JSON</div>
+        <ObjectInspector data={geojson} />
       )}
     </StandardPage>
   );
