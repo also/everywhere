@@ -147,6 +147,25 @@ export default function ImmersivePage() {
 
         // scene.beginAnimation(wayLineSystem, 0, animFrames, true);
 
+        const fallingAnimation = new Animation(
+          'falling',
+          'position.y',
+          60,
+          Animation.ANIMATIONTYPE_FLOAT,
+          Animation.ANIMATIONLOOPMODE_CONSTANT
+        );
+
+        const keys = [
+          { frame: 0, value: 3 },
+          { frame: animFrames, value: 0.03 },
+        ];
+
+        fallingAnimation.setKeys(keys);
+
+        tripsLineSystem.animations.push(fallingAnimation);
+
+        scene.beginAnimation(tripsLineSystem, 0, animFrames, false);
+
         engine.runRenderLoop(() => {
           scene.render();
         });
