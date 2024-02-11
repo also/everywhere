@@ -43,6 +43,7 @@ function Path({ feature }: { feature: Feature }) {
 
 type SomeFile = {
   geojson: Feature | FeatureCollection;
+  json?: any;
   mp4?: Traverser<Box>;
   track?: Metadata;
   raw: FileWithHandle;
@@ -54,7 +55,7 @@ function DataView({ file }: { file: FileWithDetails }) {
   if (!loaded) {
     return <LoadingPage />;
   }
-  const { geojson, mp4, track } = loaded;
+  const { json, mp4, track } = loaded;
   return (
     <StandardPage>
       {mp4 ? (
@@ -69,7 +70,7 @@ function DataView({ file }: { file: FileWithDetails }) {
           ) : null}
         </>
       ) : (
-        <ObjectInspector data={geojson} />
+        <ObjectInspector data={json} />
       )}
     </StandardPage>
   );
@@ -153,6 +154,7 @@ async function readFile(file: File): Promise<SomeFile> {
   let geojson: Feature | FeatureCollection | undefined;
   let mp4;
   let track;
+  let json;
   if (file.name.toLowerCase().endsWith('.mp4')) {
     const data = new SeekableBlobBuffer(file, 1024000);
     mp4 = bind(mp4Parser, data, fileRoot(data));
@@ -160,7 +162,7 @@ async function readFile(file: File): Promise<SomeFile> {
     geojson = await extractGps(track, mp4);
   } else {
     const text = await file.text();
-    const json = JSON.parse(text);
+    json = JSON.parse(text);
     if (isProbablyStravaCompleteActivity(json)) {
       geojson = completeActivityToGeoJson(json);
     } else if (json.type === 'Topology') {
@@ -183,7 +185,7 @@ async function readFile(file: File): Promise<SomeFile> {
       feat.properties.filename = file.name;
     }
   );
-  return { geojson, mp4, track, raw: file };
+  return { json, geojson, mp4, track, raw: file };
 }
 
 function readFiles(files: FileWithDetails[]): Promise<SomeFile[]> {
