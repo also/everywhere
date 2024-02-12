@@ -1,8 +1,8 @@
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useState } from 'react';
 
 import { get, set } from 'idb-keyval';
 import { fileOpen, FileWithHandle } from 'browser-fs-access';
-import { Feature, FeatureCollection } from 'geojson';
+import { Feature } from 'geojson';
 import { ObjectInspector } from 'react-inspector';
 import PageTitle from '../PageTitle';
 import MapComponent from '../Map';
@@ -207,8 +207,8 @@ export default function LocalDataExplorer({
       {selectedFiles.reason === 'map' ? (
         <FullScreenPage>
           <VectorTileFileView
-            files={selectedFiles.files.map((f) => ({
-              file: f.file,
+            files={selectedFiles.files.map((file) => ({
+              file,
               type: type as any,
             }))}
           />

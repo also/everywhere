@@ -1,4 +1,3 @@
-import { FileWithHandle } from 'browser-fs-access';
 import {
   Feature,
   GeoJsonProperties,
@@ -18,6 +17,7 @@ import LeafletMap from './LeafletMap';
 import L from 'leaflet';
 import { createPortal } from 'react-dom';
 import LoadingPage from './pages/LoadingPage';
+import { FileWithDetails } from '../file-data';
 
 function GoProVideoDetails({
   id,
@@ -189,7 +189,7 @@ export function VectorTileFileView({
   files,
 }: {
   files: {
-    file: FileWithHandle;
+    file: FileWithDetails;
     type: 'osm' | 'generic';
   }[];
 }) {

@@ -1,7 +1,7 @@
-import { Feature, FeatureCollection } from 'geojson';
+import { Feature, FeatureCollection, LineString } from 'geojson';
 import { FileWithHandle } from 'browser-fs-access';
 import { SeekableBlobBuffer } from '../tools/parse/buffers';
-import { extractGps } from '../tools/parse/gopro-gps';
+import { extractGps, VideoProperties } from '../tools/parse/gopro-gps';
 import { bind, fileRoot, Traverser } from '../tools/parse';
 import { Box, parser as mp4Parser } from '../tools/parse/mp4';
 import { getMeta, Metadata } from '../tools/parse/gpmf';
@@ -29,16 +29,22 @@ function isProbablyStravaCompleteActivity(json: any): json is CompleteActivity {
   return json.activity && json.streams;
 }
 
+export async function mp4ToGeoJson(
+  file: File
+): Promise<Feature<LineString, VideoProperties>> {
+  const data = new SeekableBlobBuffer(file, 1024000);
+  const mp4 = bind(mp4Parser, data, fileRoot(data));
+  const track = await getMeta(mp4);
+  return await extractGps(track, mp4);
+}
+
 export async function readFile(file: File): Promise<SomeFile> {
   let geojson: Feature | FeatureCollection | undefined;
   let mp4;
   let track;
   let json;
   if (file.name.toLowerCase().endsWith('.mp4')) {
-    const data = new SeekableBlobBuffer(file, 1024000);
-    mp4 = bind(mp4Parser, data, fileRoot(data));
-    track = await getMeta(mp4);
-    geojson = await extractGps(track, mp4);
+    geojson = await mp4ToGeoJson(file);
   } else {
     const text = await file.text();
     json = JSON.parse(text);
@@ -110,6 +116,10 @@ export function readToDataset(newFiles: SomeFile[]): DataSet {
 }
 
 export async function peekFile(file: FileWithHandle) {
+  // todo look for ftyp?
+  if (file.name.toLowerCase().endsWith('.mp4')) {
+    return 'mp4';
+  }
   const head = file.slice(0, 100);
   const value = await head.arrayBuffer();
   const array = new Uint8Array(value);

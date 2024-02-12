@@ -18,6 +18,7 @@ import {
   MultiLineString,
 } from 'geojson';
 import { highwayLevels, shouldShowHighwayAtZoom } from './osm';
+import { mp4ToGeoJson } from './file-data';
 
 // https://github.com/Microsoft/TypeScript/issues/20595
 // self is a WorkerGlobalScope, but TypeScript doesn't know that
@@ -39,7 +40,14 @@ channel.handle(setWorkerFiles, async (files) => {
     features: [],
   };
   let i = 0;
-  for (const { file, type: fileType } of files) {
+  for (const {
+    file: { file, inferredType },
+    type: fileType,
+  } of files) {
+    if (inferredType === 'mp4') {
+      f.features.push(await mp4ToGeoJson(file));
+      continue;
+    }
     const value = JSON.parse(await file.text());
     f.features.push(
       ...(value.type === 'Topology'
