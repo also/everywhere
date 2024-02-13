@@ -44,7 +44,10 @@ export async function readFile(file: File): Promise<SomeFile> {
   let track;
   let json;
   if (file.name.toLowerCase().endsWith('.mp4')) {
-    geojson = await mp4ToGeoJson(file);
+    const data = new SeekableBlobBuffer(file, 1024000);
+    mp4 = bind(mp4Parser, data, fileRoot(data));
+    track = await getMeta(mp4);
+    geojson = await extractGps(track, mp4);
   } else {
     const text = await file.text();
     json = JSON.parse(text);
