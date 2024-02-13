@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { ObjectInspector } from 'react-inspector';
 import { bind, Entry, root, Traverser } from '../../../tools/parse';
 import {
   iterateMetadataSamples,
@@ -50,7 +51,8 @@ function TraverserValueView<T extends Entry>({
             {value instanceof DataView ? (
               <DataViewView value={value} />
             ) : (
-              JSON.stringify(value, null, 2)
+              <ObjectInspector data={value} expandPaths={['$']} />
+              // JSON.stringify(value, null, 2)
             )}
           </pre>
         ) : null}
