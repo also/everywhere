@@ -35,7 +35,7 @@ function Path({ feature }: { feature: Feature }) {
 }
 
 function DataView({ file }: { file: FileWithDetails }) {
-  const loaded = useMemoAsync<SomeFile>(() => readFile(file.file), [file]);
+  const loaded = useMemoAsync<SomeFile>(() => readFile(file), [file]);
 
   if (!loaded) {
     return <LoadingPage />;

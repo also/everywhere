@@ -38,7 +38,7 @@ export async function mp4ToGeoJson(
   return await extractGps(track, mp4);
 }
 
-export async function readFile(file: File): Promise<SomeFile> {
+export async function readFile({ file }: FileWithDetails): Promise<SomeFile> {
   let geojson: Feature | FeatureCollection | undefined;
   let mp4;
   let track;
@@ -77,7 +77,7 @@ export async function readFile(file: File): Promise<SomeFile> {
 }
 
 export function readFiles(files: FileWithDetails[]): Promise<SomeFile[]> {
-  return Promise.all(files.map((file) => readFile(file.file)));
+  return Promise.all(files.map((file) => readFile(file)));
 }
 
 function isProbablyStravaTrip(
