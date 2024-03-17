@@ -31,6 +31,8 @@ import {
 function Path({ feature }: { feature: Feature }) {
   const { path } = useContext(MapContext);
 
+  // TODO handle points. this works, but draws a 4.5 radius circle with the same style as a trip
+  // https://d3js.org/d3-geo/path#path_pointRadius
   return <path className="trip" d={path(feature)} />;
 }
 
