@@ -97,7 +97,7 @@ async function fetchAllTrips(breakOnExisting = false) {
       console.error(`skipping manual trip ${id}`);
       continue;
     }
-    if (name.match(/^\d+ min /)) {
+    if (name.match(/^\d+ min /) || name.match(/Peloton/)) {
       console.log(`skipping probably peloton "${name}" ${id}`);
       continue;
     }
