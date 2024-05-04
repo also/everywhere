@@ -156,10 +156,7 @@ export function drawTile2(
     isStroke = false,
     isSelected = false
   ) {
-    const { type, geometry } = feat;
-
     let defaultColor = '#00dcc2';
-    // TODO the type of tags is wrong - values can be objects?
     // TODO show non-roads that have been visited
     const visited = feat.tags.everywhere?.visited;
     if (visited === false) {
@@ -172,8 +169,8 @@ export function drawTile2(
       console.log(feat);
     }
 
-    if (type === 1) {
-      const [point] = geometry;
+    if (feat.type === 1) {
+      const [point] = feat.geometry;
       const [x, y] = point;
       ctx.beginPath();
       ctx.arc(x * ratio + pad, y * ratio + pad, 5, 0, Math.PI * 2);
@@ -186,7 +183,7 @@ export function drawTile2(
         ctx.fill();
       }
     }
-    if (type !== 2) {
+    if (feat.type !== 2) {
       return;
     }
 
@@ -200,7 +197,7 @@ export function drawTile2(
     ctx.beginPath();
     ctx.lineJoin = 'round';
     ctx.lineWidth = isSelected || isStroke ? 8 : 2;
-    geometry.forEach((points) => {
+    feat.geometry.forEach((points) => {
       points.forEach(([x, y], i) => {
         if (i > 0) {
           ctx.lineTo(x * ratio + pad, y * ratio + pad);
