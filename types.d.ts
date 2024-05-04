@@ -10,13 +10,13 @@ declare module 'geojson-vt' {
         type: 1;
         id: number | undefined;
         geometry: [number, number][];
-        tags: Record<string, string | number>;
+        tags: Record<string, any>;
       }
     | {
         type: 2;
         id: number | undefined;
         geometry: [number, number][][];
-        tags: Record<string, string | number>;
+        tags: Record<string, any>;
       };
 
   export interface Tile extends TileCoords {
