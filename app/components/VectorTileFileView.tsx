@@ -160,7 +160,7 @@ function VectorTileView({ channel }: { channel: WorkerChannel }) {
 
         layer.setOpts({
           // TODO create a type that includes properties and everywhereFeatureIndex
-          selectedIndex: selected?.feature.properties.everywhereFeatureIndex,
+          selectedIndex: selected?.feature.properties!.everywhereFeatureIndex,
         });
       });
     };
