@@ -20,7 +20,7 @@ async function extractFileGps(filename: string): Promise<Feature> {
   return extractGps(track, mp4);
 }
 
-export default async function ({ _: [filename] }: { _: string[] }) {
+export default async function ({ _: [filename, destDir] }: { _: string[] }) {
   const files = fs.statSync(filename).isDirectory()
     ? fs
         .readdirSync(filename)
@@ -28,25 +28,34 @@ export default async function ({ _: [filename] }: { _: string[] }) {
         .map((f) => path.join(filename, f))
     : [filename];
 
-  let i = 0;
-  for (const f of files) {
-    const basename = path.basename(f);
-    console.log(basename, (i++ / files.length) * 100);
-    const dest = path.join(
-      __dirname,
-      '..',
-      'app-data',
-      'video-metadata',
-      basename + '.geojson'
-    );
+  if (!destDir) {
+    destDir = path.join(__dirname, '..');
+  }
 
-    if (!fs.existsSync(dest) || true) {
-      try {
-        const geojson = await extractFileGps(f);
-        fs.writeFileSync(dest, JSON.stringify(geojson));
-      } catch (e) {
-        console.log(e);
-      }
+  const toProcess = files
+    .map((f) => {
+      const basename = path.basename(f);
+      const dest = path.join(
+        destDir,
+        'app-data',
+        'video-metadata',
+        basename + '.geojson'
+      );
+
+      return { f, dest };
+    })
+    .filter(({ dest }) => !fs.existsSync(dest));
+
+  let i = 0;
+  for (const { f, dest } of toProcess) {
+    const basename = path.basename(f);
+    console.log(basename, (i++ / toProcess.length) * 100);
+
+    try {
+      const geojson = await extractFileGps(f);
+      fs.writeFileSync(dest, JSON.stringify(geojson));
+    } catch (e) {
+      console.log(e);
     }
   }
 }
