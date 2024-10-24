@@ -4,7 +4,7 @@ import path from 'path';
 import fs from 'fs';
 import send from 'send';
 
-export default function ({ _: [cert, directories] }: { _: string[] }) {
+export default function ({ _: [cert, ...directories] }: { _: string[] }) {
   const options = {
     key: fs.readFileSync(`${cert}.key`),
     cert: fs.readFileSync(`${cert}.cer`),
@@ -17,7 +17,7 @@ export default function ({ _: [cert, directories] }: { _: string[] }) {
     }
   }
 
-  function onRequest(req, res) {
+  function onRequest(req: http.IncomingMessage, res: http.ServerResponse) {
     if (req.url?.match(/^\/[A-Za-z0-9]+\.MP4$/)) {
       for (const dir of directories) {
         const filename = path.join(dir, req.url);
@@ -31,9 +31,7 @@ export default function ({ _: [cert, directories] }: { _: string[] }) {
     res.statusCode = 404;
     res.end();
   }
-  const server = http.createServer(onRequest);
+  http.createServer(onRequest).listen(3000, '0.0.0.0');
 
-  server.listen(3000, '0.0.0.0');
-
-  https.createServer(options, onRequest).listen(3001);
+  https.createServer(options, onRequest).listen(443);
 }
