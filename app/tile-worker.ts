@@ -94,7 +94,7 @@ channel.handle(setWorkerFiles, async (files) => {
 
 channel.handle(getTile, ({ z, x, y }) => tileIndex?.getTile(z, x, y));
 
-const debug = true;
+const debug = false;
 
 channel.handle(renderTileInWorker, ({ size, coords: { z, x, y }, opts }) => {
   const tile = tileIndex?.getTile(z, x, y);
