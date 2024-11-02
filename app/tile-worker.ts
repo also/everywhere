@@ -9,7 +9,7 @@ import {
   setWorkerFiles,
 } from './worker-stuff';
 import { LineRTree, features, tree, filteredNearestLine } from './geo';
-import { drawDistanceTile, drawTile2 } from './tile-drawing';
+import { drawDebugInfo, drawDistanceTile, drawTile2 } from './tile-drawing';
 import {
   Feature,
   FeatureCollection,
@@ -94,11 +94,21 @@ channel.handle(setWorkerFiles, async (files) => {
 
 channel.handle(getTile, ({ z, x, y }) => tileIndex?.getTile(z, x, y));
 
+const debug = true;
+
 channel.handle(renderTileInWorker, ({ size, coords: { z, x, y }, opts }) => {
   const tile = tileIndex?.getTile(z, x, y);
+  let offscreen: OffscreenCanvas | undefined;
   if (tile) {
-    const offscreen = new OffscreenCanvas(size, size);
+    offscreen = new OffscreenCanvas(size, size);
     drawTile2(offscreen, tile, z, opts);
+  }
+  if (debug) {
+    offscreen ??= new OffscreenCanvas(size, size);
+    const ctx = offscreen.getContext('2d')!;
+    drawDebugInfo(ctx, size, { x, y, z }, tile);
+  }
+  if (offscreen) {
     return offscreen.transferToImageBitmap();
   }
 });

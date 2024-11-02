@@ -119,13 +119,16 @@ export function drawDistanceTile(
   }
 }
 
-function drawDebugInfo(
+export function drawDebugInfo(
   ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D,
   size: number,
-  tile: Tile,
-  z: number
+  coords: { x: number; y: number; z: number },
+  tile?: Tile
 ) {
-  const text = `${z} ${tile.x} ${tile.y}: ${tile.features.length} features`;
+  ctx.save();
+  const text = `${coords.z} ${coords.x} ${coords.y}: ${
+    tile ? `${tile.features.length} features` : 'no tile'
+  }`;
 
   ctx.font = '14px monospace';
   ctx.fillStyle = 'white';
@@ -133,8 +136,11 @@ function drawDebugInfo(
   ctx.fillStyle = 'black';
   ctx.fillText(text, 10, 20);
 
-  ctx.strokeStyle = 'black';
-  ctx.strokeRect(0, 0, size, size);
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = tile ? 'black' : 'rgba(0, 0, 0, 0.2)';
+  const inset = 2;
+  ctx.strokeRect(inset, inset, size - inset * 2, size - inset * 2);
+  ctx.restore();
 }
 
 export function drawTile2(
@@ -225,6 +231,4 @@ export function drawTile2(
   if (selectedFeature) {
     drawFeature(selectedFeature, false, true);
   }
-
-  //   drawDebugInfo(ctx, size, tile, z);
 }
