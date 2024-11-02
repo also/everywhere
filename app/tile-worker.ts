@@ -49,33 +49,43 @@ channel.handle(setWorkerFiles, async (files) => {
       continue;
     }
     const value = JSON.parse(await file.text());
-    f.features.push(
-      ...(value.type === 'Topology'
-        ? features(value)
-        : (value as FeatureCollection)
-      ).features.filter((f): f is Feature<LineString | MultiLineString> => {
-        const {
-          geometry: { type },
-        } = f;
-        let { properties } = f;
-        // TODO don't do this in filter
-        if (!properties) {
-          properties = f.properties = {};
-        }
-        properties.everywhereFeatureIndex = i++;
-        if (type === 'LineString' || type === 'MultiLineString') {
-          return (
-            fileType !== 'osm' ||
-            Object.prototype.hasOwnProperty.call(
-              highwayLevels,
-              properties?.highway
-            )
-          );
-        } else {
-          return type === 'Point';
-        }
-      })
-    );
+    const featuresToAdd = (
+      value.type === 'Topology' ? features(value) : (value as FeatureCollection)
+    ).features.filter((f): f is Feature<LineString | MultiLineString> => {
+      const {
+        geometry: { type },
+      } = f;
+      let { properties } = f;
+      // TODO don't do this in filter
+      if (!properties) {
+        properties = f.properties = {};
+      }
+      properties.everywhereFeatureIndex = i++;
+      if (type === 'LineString' || type === 'MultiLineString') {
+        return (
+          fileType !== 'osm' ||
+          Object.prototype.hasOwnProperty.call(
+            highwayLevels,
+            properties?.highway
+          )
+        );
+      } else {
+        return type === 'Point';
+      }
+    });
+
+    if (files.length === 1) {
+      f.features = featuresToAdd;
+    } else {
+      try {
+        // pushing more than 65k features at once causes a " Maximum call stack size exceeded" error
+        // https://stackoverflow.com/a/22747272
+        f.features.push(...featuresToAdd);
+      } catch (e) {
+        console.error('maybe too many features?');
+        console.error(e);
+      }
+    }
   }
 
   tileIndex = geojsonvt(f, { maxZoom: 24 });
