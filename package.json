@@ -76,5 +76,6 @@
   "devDependencies": {
     "@types/send": "^0.17.1",
     "send": "^0.18.0"
-  }
+  },
+  "packageManager": "pnpm@9.12.3"
 }

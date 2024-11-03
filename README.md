@@ -63,7 +63,3 @@ Logs every trip object available from Strava.
 `everywhere-2015-v1`
 
 The original dataset from riding every street in Somerville in 2015.
-
-```
-
-```
