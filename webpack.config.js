@@ -83,11 +83,14 @@ module.exports = (env) => ({
         client: {
           overlay: false,
         },
-        https: {
-          key: fs.readFileSync(path.join(__dirname, 'key.pem')),
-          cert: fs.readFileSync(path.join(__dirname, 'cert.pem')),
+        server: {
+          type: 'https',
+          options: {
+            key: fs.readFileSync(path.join(__dirname, 'key.pem')),
+            cert: fs.readFileSync(path.join(__dirname, 'cert.pem')),
+          },
         },
-        onBeforeSetupMiddleware(devServer) {
+        setupMiddlewares(middlewares, devServer) {
           devServer.app.get('/strava-auth', async (req, res) => {
             try {
               require('ts-node').register({ transpileOnly: true });
@@ -102,6 +105,8 @@ module.exports = (env) => ({
               res.status(500).send(e.stack);
             }
           });
+
+          return middlewares;
         },
       }
     : undefined,
