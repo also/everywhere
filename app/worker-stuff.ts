@@ -43,7 +43,9 @@ export const lookup =
   >('lookup');
 
 export async function create() {
-  const worker = new Worker(new URL('./tile-worker.ts', import.meta.url));
+  const worker = new Worker(new URL('./tile-worker.js', import.meta.url), {
+    type: 'module',
+  });
 
   const error = new Promise<Error>((__, reject) => {
     worker.addEventListener(
