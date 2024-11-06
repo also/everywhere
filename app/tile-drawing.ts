@@ -3,6 +3,7 @@ import {
   GeoJsonProperties,
   LineString,
   MultiLineString,
+  Point,
 } from 'geojson';
 import { Tile, TileCoords } from 'geojson-vt';
 import { positionDistance } from './distance';
@@ -72,7 +73,9 @@ export function drawDistanceTile(
   canvas: HTMLCanvasElement | OffscreenCanvas,
   coords: TileCoords,
   featureTree:
-    | LineRTree<Feature<LineString | MultiLineString, GeoJsonProperties>>
+    | LineRTree<
+        Feature<LineString | MultiLineString | Point, GeoJsonProperties>
+      >
     | undefined
 ) {
   const size = canvas.width;
@@ -85,7 +88,7 @@ export function drawDistanceTile(
   let prev:
     | {
         item: RTreeItem<
-          Feature<LineString | MultiLineString, GeoJsonProperties>
+          Feature<LineString | MultiLineString | Point, GeoJsonProperties>
         >;
         distance: number;
       }

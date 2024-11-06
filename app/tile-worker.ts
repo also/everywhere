@@ -16,6 +16,7 @@ import {
   GeoJsonProperties,
   LineString,
   MultiLineString,
+  Point,
 } from 'geojson';
 import { highwayLevels, shouldShowHighwayAtZoom } from './osm';
 import { mp4ToGeoJson } from './file-data';
@@ -31,11 +32,11 @@ channel.handle(workerHandshake, () => 'pong');
 let tileIndex: GeoJSONVT | undefined = undefined;
 
 let featureTree:
-  | LineRTree<Feature<LineString | MultiLineString, GeoJsonProperties>>
+  | LineRTree<Feature<LineString | MultiLineString | Point, GeoJsonProperties>>
   | undefined = undefined;
 
 channel.handle(setWorkerFiles, async (files) => {
-  const f: FeatureCollection<LineString | MultiLineString> = {
+  const collection: FeatureCollection<LineString | MultiLineString | Point> = {
     type: 'FeatureCollection',
     features: [],
   };
@@ -45,51 +46,42 @@ channel.handle(setWorkerFiles, async (files) => {
     type: fileType,
   } of files) {
     if (inferredType === 'mp4') {
-      f.features.push(await mp4ToGeoJson(file));
+      collection.features.push(await mp4ToGeoJson(file));
       continue;
     }
     const value = JSON.parse(await file.text());
-    const featuresToAdd = (
-      value.type === 'Topology' ? features(value) : (value as FeatureCollection)
-    ).features.filter((f): f is Feature<LineString | MultiLineString> => {
-      const {
-        geometry: { type },
-      } = f;
+
+    for (const f of (value.type === 'Topology'
+      ? features(value)
+      : (value as FeatureCollection)
+    ).features) {
       let { properties } = f;
       // TODO don't do this in filter
       if (!properties) {
         properties = f.properties = {};
       }
       properties.everywhereFeatureIndex = i++;
-      if (type === 'LineString' || type === 'MultiLineString') {
-        return (
+      if (
+        f.geometry.type === 'LineString' ||
+        f.geometry.type === 'MultiLineString'
+      ) {
+        if (
           fileType !== 'osm' ||
           Object.prototype.hasOwnProperty.call(
             highwayLevels,
             properties?.highway
           )
-        );
-      } else {
-        return type === 'Point';
-      }
-    });
-
-    if (files.length === 1) {
-      f.features = featuresToAdd;
-    } else {
-      try {
-        // pushing more than 65k features at once causes a " Maximum call stack size exceeded" error
-        // https://stackoverflow.com/a/22747272
-        f.features.push(...featuresToAdd);
-      } catch (e) {
-        console.error('maybe too many features?');
-        console.error(e);
+        ) {
+          collection.features.push(f);
+        }
+      } else if (f.geometry.type === 'Point') {
+        collection.features.push(f);
       }
     }
   }
 
-  tileIndex = geojsonvt(f, { maxZoom: 24 });
-  featureTree = tree(f);
+  tileIndex = geojsonvt(collection, { maxZoom: 24 });
+  featureTree = tree(collection);
 });
 
 channel.handle(getTile, ({ z, x, y }) => tileIndex?.getTile(z, x, y));
