@@ -1,6 +1,6 @@
 import { WorkerChannel, workerHandshake } from './WorkerChannel';
 
-import geojsonvt, { GeoJSONVT } from 'geojson-vt';
+import { GeoJSONVT } from 'geojson-vt';
 import {
   getTile,
   lookup,
@@ -8,18 +8,17 @@ import {
   renderTileInWorker,
   setWorkerFiles,
 } from './worker-stuff';
-import { LineRTree, features, tree, filteredNearestLine } from './geo';
+import { LineRTree, filteredNearestLine } from './geo';
 import { drawDebugInfo, drawDistanceTile, drawTile2 } from './tile-drawing';
 import {
   Feature,
-  FeatureCollection,
   GeoJsonProperties,
   LineString,
   MultiLineString,
   Point,
 } from 'geojson';
-import { highwayLevels, shouldShowHighwayAtZoom } from './osm';
-import { mp4ToGeoJson } from './file-data';
+import { shouldShowHighwayAtZoom } from './osm';
+import { loadTileDataFromFiles } from './vector-tile-data';
 
 // https://github.com/Microsoft/TypeScript/issues/20595
 // self is a WorkerGlobalScope, but TypeScript doesn't know that
@@ -36,52 +35,10 @@ let featureTree:
   | undefined = undefined;
 
 channel.handle(setWorkerFiles, async (files) => {
-  const collection: FeatureCollection<LineString | MultiLineString | Point> = {
-    type: 'FeatureCollection',
-    features: [],
-  };
-  let i = 0;
-  for (const {
-    file: { file, inferredType },
-    type: fileType,
-  } of files) {
-    if (inferredType === 'mp4') {
-      collection.features.push(await mp4ToGeoJson(file));
-      continue;
-    }
-    const value = JSON.parse(await file.text());
+  const data = await loadTileDataFromFiles(files);
 
-    for (const f of (value.type === 'Topology'
-      ? features(value)
-      : (value as FeatureCollection)
-    ).features) {
-      let { properties } = f;
-      // TODO don't do this in filter
-      if (!properties) {
-        properties = f.properties = {};
-      }
-      properties.everywhereFeatureIndex = i++;
-      if (
-        f.geometry.type === 'LineString' ||
-        f.geometry.type === 'MultiLineString'
-      ) {
-        if (
-          fileType !== 'osm' ||
-          Object.prototype.hasOwnProperty.call(
-            highwayLevels,
-            properties?.highway
-          )
-        ) {
-          collection.features.push(f);
-        }
-      } else if (f.geometry.type === 'Point') {
-        collection.features.push(f);
-      }
-    }
-  }
-
-  tileIndex = geojsonvt(collection, { maxZoom: 24 });
-  featureTree = tree(collection);
+  tileIndex = data.tileIndex;
+  featureTree = data.featureTree;
 });
 
 channel.handle(getTile, ({ z, x, y }) => tileIndex?.getTile(z, x, y));
