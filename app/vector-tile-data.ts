@@ -1,13 +1,13 @@
 import geojsonvt from 'geojson-vt';
 import { features, tree } from './geo';
-import { FeatureCollection, LineString, MultiLineString, Point } from 'geojson';
+import { FeatureCollection } from 'geojson';
 import { highwayLevels } from './osm';
 import { FileWithDetails, mp4ToGeoJson } from './file-data';
 
 export async function loadTileDataFromFiles(
   files: { file: FileWithDetails; type: 'osm' | 'generic' }[]
 ) {
-  const collection: FeatureCollection<LineString | MultiLineString | Point> = {
+  const collection: FeatureCollection = {
     type: 'FeatureCollection',
     features: [],
   };

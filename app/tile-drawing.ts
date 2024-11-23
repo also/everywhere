@@ -1,10 +1,4 @@
-import {
-  Feature,
-  GeoJsonProperties,
-  LineString,
-  MultiLineString,
-  Point,
-} from 'geojson';
+import { Feature } from 'geojson';
 import { Tile, TileCoords } from 'geojson-vt';
 import { positionDistance } from './distance';
 import { shouldShowHighwayAtZoom } from './osm';
@@ -72,11 +66,7 @@ function computeSquareSize(
 export function drawDistanceTile(
   canvas: HTMLCanvasElement | OffscreenCanvas,
   coords: TileCoords,
-  featureTree:
-    | LineRTree<
-        Feature<LineString | MultiLineString | Point, GeoJsonProperties>
-      >
-    | undefined
+  featureTree: LineRTree<Feature> | undefined
 ) {
   const size = canvas.width;
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -87,9 +77,7 @@ export function drawDistanceTile(
   const squareSize = 8;
   let prev:
     | {
-        item: RTreeItem<
-          Feature<LineString | MultiLineString | Point, GeoJsonProperties>
-        >;
+        item: RTreeItem<Feature>;
         distance: number;
       }
     | undefined;

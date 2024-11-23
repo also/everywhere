@@ -3,10 +3,6 @@ import {
   FeatureCollection,
   GeoJsonProperties,
   Geometry,
-  LineString,
-  MultiLineString,
-  Point,
-  Polygon,
   Position,
 } from 'geojson';
 import * as topojson from 'topojson';
@@ -75,24 +71,35 @@ export function featureCollection<T extends Geometry>(
   return { type: 'FeatureCollection', features: features };
 }
 
-function coordses(
-  geometry: LineString | MultiLineString | Polygon | Point
-): Position[][] {
+function coordses(geometry: Geometry): Position[][] {
   if (geometry.type === 'Point') {
     return [[geometry.coordinates, geometry.coordinates]];
   }
-  return geometry.type === 'MultiLineString' || geometry.type === 'Polygon'
-    ? geometry.coordinates
-    : [geometry.coordinates];
+  if (geometry.type === 'MultiPoint') {
+    return geometry.coordinates.map((c) => [c, c]);
+  }
+  if (geometry.type === 'LineString') {
+    return [geometry.coordinates];
+  }
+  if (geometry.type === 'MultiLineString') {
+    return geometry.coordinates;
+  }
+  if (geometry.type === 'Polygon') {
+    return [geometry.coordinates[0]];
+  }
+  if (geometry.type === 'MultiPolygon') {
+    return geometry.coordinates.map((c) => c[0]);
+  }
+  // GeometryCollection
+  return geometry.geometries.flatMap(coordses);
 }
 
-export function tree<
-  G extends LineString | MultiLineString | Polygon | Point,
-  T
->(feat: Feature<G, T> | FeatureCollection<G, T>): LineRTree<Feature<G, T>> {
+export function tree<T>(
+  feat: Feature<Geometry, T> | FeatureCollection<Geometry, T>
+): LineRTree<Feature<Geometry, T>> {
   const arcs: {
     arc: Position[];
-    data: Feature<G, T>;
+    data: Feature<Geometry, T>;
   }[] = [];
 
   (feat.type === 'FeatureCollection' ? feat.features : [feat]).forEach(
@@ -134,7 +141,7 @@ export function pointLineSegmentItemDistance(
 
 export type LineRTree<T> = RBush<RTreeItem<T>>;
 
-function makeRTree<G extends LineString | MultiLineString | Polygon | Point, T>(
+function makeRTree<G extends Geometry, T>(
   arcs: {
     arc: Position[];
     data: Feature<G, T>;
