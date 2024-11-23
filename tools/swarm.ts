@@ -303,3 +303,44 @@ export interface Icon4 {
   mapPrefix: string;
   suffix: string;
 }
+
+export type SimpleVenue = Pick<Venue, 'id' | 'name'>;
+export type SimpleCheckin = Pick<Checkin, 'id' | 'createdAt'>;
+
+export type VenueFeature = GeoJSON.Feature<
+  GeoJSON.Point,
+  { type: 'swarm-venue'; venue: SimpleVenue; checkins: SimpleCheckin[] }
+>;
+
+export function processCheckin(
+  checkin: Checkin,
+  venues: Map<string, VenueFeature>
+): VenueFeature | undefined {
+  const existing = venues.get(checkin.venue.id);
+  const simpleCheckin: SimpleCheckin = {
+    id: checkin.id,
+    createdAt: checkin.createdAt,
+  };
+  if (existing) {
+    existing.properties.checkins.push(simpleCheckin);
+  } else {
+    const { venue } = checkin;
+    const venueFeature: VenueFeature = {
+      type: 'Feature',
+      geometry: {
+        type: 'Point',
+        coordinates: [venue.location.lng, venue.location.lat],
+      },
+      properties: {
+        type: 'swarm-venue',
+        venue: {
+          id: venue.id,
+          name: venue.name,
+        },
+        checkins: [simpleCheckin],
+      },
+    };
+    venues.set(checkin.venue.id, venueFeature);
+    return venueFeature;
+  }
+}

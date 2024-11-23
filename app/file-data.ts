@@ -44,10 +44,7 @@ export async function readFile({ file }: FileWithDetails): Promise<SomeFile> {
   let track;
   let json;
   if (file.name.toLowerCase().endsWith('.mp4')) {
-    const data = new SeekableBlobBuffer(file, 1024000);
-    mp4 = bind(mp4Parser, data, fileRoot(data));
-    track = await getMeta(mp4);
-    geojson = await extractGps(track, mp4);
+    geojson = await mp4ToGeoJson(file);
   } else {
     const text = await file.text();
     json = JSON.parse(text);
@@ -119,8 +116,12 @@ export function readToDataset(newFiles: SomeFile[]): DataSet {
 }
 
 export async function peekFile(file: FileWithHandle) {
+  const extension = file.name.split('.').pop()!.toLowerCase();
+  if (extension === 'gpx') {
+    return 'gpx';
+  }
   // todo look for ftyp?
-  if (file.name.toLowerCase().endsWith('.mp4')) {
+  if (extension === '.mp4') {
     return 'mp4';
   }
   const head = file.slice(0, 100);

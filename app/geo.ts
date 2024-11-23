@@ -33,9 +33,7 @@ export function features<G extends Geometry, T extends TopoJSON.Properties>(
   if (object.type !== 'GeometryCollection') {
     throw new Error('expected object to be a GeometryCollection');
   }
-  if (object.geometries.length !== 1) {
-    console.log('expected a single geometry');
-  }
+
   // @ts-expect-error FIXME
   return topojson.feature(geojson, object);
 }

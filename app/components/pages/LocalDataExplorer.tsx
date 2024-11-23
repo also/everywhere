@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useState } from 'react';
+import { useCallback, useContext, useState } from 'react';
 
 import { get, set } from 'idb-keyval';
 import { fileOpen, FileWithHandle } from 'browser-fs-access';
@@ -15,10 +15,10 @@ import TraverserView, { GpmfSamples } from '../data/TraverserView';
 import { useMemoAsync } from '../../hooks';
 import FullScreenPage from '../FullScreenPage';
 import StandardPage from '../StandardPage';
-import { VectorTileFileView } from '../VectorTileFileView';
+import VectorTileView from '../VectorTileView';
 import { NavExtension } from '../Nav';
 import LoadingPage from './LoadingPage';
-import Map from '../Map';
+import StylizedMap2 from '../Map';
 import {
   FileWithDetails,
   peekFile,
@@ -27,6 +27,13 @@ import {
   readToDataset,
   SomeFile,
 } from '../../file-data';
+import { tools } from '../../tools';
+import {
+  create,
+  toolFiles,
+  toolFileStatus,
+  toolReady,
+} from '../../worker-stuff';
 
 function Path({ feature }: { feature: Feature }) {
   const { path } = useContext(MapContext);
@@ -34,6 +41,67 @@ function Path({ feature }: { feature: Feature }) {
   // TODO handle points. this works, but draws a 4.5 radius circle with the same style as a trip
   // https://d3js.org/d3-geo/path#path_pointRadius
   return <path className="trip" d={path(feature)} />;
+}
+
+function ToolView({
+  files,
+  tool,
+}: {
+  files: {
+    file: FileWithDetails;
+    type: 'osm' | 'generic';
+  }[];
+  tool: keyof typeof tools;
+}) {
+  const [fileStatus, setFileStatus] = useState({
+    byIndex: files.map((file) => ({ file, status: 'pending' })),
+    counts: new Map([['pending', files.length]]),
+  });
+  const [ready, setReady] = useState(false);
+  const channel = useMemoAsync(
+    async ({ signal }) => {
+      const { channel, worker } = await create();
+      signal.addEventListener('abort', () => {
+        worker.terminate();
+      });
+      channel.handle(toolFileStatus, ({ index, status }) => {
+        setFileStatus((old) => {
+          const counts = new Map(old.counts);
+          const oldStatus = old.byIndex[index].status;
+          counts.set(oldStatus, counts.get(oldStatus)! - 1);
+          counts.set(status, (counts.get(status) || 0) + 1);
+          return {
+            byIndex: old.byIndex.map((o, i) =>
+              i === index ? { ...o, status } : o
+            ),
+            counts,
+          };
+        });
+      });
+
+      channel.handle(toolReady, () => {
+        setReady(true);
+      });
+
+      await channel.sendRequest(toolFiles, { files, tool });
+
+      return channel;
+    },
+    [files]
+  );
+  return ready ? (
+    <FullScreenPage>
+      <VectorTileView channel={channel!} />
+    </FullScreenPage>
+  ) : (
+    <LoadingPage>
+      {Array.from(fileStatus.counts.entries()).map(([status, count]) => (
+        <span key={status}>
+          <strong>{status}:</strong> <span>{count}</span>{' '}
+        </span>
+      ))}
+    </LoadingPage>
+  );
 }
 
 function DataView({ file }: { file: FileWithDetails }) {
@@ -88,7 +156,7 @@ function StylizedMap({ files }: { files: FileWithDetails[] }) {
       </MapBox>
     </StandardPage>
   ) : (
-    <Map width={600} height={600} asLoadingAnimation={true} />
+    <StylizedMap2 width={600} height={600} asLoadingAnimation={true} />
   );
 }
 
@@ -103,7 +171,7 @@ function SimpleLeafletMap({ files }: { files: FileWithDetails[] }) {
         .flat()}
     />
   ) : (
-    <Map width={600} height={600} asLoadingAnimation={true} />
+    <StylizedMap2 width={600} height={600} asLoadingAnimation={true} />
   );
 }
 
@@ -129,7 +197,7 @@ function DataSetLoader({
       </>
     );
   } else {
-    return <Map width={600} height={600} asLoadingAnimation={true} />;
+    return <StylizedMap2 width={600} height={600} asLoadingAnimation={true} />;
   }
 }
 
@@ -143,12 +211,12 @@ export default function LocalDataExplorer({
     useState<{
       files: FileWithDetails[];
       reason:
-        | 'map'
         | 'simple-leaflet-map'
         | 'data'
         | 'extract-map'
         | 'stylized-map'
-        | 'dataset';
+        | 'dataset'
+        | 'tool';
     }>();
 
   const [type, setType] = useState('generic');
@@ -156,6 +224,8 @@ export default function LocalDataExplorer({
     setFiles(await get('files'));
     return true;
   }, []);
+
+  const [tool, setTool] = useState<keyof typeof tools>('strava');
 
   async function handleFiles(
     result: FileWithHandle[],
@@ -206,16 +276,7 @@ export default function LocalDataExplorer({
           : ' '}
         <button onClick={() => setSelectedFiles(undefined)}>Unload</button>
       </NavExtension>
-      {selectedFiles.reason === 'map' ? (
-        <FullScreenPage>
-          <VectorTileFileView
-            files={selectedFiles.files.map((file) => ({
-              file,
-              type: type as any,
-            }))}
-          />
-        </FullScreenPage>
-      ) : selectedFiles.reason === 'simple-leaflet-map' ? (
+      {selectedFiles.reason === 'simple-leaflet-map' ? (
         <SimpleLeafletMap files={selectedFiles.files} />
       ) : selectedFiles.reason === 'stylized-map' ? (
         <StylizedMap files={selectedFiles.files} />
@@ -223,6 +284,14 @@ export default function LocalDataExplorer({
         <StandardPage>
           <DataSetLoader files={selectedFiles.files} setDataSet={setDataSet} />
         </StandardPage>
+      ) : selectedFiles.reason === 'tool' ? (
+        <ToolView
+          files={selectedFiles.files.map((file) => ({
+            file,
+            type: type as any,
+          }))}
+          tool={tool}
+        />
       ) : (
         <DataView file={selectedFiles.files[0]} />
       )}
@@ -239,7 +308,47 @@ export default function LocalDataExplorer({
           <>
             <button onClick={handleLoadClick}>load</button>
             <button onClick={handleAddClick}>add</button>{' '}
-            <button onClick={handleResetClick}>reset</button>
+          </>
+        ) : undefined}
+      </div>
+      <div>
+        {' '}
+        {files ? (
+          <>
+            All files:{' '}
+            <button
+              onClick={() => setSelectedFiles({ files, reason: 'dataset' })}
+            >
+              dataset
+            </button>
+            <button
+              onClick={() =>
+                setSelectedFiles({ files, reason: 'stylized-map' })
+              }
+            >
+              stylized map
+            </button>
+            <button
+              onClick={() =>
+                setSelectedFiles({ files, reason: 'simple-leaflet-map' })
+              }
+            >
+              simple map
+            </button>
+            <button onClick={handleResetClick}>reset</button> Tool:{' '}
+            <select
+              value={tool}
+              onChange={(e) => setTool(e.target.value as any)}
+            >
+              {Object.keys(tools).map((t) => (
+                <option key={t} value={t}>
+                  {t}
+                </option>
+              ))}
+            </select>
+            <button onClick={() => setSelectedFiles({ files, reason: 'tool' })}>
+              run
+            </button>
           </>
         ) : undefined}
       </div>
@@ -253,20 +362,13 @@ export default function LocalDataExplorer({
           </tr>
         </thead>
         <tbody>
-          {(files || []).map((f, i) => (
+          {(files || []).slice(0, 100).map((f, i) => (
             <tr key={i}>
               <td>{f.file.name}</td>
               <td>{f.file.size.toLocaleString()}</td>
               <td>{new Date(f.file.lastModified).toLocaleString()}</td>
               <td>{f.inferredType}</td>
               <td>
-                <button
-                  onClick={() =>
-                    setSelectedFiles({ files: [f], reason: 'map' })
-                  }
-                >
-                  fancy map
-                </button>
                 <button
                   onClick={() =>
                     setSelectedFiles({ files: [f], reason: 'data' })
@@ -291,41 +393,22 @@ export default function LocalDataExplorer({
                 >
                   stylized map
                 </button>
+                <button
+                  onClick={() =>
+                    setSelectedFiles({ files: [f], reason: 'tool' })
+                  }
+                >
+                  tool
+                </button>
               </td>
             </tr>
           ))}
         </tbody>
       </Table>
-      <div>
-        {' '}
-        {files ? (
-          <>
-            All files:{' '}
-            <button
-              onClick={() => setSelectedFiles({ files, reason: 'dataset' })}
-            >
-              dataset
-            </button>
-            <button onClick={() => setSelectedFiles({ files, reason: 'map' })}>
-              fancy map
-            </button>
-            <button
-              onClick={() =>
-                setSelectedFiles({ files, reason: 'stylized-map' })
-              }
-            >
-              stylized map
-            </button>
-            <button
-              onClick={() =>
-                setSelectedFiles({ files, reason: 'simple-leaflet-map' })
-              }
-            >
-              simple map
-            </button>
-          </>
-        ) : undefined}
-      </div>
+      {files && files.length > 100 && (
+        <div>{files.length - 100} files not shown</div>
+      )}
+
       <p>
         <strong>load:</strong> replace the current list of files with the
         selected files
@@ -335,11 +418,6 @@ export default function LocalDataExplorer({
         files
       </p>
       <h2>For each file</h2>
-      <p>
-        <strong>fancy map:</strong> Assuming the file is a geojson or topojson
-        file, load it in a map view using geojson-vt to render it with
-        reasonable performance
-      </p>
       <p>
         <strong>data:</strong> Show data about a video file.
       </p>

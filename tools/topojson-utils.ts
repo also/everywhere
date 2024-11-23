@@ -1,3 +1,4 @@
+import { GeoJsonProperties } from 'geojson';
 import {
   GeometryCollection,
   GeometryObject,
@@ -33,7 +34,9 @@ export function addArcOffset(n: number, offset: number): number {
 
 type PropsOf<T> = T extends GeometryObject<infer P> ? P : never;
 
-export function createMutableSimpleCombinedTopology<P>() {
+export function createMutableSimpleCombinedTopology<
+  P extends GeoJsonProperties
+>() {
   return {
     type: 'Topology',
     arcs: [],

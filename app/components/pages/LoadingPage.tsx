@@ -2,10 +2,17 @@ import Map from '../Map';
 import PageTitle from '../PageTitle';
 import StandardPage from '../StandardPage';
 
-export default function LoadingPage() {
+export default function LoadingPage({
+  children,
+}: {
+  children?: React.ReactNode;
+}) {
   return (
     <StandardPage>
       <PageTitle>Loading</PageTitle>
+
+      {children}
+
       <div
         style={{
           display: 'flex',
