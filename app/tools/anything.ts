@@ -18,10 +18,11 @@ const anythingTool: ToolFunction = async ({
     features: [],
   };
 
-  for (const f of (value.type === 'Topology'
-    ? features(value)
-    : (value as FeatureCollection)
-  ).features) {
+  for (const f of value.type === 'Feature'
+    ? [value]
+    : value.type === 'Topology'
+    ? features(value).features
+    : (value as FeatureCollection).features) {
     if (
       f.geometry.type === 'LineString' ||
       f.geometry.type === 'MultiLineString'
