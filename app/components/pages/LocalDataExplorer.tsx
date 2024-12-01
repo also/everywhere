@@ -30,10 +30,13 @@ import {
 import { tools } from '../../tools';
 import {
   create,
+  featureSummary,
   toolFiles,
   toolFileStatus,
   toolReady,
 } from '../../worker-stuff';
+import { WorkerChannel } from '../../WorkerChannel';
+import FeatureDetails from '../FeatureDetails';
 
 function Path({ feature }: { feature: Feature }) {
   const { path } = useContext(MapContext);
@@ -43,21 +46,47 @@ function Path({ feature }: { feature: Feature }) {
   return <path className="trip" d={path(feature)} />;
 }
 
+function FeaturesView({ channel }: { channel: WorkerChannel }) {
+  const features = useMemoAsync(async () => {
+    return await channel.sendRequest(featureSummary, undefined);
+  }, [channel]);
+
+  if (!features) {
+    return <LoadingPage />;
+  } else {
+    return (
+      <StandardPage>
+        <div>{features.length} features</div>
+        <ul>
+          {features.map((f, i) => (
+            <li key={i}>
+              {f.geometry.type} <FeatureDetails feature={f} />
+            </li>
+          ))}
+        </ul>
+      </StandardPage>
+    );
+  }
+}
+
 function ToolView({
   files,
   tool,
+  NavComponent,
 }: {
   files: {
     file: FileWithDetails;
     type: 'osm' | 'generic';
   }[];
   tool: keyof typeof tools;
+  NavComponent: React.ReactNode;
 }) {
   const [fileStatus, setFileStatus] = useState({
     byIndex: files.map((file) => ({ file, status: 'pending' })),
     counts: new Map([['pending', files.length]]),
   });
   const [ready, setReady] = useState(false);
+  const [show, setShow] = useState<'features' | 'map'>('map');
   const channel = useMemoAsync(
     async ({ signal }) => {
       const { channel, worker } = await create();
@@ -89,18 +118,30 @@ function ToolView({
     },
     [files]
   );
-  return ready ? (
-    <FullScreenPage>
-      <VectorTileView channel={channel!} />
-    </FullScreenPage>
-  ) : (
-    <LoadingPage>
-      {Array.from(fileStatus.counts.entries()).map(([status, count]) => (
-        <span key={status}>
-          <strong>{status}:</strong> <span>{count}</span>{' '}
-        </span>
-      ))}
-    </LoadingPage>
+  return (
+    <>
+      <NavExtension>
+        <button onClick={() => setShow('features')}>features</button>{' '}
+        <button onClick={() => setShow('map')}>map</button> {NavComponent}
+      </NavExtension>
+      {ready && channel ? (
+        show === 'features' ? (
+          <FeaturesView channel={channel} />
+        ) : (
+          <FullScreenPage>
+            <VectorTileView channel={channel} />
+          </FullScreenPage>
+        )
+      ) : (
+        <LoadingPage>
+          {Array.from(fileStatus.counts.entries()).map(([status, count]) => (
+            <span key={status}>
+              <strong>{status}:</strong> <span>{count}</span>{' '}
+            </span>
+          ))}
+        </LoadingPage>
+      )}
+    </>
   );
 }
 
@@ -225,7 +266,7 @@ export default function LocalDataExplorer({
     return true;
   }, []);
 
-  const [tool, setTool] = useState<keyof typeof tools>('strava');
+  const [tool, setTool] = useState<keyof typeof tools>('anything');
 
   async function handleFiles(
     result: FileWithHandle[],
@@ -267,36 +308,58 @@ export default function LocalDataExplorer({
     setFiles(undefined);
   }, []);
 
-  return selectedFiles ? (
-    <>
-      <NavExtension>
-        {selectedFiles.files[0].file.name}
-        {selectedFiles.files.length > 1
-          ? ` + ${selectedFiles.files.length - 1} `
-          : ' '}
-        <button onClick={() => setSelectedFiles(undefined)}>Unload</button>
-      </NavExtension>
-      {selectedFiles.reason === 'simple-leaflet-map' ? (
-        <SimpleLeafletMap files={selectedFiles.files} />
-      ) : selectedFiles.reason === 'stylized-map' ? (
-        <StylizedMap files={selectedFiles.files} />
-      ) : selectedFiles.reason === 'dataset' ? (
-        <StandardPage>
-          <DataSetLoader files={selectedFiles.files} setDataSet={setDataSet} />
-        </StandardPage>
-      ) : selectedFiles.reason === 'tool' ? (
+  if (selectedFiles) {
+    if (selectedFiles.reason === 'tool') {
+      return (
         <ToolView
           files={selectedFiles.files.map((file) => ({
             file,
             type: type as any,
           }))}
           tool={tool}
+          NavComponent={
+            <>
+              {selectedFiles.files[0].file.name}
+              {selectedFiles.files.length > 1
+                ? ` + ${selectedFiles.files.length - 1} `
+                : ' '}
+              <button onClick={() => setSelectedFiles(undefined)}>
+                Unload
+              </button>
+            </>
+          }
         />
-      ) : (
-        <DataView file={selectedFiles.files[0]} />
-      )}
-    </>
-  ) : (
+      );
+    } else {
+      return (
+        <>
+          <NavExtension>
+            {selectedFiles.files[0].file.name}
+            {selectedFiles.files.length > 1
+              ? ` + ${selectedFiles.files.length - 1} `
+              : ' '}
+            <button onClick={() => setSelectedFiles(undefined)}>Unload</button>
+          </NavExtension>
+          {selectedFiles.reason === 'simple-leaflet-map' ? (
+            <SimpleLeafletMap files={selectedFiles.files} />
+          ) : selectedFiles.reason === 'stylized-map' ? (
+            <StylizedMap files={selectedFiles.files} />
+          ) : selectedFiles.reason === 'dataset' ? (
+            <StandardPage>
+              <DataSetLoader
+                files={selectedFiles.files}
+                setDataSet={setDataSet}
+              />
+            </StandardPage>
+          ) : (
+            <DataView file={selectedFiles.files[0]} />
+          )}
+        </>
+      );
+    }
+  }
+
+  return (
     <StandardPage>
       <PageTitle>Local Data</PageTitle>
       <div>

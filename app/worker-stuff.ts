@@ -9,6 +9,7 @@ import { FileWithDetails } from './file-data';
 import { TileRenderOpts } from './tile-drawing';
 import { tools } from './tools';
 import { key, WorkerChannel, workerHandshake } from './WorkerChannel';
+import { LimitedFeature } from './components/FeatureDetails';
 
 export const toolFiles =
   key<
@@ -18,6 +19,8 @@ export const toolFiles =
     },
     void
   >('toolFiles');
+export const featureSummary =
+  key<undefined, LimitedFeature[]>('featureSummary');
 export const toolFileStatus =
   key<{ index: number; status: string }, void>('toolFileStatus');
 export const toolReady = key<{ resultType: 'tiles' }, void>('toolReady');

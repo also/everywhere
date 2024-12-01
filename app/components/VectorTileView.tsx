@@ -6,7 +6,6 @@ import {
 } from 'geojson';
 
 import { useMemo, useState } from 'react';
-import { VideoProperties } from '../../tools/parse/gopro-gps';
 import CanvasLayer from '../CanvasLayer';
 import { drawDistanceTile, drawTile } from '../vector-tiles';
 
@@ -15,104 +14,7 @@ import { WorkerChannel } from '../WorkerChannel';
 import LeafletMap from './LeafletMap';
 import L from 'leaflet';
 import { createPortal } from 'react-dom';
-
-function GoProVideoDetails({
-  id,
-  properties,
-}: {
-  id: string;
-  properties: VideoProperties;
-}) {
-  return (
-    <div>
-      <strong>
-        {localStorage.videoBaseUrl ? (
-          <a href={localStorage.videoBaseUrl + id}>{id}</a>
-        ) : (
-          id
-        )}
-      </strong>{' '}
-      <span>
-        Start: {new Date(properties.creationTime * 1000).toISOString()}
-      </span>{' '}
-      <span>Camera: {properties.cameraModelName}</span>
-    </div>
-  );
-}
-
-export function SwarmVenueDetails({
-  properties: {
-    venue: { id, name },
-    checkins,
-  },
-}: {
-  properties: { venue: { id: string; name: string }; checkins: any[] };
-}) {
-  return (
-    <>
-      <div>
-        <a
-          href={`https://foursquare.com/v/v/${id}`}
-          target="_blank"
-          rel="noreferrer"
-        >
-          <strong>{name}</strong>
-        </a>{' '}
-      </div>
-      <div>{checkins.length} checkins</div>
-    </>
-  );
-}
-
-function StravaTripDetails({ id }: { id: string }) {
-  return (
-    <div>
-      <a
-        href={`https://www.strava.com/activities/${id}`}
-        target="_blank"
-        rel="noreferrer"
-      >
-        View on Strava
-      </a>
-    </div>
-  );
-}
-
-function isProbablyOsmId(id: string | number) {
-  return (
-    typeof id === 'string' && (id.startsWith('node/') || id.startsWith('way/'))
-  );
-}
-
-const GenericFeatureDetails = ({
-  id,
-  properties,
-}: {
-  id?: string | number;
-  properties?: Record<string, any>;
-}) => (
-  <div>
-    ID: {id ?? '(none)'}, type: {properties?.type ?? '(none)'}
-    {id && isProbablyOsmId(id) && (
-      <>
-        {' '}
-        <a
-          href={`https://www.openstreetmap.org/${id}`}
-          target="_blank"
-          rel="noreferrer"
-        >
-          View on OSM
-        </a>
-      </>
-    )}
-  </div>
-);
-
-const componentsByType: Record<string, React.ComponentType<any>> = {
-  video: GoProVideoDetails,
-  'strava-trip': StravaTripDetails,
-  'swarm-venue': SwarmVenueDetails,
-};
+import FeatureDetails from './FeatureDetails';
 
 export default function VectorTileView({
   channel,
@@ -167,17 +69,13 @@ export default function VectorTileView({
     };
   }, [channel]);
 
-  const ComponentForType =
-    componentsByType[selected?.feature?.properties?.type] ??
-    GenericFeatureDetails;
-
   return (
     <>
       {selected &&
         createPortal(
           <>
             {selected.lat}, {selected.lng}; distance: {selected.distance}
-            <ComponentForType {...selected?.feature} />
+            <FeatureDetails feature={selected?.feature} />
           </>,
           popupDiv
         )}

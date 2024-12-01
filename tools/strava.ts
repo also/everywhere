@@ -16,6 +16,7 @@ export type TripGeoJSON = geojson.FeatureCollection<
   geojson.MultiLineString,
   {
     activity: Activity;
+    type: 'strava-trip';
   }
 >;
 
@@ -88,7 +89,10 @@ function streamsToGeoJson(streams: StreamsByType): TripGeoJSON | undefined {
       {
         type: 'Feature',
         id: streams.activity.id,
-        properties: { activity: extractProperties(streams.activity) },
+        properties: {
+          activity: extractProperties(streams.activity),
+          type: 'strava-trip',
+        },
         geometry: {
           type: 'MultiLineString',
           coordinates: coordinates,

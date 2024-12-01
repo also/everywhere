@@ -2,6 +2,7 @@ import { WorkerChannel, workerHandshake } from './WorkerChannel';
 
 import geojsonVt, { GeoJSONVT } from 'geojson-vt';
 import {
+  featureSummary,
   getTile,
   lookup,
   renderDistanceTileInWorker,
@@ -126,6 +127,14 @@ channel.handle(toolFiles, async ({ files, tool: toolName }) => {
     feature.properties!.everywhereFeatureIndex = i;
     i++;
   }
+
+  channel.handle(featureSummary, () =>
+    collection.features.map((f) => ({
+      id: f.id,
+      properties: f.properties,
+      geometry: { type: f.geometry.type },
+    }))
+  );
 
   createTileHandlers({
     tileIndex: geojsonVt(collection, { maxZoom: 24 }),
