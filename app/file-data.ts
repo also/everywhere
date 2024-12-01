@@ -12,8 +12,17 @@ import { RawVideoFeature, toChapter, VideoChapter } from './videos';
 import { CompleteActivity } from '../tools/strava-api';
 import { completeActivityToGeoJson } from '../tools/strava';
 
-export interface FileWithDetails {
+export type FileWithDetails = FileHandleWithDetails | FileContentsWithDetails;
+
+export interface FileHandleWithDetails {
+  type: 'handle';
   file: FileWithHandle;
+  inferredType?: string;
+}
+
+export interface FileContentsWithDetails {
+  type: 'contents';
+  file: Blob;
   inferredType?: string;
 }
 
@@ -30,15 +39,17 @@ function isProbablyStravaCompleteActivity(json: any): json is CompleteActivity {
 }
 
 export async function mp4ToGeoJson(
-  file: File
+  blob: Blob
 ): Promise<Feature<LineString, VideoProperties>> {
-  const data = new SeekableBlobBuffer(file, 1024000);
+  const data = new SeekableBlobBuffer(blob, 1024000);
   const mp4 = bind(mp4Parser, data, fileRoot(data));
   const track = await getMeta(mp4);
   return await extractGps(track, mp4);
 }
 
-export async function readFile({ file }: FileWithDetails): Promise<SomeFile> {
+export async function readFile({
+  file,
+}: FileHandleWithDetails): Promise<SomeFile> {
   let geojson: Feature | FeatureCollection | undefined;
   let mp4;
   let track;
@@ -73,7 +84,7 @@ export async function readFile({ file }: FileWithDetails): Promise<SomeFile> {
   return { json, geojson, mp4, track, raw: file };
 }
 
-export function readFiles(files: FileWithDetails[]): Promise<SomeFile[]> {
+export function readFiles(files: FileHandleWithDetails[]): Promise<SomeFile[]> {
   return Promise.all(files.map((file) => readFile(file)));
 }
 

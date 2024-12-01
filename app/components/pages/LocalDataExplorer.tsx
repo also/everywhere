@@ -1,4 +1,4 @@
-import { useCallback, useContext, useState } from 'react';
+import { useCallback, useContext, useMemo, useState } from 'react';
 
 import { get, set } from 'idb-keyval';
 import { fileOpen, FileWithHandle } from 'browser-fs-access';
@@ -20,6 +20,8 @@ import { NavExtension } from '../Nav';
 import LoadingPage from './LoadingPage';
 import StylizedMap2 from '../Map';
 import {
+  FileContentsWithDetails,
+  FileHandleWithDetails,
   FileWithDetails,
   peekFile,
   readFile,
@@ -69,26 +71,47 @@ function FeaturesView({ channel }: { channel: WorkerChannel }) {
   }
 }
 
-function ToolView({
-  files,
-  tool,
-  NavComponent,
-}: {
+export function SimpleVectorTileView({ features }: { features: Feature[] }) {
+  const files = useMemo(
+    () =>
+      features
+        .map<FileContentsWithDetails>((feature) => ({
+          type: 'contents',
+          file: new Blob([JSON.stringify(feature)], {
+            type: 'application/json',
+          }),
+        }))
+        .map(
+          (file) =>
+            ({
+              file,
+              type: 'generic',
+            } as const)
+        ),
+    [features]
+  );
+  const { channel } = useFilesInTool(files, 'anything');
+  return channel ? <VectorTileView channel={channel} /> : <div>loading</div>;
+}
+
+function useFilesInTool(
   files: {
     file: FileWithDetails;
     type: 'osm' | 'generic';
-  }[];
-  tool: keyof typeof tools;
-  NavComponent: React.ReactNode;
-}) {
+  }[],
+  tool: keyof typeof tools
+) {
   const [fileStatus, setFileStatus] = useState({
     byIndex: files.map((file) => ({ file, status: 'pending' })),
     counts: new Map([['pending', files.length]]),
   });
   const [ready, setReady] = useState(false);
-  const [show, setShow] = useState<'features' | 'map'>('map');
   const channel = useMemoAsync(
     async ({ signal }) => {
+      setFileStatus({
+        byIndex: files.map((file) => ({ file, status: 'pending' })),
+        counts: new Map([['pending', files.length]]),
+      });
       const { channel, worker } = await create();
       signal.addEventListener('abort', () => {
         worker.terminate();
@@ -118,13 +141,33 @@ function ToolView({
     },
     [files]
   );
+
+  return { fileStatus, channel: ready ? channel : undefined };
+}
+
+function ToolView({
+  files,
+  tool,
+  NavComponent,
+}: {
+  files: {
+    file: FileWithDetails;
+    type: 'osm' | 'generic';
+  }[];
+  tool: keyof typeof tools;
+  NavComponent: React.ReactNode;
+}) {
+  const [show, setShow] = useState<'features' | 'map'>('map');
+
+  const { fileStatus, channel } = useFilesInTool(files, tool);
+
   return (
     <>
       <NavExtension>
         <button onClick={() => setShow('features')}>features</button>{' '}
         <button onClick={() => setShow('map')}>map</button> {NavComponent}
       </NavExtension>
-      {ready && channel ? (
+      {channel ? (
         show === 'features' ? (
           <FeaturesView channel={channel} />
         ) : (
@@ -145,7 +188,7 @@ function ToolView({
   );
 }
 
-function DataView({ file }: { file: FileWithDetails }) {
+function DataView({ file }: { file: FileHandleWithDetails }) {
   const loaded = useMemoAsync<SomeFile>(() => readFile(file), [file]);
 
   if (!loaded) {
@@ -172,7 +215,7 @@ function DataView({ file }: { file: FileWithDetails }) {
   );
 }
 
-function StylizedMap({ files }: { files: FileWithDetails[] }) {
+function StylizedMap({ files }: { files: FileHandleWithDetails[] }) {
   const features = useMemoAsync(async () => {
     const loadedFiles = await readFiles(files);
     return loadedFiles
@@ -201,7 +244,7 @@ function StylizedMap({ files }: { files: FileWithDetails[] }) {
   );
 }
 
-function SimpleLeafletMap({ files }: { files: FileWithDetails[] }) {
+function SimpleLeafletMap({ files }: { files: FileHandleWithDetails[] }) {
   const loadedFiles = useMemoAsync(() => readFiles(files), [files]);
   return loadedFiles ? (
     <LeafletMap
@@ -220,7 +263,7 @@ function DataSetLoader({
   files,
   setDataSet,
 }: {
-  files: FileWithDetails[];
+  files: FileHandleWithDetails[];
   setDataSet(dataSet: DataSet): void;
 }) {
   const dataset = useMemoAsync(
@@ -247,10 +290,10 @@ export default function LocalDataExplorer({
 }: {
   setDataSet(dataSet: DataSet): void;
 }) {
-  const [files, setFiles] = useState<FileWithDetails[] | undefined>();
+  const [files, setFiles] = useState<FileHandleWithDetails[] | undefined>();
   const [selectedFiles, setSelectedFiles] =
     useState<{
-      files: FileWithDetails[];
+      files: FileHandleWithDetails[];
       reason:
         | 'simple-leaflet-map'
         | 'data'
@@ -270,10 +313,14 @@ export default function LocalDataExplorer({
 
   async function handleFiles(
     result: FileWithHandle[],
-    existingFiles: FileWithDetails[] = []
+    existingFiles: FileHandleWithDetails[] = []
   ) {
-    const newFiles: FileWithDetails[] = await Promise.all(
-      result.map(async (file) => ({ file, inferredType: await peekFile(file) }))
+    const newFiles: FileHandleWithDetails[] = await Promise.all(
+      result.map(async (file) => ({
+        type: 'handle',
+        file,
+        inferredType: await peekFile(file),
+      }))
     );
     const allFiles = [...newFiles, ...existingFiles];
     setFiles(allFiles);

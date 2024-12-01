@@ -2,6 +2,7 @@ import Scale from './docs/Scale';
 import LeafletMapExample from './docs/LeafletMapExample';
 import StylizedMapExample from './docs/StylizedMapExample';
 import VideoExample from './docs/VideoExample';
+import SimpleVectorTileViewExample from './docs/SimpleVectorTileViewExample';
 import { interpolateViridis } from 'd3-scale-chromatic';
 
 ## Heatmap Scale
@@ -35,6 +36,19 @@ import { interpolateViridis } from 'd3-scale-chromatic';
 
 <StylizedMapExample data={(dataSet) => dataSet.tripsById.get('329517677')} />
 
+### Vector Tile View
+
+<SimpleVectorTileViewExample
+  data={(dataSet) => dataSet.tripsById.get('329517677')}
+/>
+
 ### One of the videos
 
 <VideoExample name="0010" />
+
+## All Trips in vector tile view
+
+<SimpleVectorTileViewExample
+  data={(dataSet) => [...dataSet.tripsById.values()]}
+/>
+```
