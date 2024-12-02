@@ -14,16 +14,19 @@ import { completeActivityToGeoJson } from '../tools/strava';
 
 export type FileWithDetails = FileHandleWithDetails | FileContentsWithDetails;
 
-export interface FileHandleWithDetails {
-  type: 'handle';
-  file: FileWithHandle;
+export interface BaseFileDetails {
+  id: string;
   inferredType?: string;
 }
 
-export interface FileContentsWithDetails {
+export interface FileHandleWithDetails extends BaseFileDetails {
+  type: 'handle';
+  file: FileWithHandle;
+}
+
+export interface FileContentsWithDetails extends BaseFileDetails {
   type: 'contents';
   file: Blob;
-  inferredType?: string;
 }
 
 export type SomeFile = {

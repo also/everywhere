@@ -1,6 +1,6 @@
 import { useCallback, useContext, useMemo, useState } from 'react';
 
-import { get, set } from 'idb-keyval';
+import { get, set, update } from 'idb-keyval';
 import { fileOpen, FileWithHandle } from 'browser-fs-access';
 import { Feature } from 'geojson';
 import { ObjectInspector } from 'react-inspector';
@@ -75,7 +75,8 @@ export function SimpleVectorTileView({ features }: { features: Feature[] }) {
   const files = useMemo(
     () =>
       features
-        .map<FileContentsWithDetails>((feature) => ({
+        .map<FileContentsWithDetails>((feature, i) => ({
+          id: i.toString(),
           type: 'contents',
           file: new Blob([JSON.stringify(feature)], {
             type: 'application/json',
@@ -315,8 +316,14 @@ export default function LocalDataExplorer({
     result: FileWithHandle[],
     existingFiles: FileHandleWithDetails[] = []
   ) {
+    let maxId: number;
+    await update('maxId', (current = 0) => {
+      maxId = current + result.length;
+      return maxId;
+    });
     const newFiles: FileHandleWithDetails[] = await Promise.all(
-      result.map(async (file) => ({
+      result.map(async (file, i) => ({
+        id: `${maxId + i + 1}`,
         type: 'handle',
         file,
         inferredType: await peekFile(file),
@@ -328,6 +335,7 @@ export default function LocalDataExplorer({
     // removing them drops the reference or something
     await set('files', allFiles);
   }
+
   const handleLoadClick = useCallback(async (e) => {
     e.preventDefault();
     const result = await fileOpen({
@@ -465,6 +473,7 @@ export default function LocalDataExplorer({
       <Table>
         <thead>
           <tr>
+            <th>ID</th>
             <th>Name</th>
             <th>Size</th>
             <th>Last Modified</th>
@@ -474,6 +483,7 @@ export default function LocalDataExplorer({
         <tbody>
           {(files || []).slice(0, 100).map((f, i) => (
             <tr key={i}>
+              <td>{f.id}</td>
               <td>{f.file.name}</td>
               <td>{f.file.size.toLocaleString()}</td>
               <td>{new Date(f.file.lastModified).toLocaleString()}</td>
