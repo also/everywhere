@@ -7,7 +7,7 @@ import {
 } from './dataset-utils';
 import { SimpleVectorTileView } from '../components/pages/LocalDataExplorer';
 
-export default function StylizedMapExample({
+export default function SimpleVectorTileViewExample({
   data,
 }: {
   data: DataSetFeatureExtractor<StravaTripFeature>;
