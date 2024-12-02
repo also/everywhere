@@ -98,6 +98,13 @@ export default React.memo(function LeafletMap({
         map.removeLayer(layer);
       }
     });
+    ([...(control as any)._layers] as { layer: L.Layer }[]).forEach(
+      ({ layer }) => {
+        if (!defaultLayers.has(layer)) {
+          control.removeLayer(layer);
+        }
+      }
+    );
 
     if (customize) {
       customize(map, control);
