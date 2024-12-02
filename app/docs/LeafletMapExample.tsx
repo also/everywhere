@@ -1,6 +1,6 @@
 import { useContext, useMemo } from 'react';
 import DataSetContext from '../components/DataSetContext';
-import LeafletMap from '../components/LeafletMap';
+import { LeafletFeatureMap } from '../components/LeafletMap';
 import {
   DataSetFeatureExtractor,
   extractFeaturesFromDataSet,
@@ -33,7 +33,11 @@ export default function LeafletMapExample({
         height: 300,
       }}
     >
-      <LeafletMap features={features} center={center} zoom={zoom} />
+      <LeafletFeatureMap
+        features={features ?? []}
+        center={center}
+        zoom={zoom}
+      />
     </div>
   );
 }

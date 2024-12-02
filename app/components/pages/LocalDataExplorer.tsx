@@ -9,7 +9,7 @@ import MapComponent from '../Map';
 import MapContext from '../MapContext';
 import MapBox from '../MapBox';
 import { DataSet } from '../../data';
-import LeafletMap from '../LeafletMap';
+import { LeafletFeatureMap } from '../LeafletMap';
 import Table from '../Table';
 import TraverserView, { GpmfSamples } from '../data/TraverserView';
 import { useMemoAsync } from '../../hooks';
@@ -247,7 +247,7 @@ function StylizedMap({ files }: { files: FileHandleWithDetails[] }) {
 function SimpleLeafletMap({ files }: { files: FileHandleWithDetails[] }) {
   const loadedFiles = useMemoAsync(() => readFiles(files), [files]);
   return loadedFiles ? (
-    <LeafletMap
+    <LeafletFeatureMap
       features={loadedFiles
         .map(({ geojson }) =>
           geojson.type === 'Feature' ? [geojson] : geojson.features

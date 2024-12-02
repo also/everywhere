@@ -42,7 +42,7 @@ import { ReactNode, useContext, useEffect, useState } from 'react';
 import LocalDataExplorer from './components/pages/LocalDataExplorer';
 import DataSetContext from './components/DataSetContext';
 import { loadDataset } from './default-data-set';
-import LeafletMap from './components/LeafletMap';
+import { LeafletFeatureMap } from './components/LeafletMap';
 import DataPage from './components/pages/DataPage';
 import StandardPage from './components/StandardPage';
 import FullScreenPage from './components/FullScreenPage';
@@ -257,7 +257,7 @@ function MapRoute() {
   const { trips } = useContext(DataSetContext);
   return (
     <FullScreenPage>
-      <LeafletMap features={trips} />
+      <LeafletFeatureMap features={trips} />
     </FullScreenPage>
   );
 }

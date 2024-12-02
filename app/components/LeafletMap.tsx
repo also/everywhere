@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import L from 'leaflet';
 import React from 'react';
 import { Feature } from 'geojson';
@@ -27,11 +27,7 @@ const mapboxOpts = {
     'pk.eyJ1IjoicmJlcmRlZW4iLCJhIjoiZTU1YjNmOWU4MWExNDJhNWNlMTAxYjA2NjFlODBiNWUifQ.AHJ0I8wQi1pJekXfAaPxLw',
 };
 
-function createMap(
-  element: HTMLElement,
-  center: [number, number],
-  zoom: number
-) {
+function createMap(element: HTMLElement) {
   const streets = L.tileLayer(
     'https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}',
     mapboxOpts
@@ -57,7 +53,7 @@ function createMap(
       streets,
       ...heatmaps.filter((l) => (l.options as any).enabledByDefault !== false),
     ],
-  }).setView(center, zoom);
+  });
 
   control.addTo(map);
 
@@ -68,13 +64,11 @@ function createMap(
   };
 }
 
-export default React.memo(function LeafletMap({
-  features = [],
+const LeafletMap = React.memo(function LeafletMap({
   customize,
   center = [42.389118, -71.097153],
   zoom = 11,
 }: {
-  features?: Feature[];
   customize?(map: L.Map, control: L.Control.Layers): void;
   center?: [number, number];
   zoom?: number;
@@ -89,7 +83,7 @@ export default React.memo(function LeafletMap({
 
   useEffect(() => {
     if (!mapRef.current) {
-      mapRef.current = createMap(mapComponent.current!, center, zoom);
+      mapRef.current = createMap(mapComponent.current!);
     }
 
     const { map, defaultLayers, control } = mapRef.current;
@@ -109,15 +103,38 @@ export default React.memo(function LeafletMap({
     if (customize) {
       customize(map, control);
     }
+  }, [customize]);
 
-    features.forEach((f) =>
-      L.geoJSON(f)
-        .addTo(map)
-        .on('click', (e) => {
-          console.log(e, f.properties);
-        })
-    );
-  }, [features]);
+  useEffect(() => {
+    mapRef.current?.map.setView(center, zoom);
+  }, [center, zoom]);
 
   return <div ref={mapComponent} style={{ flex: 1 }} />;
 });
+
+export default LeafletMap;
+
+export function LeafletFeatureMap({
+  features,
+  center,
+  zoom,
+}: {
+  features: Feature[];
+  center?: [number, number];
+  zoom?: number;
+}) {
+  const customize = useMemo(
+    () => (map: L.Map) => {
+      features.forEach((f) =>
+        L.geoJSON(f)
+          .addTo(map)
+          .on('click', (e) => {
+            console.log(e, f.properties);
+          })
+      );
+    },
+    [features]
+  );
+
+  return <LeafletMap customize={customize} center={center} zoom={zoom} />;
+}
