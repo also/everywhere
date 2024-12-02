@@ -1,4 +1,4 @@
-import { useCallback, useContext, useMemo, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 import { get, set, update } from 'idb-keyval';
 import { fileOpen, FileWithHandle } from 'browser-fs-access';
@@ -39,6 +39,8 @@ import {
 } from '../../worker-stuff';
 import { WorkerChannel } from '../../WorkerChannel';
 import FeatureDetails from '../FeatureDetails';
+import { Route, Switch, useRouteMatch } from 'react-router';
+import { Link, useHistory } from 'react-router-dom';
 
 function Path({ feature }: { feature: Feature }) {
   const { path } = useContext(MapContext);
@@ -286,65 +288,76 @@ function DataSetLoader({
   }
 }
 
-export default function LocalDataExplorer({
-  setDataSet,
+type HandleFiles = (
+  result: FileWithHandle[],
+  existingFiles?: FileHandleWithDetails[]
+) => Promise<void>;
+
+function useFiles() {
+  const [files, setFiles] =
+    useState<FileHandleWithDetails[] | undefined>(undefined);
+
+  const handleFiles = useMemo(() => {
+    return async function handleFiles(
+      result: FileWithHandle[],
+      existingFiles: FileHandleWithDetails[] = []
+    ) {
+      let maxId: number;
+      await update('maxId', (current = 0) => {
+        maxId = current + result.length;
+        return maxId;
+      });
+      const newFiles: FileHandleWithDetails[] = await Promise.all(
+        result.map(async (file, i) => ({
+          id: `${maxId + i + 1}`,
+          type: 'handle',
+          file,
+          inferredType: await peekFile(file),
+        }))
+      );
+      // TODO use update()
+      const allFiles = [...newFiles, ...existingFiles];
+      setFiles(allFiles);
+      // for safari, it seems to be important that you don't remove the files from indexDB before you read them.
+      // removing them drops the reference or something
+      await set('files', allFiles);
+    };
+  }, []);
+
+  useEffect(() => {
+    (async () => setFiles((await get('files')) ?? []))();
+  }, []);
+
+  return { files, handleFiles };
+}
+
+function FileManager({
+  files,
+  handleFiles,
 }: {
-  setDataSet(dataSet: DataSet): void;
+  files: FileHandleWithDetails[] | undefined;
+  handleFiles: HandleFiles;
 }) {
-  const [files, setFiles] = useState<FileHandleWithDetails[] | undefined>();
-  const [selectedFiles, setSelectedFiles] =
-    useState<{
-      files: FileHandleWithDetails[];
-      reason:
-        | 'simple-leaflet-map'
-        | 'data'
-        | 'extract-map'
-        | 'stylized-map'
-        | 'dataset'
-        | 'tool';
-    }>();
+  const history = useHistory();
+
+  const { path, url } = useRouteMatch();
 
   const [type, setType] = useState('generic');
-  const initialized = useMemoAsync<boolean>(async () => {
-    setFiles(await get('files'));
-    return true;
-  }, []);
 
   const [tool, setTool] = useState<keyof typeof tools>('anything');
 
-  async function handleFiles(
-    result: FileWithHandle[],
-    existingFiles: FileHandleWithDetails[] = []
-  ) {
-    let maxId: number;
-    await update('maxId', (current = 0) => {
-      maxId = current + result.length;
-      return maxId;
-    });
-    const newFiles: FileHandleWithDetails[] = await Promise.all(
-      result.map(async (file, i) => ({
-        id: `${maxId + i + 1}`,
-        type: 'handle',
-        file,
-        inferredType: await peekFile(file),
-      }))
-    );
-    const allFiles = [...newFiles, ...existingFiles];
-    setFiles(allFiles);
-    // for safari, it seems to be important that you don't remove the files from indexDB before you read them.
-    // removing them drops the reference or something
-    await set('files', allFiles);
-  }
+  const handleLoadClick = useCallback(
+    async (e) => {
+      e.preventDefault();
+      const result = await fileOpen({
+        multiple: true,
+        // mimeTypes: ['video/mp4'],
+      });
 
-  const handleLoadClick = useCallback(async (e) => {
-    e.preventDefault();
-    const result = await fileOpen({
-      multiple: true,
-      // mimeTypes: ['video/mp4'],
-    });
-
-    await handleFiles(result);
-  }, []);
+      await handleFiles(result);
+    },
+    [handleFiles]
+  );
   const handleAddClick = useCallback(
     async (e) => {
       e.preventDefault();
@@ -354,65 +367,16 @@ export default function LocalDataExplorer({
 
       await handleFiles(result, files);
     },
-    [files]
+    [files, handleFiles]
   );
 
-  const handleResetClick = useCallback(async (e) => {
-    e.preventDefault();
-    await set('files', undefined);
-    setFiles(undefined);
-  }, []);
-
-  if (selectedFiles) {
-    if (selectedFiles.reason === 'tool') {
-      return (
-        <ToolView
-          files={selectedFiles.files.map((file) => ({
-            file,
-            type: type as any,
-          }))}
-          tool={tool}
-          NavComponent={
-            <>
-              {selectedFiles.files[0].file.name}
-              {selectedFiles.files.length > 1
-                ? ` + ${selectedFiles.files.length - 1} `
-                : ' '}
-              <button onClick={() => setSelectedFiles(undefined)}>
-                Unload
-              </button>
-            </>
-          }
-        />
-      );
-    } else {
-      return (
-        <>
-          <NavExtension>
-            {selectedFiles.files[0].file.name}
-            {selectedFiles.files.length > 1
-              ? ` + ${selectedFiles.files.length - 1} `
-              : ' '}
-            <button onClick={() => setSelectedFiles(undefined)}>Unload</button>
-          </NavExtension>
-          {selectedFiles.reason === 'simple-leaflet-map' ? (
-            <SimpleLeafletMap files={selectedFiles.files} />
-          ) : selectedFiles.reason === 'stylized-map' ? (
-            <StylizedMap files={selectedFiles.files} />
-          ) : selectedFiles.reason === 'dataset' ? (
-            <StandardPage>
-              <DataSetLoader
-                files={selectedFiles.files}
-                setDataSet={setDataSet}
-              />
-            </StandardPage>
-          ) : (
-            <DataView file={selectedFiles.files[0]} />
-          )}
-        </>
-      );
-    }
-  }
+  const handleResetClick = useCallback(
+    async (e) => {
+      e.preventDefault();
+      handleFiles([]);
+    },
+    [handleFiles]
+  );
 
   return (
     <StandardPage>
@@ -422,10 +386,11 @@ export default function LocalDataExplorer({
           <option>generic</option>
           <option>osm</option>
         </select>
-        {initialized ? (
+        {files ? (
           <>
             <button onClick={handleLoadClick}>load</button>
-            <button onClick={handleAddClick}>add</button>{' '}
+            <button onClick={handleAddClick}>add</button>
+            <button onClick={handleResetClick}>reset</button>
           </>
         ) : undefined}
       </div>
@@ -433,27 +398,12 @@ export default function LocalDataExplorer({
         {' '}
         {files ? (
           <>
-            All files:{' '}
-            <button
-              onClick={() => setSelectedFiles({ files, reason: 'dataset' })}
-            >
-              dataset
-            </button>
-            <button
-              onClick={() =>
-                setSelectedFiles({ files, reason: 'stylized-map' })
-              }
-            >
-              stylized map
-            </button>
-            <button
-              onClick={() =>
-                setSelectedFiles({ files, reason: 'simple-leaflet-map' })
-              }
-            >
+            All files: <Link to={`${url}/file/all/view/dataset`}>dataset</Link>{' '}
+            <Link to={`${url}/file/all/view/stylized-map`}>stylized map</Link>{' '}
+            <Link to={`${url}/file/all/view/simple-leaflet-map`}>
               simple map
-            </button>
-            <button onClick={handleResetClick}>reset</button> Tool:{' '}
+            </Link>{' '}
+            Tool:{' '}
             <select
               value={tool}
               onChange={(e) => setTool(e.target.value as any)}
@@ -464,7 +414,9 @@ export default function LocalDataExplorer({
                 </option>
               ))}
             </select>
-            <button onClick={() => setSelectedFiles({ files, reason: 'tool' })}>
+            <button
+              onClick={() => history.push(`${url}/file/all/tool/${tool}`)}
+            >
               run
             </button>
           </>
@@ -489,37 +441,15 @@ export default function LocalDataExplorer({
               <td>{new Date(f.file.lastModified).toLocaleString()}</td>
               <td>{f.inferredType}</td>
               <td>
-                <button
-                  onClick={() =>
-                    setSelectedFiles({ files: [f], reason: 'data' })
-                  }
-                >
-                  data
-                </button>
-                <button
-                  onClick={() =>
-                    setSelectedFiles({
-                      files: [f],
-                      reason: 'simple-leaflet-map',
-                    })
-                  }
-                >
+                <Link to={`${url}/file/${f.id}/view/data`}>data</Link>{' '}
+                <Link to={`${url}/file/${f.id}/view/simple-leaflet-map`}>
+                  {' '}
                   simple map
-                </button>
-                <button
-                  onClick={() =>
-                    setSelectedFiles({ files: [f], reason: 'stylized-map' })
-                  }
-                >
+                </Link>{' '}
+                <Link to={`${url}/file/${f.id}/view/stylized-map`}>
                   stylized map
-                </button>
-                <button
-                  onClick={() =>
-                    setSelectedFiles({ files: [f], reason: 'tool' })
-                  }
-                >
-                  tool
-                </button>
+                </Link>{' '}
+                <Link to={`/local/file/${f.id}`}>tools</Link>
               </td>
             </tr>
           ))}
@@ -550,5 +480,148 @@ export default function LocalDataExplorer({
         everywhere.bike style
       </p>
     </StandardPage>
+  );
+}
+
+function SelectedFilesView({
+  reason,
+  selectedFiles,
+  setDataSet,
+}: {
+  reason: string;
+  selectedFiles: FileHandleWithDetails[];
+  setDataSet(dataSet: DataSet): void;
+}) {
+  const history = useHistory();
+
+  return (
+    <>
+      <NavExtension>
+        {selectedFiles[0].file.name}
+        {selectedFiles.length > 1 ? ` + ${selectedFiles.length - 1} ` : ' '}
+        <button onClick={() => history.push('/local')}>Unload</button>
+      </NavExtension>
+      {reason === 'simple-leaflet-map' ? (
+        <SimpleLeafletMap files={selectedFiles} />
+      ) : reason === 'stylized-map' ? (
+        <StylizedMap files={selectedFiles} />
+      ) : reason === 'dataset' ? (
+        <StandardPage>
+          <DataSetLoader files={selectedFiles} setDataSet={setDataSet} />
+        </StandardPage>
+      ) : (
+        <DataView file={selectedFiles[0]} />
+      )}
+    </>
+  );
+}
+
+export default function LocalDataExplorer({
+  setDataSet,
+}: {
+  setDataSet(dataSet: DataSet): void;
+}) {
+  const { path } = useRouteMatch();
+  const { files, handleFiles } = useFiles();
+
+  return (
+    <Switch>
+      <Route exact path={path}>
+        <FileManager files={files} handleFiles={handleFiles} />
+      </Route>
+      <Route
+        path={`${path}/file/:id`}
+        render={(p) => (
+          <FileViewPage id={p.match.params.id} setDataSet={setDataSet} />
+        )}
+      />
+    </Switch>
+  );
+}
+
+export function FileViewPage({
+  id,
+  setDataSet,
+}: {
+  id: string;
+  setDataSet(dataSet: DataSet): void;
+}) {
+  const { files } = useFiles();
+  const selectedFiles = useMemo(
+    () => (id === 'all' ? files : files?.filter((f) => f.id === id)) ?? [],
+    [files, id]
+  );
+  const { path, url } = useRouteMatch();
+  if (!files) {
+    return <LoadingPage />;
+  }
+  if (selectedFiles.length === 0) {
+    return <div>No matching files</div>;
+  }
+  const firstFile = selectedFiles[0];
+  return (
+    <Switch>
+      <Route exact path={path}>
+        <StandardPage>
+          <PageTitle>
+            {id === 'all' ? 'All Files' : firstFile.file.name}
+          </PageTitle>
+          <div>
+            <Link to={`${url}/view/dataset`}>dataset</Link>{' '}
+            {id !== 'all' && (
+              <>
+                <Link to={`${url}/view/data`}>data</Link>{' '}
+              </>
+            )}
+            <Link to={`${url}/view/stylized-map`}>stylized map</Link>{' '}
+            <Link to={`${url}/view/simple-leaflet-map`}>simple map</Link>{' '}
+          </div>
+          {Object.keys(tools).map((tool) => (
+            <>
+              <Link to={`${url}/tool/${tool}`}>{tool}</Link>{' '}
+            </>
+          ))}
+          {id !== 'all' && (
+            <>
+              <p>Size: {firstFile.file.size.toLocaleString()}</p>
+              <p>
+                Last Modified:{' '}
+                {new Date(firstFile.file.lastModified).toLocaleString()}
+              </p>
+              <p>Inferred Type: {firstFile.inferredType}</p>
+            </>
+          )}
+        </StandardPage>
+      </Route>
+      <Route
+        path={`${path}/view/:reason`}
+        render={(p) => {
+          if (!files) {
+            return <LoadingPage />;
+          }
+          return (
+            <SelectedFilesView
+              selectedFiles={selectedFiles}
+              reason={p.match.params.reason}
+              setDataSet={setDataSet}
+            />
+          );
+        }}
+      />
+      <Route
+        path={`${path}/tool/:tool`}
+        render={(p) => {
+          return (
+            <FullScreenPage>
+              <ToolView
+                files={selectedFiles.map((f) => ({ file: f, type: 'generic' }))}
+                tool={p.match.params.tool as any}
+                NavComponent={<Link to={url}>File details</Link>}
+              />
+            </FullScreenPage>
+          );
+        }}
+      />
+    </Switch>
   );
 }
