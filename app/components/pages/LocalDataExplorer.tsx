@@ -24,7 +24,6 @@ import {
   FileHandleWithDetails,
   FileWithDetails,
   peekFile,
-  readFile,
   readFiles,
   readToDataset,
   SomeFile,
@@ -191,13 +190,8 @@ function ToolView({
   );
 }
 
-function DataView({ file }: { file: FileHandleWithDetails }) {
-  const loaded = useMemoAsync<SomeFile>(() => readFile(file), [file]);
-
-  if (!loaded) {
-    return <LoadingPage />;
-  }
-  const { json, mp4, track } = loaded;
+function DataView({ file }: { file: SomeFile }) {
+  const { json, mp4, track } = file;
   return (
     <StandardPage>
       {mp4 ? (
@@ -218,17 +212,16 @@ function DataView({ file }: { file: FileHandleWithDetails }) {
   );
 }
 
-function StylizedMap({ files }: { files: FileHandleWithDetails[] }) {
-  const features = useMemoAsync(async () => {
-    const loadedFiles = await readFiles(files);
-    return loadedFiles
+function StylizedMap({ files }: { files: SomeFile[] }) {
+  const features = useMemo(() => {
+    return files
       .map(({ geojson }) =>
         geojson.type === 'Feature' ? [geojson] : geojson.features
       )
       .flat();
   }, [files]);
 
-  return features ? (
+  return (
     <StandardPage>
       <MapBox>
         <MapComponent
@@ -242,23 +235,18 @@ function StylizedMap({ files }: { files: FileHandleWithDetails[] }) {
         </MapComponent>
       </MapBox>
     </StandardPage>
-  ) : (
-    <StylizedMap2 width={600} height={600} asLoadingAnimation={true} />
   );
 }
 
-function SimpleLeafletMap({ files }: { files: FileHandleWithDetails[] }) {
-  const loadedFiles = useMemoAsync(() => readFiles(files), [files]);
-  return loadedFiles ? (
+function SimpleLeafletMap({ files }: { files: SomeFile[] }) {
+  return (
     <LeafletFeatureMap
-      features={loadedFiles
+      features={files
         .map(({ geojson }) =>
           geojson.type === 'Feature' ? [geojson] : geojson.features
         )
         .flat()}
     />
-  ) : (
-    <StylizedMap2 width={600} height={600} asLoadingAnimation={true} />
   );
 }
 
@@ -266,26 +254,19 @@ function DataSetLoader({
   files,
   setDataSet,
 }: {
-  files: FileHandleWithDetails[];
+  files: SomeFile[];
   setDataSet(dataSet: DataSet): void;
 }) {
-  const dataset = useMemoAsync(
-    async () => readToDataset(await readFiles(files)),
-    [files]
-  );
+  const dataset = useMemo(() => readToDataset(files), [files]);
 
-  if (dataset) {
-    return (
-      <>
-        <div>
-          Trips: {dataset.trips.length}, Videos: {dataset.videos.size}
-        </div>
-        <button onClick={() => setDataSet(dataset)}>Set Dataset</button>
-      </>
-    );
-  } else {
-    return <StylizedMap2 width={600} height={600} asLoadingAnimation={true} />;
-  }
+  return (
+    <>
+      <div>
+        Trips: {dataset.trips.length}, Videos: {dataset.videos.size}
+      </div>
+      <button onClick={() => setDataSet(dataset)}>Set Dataset</button>
+    </>
+  );
 }
 
 type HandleFiles = (
@@ -340,7 +321,7 @@ function FileManager({
 }) {
   const history = useHistory();
 
-  const { path, url } = useRouteMatch();
+  const { url } = useRouteMatch();
 
   const [type, setType] = useState('generic');
 
@@ -494,6 +475,11 @@ function SelectedFilesView({
 }) {
   const history = useHistory();
 
+  const loadedFiles = useMemoAsync(
+    () => readFiles(selectedFiles),
+    [selectedFiles]
+  );
+
   return (
     <>
       <NavExtension>
@@ -501,16 +487,20 @@ function SelectedFilesView({
         {selectedFiles.length > 1 ? ` + ${selectedFiles.length - 1} ` : ' '}
         <button onClick={() => history.push('/local')}>Unload</button>
       </NavExtension>
-      {reason === 'simple-leaflet-map' ? (
-        <SimpleLeafletMap files={selectedFiles} />
-      ) : reason === 'stylized-map' ? (
-        <StylizedMap files={selectedFiles} />
-      ) : reason === 'dataset' ? (
-        <StandardPage>
-          <DataSetLoader files={selectedFiles} setDataSet={setDataSet} />
-        </StandardPage>
+      {loadedFiles ? (
+        reason === 'simple-leaflet-map' ? (
+          <SimpleLeafletMap files={loadedFiles} />
+        ) : reason === 'stylized-map' ? (
+          <StylizedMap files={loadedFiles} />
+        ) : reason === 'dataset' ? (
+          <StandardPage>
+            <DataSetLoader files={loadedFiles} setDataSet={setDataSet} />
+          </StandardPage>
+        ) : (
+          <DataView file={loadedFiles[0]} />
+        )
       ) : (
-        <DataView file={selectedFiles[0]} />
+        <StylizedMap2 width={600} height={600} asLoadingAnimation={true} />
       )}
     </>
   );
