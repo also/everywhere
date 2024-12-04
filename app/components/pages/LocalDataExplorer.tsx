@@ -75,34 +75,20 @@ function FeaturesView({ channel }: { channel: WorkerChannel }) {
 export function SimpleVectorTileView({ features }: { features: Feature[] }) {
   const files = useMemo(
     () =>
-      features
-        .map<FileContentsWithDetails>((feature, i) => ({
-          id: i.toString(),
-          type: 'contents',
-          file: new Blob([JSON.stringify(feature)], {
-            type: 'application/json',
-          }),
-        }))
-        .map(
-          (file) =>
-            ({
-              file,
-              type: 'generic',
-            } as const)
-        ),
+      features.map<FileContentsWithDetails>((feature, i) => ({
+        id: i.toString(),
+        type: 'contents',
+        file: new Blob([JSON.stringify(feature)], {
+          type: 'application/json',
+        }),
+      })),
     [features]
   );
   const { channel } = useFilesInTool(files, 'anything');
   return channel ? <VectorTileView channel={channel} /> : <div>loading</div>;
 }
 
-function useFilesInTool(
-  files: {
-    file: FileWithDetails;
-    type: 'osm' | 'generic';
-  }[],
-  tool: keyof typeof tools
-) {
+function useFilesInTool(files: FileWithDetails[], tool: keyof typeof tools) {
   const [fileStatus, setFileStatus] = useState({
     byIndex: files.map((file) => ({ file, status: 'pending' })),
     counts: new Map([['pending', files.length]]),
@@ -137,7 +123,10 @@ function useFilesInTool(
         setReady(true);
       });
 
-      await channel.sendRequest(toolFiles, { files, tool });
+      await channel.sendRequest(toolFiles, {
+        files: files.map((file) => ({ file, type: 'generic' })),
+        tool,
+      });
 
       return channel;
     },
@@ -152,31 +141,36 @@ function ToolView({
   tool,
   NavComponent,
 }: {
-  files: {
-    file: FileWithDetails;
-    type: 'osm' | 'generic';
-  }[];
+  files: FileWithDetails[];
   tool: keyof typeof tools;
   NavComponent: React.ReactNode;
 }) {
-  const [show, setShow] = useState<'features' | 'map'>('map');
+  const { path, url } = useRouteMatch();
 
   const { fileStatus, channel } = useFilesInTool(files, tool);
 
   return (
     <>
       <NavExtension>
-        <button onClick={() => setShow('features')}>features</button>{' '}
-        <button onClick={() => setShow('map')}>map</button> {NavComponent}
+        <Link to={`${url}/map`}>Map</Link>{' '}
+        <Link to={`${url}/features`}>Features</Link> {NavComponent}
       </NavExtension>
       {channel ? (
-        show === 'features' ? (
-          <FeaturesView channel={channel} />
-        ) : (
-          <FullScreenPage>
-            <VectorTileView channel={channel} />
-          </FullScreenPage>
-        )
+        <Switch>
+          <Route path={`${path}/features`}>
+            <FeaturesView channel={channel} />
+          </Route>
+          <Route path={`${path}/map`}>
+            <FullScreenPage>
+              <VectorTileView channel={channel} />
+            </FullScreenPage>
+          </Route>
+          <Route path={path}>
+            <FullScreenPage>
+              <VectorTileView channel={channel} />
+            </FullScreenPage>
+          </Route>
+        </Switch>
       ) : (
         <LoadingPage>
           {Array.from(fileStatus.counts.entries()).map(([status, count]) => (
@@ -604,7 +598,7 @@ export function FileViewPage({
           return (
             <FullScreenPage>
               <ToolView
-                files={selectedFiles.map((f) => ({ file: f, type: 'generic' }))}
+                files={selectedFiles}
                 tool={p.match.params.tool as any}
                 NavComponent={<Link to={url}>File details</Link>}
               />
