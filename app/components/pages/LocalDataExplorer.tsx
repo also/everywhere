@@ -317,8 +317,6 @@ function FileManager({
 
   const { url } = useRouteMatch();
 
-  const [type, setType] = useState('generic');
-
   const [tool, setTool] = useState<keyof typeof tools>('anything');
 
   const handleLoadClick = useCallback(
@@ -357,10 +355,6 @@ function FileManager({
     <StandardPage>
       <PageTitle>Local Data</PageTitle>
       <div>
-        <select value={type} onChange={(e) => setType(e.target.value)}>
-          <option>generic</option>
-          <option>osm</option>
-        </select>
         {files ? (
           <>
             <button onClick={handleLoadClick}>load</button>
