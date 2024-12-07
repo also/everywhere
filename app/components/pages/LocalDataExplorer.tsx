@@ -346,12 +346,15 @@ function useFiles() {
         return maxId;
       });
       const newFiles: FileHandleWithDetails[] = await Promise.all(
-        result.map(async (file, i) => ({
-          id: `${maxId + i + 1}`,
-          type: 'handle',
-          file,
-          inferredType: await peekFile(file),
-        }))
+        result.map(
+          async (file, i) =>
+            ({
+              id: `${maxId + i + 1}`,
+              type: 'handle',
+              file,
+              inferredType: await peekFile(file),
+            } as const)
+        )
       );
       // TODO use update()
       const allFiles = [...newFiles, ...existingFiles];
@@ -383,7 +386,7 @@ function FileManager({
   const [tool, setTool] = useState<keyof typeof tools>('anything');
 
   const handleLoadClick = useCallback(
-    async (e) => {
+    async (e: React.MouseEvent) => {
       e.preventDefault();
       const result = await fileOpen({
         multiple: true,
@@ -395,7 +398,7 @@ function FileManager({
     [handleFiles]
   );
   const handleAddClick = useCallback(
-    async (e) => {
+    async (e: React.MouseEvent) => {
       e.preventDefault();
       const result = await fileOpen({
         multiple: true,
@@ -407,7 +410,7 @@ function FileManager({
   );
 
   const handleResetClick = useCallback(
-    async (e) => {
+    async (e: React.MouseEvent) => {
       e.preventDefault();
       handleFiles([]);
     },
