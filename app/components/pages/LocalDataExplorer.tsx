@@ -373,11 +373,7 @@ function FileManager({
   files: FileHandleWithDetails[] | undefined;
   handleFiles: HandleFiles;
 }) {
-  const history = useHistory();
-
   const { url } = useRouteMatch();
-
-  const [tool, setTool] = useState<string>('anything');
 
   const handleLoadClick = useCallback(
     async (e: React.MouseEvent) => {
@@ -424,30 +420,9 @@ function FileManager({
         ) : undefined}
       </div>
       <div>
-        {' '}
         {files ? (
           <>
-            All files: <Link to={`${url}/file/all/view/dataset`}>dataset</Link>{' '}
-            <Link to={`${url}/file/all/view/stylized-map`}>stylized map</Link>{' '}
-            <Link to={`${url}/file/all/view/simple-leaflet-map`}>
-              simple map
-            </Link>{' '}
-            Tool:{' '}
-            <select
-              value={tool}
-              onChange={(e) => setTool(e.target.value as any)}
-            >
-              {Object.keys(tools).map((t) => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
-              ))}
-            </select>
-            <button
-              onClick={() => history.push(`${url}/file/all/tool/${tool}`)}
-            >
-              run
-            </button>
+            <Link to={`${url}/file/all`}>All Files</Link>
           </>
         ) : undefined}
       </div>
@@ -465,21 +440,12 @@ function FileManager({
           {(files || []).slice(0, 100).map((f, i) => (
             <tr key={i}>
               <td>{f.id}</td>
-              <td>{f.file.name}</td>
+              <td>
+                <Link to={`${url}/file/${f.id}`}>{f.file.name}</Link>
+              </td>
               <td>{f.file.size.toLocaleString()}</td>
               <td>{new Date(f.file.lastModified).toLocaleString()}</td>
               <td>{f.inferredType}</td>
-              <td>
-                <Link to={`${url}/file/${f.id}/view/data`}>data</Link>{' '}
-                <Link to={`${url}/file/${f.id}/view/simple-leaflet-map`}>
-                  {' '}
-                  simple map
-                </Link>{' '}
-                <Link to={`${url}/file/${f.id}/view/stylized-map`}>
-                  stylized map
-                </Link>{' '}
-                <Link to={`/local/file/${f.id}`}>tools</Link>
-              </td>
             </tr>
           ))}
         </tbody>
@@ -495,18 +461,6 @@ function FileManager({
       <p>
         <strong>add:</strong> add the selected files to the current list of
         files
-      </p>
-      <h2>For each file</h2>
-      <p>
-        <strong>data:</strong> Show data about a video file.
-      </p>
-      <p>
-        <strong>simple map:</strong> Show a video file as a map, or geojson file
-        using a pure leaflet map
-      </p>
-      <p>
-        <strong>stylized map:</strong> Same as "load as map", but using the
-        everywhere.bike style
       </p>
     </StandardPage>
   );
@@ -631,6 +585,19 @@ export function FileViewPage({
               <p>Inferred Type: {firstFile.inferredType}</p>
             </>
           )}
+          <div>
+            <p>
+              <strong>data:</strong> Show data about a video file.
+            </p>
+            <p>
+              <strong>simple map:</strong> Show a video file as a map, or
+              geojson file using a pure leaflet map
+            </p>
+            <p>
+              <strong>stylized map:</strong> Same as "load as map", but using
+              the everywhere.bike style
+            </p>
+          </div>
         </StandardPage>
       </Route>
       <Route
