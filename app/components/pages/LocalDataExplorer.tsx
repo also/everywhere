@@ -31,7 +31,6 @@ import {
 import { tools } from '../../tools';
 import {
   create,
-  featureSummary,
   toolFiles,
   toolFileStatus,
   toolReady,
@@ -53,9 +52,10 @@ function Path({ feature }: { feature: Feature }) {
 /** convert a component that takes a features prop to one that takes a channel prop */
 function withChannel(Component: React.ComponentType<{ features: Feature[] }>) {
   return function ({ channel }: { channel: WorkerChannel }) {
-    const features = useMemoAsync(async () => {
-      return await channel.sendRequest(getFeatures, undefined);
-    }, [channel]);
+    const features = useMemoAsync(
+      () => channel.sendRequest(getFeatures, undefined),
+      [channel]
+    );
 
     if (!features) {
       return <LoadingPage />;
@@ -65,28 +65,22 @@ function withChannel(Component: React.ComponentType<{ features: Feature[] }>) {
   };
 }
 
-function FeaturesView({ channel }: { channel: WorkerChannel }) {
-  const features = useMemoAsync(async () => {
-    return await channel.sendRequest(featureSummary, undefined);
-  }, [channel]);
-
-  if (!features) {
-    return <LoadingPage />;
-  } else {
-    return (
-      <StandardPage>
-        <div>{features.length} features</div>
-        <ul>
-          {features.map((f, i) => (
-            <li key={i}>
-              {f.geometry.type} <FeatureDetails feature={f} />
-            </li>
-          ))}
-        </ul>
-      </StandardPage>
-    );
-  }
+function FeaturesView({ features }: { features: Feature[] }) {
+  return (
+    <StandardPage>
+      <div>{features.length} features</div>
+      <ul>
+        {features.map((f, i) => (
+          <li key={i}>
+            {f.geometry.type} <FeatureDetails feature={f} />
+          </li>
+        ))}
+      </ul>
+    </StandardPage>
+  );
 }
+
+const ChannelFeaturesView = withChannel(FeaturesView);
 
 function SimpleFilesVectorTileView({ files }: { files: SomeFile[] }) {
   const features = useMemo(() => {
@@ -121,7 +115,7 @@ interface FileStatus {
   counts: Map<string, number>;
 }
 
-function useFilesInTool(files: FileWithDetails[], tool: keyof typeof tools) {
+function useFilesInTool(files: FileWithDetails[], tool: string) {
   const [fileStatus, setFileStatus] = useState({
     byIndex: files.map((file) => ({ file, status: 'pending' })),
     counts: new Map([['pending', files.length]]),
@@ -187,7 +181,7 @@ function ToolView({
   NavComponent,
 }: {
   files: FileWithDetails[];
-  tool: keyof typeof tools;
+  tool: string;
   NavComponent: React.ReactNode;
 }) {
   const { path, url } = useRouteMatch();
@@ -204,7 +198,7 @@ function ToolView({
       {channel ? (
         <Switch>
           <Route path={`${path}/features`}>
-            <FeaturesView channel={channel} />
+            <ChannelFeaturesView channel={channel} />
           </Route>
           <Route path={`${path}/map`}>
             <FullScreenPage>
@@ -383,7 +377,7 @@ function FileManager({
 
   const { url } = useRouteMatch();
 
-  const [tool, setTool] = useState<keyof typeof tools>('anything');
+  const [tool, setTool] = useState<string>('anything');
 
   const handleLoadClick = useCallback(
     async (e: React.MouseEvent) => {
@@ -658,13 +652,11 @@ export function FileViewPage({
         path={`${path}/tool/:tool`}
         render={(p) => {
           return (
-            <FullScreenPage>
-              <ToolView
-                files={selectedFiles}
-                tool={p.match.params.tool as any}
-                NavComponent={<Link to={url}>File details</Link>}
-              />
-            </FullScreenPage>
+            <ToolView
+              files={selectedFiles}
+              tool={p.match.params.tool as any}
+              NavComponent={<Link to={url}>File details</Link>}
+            />
           );
         }}
       />
