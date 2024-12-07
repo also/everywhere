@@ -93,14 +93,16 @@ function FeaturesView({ features }: { features: Feature[] }) {
 
 const ChannelFeaturesView = withChannel(FeaturesView);
 
+function filesToFeatures(files: SomeFile[]) {
+  return files
+    .map(({ geojson }) =>
+      geojson.type === 'Feature' ? [geojson] : geojson.features
+    )
+    .flat();
+}
+
 function SimpleFilesVectorTileView({ files }: { files: SomeFile[] }) {
-  const features = useMemo(() => {
-    return files
-      .map(({ geojson }) =>
-        geojson.type === 'Feature' ? [geojson] : geojson.features
-      )
-      .flat();
-  }, [files]);
+  const features = useMemo(() => filesToFeatures(files), [files]);
 
   return <SimpleVectorTileView features={features} />;
 }
@@ -292,13 +294,7 @@ function StylizedFeatureMap({ features }: { features: Feature[] }) {
 const StylizedChannelMap = withChannel(StylizedFeatureMap);
 
 function StylizedMap({ files }: { files: SomeFile[] }) {
-  const features = useMemo(() => {
-    return files
-      .map(({ geojson }) =>
-        geojson.type === 'Feature' ? [geojson] : geojson.features
-      )
-      .flat();
-  }, [files]);
+  const features = useMemo(() => filesToFeatures(files), [files]);
 
   return (
     <StandardPage>
@@ -310,15 +306,8 @@ function StylizedMap({ files }: { files: SomeFile[] }) {
 const LeafletMap = withChannel(LeafletFeatureMap);
 
 function SimpleLeafletMap({ files }: { files: SomeFile[] }) {
-  return (
-    <LeafletFeatureMap
-      features={files
-        .map(({ geojson }) =>
-          geojson.type === 'Feature' ? [geojson] : geojson.features
-        )
-        .flat()}
-    />
-  );
+  const features = useMemo(() => filesToFeatures(files), [files]);
+  return <LeafletFeatureMap features={features} />;
 }
 
 function DataSetLoader({ files }: { files: SomeFile[] }) {
