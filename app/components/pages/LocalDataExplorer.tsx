@@ -1,4 +1,11 @@
-import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import {
+  use,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 
 import { get, set, update } from 'idb-keyval';
 import { fileOpen, FileWithHandle } from 'browser-fs-access';
@@ -8,7 +15,6 @@ import PageTitle from '../PageTitle';
 import MapComponent from '../Map';
 import MapContext from '../MapContext';
 import MapBox from '../MapBox';
-import { DataSet } from '../../data';
 import { LeafletFeatureMap } from '../LeafletMap';
 import Table from '../Table';
 import TraverserView, { GpmfSamples } from '../data/TraverserView';
@@ -44,6 +50,7 @@ import { SeekableBlobBuffer } from '../../../tools/parse/buffers';
 import { bind, fileRoot } from '../../../tools/parse';
 import { parser as mp4Parser } from '../../../tools/parse/mp4';
 import { getMeta } from '../../../tools/parse/gpmf';
+import { DataSetProviderContext } from '../DataSetContext';
 
 function Path({ feature }: { feature: Feature }) {
   const { path } = useContext(MapContext);
@@ -314,14 +321,9 @@ function SimpleLeafletMap({ files }: { files: SomeFile[] }) {
   );
 }
 
-function DataSetLoader({
-  files,
-  setDataSet,
-}: {
-  files: SomeFile[];
-  setDataSet(dataSet: DataSet): void;
-}) {
+function DataSetLoader({ files }: { files: SomeFile[] }) {
   const dataset = useMemo(() => readToDataset(files), [files]);
+  const setDataSet = use(DataSetProviderContext);
 
   return (
     <>
@@ -484,11 +486,9 @@ function FileManager({
 function SelectedFilesView({
   reason,
   selectedFiles,
-  setDataSet,
 }: {
   reason: string;
   selectedFiles: FileHandleWithDetails[];
-  setDataSet(dataSet: DataSet): void;
 }) {
   const history = useHistory();
 
@@ -511,7 +511,7 @@ function SelectedFilesView({
           <StylizedMap files={loadedFiles} />
         ) : reason === 'dataset' ? (
           <StandardPage>
-            <DataSetLoader files={loadedFiles} setDataSet={setDataSet} />
+            <DataSetLoader files={loadedFiles} />
           </StandardPage>
         ) : (
           <SimpleFilesVectorTileView files={loadedFiles} />
@@ -523,11 +523,7 @@ function SelectedFilesView({
   );
 }
 
-export default function LocalDataExplorer({
-  setDataSet,
-}: {
-  setDataSet(dataSet: DataSet): void;
-}) {
+export default function LocalDataExplorer() {
   const { path } = useRouteMatch();
   const { files, handleFiles } = useFiles();
 
@@ -538,21 +534,13 @@ export default function LocalDataExplorer({
       </Route>
       <Route
         path={`${path}/file/:id`}
-        render={(p) => (
-          <FileViewPage id={p.match.params.id} setDataSet={setDataSet} />
-        )}
+        render={(p) => <FileViewPage id={p.match.params.id} />}
       />
     </Switch>
   );
 }
 
-export function FileViewPage({
-  id,
-  setDataSet,
-}: {
-  id: string;
-  setDataSet(dataSet: DataSet): void;
-}) {
+export function FileViewPage({ id }: { id: string }) {
   const { files } = useFiles();
   const selectedFiles = useMemo(
     () => (id === 'all' ? files : files?.filter((f) => f.id === id)) ?? [],
@@ -640,7 +628,6 @@ export function FileViewPage({
             <SelectedFilesView
               selectedFiles={selectedFiles}
               reason={p.match.params.reason}
-              setDataSet={setDataSet}
             />
           );
         }}

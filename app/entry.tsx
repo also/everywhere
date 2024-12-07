@@ -40,7 +40,9 @@ import {
 import DataContext from './components/DataContext';
 import { ReactNode, useContext, useEffect, useState } from 'react';
 import LocalDataExplorer from './components/pages/LocalDataExplorer';
-import DataSetContext from './components/DataSetContext';
+import DataSetContext, {
+  DataSetProviderContext,
+} from './components/DataSetContext';
 import { loadDataset } from './default-data-set';
 import { LeafletFeatureMap } from './components/LeafletMap';
 import DataPage from './components/pages/DataPage';
@@ -240,7 +242,7 @@ function DataSetSelector({
   children,
 }: {
   initialDataSet: DataSet;
-  children: (renderProp: (dataset: DataSet) => void) => React.ReactElement;
+  children: ReactNode;
 }) {
   const [dataset, setDataSet] = useState(initialDataSet);
   useEffect(() => {
@@ -248,7 +250,9 @@ function DataSetSelector({
   }, []);
   return (
     <DataSetContext.Provider value={dataset}>
-      {children(setDataSet)}
+      <DataSetProviderContext.Provider value={setDataSet}>
+        {children}
+      </DataSetProviderContext.Provider>
     </DataSetContext.Provider>
   );
 }
@@ -274,40 +278,31 @@ root.render(
     <NavExtensionContext.Provider>
       <DataContext.Provider value={{ boundary, contours, ways }}>
         <DataSetSelector initialDataSet={buildDataSet([], [])}>
-          {(setDataSet) => {
-            return (
-              <Router>
-                <App>
-                  <Switch>
-                    <Route
-                      path="/local"
-                      render={() => (
-                        <LocalDataExplorer setDataSet={setDataSet} />
-                      )}
-                    />
-                    <Route path="/data" component={DataPage} />
-                    <Route path="/map" component={MapRoute} />
-                    <Route path="/ways/*" component={WayDetailsRoute} />
-                    <Route path="/ways" component={WayListRoute} />
-                    <Route
-                      path="/videos/:name/:seek"
-                      component={VideoDetailsRoute}
-                    />
-                    <Route path="/videos/:name" component={VideoDetailsRoute} />
-                    <Route path="/videos" component={VideosRoute} />
-                    <Route path="/trips/:id" component={TripDetailsRoute} />
-                    <Route path="/trips" component={TripsRoute} />
-                    <Route
-                      path="/locations/:coords"
-                      component={LocationDetailsRoute}
-                    />
-                    <Route path="/docs" component={DocsPage} />
-                    <Route path="/" component={CityMapRoute} />
-                  </Switch>
-                </App>
-              </Router>
-            );
-          }}
+          <Router>
+            <App>
+              <Switch>
+                <Route path="/local" render={() => <LocalDataExplorer />} />
+                <Route path="/data" component={DataPage} />
+                <Route path="/map" component={MapRoute} />
+                <Route path="/ways/*" component={WayDetailsRoute} />
+                <Route path="/ways" component={WayListRoute} />
+                <Route
+                  path="/videos/:name/:seek"
+                  component={VideoDetailsRoute}
+                />
+                <Route path="/videos/:name" component={VideoDetailsRoute} />
+                <Route path="/videos" component={VideosRoute} />
+                <Route path="/trips/:id" component={TripDetailsRoute} />
+                <Route path="/trips" component={TripsRoute} />
+                <Route
+                  path="/locations/:coords"
+                  component={LocationDetailsRoute}
+                />
+                <Route path="/docs" component={DocsPage} />
+                <Route path="/" component={CityMapRoute} />
+              </Switch>
+            </App>
+          </Router>
         </DataSetSelector>
       </DataContext.Provider>
     </NavExtensionContext.Provider>
