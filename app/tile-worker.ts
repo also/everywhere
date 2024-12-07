@@ -2,6 +2,7 @@ import { WorkerChannel, workerHandshake } from './WorkerChannel';
 
 import geojsonVt, { GeoJSONVT } from 'geojson-vt';
 import {
+  features,
   featureSummary,
   getTile,
   lookup,
@@ -135,6 +136,8 @@ channel.handle(toolFiles, async ({ files, tool: toolName }) => {
       geometry: { type: f.geometry.type },
     }))
   );
+
+  channel.handle(features, () => collection.features);
 
   createTileHandlers({
     tileIndex: geojsonVt(collection, { maxZoom: 24 }),

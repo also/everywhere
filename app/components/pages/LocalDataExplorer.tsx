@@ -35,6 +35,7 @@ import {
   toolFiles,
   toolFileStatus,
   toolReady,
+  features as getFeatures,
 } from '../../worker-stuff';
 import { WorkerChannel } from '../../WorkerChannel';
 import FeatureDetails from '../FeatureDetails';
@@ -47,6 +48,21 @@ function Path({ feature }: { feature: Feature }) {
   // TODO handle points. this works, but draws a 4.5 radius circle with the same style as a trip
   // https://d3js.org/d3-geo/path#path_pointRadius
   return <path className="trip" d={path(feature)} />;
+}
+
+/** convert a component that takes a features prop to one that takes a channel prop */
+function withChannel(Component: React.ComponentType<{ features: Feature[] }>) {
+  return function ({ channel }: { channel: WorkerChannel }) {
+    const features = useMemoAsync(async () => {
+      return await channel.sendRequest(getFeatures, undefined);
+    }, [channel]);
+
+    if (!features) {
+      return <LoadingPage />;
+    } else {
+      return <Component features={features} />;
+    }
+  };
 }
 
 function FeaturesView({ channel }: { channel: WorkerChannel }) {
@@ -72,6 +88,18 @@ function FeaturesView({ channel }: { channel: WorkerChannel }) {
   }
 }
 
+function SimpleFilesVectorTileView({ files }: { files: SomeFile[] }) {
+  const features = useMemo(() => {
+    return files
+      .map(({ geojson }) =>
+        geojson.type === 'Feature' ? [geojson] : geojson.features
+      )
+      .flat();
+  }, [files]);
+
+  return <SimpleVectorTileView features={features} />;
+}
+
 export function SimpleVectorTileView({ features }: { features: Feature[] }) {
   const files = useMemo(
     () =>
@@ -86,6 +114,11 @@ export function SimpleVectorTileView({ features }: { features: Feature[] }) {
   );
   const { channel } = useFilesInTool(files, 'anything');
   return channel ? <VectorTileView channel={channel} /> : <div>loading</div>;
+}
+
+interface FileStatus {
+  byIndex: { file: FileWithDetails; status: string }[];
+  counts: Map<string, number>;
 }
 
 function useFilesInTool(files: FileWithDetails[], tool: keyof typeof tools) {
@@ -136,6 +169,18 @@ function useFilesInTool(files: FileWithDetails[], tool: keyof typeof tools) {
   return { fileStatus, channel: ready ? channel : undefined };
 }
 
+function ToolStatus({ fileStatus }: { fileStatus: FileStatus }) {
+  return (
+    <div>
+      {Array.from(fileStatus.counts.entries()).map(([status, count]) => (
+        <span key={status}>
+          <strong>{status}:</strong> <span>{count}</span>{' '}
+        </span>
+      ))}
+    </div>
+  );
+}
+
 function ToolView({
   files,
   tool,
@@ -153,7 +198,8 @@ function ToolView({
     <>
       <NavExtension>
         <Link to={`${url}/map`}>Map</Link>{' '}
-        <Link to={`${url}/features`}>Features</Link> {NavComponent}
+        <Link to={`${url}/features`}>Features</Link>{' '}
+        <Link to={`${url}/status`}>Status</Link> {NavComponent}
       </NavExtension>
       {channel ? (
         <Switch>
@@ -165,6 +211,17 @@ function ToolView({
               <VectorTileView channel={channel} />
             </FullScreenPage>
           </Route>
+          <Route path={`${path}/simple-leaflet-map`}>
+            <LeafletMap channel={channel} />
+          </Route>
+          <Route path={`${path}/stylized`}>
+            <StylizedChannelMap channel={channel} />
+          </Route>
+          <Route path={`${path}/status`}>
+            <StandardPage>
+              <ToolStatus fileStatus={fileStatus} />
+            </StandardPage>
+          </Route>
           <Route path={path}>
             <FullScreenPage>
               <VectorTileView channel={channel} />
@@ -173,11 +230,7 @@ function ToolView({
         </Switch>
       ) : (
         <LoadingPage>
-          {Array.from(fileStatus.counts.entries()).map(([status, count]) => (
-            <span key={status}>
-              <strong>{status}:</strong> <span>{count}</span>{' '}
-            </span>
-          ))}
+          <ToolStatus fileStatus={fileStatus} />
         </LoadingPage>
       )}
     </>
@@ -206,6 +259,24 @@ function DataView({ file }: { file: SomeFile }) {
   );
 }
 
+function StylizedFeatureMap({ features }: { features: Feature[] }) {
+  return (
+    <MapBox>
+      <MapComponent
+        width={1000}
+        height={1000}
+        zoomFeature={features.length === 1 ? features[0] : undefined}
+      >
+        {features.map((f, i) => (
+          <Path feature={f} key={i} />
+        ))}
+      </MapComponent>
+    </MapBox>
+  );
+}
+
+const StylizedChannelMap = withChannel(StylizedFeatureMap);
+
 function StylizedMap({ files }: { files: SomeFile[] }) {
   const features = useMemo(() => {
     return files
@@ -217,20 +288,12 @@ function StylizedMap({ files }: { files: SomeFile[] }) {
 
   return (
     <StandardPage>
-      <MapBox>
-        <MapComponent
-          width={1000}
-          height={1000}
-          zoomFeature={features.length === 1 ? features[0] : undefined}
-        >
-          {features.map((f, i) => (
-            <Path feature={f} key={i} />
-          ))}
-        </MapComponent>
-      </MapBox>
+      <StylizedFeatureMap features={features} />
     </StandardPage>
   );
 }
+
+const LeafletMap = withChannel(LeafletFeatureMap);
 
 function SimpleLeafletMap({ files }: { files: SomeFile[] }) {
   return (
@@ -484,6 +547,8 @@ function SelectedFilesView({
           <StandardPage>
             <DataSetLoader files={loadedFiles} setDataSet={setDataSet} />
           </StandardPage>
+        ) : reason === 'map' ? (
+          <SimpleFilesVectorTileView files={loadedFiles} />
         ) : (
           <DataView file={loadedFiles[0]} />
         )

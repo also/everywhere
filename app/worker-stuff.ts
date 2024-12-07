@@ -21,6 +21,7 @@ export const toolFiles =
   >('toolFiles');
 export const featureSummary =
   key<undefined, LimitedFeature[]>('featureSummary');
+export const features = key<undefined, Feature[]>('features');
 export const toolFileStatus =
   key<{ index: number; status: string }, void>('toolFileStatus');
 export const toolReady = key<{ resultType: 'tiles' }, void>('toolReady');
