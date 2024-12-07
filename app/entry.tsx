@@ -1,5 +1,5 @@
 import d3 from 'd3';
-import * as ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import styled, { createGlobalStyle } from 'styled-components';
 
 import {
@@ -266,7 +266,9 @@ const div = document.createElement('div');
 document.body.appendChild(div);
 const datasetPromise = loadDataset();
 
-ReactDOM.render(
+const root = createRoot(div);
+
+root.render(
   <>
     <GlobalStyle />
     <NavExtensionContext.Provider>
@@ -309,6 +311,5 @@ ReactDOM.render(
         </DataSetSelector>
       </DataContext.Provider>
     </NavExtensionContext.Provider>
-  </>,
-  div
+  </>
 );
