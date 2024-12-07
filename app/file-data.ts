@@ -2,9 +2,9 @@ import { Feature, FeatureCollection, LineString } from 'geojson';
 import { FileWithHandle } from 'browser-fs-access';
 import { SeekableBlobBuffer } from '../tools/parse/buffers';
 import { extractGps, VideoProperties } from '../tools/parse/gopro-gps';
-import { bind, fileRoot, Traverser } from '../tools/parse';
-import { Box, parser as mp4Parser } from '../tools/parse/mp4';
-import { getMeta, Metadata } from '../tools/parse/gpmf';
+import { bind, fileRoot } from '../tools/parse';
+import { parser as mp4Parser } from '../tools/parse/mp4';
+import { getMeta } from '../tools/parse/gpmf';
 import { FeatureOrCollection, features, singleFeature } from './geo';
 import { DataSet } from './data';
 import { buildDataSet, RawStravaTripFeature } from './trips';
@@ -31,9 +31,6 @@ export interface FileContentsWithDetails extends BaseFileDetails {
 
 export type SomeFile = {
   geojson: Feature | FeatureCollection;
-  json?: any;
-  mp4?: Traverser<Box>;
-  track?: Metadata;
   raw: FileWithHandle;
 };
 
@@ -54,14 +51,11 @@ export async function readFile({
   file,
 }: FileHandleWithDetails): Promise<SomeFile> {
   let geojson: Feature | FeatureCollection | undefined;
-  let mp4;
-  let track;
-  let json;
   if (file.name.toLowerCase().endsWith('.mp4')) {
     geojson = await mp4ToGeoJson(file);
   } else {
     const text = await file.text();
-    json = JSON.parse(text);
+    const json = JSON.parse(text);
     if (isProbablyStravaCompleteActivity(json)) {
       geojson = completeActivityToGeoJson(json);
     } else if (json.type === 'Topology') {
@@ -84,7 +78,7 @@ export async function readFile({
       feat.properties.filename = file.name;
     }
   );
-  return { json, geojson, mp4, track, raw: file };
+  return { geojson, raw: file };
 }
 
 export function readFiles(files: FileHandleWithDetails[]): Promise<SomeFile[]> {
@@ -135,7 +129,7 @@ export async function peekFile(file: FileWithHandle) {
     return 'gpx';
   }
   // todo look for ftyp?
-  if (extension === '.mp4') {
+  if (extension === 'mp4') {
     return 'mp4';
   }
   const head = file.slice(0, 100);

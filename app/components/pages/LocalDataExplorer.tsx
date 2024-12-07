@@ -40,6 +40,10 @@ import { WorkerRemote } from '../../WorkerChannel';
 import FeatureDetails from '../FeatureDetails';
 import { Route, Switch, useRouteMatch } from 'react-router';
 import { Link, useHistory } from 'react-router-dom';
+import { SeekableBlobBuffer } from '../../../tools/parse/buffers';
+import { bind, fileRoot } from '../../../tools/parse';
+import { parser as mp4Parser } from '../../../tools/parse/mp4';
+import { getMeta } from '../../../tools/parse/gpmf';
 
 function Path({ feature }: { feature: Feature }) {
   const { path } = useContext(MapContext);
@@ -231,26 +235,35 @@ function ToolView({
   );
 }
 
-function DataView({ file }: { file: SomeFile }) {
-  const { json, mp4, track } = file;
+function Mp4View({ file }: { file: FileHandleWithDetails }) {
+  const mp4 = useMemo(() => {
+    const data = new SeekableBlobBuffer(file.file, 1024000);
+    return bind(mp4Parser, data, fileRoot(data));
+  }, [file]);
+
+  const track = useMemoAsync(() => getMeta(mp4), [mp4]);
+
   return (
-    <StandardPage>
-      {mp4 ? (
+    <>
+      <h2>MP4</h2>
+      <TraverserView traverser={mp4} />
+      {track?.samples ? (
         <>
-          <h2>MP4</h2>
-          <TraverserView traverser={mp4} />
-          {track?.samples ? (
-            <>
-              <h2>GMPF Samples</h2>
-              <GpmfSamples sampleMetadata={track.samples} mp4={mp4} />
-            </>
-          ) : null}
+          <h2>GPMF</h2>
+          <GpmfSamples sampleMetadata={track.samples} mp4={mp4} />
         </>
-      ) : (
-        <ObjectInspector data={json} />
-      )}
-    </StandardPage>
+      ) : null}
+    </>
   );
+}
+
+function JsonView({ file }: { file: FileHandleWithDetails }) {
+  const json = useMemoAsync(
+    async () => JSON.parse(await file.file.text()),
+    [file]
+  );
+
+  return <ObjectInspector data={json} />;
 }
 
 function StylizedFeatureMap({ features }: { features: Feature[] }) {
@@ -350,12 +363,14 @@ function useFiles() {
             } as const)
         )
       );
-      // TODO use update()
       const allFiles = [...newFiles, ...existingFiles];
-      setFiles(allFiles);
       // for safari, it seems to be important that you don't remove the files from indexDB before you read them.
       // removing them drops the reference or something
+
+      // sometimes this takes several seconds, like with a video file
+      // TODO use update()
       await set('files', allFiles);
+      setFiles(allFiles);
     };
   }, []);
 
@@ -498,10 +513,8 @@ function SelectedFilesView({
           <StandardPage>
             <DataSetLoader files={loadedFiles} setDataSet={setDataSet} />
           </StandardPage>
-        ) : reason === 'map' ? (
-          <SimpleFilesVectorTileView files={loadedFiles} />
         ) : (
-          <DataView file={loadedFiles[0]} />
+          <SimpleFilesVectorTileView files={loadedFiles} />
         )
       ) : (
         <StylizedMap2 width={600} height={600} asLoadingAnimation={true} />
@@ -552,19 +565,20 @@ export function FileViewPage({
   if (selectedFiles.length === 0) {
     return <div>No matching files</div>;
   }
-  const firstFile = selectedFiles[0];
+  const singleFile = id !== 'all' ? selectedFiles[0] : undefined;
   return (
     <Switch>
       <Route exact path={path}>
         <StandardPage>
           <PageTitle>
-            {id === 'all' ? 'All Files' : firstFile.file.name}
+            {singleFile ? singleFile.file.name : 'All Files'}
           </PageTitle>
           <div>
             <Link to={`${url}/view/dataset`}>dataset</Link>{' '}
-            {id !== 'all' && (
+            {singleFile != null && (
               <>
-                <Link to={`${url}/view/data`}>data</Link>{' '}
+                <Link to={`${url}/view/json`}>json</Link>{' '}
+                <Link to={`${url}/view/mp4`}>mp4</Link>{' '}
               </>
             )}
             <Link to={`${url}/view/stylized-map`}>stylized map</Link>{' '}
@@ -575,14 +589,14 @@ export function FileViewPage({
               <Link to={`${url}/tool/${tool}`}>{tool}</Link>{' '}
             </>
           ))}
-          {id !== 'all' && (
+          {singleFile != null && (
             <>
-              <p>Size: {firstFile.file.size.toLocaleString()}</p>
+              <p>Size: {singleFile.file.size.toLocaleString()}</p>
               <p>
                 Last Modified:{' '}
-                {new Date(firstFile.file.lastModified).toLocaleString()}
+                {new Date(singleFile.file.lastModified).toLocaleString()}
               </p>
-              <p>Inferred Type: {firstFile.inferredType}</p>
+              <p>Inferred Type: {singleFile.inferredType}</p>
             </>
           )}
           <div>
@@ -600,6 +614,22 @@ export function FileViewPage({
           </div>
         </StandardPage>
       </Route>
+      <Route
+        path={`${path}/view/mp4`}
+        render={() => (
+          <StandardPage>
+            <Mp4View file={singleFile} />
+          </StandardPage>
+        )}
+      />
+      <Route
+        path={`${path}/view/json`}
+        render={() => (
+          <StandardPage>
+            <JsonView file={singleFile} />
+          </StandardPage>
+        )}
+      />
       <Route
         path={`${path}/view/:reason`}
         render={(p) => {
