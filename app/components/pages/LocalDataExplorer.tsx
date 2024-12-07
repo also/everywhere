@@ -36,7 +36,7 @@ import {
   toolReady,
   features as getFeatures,
 } from '../../worker-stuff';
-import { WorkerChannel } from '../../WorkerChannel';
+import { WorkerRemote } from '../../WorkerChannel';
 import FeatureDetails from '../FeatureDetails';
 import { Route, Switch, useRouteMatch } from 'react-router';
 import { Link, useHistory } from 'react-router-dom';
@@ -51,7 +51,7 @@ function Path({ feature }: { feature: Feature }) {
 
 /** convert a component that takes a features prop to one that takes a channel prop */
 function withChannel(Component: React.ComponentType<{ features: Feature[] }>) {
-  return function ({ channel }: { channel: WorkerChannel }) {
+  return function ({ channel }: { channel: WorkerRemote }) {
     const features = useMemoAsync(
       () => channel.sendRequest(getFeatures, undefined),
       [channel]

@@ -6,9 +6,54 @@ export function key<I, O = undefined>(key: string): MessageChannelKey<I, O> {
 
 export const workerHandshake = key<'ping', 'pong'>('handshake');
 
-export class WorkerChannel {
-  private id = 0;
+export interface WorkerRemote {
+  sendRequest<I, O>(
+    { key }: MessageChannelKey<I, O>,
+    input: I,
+    transferrable?: Transferable[]
+  ): Promise<O>;
+}
+
+export interface WorkerLocal {
+  handle<I, O>(
+    { key }: MessageChannelKey<I, O>,
+    handler: (input: I) => O | Promise<O>
+  ): void;
+}
+
+class HandlerRegistry implements WorkerLocal {
   private handlers: Map<string, (input: any) => any> = new Map();
+
+  handle<I, O>(
+    { key }: MessageChannelKey<I, O>,
+    handler: (input: I) => O | Promise<O>
+  ): void {
+    this.handlers.set(key, handler);
+  }
+
+  protected async invokeHandler(key: string, input: any) {
+    const handler = this.handlers.get(key);
+    if (!handler) {
+      throw new Error(`missing handler ${key}`);
+    }
+    return await handler(input);
+  }
+}
+
+export class LocalWorkerChannel
+  extends HandlerRegistry
+  implements WorkerRemote
+{
+  async sendRequest<I, O>(
+    { key }: MessageChannelKey<I, O>,
+    input: I
+  ): Promise<O> {
+    return this.invokeHandler(key, input);
+  }
+}
+
+export class WorkerChannel extends HandlerRegistry implements WorkerRemote {
+  private id = 0;
   private requests: Map<
     number,
     { resolve: (value: any) => any; reject: (value: any) => any }
@@ -18,6 +63,7 @@ export class WorkerChannel {
     private postMessage: Worker['postMessage'],
     onmessageable: Pick<Worker, 'onmessage'>
   ) {
+    super();
     onmessageable.onmessage = (message) => this.onmessage(message);
   }
 
@@ -34,20 +80,14 @@ export class WorkerChannel {
       } = data;
       if (type === 'request') {
         const { key, input } = value;
-        const handler = this.handlers.get(key);
         let result;
         let status: 'success' | 'failure' = 'success';
-        if (handler) {
-          try {
-            result = await handler(input);
-          } catch (e) {
-            status = 'failure';
-            // FIXME only chrome can send errors
-            result = e;
-          }
-        } else {
+        try {
+          result = await this.invokeHandler(key, input);
+        } catch (e) {
           status = 'failure';
-          result = new Error('missing handler ' + key);
+          // FIXME only chrome can send errors
+          result = e;
         }
         this.postMessage({
           from: 'MessageChannel',
@@ -87,12 +127,5 @@ export class WorkerChannel {
       );
       this.requests.set(id, { resolve, reject });
     });
-  }
-
-  handle<I, O>(
-    { key }: MessageChannelKey<I, O>,
-    handler: (input: I) => O | Promise<O>
-  ): void {
-    this.handlers.set(key, handler);
   }
 }
