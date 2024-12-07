@@ -240,7 +240,7 @@ function DataSetSelector({
   children,
 }: {
   initialDataSet: DataSet;
-  children: (renderProp: (dataset: DataSet) => void) => JSX.Element;
+  children: (renderProp: (dataset: DataSet) => void) => React.ReactElement;
 }) {
   const [dataset, setDataSet] = useState(initialDataSet);
   useEffect(() => {
