@@ -3,6 +3,7 @@ import LeafletMapExample from './docs/LeafletMapExample';
 import StylizedMapExample from './docs/StylizedMapExample';
 import VideoExample from './docs/VideoExample';
 import SimpleVectorTileViewExample from './docs/SimpleVectorTileViewExample';
+import Table from './components/Table';
 import { interpolateViridis } from 'd3-scale-chromatic';
 
 ## Heatmap Scale
@@ -51,4 +52,44 @@ import { interpolateViridis } from 'd3-scale-chromatic';
 <SimpleVectorTileViewExample
   data={(dataSet) => [...dataSet.tripsById.values()]}
 />
-```
+
+# File Types
+
+The browser will populate `type` on `File`, somehow.
+
+<Table>
+  <thead>
+    <tr>
+      <th>Extension</th>
+      <th>Chrome</th>
+      <th>Safari</th>
+      <th>Firefox</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>mp4</td>
+      <td>video/mp4</td>
+      <td>video/mp4</td>
+      <td>video/mp4</td>
+    </tr>
+    <tr>
+      <td>json</td>
+      <td>application/json</td>
+      <td>application/json</td>
+      <td>application/json</td>
+    </tr>
+    <tr>
+      <td>geojson</td>
+      <td></td>
+      <td>application/geo+json</td>
+      <td>application/geo+json</td>
+    </tr>
+    <tr>
+      <td>gpx</td>
+      <td></td>
+      <td></td>
+      <td>application/gpx+xml</td>
+    </tr>
+  </tbody>
+</Table>
