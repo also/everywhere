@@ -1,16 +1,10 @@
-import { Feature, FeatureCollection, LineString } from 'geojson';
+import { Feature } from 'geojson';
 import { FileWithHandle } from 'browser-fs-access';
-import { SeekableBlobBuffer } from '../tools/parse/buffers';
-import { extractGps, VideoProperties } from '../tools/parse/gopro-gps';
-import { bind, fileRoot } from '../tools/parse';
-import { parser as mp4Parser } from '../tools/parse/mp4';
-import { getMeta } from '../tools/parse/gpmf';
-import { FeatureOrCollection, features, singleFeature } from './geo';
+import { FeatureOrCollection } from './geo';
 import { DataSet } from './data';
 import { buildDataSet, RawStravaTripFeature } from './trips';
 import { RawVideoFeature, toChapter, VideoChapter } from './videos';
 import { CompleteActivity } from '../tools/strava-api';
-import { completeActivityToGeoJson } from '../tools/strava';
 
 export type FileWithDetails = FileHandleWithDetails | FileContentsWithDetails;
 
@@ -40,36 +34,6 @@ export function isProbablyStravaCompleteActivity(
   return json.activity && json.streams;
 }
 
-export async function mp4ToGeoJson(
-  blob: Blob
-): Promise<Feature<LineString, VideoProperties>> {
-  const data = new SeekableBlobBuffer(blob, 1024000);
-  const mp4 = bind(mp4Parser, data, fileRoot(data));
-  const track = await getMeta(mp4);
-  return await extractGps(track, mp4);
-}
-
-export async function readFile({
-  file,
-  inferredType,
-}: FileWithDetails): Promise<Feature | FeatureCollection | undefined> {
-  let geojson: Feature | FeatureCollection | undefined;
-  if (inferredType === '.mp4') {
-    geojson = await mp4ToGeoJson(file);
-  } else {
-    const text = await file.text();
-    const json = JSON.parse(text);
-    if (isProbablyStravaCompleteActivity(json)) {
-      geojson = completeActivityToGeoJson(json);
-    } else if (json.type === 'Topology') {
-      geojson = features(json);
-    } else {
-      geojson = json as Feature;
-    }
-  }
-  return geojson;
-}
-
 function isProbablyStravaTrip(
   f: FeatureOrCollection<any, any>
 ): f is RawStravaTripFeature {
@@ -82,21 +46,14 @@ function isProbablyVideoTrack(
   return f.type === 'Feature' && !!f.properties?.creationTime;
 }
 
-export async function readToDataset(
-  newFiles: FileHandleWithDetails[]
-): Promise<DataSet> {
+export async function readToDataset(features: Feature[]): Promise<DataSet> {
   const trips: RawStravaTripFeature[] = [];
 
   const videoChapters: VideoChapter[] = [];
-  for (const file of newFiles) {
-    const geojson = await readFile(file);
-    if (!geojson) {
-      continue;
-    }
+  for (const f of features) {
+    // FIXME add type for these properties
+    const name = f.properties?.everywhereFilename ?? 'unknown';
 
-    const name = file.file.name;
-
-    const f = singleFeature(geojson) || geojson;
     if (isProbablyStravaTrip(f)) {
       trips.push(f);
     } else if (isProbablyVideoTrack(f)) {

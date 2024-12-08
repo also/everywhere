@@ -90,6 +90,11 @@ function DirectFeaturesRoute({ features }: { features: Feature[] }) {
           <StylizedFeatureMap features={features} />
         </StandardPage>
       </Route>
+      <Route path={`${path}/dataset`}>
+        <StandardPage>
+          <DataSetLoader features={features} />
+        </StandardPage>
+      </Route>
     </Switch>
   );
 }
@@ -124,7 +129,7 @@ export function SimpleVectorTileView({ features }: { features: Feature[] }) {
       })),
     [features]
   );
-  const { channel } = useFilesInTool(files, 'anything');
+  const { channel } = useFilesInTool(files, 'geojson');
   return channel ? <VectorTileView channel={channel} /> : <div>loading</div>;
 }
 
@@ -292,8 +297,8 @@ function StylizedFeatureMap({ features }: { features: Feature[] }) {
   );
 }
 
-function DataSetLoader({ files }: { files: FileHandleWithDetails[] }) {
-  const dataset = useMemoAsync(async () => readToDataset(files), [files]);
+function DataSetLoader({ features }: { features: Feature[] }) {
+  const dataset = useMemoAsync(async () => readToDataset(features), [features]);
   const setDataSet = use(DataSetProviderContext);
 
   return dataset ? (
@@ -496,7 +501,7 @@ export function FileViewPage({ id }: { id: string }) {
             {singleFile ? singleFile.file.name : 'All Files'}
           </PageTitle>
           <div>
-            <Link to={`${url}/dataset`}>dataset</Link>{' '}
+            <Link to={`${url}/tool/anything/features/dataset`}>dataset</Link>{' '}
             {singleFile != null && (
               <>
                 <Link to={`${url}/view/json`}>json</Link>{' '}
