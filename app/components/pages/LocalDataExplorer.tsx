@@ -24,7 +24,6 @@ import StandardPage from '../StandardPage';
 import VectorTileView from '../VectorTileView';
 import { NavExtension } from '../Nav';
 import LoadingPage from './LoadingPage';
-import StylizedMap2 from '../Map';
 import {
   FileContentsWithDetails,
   FileHandleWithDetails,
@@ -45,7 +44,7 @@ import {
 import { WorkerRemote } from '../../WorkerChannel';
 import FeatureDetails from '../FeatureDetails';
 import { Route, Switch, useRouteMatch } from 'react-router';
-import { Link, useHistory } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { SeekableBlobBuffer } from '../../../tools/parse/buffers';
 import { bind, fileRoot } from '../../../tools/parse';
 import { parser as mp4Parser } from '../../../tools/parse/mp4';
@@ -76,7 +75,31 @@ function withChannel(Component: React.ComponentType<{ features: Feature[] }>) {
   };
 }
 
-function FeaturesView({ features }: { features: Feature[] }) {
+function DirectFeaturesRoute({ features }: { features: Feature[] }) {
+  const { path } = useRouteMatch();
+  return (
+    <Switch>
+      <Route path={`${path}/list`}>
+        <FeatureList features={features} />
+      </Route>
+      <Route path={`${path}/map`}>
+        <FullScreenPage>
+          <LeafletFeatureMap features={features} />
+        </FullScreenPage>
+      </Route>
+      <Route path={`${path}/stylized`}>
+        <StandardPage>
+          <StylizedFeatureMap features={features} />
+        </StandardPage>
+      </Route>
+      <Route path={`${path}/vector`}>
+        <SimpleVectorTileView features={features} />
+      </Route>
+    </Switch>
+  );
+}
+
+function FeatureList({ features }: { features: Feature[] }) {
   return (
     <StandardPage>
       <div>{features.length} features</div>
@@ -91,7 +114,7 @@ function FeaturesView({ features }: { features: Feature[] }) {
   );
 }
 
-const ChannelFeaturesView = withChannel(FeaturesView);
+const ChannelFeaturesView = withChannel(DirectFeaturesRoute);
 
 function filesToFeatures(files: SomeFile[]) {
   return files
@@ -101,10 +124,17 @@ function filesToFeatures(files: SomeFile[]) {
     .flat();
 }
 
-function SimpleFilesVectorTileView({ files }: { files: SomeFile[] }) {
-  const features = useMemo(() => filesToFeatures(files), [files]);
+function SomeFileFeaturesView({ files }: { files: FileHandleWithDetails[] }) {
+  const features = useMemoAsync(
+    async () => filesToFeatures(await readFiles(files)),
+    [files]
+  );
 
-  return <SimpleVectorTileView features={features} />;
+  return features ? (
+    <DirectFeaturesRoute features={features} />
+  ) : (
+    <LoadingPage />
+  );
 }
 
 export function SimpleVectorTileView({ features }: { features: Feature[] }) {
@@ -205,7 +235,9 @@ function ToolView({
     <>
       <NavExtension>
         <Link to={`${url}/map`}>Map</Link>{' '}
-        <Link to={`${url}/features`}>Features</Link>{' '}
+        <Link to={`${url}/features/list`}>Features</Link>{' '}
+        <Link to={`${url}/features/map`}>Leaflet Map</Link>{' '}
+        <Link to={`${url}/features/stylized`}>Stylized Map</Link>{' '}
         <Link to={`${url}/status`}>Status</Link> {NavComponent}
       </NavExtension>
       {channel ? (
@@ -217,12 +249,6 @@ function ToolView({
             <FullScreenPage>
               <VectorTileView channel={channel} />
             </FullScreenPage>
-          </Route>
-          <Route path={`${path}/simple-leaflet-map`}>
-            <LeafletMap channel={channel} />
-          </Route>
-          <Route path={`${path}/stylized`}>
-            <StylizedChannelMap channel={channel} />
           </Route>
           <Route path={`${path}/status`}>
             <StandardPage>
@@ -291,36 +317,22 @@ function StylizedFeatureMap({ features }: { features: Feature[] }) {
   );
 }
 
-const StylizedChannelMap = withChannel(StylizedFeatureMap);
-
-function StylizedMap({ files }: { files: SomeFile[] }) {
-  const features = useMemo(() => filesToFeatures(files), [files]);
-
-  return (
-    <StandardPage>
-      <StylizedFeatureMap features={features} />
-    </StandardPage>
+function DataSetLoader({ files }: { files: FileHandleWithDetails[] }) {
+  const dataset = useMemoAsync(
+    async () => readToDataset(await readFiles(files)),
+    [files]
   );
-}
-
-const LeafletMap = withChannel(LeafletFeatureMap);
-
-function SimpleLeafletMap({ files }: { files: SomeFile[] }) {
-  const features = useMemo(() => filesToFeatures(files), [files]);
-  return <LeafletFeatureMap features={features} />;
-}
-
-function DataSetLoader({ files }: { files: SomeFile[] }) {
-  const dataset = useMemo(() => readToDataset(files), [files]);
   const setDataSet = use(DataSetProviderContext);
 
-  return (
+  return dataset ? (
     <>
       <div>
         Trips: {dataset.trips.length}, Videos: {dataset.videos.size}
       </div>
       <button onClick={() => setDataSet(dataset)}>Set Dataset</button>
     </>
+  ) : (
+    <LoadingPage />
   );
 }
 
@@ -472,46 +484,6 @@ function FileManager({
   );
 }
 
-function SelectedFilesView({
-  reason,
-  selectedFiles,
-}: {
-  reason: string;
-  selectedFiles: FileHandleWithDetails[];
-}) {
-  const history = useHistory();
-
-  const loadedFiles = useMemoAsync(
-    () => readFiles(selectedFiles),
-    [selectedFiles]
-  );
-
-  return (
-    <>
-      <NavExtension>
-        {selectedFiles[0].file.name}
-        {selectedFiles.length > 1 ? ` + ${selectedFiles.length - 1} ` : ' '}
-        <button onClick={() => history.push('/local')}>Unload</button>
-      </NavExtension>
-      {loadedFiles ? (
-        reason === 'simple-leaflet-map' ? (
-          <SimpleLeafletMap files={loadedFiles} />
-        ) : reason === 'stylized-map' ? (
-          <StylizedMap files={loadedFiles} />
-        ) : reason === 'dataset' ? (
-          <StandardPage>
-            <DataSetLoader files={loadedFiles} />
-          </StandardPage>
-        ) : (
-          <SimpleFilesVectorTileView files={loadedFiles} />
-        )
-      ) : (
-        <StylizedMap2 width={600} height={600} asLoadingAnimation={true} />
-      )}
-    </>
-  );
-}
-
 export default function LocalDataExplorer() {
   const { path } = useRouteMatch();
   const { files, handleFiles } = useFiles();
@@ -551,15 +523,17 @@ export function FileViewPage({ id }: { id: string }) {
             {singleFile ? singleFile.file.name : 'All Files'}
           </PageTitle>
           <div>
-            <Link to={`${url}/view/dataset`}>dataset</Link>{' '}
+            <Link to={`${url}/dataset`}>dataset</Link>{' '}
             {singleFile != null && (
               <>
                 <Link to={`${url}/view/json`}>json</Link>{' '}
                 <Link to={`${url}/view/mp4`}>mp4</Link>{' '}
               </>
             )}
-            <Link to={`${url}/view/stylized-map`}>stylized map</Link>{' '}
-            <Link to={`${url}/view/simple-leaflet-map`}>simple map</Link>{' '}
+            <Link to={`${url}/features/list`}>Features</Link>{' '}
+            <Link to={`${url}/features/map`}>Leaflet Map</Link>{' '}
+            <Link to={`${url}/features/stylized`}>Stylized Map</Link>{' '}
+            <Link to={`${url}/features/vector`}>Vector Map</Link>{' '}
           </div>
           {Object.keys(tools).map((tool) => (
             <>
@@ -591,6 +565,9 @@ export function FileViewPage({ id }: { id: string }) {
           </div>
         </StandardPage>
       </Route>
+      <Route path={`${path}/features`}>
+        <SomeFileFeaturesView files={selectedFiles} />
+      </Route>
       <Route
         path={`${path}/view/mp4`}
         render={() => (
@@ -607,20 +584,11 @@ export function FileViewPage({ id }: { id: string }) {
           </StandardPage>
         )}
       />
-      <Route
-        path={`${path}/view/:reason`}
-        render={(p) => {
-          if (!files) {
-            return <LoadingPage />;
-          }
-          return (
-            <SelectedFilesView
-              selectedFiles={selectedFiles}
-              reason={p.match.params.reason}
-            />
-          );
-        }}
-      />
+      <Route path={`${path}/dataset`}>
+        <StandardPage>
+          <DataSetLoader files={selectedFiles} />
+        </StandardPage>
+      </Route>
       <Route
         path={`${path}/tool/:tool`}
         render={(p) => {
