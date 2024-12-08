@@ -339,7 +339,6 @@ function useFiles() {
               id: `${maxId + i + 1}`,
               type: 'handle',
               file,
-              inferredType: await peekFile(file),
             } as const)
         )
       );
@@ -428,7 +427,6 @@ function FileManager({
             <th>Name</th>
             <th>Size</th>
             <th>Last Modified</th>
-            <th>Inferred Type</th>
           </tr>
         </thead>
         <tbody>
@@ -440,8 +438,6 @@ function FileManager({
               </td>
               <td>{f.file.size.toLocaleString()}</td>
               <td>{new Date(f.file.lastModified).toLocaleString()}</td>
-              <td>{f.inferredType}</td>
-              <td>{f.file.type}</td>
             </tr>
           ))}
         </tbody>
@@ -527,7 +523,6 @@ export function FileViewPage({ id }: { id: string }) {
                 Last Modified:{' '}
                 {new Date(singleFile.file.lastModified).toLocaleString()}
               </p>
-              <p>Inferred Type: {singleFile.inferredType}</p>
             </>
           )}
           <div>

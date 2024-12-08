@@ -10,7 +10,6 @@ export type FileWithDetails = FileHandleWithDetails | FileContentsWithDetails;
 
 export interface BaseFileDetails {
   id: string;
-  inferredType?: string;
 }
 
 export interface FileHandleWithDetails extends BaseFileDetails {
