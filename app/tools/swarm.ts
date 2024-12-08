@@ -1,13 +1,16 @@
 import { processCheckin, VenueFeature } from '../../tools/swarm';
 
-import { Tool } from '.';
+import { getJsonFromFile, StatefulTool } from '.';
 
-const swarmTool: Tool<Map<string, VenueFeature>> = {
+const swarmTool: StatefulTool<Map<string, VenueFeature>> = {
   createState() {
     return new Map();
   },
+  couldProcessFileByExtension(extension) {
+    return extension === 'json' ? 'maybe' : 'no';
+  },
   async processFile(file, state) {
-    const checkin = JSON.parse(await file.file.file.text());
+    const checkin = await getJsonFromFile(file);
     return processCheckin(checkin, state);
   },
 };

@@ -75,7 +75,11 @@ export default function VectorTileView({
         createPortal(
           <>
             {selected.lat}, {selected.lng}; distance: {selected.distance}
-            <FeatureDetails feature={selected?.feature} />
+            <FeatureDetails feature={selected.feature} />
+            <div>
+              Filename: {selected.feature?.properties?.everywhereFilename}
+            </div>
+            <div>Tool: {selected.feature?.properties?.everywhereTool}</div>
           </>,
           popupDiv
         )}

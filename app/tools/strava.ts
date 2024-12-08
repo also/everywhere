@@ -1,10 +1,18 @@
 import { completeActivityToGeoJson } from '../../tools/strava';
 
-import { ToolFunction } from '.';
+import { getJsonFromFile, Tool } from '.';
+import { isProbablyStravaCompleteActivity } from '../file-data';
 
-const stravaTool: ToolFunction = async (file) => {
-  const contents = await file.file.file.text();
-  return completeActivityToGeoJson(JSON.parse(contents));
+const stravaTool: Tool = {
+  couldProcessFileByExtension(extension) {
+    return extension === 'json' ? 'maybe' : 'no';
+  },
+  couldProcessFileByJson(json) {
+    return isProbablyStravaCompleteActivity(json) ? 'yes' : 'no';
+  },
+  async processFile(file) {
+    return completeActivityToGeoJson(await getJsonFromFile(file));
+  },
 };
 
 export default stravaTool;

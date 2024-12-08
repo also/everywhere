@@ -120,6 +120,7 @@ export function SimpleVectorTileView({ features }: { features: Feature[] }) {
         file: new Blob([JSON.stringify(feature)], {
           type: 'application/json',
         }),
+        name: `${i}.geojson`,
       })),
     [features]
   );
@@ -168,7 +169,7 @@ function useFilesInTool(files: FileWithDetails[], tool: string) {
       });
 
       await channel.sendRequest(toolFiles, {
-        files: files.map((file) => ({ file, type: 'generic' })),
+        files,
         tool,
       });
 
@@ -435,6 +436,7 @@ function FileManager({
               <td>{f.file.size.toLocaleString()}</td>
               <td>{new Date(f.file.lastModified).toLocaleString()}</td>
               <td>{f.inferredType}</td>
+              <td>{f.file.type}</td>
             </tr>
           ))}
         </tbody>

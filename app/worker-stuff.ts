@@ -14,7 +14,7 @@ import { LimitedFeature } from './components/FeatureDetails';
 export const toolFiles =
   key<
     {
-      files: { file: FileWithDetails; type: 'osm' | 'generic' }[];
+      files: FileWithDetails[];
       tool: keyof typeof tools;
     },
     void

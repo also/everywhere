@@ -27,6 +27,11 @@ export interface FileHandleWithDetails extends BaseFileDetails {
 export interface FileContentsWithDetails extends BaseFileDetails {
   type: 'contents';
   file: Blob;
+  name: string;
+}
+
+export function getFilename(file: FileWithDetails) {
+  return file.type === 'handle' ? file.file.name : file.name;
 }
 
 export function isProbablyStravaCompleteActivity(

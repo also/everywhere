@@ -11,10 +11,11 @@ import {
 import { filteredNearestLine, LineRTree, tree } from '../geo';
 import { drawDebugInfo, drawDistanceTile, drawTile2 } from '../tile-drawing';
 import { shouldShowHighwayAtZoom } from '../osm';
-import { Tool, tools } from '../tools';
+import { tools, ToolWithName } from '../tools';
 import { Feature, FeatureCollection } from 'geojson';
 import { WorkerLocal, WorkerRemote } from '../WorkerChannel';
 import { createFeatureHandlers } from './features';
+import { FileWithDetails, getFilename } from '../file-data';
 
 export interface TileData {
   tileIndex: GeoJSONVT;
@@ -53,7 +54,7 @@ function createTileHandlers(channel: WorkerLocal, data: TileData) {
   });
 
   channel.handle(lookup, ({ coords, zoom }) => {
-    const result = filteredNearestLine(featureTree!, coords, (i) => {
+    const result = filteredNearestLine(featureTree, coords, (i) => {
       if (i.data.properties?.highway) {
         return shouldShowHighwayAtZoom(i.data.properties.highway, zoom);
       } else {
@@ -74,35 +75,46 @@ export function addToolHandlers(channel: WorkerLocal & WorkerRemote) {
       features: [],
     };
 
-    const t = tools[toolName];
-    const tool: Tool<any> =
-      typeof t === 'function'
-        ? {
-            processFile: t,
-            createState() {
-              return undefined;
-            },
-          }
-        : t;
+    const tool = tools[toolName];
 
     const toolState = tool.createState();
+
+    let i = 0;
+    function assignProperties(
+      tool: ToolWithName,
+      file: FileWithDetails,
+      f: Feature
+    ) {
+      f.properties = {
+        everywhereTool: tool.name,
+        ...f.properties,
+        everywhereFilename: getFilename(file),
+        everywhereFileId: file.id,
+        everywhereFeatureIndex: i++,
+      };
+    }
 
     for (const file of files) {
       try {
         channel.sendRequest(toolFileStatus, { index, status: 'processing' });
-        const geoJson = await tool.processFile(file, toolState);
+        const geoJson = await tool.processFile({ file }, toolState);
         if (geoJson) {
           if (geoJson.type === 'Feature') {
+            assignProperties(tool, file, geoJson);
             collection.features.push(geoJson);
           } else if (geoJson.type === 'FeatureCollection') {
+            for (const f of geoJson.features) {
+              assignProperties(tool, file, f);
+            }
             collection.features.push(...geoJson.features);
           } else {
-            // make a feature from the geometry
-            collection.features.push({
+            const feature: Feature = {
               type: 'Feature',
               geometry: geoJson,
               properties: {},
-            });
+            };
+            assignProperties(tool, file, feature);
+            collection.features.push(feature);
           }
         }
 
@@ -112,12 +124,6 @@ export function addToolHandlers(channel: WorkerLocal & WorkerRemote) {
       } finally {
         index++;
       }
-    }
-
-    let i = 0;
-    for (const feature of collection.features) {
-      feature.properties!.everywhereFeatureIndex = i;
-      i++;
     }
 
     createTileHandlers(channel, {

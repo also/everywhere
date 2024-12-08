@@ -1,56 +1,83 @@
-import { FeatureCollection } from 'geojson';
-import { isProbablyStravaCompleteActivity, mp4ToGeoJson } from '../file-data';
-import { features } from '../geo';
-import { highwayLevels } from '../osm';
-import { ToolFunction } from '.';
-import { completeActivityToGeoJson } from '../../tools/strava';
+import { getFilename } from '../file-data';
+import {
+  FileWithDetailsAndMaybeJson,
+  getJsonFromFile,
+  StatefulTool,
+  tools,
+  ToolWithName,
+} from '.';
 
-const anythingTool: ToolFunction = async ({
-  file: { file, inferredType },
-  type: fileType,
-}) => {
-  if (inferredType === 'mp4') {
-    return mp4ToGeoJson(file);
-  }
-  const value = JSON.parse(await file.text());
-
-  const collection: FeatureCollection = {
-    type: 'FeatureCollection',
-    features: [],
-  };
-
-  if (isProbablyStravaCompleteActivity(value)) {
-    const feature = completeActivityToGeoJson(value);
-    if (feature) {
-      collection.features.push();
-      return collection;
-    }
-  }
-
-  for (const f of value.type === 'Feature'
-    ? [value]
-    : value.type === 'Topology'
-    ? features(value).features
-    : (value as FeatureCollection).features) {
-    if (
-      f.geometry.type === 'LineString' ||
-      f.geometry.type === 'MultiLineString'
-    ) {
-      if (
-        fileType !== 'osm' ||
-        Object.prototype.hasOwnProperty.call(
-          highwayLevels,
-          f.properties?.highway
-        )
-      ) {
-        collection.features.push(f);
+async function findTool(
+  file: FileWithDetailsAndMaybeJson
+): Promise<ToolWithName[]> {
+  const filename = getFilename(file.file);
+  const extension = filename.split('.').pop()!.toLowerCase();
+  const yes: ToolWithName[] = [];
+  const maybe: ToolWithName[] = [];
+  for (const tool of Object.values(tools)) {
+    if (tool.couldProcessFileByExtension) {
+      const result = tool.couldProcessFileByExtension(extension);
+      if (result === 'yes') {
+        yes.push(tool);
+      } else if (result === 'maybe') {
+        maybe.push(tool);
       }
-    } else if (f.geometry.type === 'Point') {
-      collection.features.push(f);
     }
   }
 
-  return collection;
+  for (const tool of maybe) {
+    if (tool.couldProcessFileByJson) {
+      const json = (file.json = await getJsonFromFile(file));
+      const result = tool.couldProcessFileByJson(json);
+      if (result === 'yes') {
+        yes.push(tool);
+      }
+    }
+  }
+
+  return yes;
+}
+
+const anythingTool: StatefulTool<Map<ToolWithName, any>> = {
+  createState() {
+    return new Map();
+  },
+  async processFile(file, state) {
+    const possibleTools = await findTool(file);
+    if (possibleTools.length === 0) {
+      console.warn('No tool could process file', file);
+      return;
+    }
+    if (possibleTools.length > 1) {
+      console.warn('Multiple tools could process file', file);
+      return;
+    }
+    const tool = possibleTools[0];
+    let toolState = state.get(tool);
+    if (!toolState) {
+      toolState = tool.createState();
+      state.set(tool, toolState);
+    }
+    let result = await tool.processFile(file, toolState);
+    if (result) {
+      if (result.type === 'FeatureCollection') {
+        for (const f of result.features) {
+          f.properties = { ...f.properties, everywhereTool: tool.name };
+        }
+      } else if (result.type === 'Feature') {
+        result.properties = { ...result.properties, everywhereTool: tool.name };
+      } else {
+        result = {
+          type: 'Feature',
+          geometry: result,
+          properties: {
+            everywhereTool: tool.name,
+          },
+        };
+      }
+      return result;
+    }
+  },
 };
 
 export default anythingTool;
