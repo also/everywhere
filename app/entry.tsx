@@ -123,6 +123,7 @@ function App({
         <HeaderLink to="/map">Map</HeaderLink>{' '}
         <HeaderLink to="/data">Data</HeaderLink>
         <HeaderLink to="/local">Files</HeaderLink>
+        <HeaderLink to="/docs">Docs</HeaderLink>
       </>
     );
   }
@@ -281,7 +282,7 @@ root.render(
           <Router>
             <App>
               <Switch>
-                <Route path="/local" render={() => <LocalDataExplorer />} />
+                <Route path="/local" component={LocalDataExplorer} />
                 <Route path="/data" component={DataPage} />
                 <Route path="/map" component={MapRoute} />
                 <Route path="/ways/*" component={WayDetailsRoute} />
