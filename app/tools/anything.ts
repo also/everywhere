@@ -1,8 +1,9 @@
 import { FeatureCollection } from 'geojson';
-import { mp4ToGeoJson } from '../file-data';
+import { isProbablyStravaCompleteActivity, mp4ToGeoJson } from '../file-data';
 import { features } from '../geo';
 import { highwayLevels } from '../osm';
 import { ToolFunction } from '.';
+import { completeActivityToGeoJson } from '../../tools/strava';
 
 const anythingTool: ToolFunction = async ({
   file: { file, inferredType },
@@ -17,6 +18,14 @@ const anythingTool: ToolFunction = async ({
     type: 'FeatureCollection',
     features: [],
   };
+
+  if (isProbablyStravaCompleteActivity(value)) {
+    const feature = completeActivityToGeoJson(value);
+    if (feature) {
+      collection.features.push();
+      return collection;
+    }
+  }
 
   for (const f of value.type === 'Feature'
     ? [value]

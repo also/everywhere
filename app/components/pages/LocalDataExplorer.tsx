@@ -29,9 +29,7 @@ import {
   FileHandleWithDetails,
   FileWithDetails,
   peekFile,
-  readFiles,
   readToDataset,
-  SomeFile,
 } from '../../file-data';
 import { tools } from '../../tools';
 import {
@@ -92,9 +90,6 @@ function DirectFeaturesRoute({ features }: { features: Feature[] }) {
           <StylizedFeatureMap features={features} />
         </StandardPage>
       </Route>
-      <Route path={`${path}/vector`}>
-        <SimpleVectorTileView features={features} />
-      </Route>
     </Switch>
   );
 }
@@ -115,27 +110,6 @@ function FeatureList({ features }: { features: Feature[] }) {
 }
 
 const ChannelFeaturesView = withChannel(DirectFeaturesRoute);
-
-function filesToFeatures(files: SomeFile[]) {
-  return files
-    .map(({ geojson }) =>
-      geojson.type === 'Feature' ? [geojson] : geojson.features
-    )
-    .flat();
-}
-
-function SomeFileFeaturesView({ files }: { files: FileHandleWithDetails[] }) {
-  const features = useMemoAsync(
-    async () => filesToFeatures(await readFiles(files)),
-    [files]
-  );
-
-  return features ? (
-    <DirectFeaturesRoute features={features} />
-  ) : (
-    <LoadingPage />
-  );
-}
 
 export function SimpleVectorTileView({ features }: { features: Feature[] }) {
   const files = useMemo(
@@ -318,10 +292,7 @@ function StylizedFeatureMap({ features }: { features: Feature[] }) {
 }
 
 function DataSetLoader({ files }: { files: FileHandleWithDetails[] }) {
-  const dataset = useMemoAsync(
-    async () => readToDataset(await readFiles(files)),
-    [files]
-  );
+  const dataset = useMemoAsync(async () => readToDataset(files), [files]);
   const setDataSet = use(DataSetProviderContext);
 
   return dataset ? (
@@ -530,10 +501,12 @@ export function FileViewPage({ id }: { id: string }) {
                 <Link to={`${url}/view/mp4`}>mp4</Link>{' '}
               </>
             )}
-            <Link to={`${url}/features/list`}>Features</Link>{' '}
-            <Link to={`${url}/features/map`}>Leaflet Map</Link>{' '}
-            <Link to={`${url}/features/stylized`}>Stylized Map</Link>{' '}
-            <Link to={`${url}/features/vector`}>Vector Map</Link>{' '}
+            <Link to={`${url}/tool/anything/features/list`}>Features</Link>{' '}
+            <Link to={`${url}/tool/anything/features/map`}>Leaflet Map</Link>{' '}
+            <Link to={`${url}/tool/anything/features/stylized`}>
+              Stylized Map
+            </Link>{' '}
+            <Link to={`${url}/tool/anything/map`}>Vector Map</Link>{' '}
           </div>
           {Object.keys(tools).map((tool) => (
             <>
@@ -564,9 +537,6 @@ export function FileViewPage({ id }: { id: string }) {
             </p>
           </div>
         </StandardPage>
-      </Route>
-      <Route path={`${path}/features`}>
-        <SomeFileFeaturesView files={selectedFiles} />
       </Route>
       <Route
         path={`${path}/view/mp4`}

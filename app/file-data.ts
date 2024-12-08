@@ -29,12 +29,9 @@ export interface FileContentsWithDetails extends BaseFileDetails {
   file: Blob;
 }
 
-export type SomeFile = {
-  geojson: Feature | FeatureCollection;
-  raw: FileWithHandle;
-};
-
-function isProbablyStravaCompleteActivity(json: any): json is CompleteActivity {
+export function isProbablyStravaCompleteActivity(
+  json: any
+): json is CompleteActivity {
   return json.activity && json.streams;
 }
 
@@ -49,9 +46,10 @@ export async function mp4ToGeoJson(
 
 export async function readFile({
   file,
-}: FileHandleWithDetails): Promise<SomeFile> {
+  inferredType,
+}: FileWithDetails): Promise<Feature | FeatureCollection | undefined> {
   let geojson: Feature | FeatureCollection | undefined;
-  if (file.name.toLowerCase().endsWith('.mp4')) {
+  if (inferredType === '.mp4') {
     geojson = await mp4ToGeoJson(file);
   } else {
     const text = await file.text();
@@ -64,25 +62,7 @@ export async function readFile({
       geojson = json as Feature;
     }
   }
-  if (!geojson) {
-    geojson = {
-      type: 'FeatureCollection',
-      features: [],
-    };
-  }
-  (geojson.type === 'FeatureCollection' ? geojson.features : [geojson]).forEach(
-    (feat) => {
-      if (!feat.properties) {
-        feat.properties = {};
-      }
-      feat.properties.filename = file.name;
-    }
-  );
-  return { geojson, raw: file };
-}
-
-export function readFiles(files: FileHandleWithDetails[]): Promise<SomeFile[]> {
-  return Promise.all(files.map((file) => readFile(file)));
+  return geojson;
 }
 
 function isProbablyStravaTrip(
@@ -97,11 +77,20 @@ function isProbablyVideoTrack(
   return f.type === 'Feature' && !!f.properties?.creationTime;
 }
 
-export function readToDataset(newFiles: SomeFile[]): DataSet {
+export async function readToDataset(
+  newFiles: FileHandleWithDetails[]
+): Promise<DataSet> {
   const trips: RawStravaTripFeature[] = [];
 
   const videoChapters: VideoChapter[] = [];
-  newFiles.forEach(({ geojson, raw: { name } }) => {
+  for (const file of newFiles) {
+    const geojson = await readFile(file);
+    if (!geojson) {
+      continue;
+    }
+
+    const name = file.file.name;
+
     const f = singleFeature(geojson) || geojson;
     if (isProbablyStravaTrip(f)) {
       trips.push(f);
@@ -118,7 +107,7 @@ export function readToDataset(newFiles: SomeFile[]): DataSet {
         })
       );
     }
-  });
+  }
 
   return buildDataSet(trips, videoChapters);
 }
