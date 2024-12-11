@@ -94,24 +94,3 @@ export function datasetToFiles(dataset: DataSet): FileContentsWithDetails[] {
   }
   return files;
 }
-
-export async function peekFile(file: FileWithHandle) {
-  const extension = file.name.split('.').pop()!.toLowerCase();
-  if (extension === 'gpx') {
-    return 'gpx';
-  }
-  // todo look for ftyp?
-  if (extension === 'mp4') {
-    return 'mp4';
-  }
-  const head = file.slice(0, 100);
-  const value = await head.arrayBuffer();
-  const array = new Uint8Array(value);
-  // if json
-  if (array[0] === 123) {
-    const s = new TextDecoder('ascii').decode(array);
-    const type = s.match(/{\s*"type"\s*:\s*"([^"]+)"/)?.[1];
-    return type ?? 'json';
-  }
-  return 'unknown';
-}
