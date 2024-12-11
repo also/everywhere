@@ -103,13 +103,30 @@ function FeatureList({ features }: { features: Feature[] }) {
   return (
     <StandardPage>
       <div>{features.length} features</div>
-      <ul>
-        {features.map((f, i) => (
-          <li key={i}>
-            {f.geometry.type} <FeatureDetails feature={f} />
-          </li>
-        ))}
-      </ul>
+      <Table>
+        <thead>
+          <tr>
+            <th>File ID</th>
+            <th>Filename</th>
+            <th>Tool</th>
+            <th>Type</th>
+            <th>Details</th>
+          </tr>
+        </thead>
+        <tbody>
+          {features.map((f, i) => (
+            <tr key={i}>
+              <td>{f.properties?.everywhereFileId ?? 'unknown'}</td>
+              <td>{f.properties?.everywhereFilename ?? 'unknown'}</td>
+              <td>{f.properties?.everywhereTool ?? 'unknown'}</td>
+              <td>{f.geometry.type}</td>
+              <td>
+                <FeatureDetails feature={f} />
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </Table>
     </StandardPage>
   );
 }
