@@ -1,6 +1,6 @@
 import { GeoJSON } from 'geojson';
 
-import { FileWithDetails } from '../file-data';
+import { FileWithDetails, getFilename } from '../file-data';
 
 import swarmTool from './swarm';
 
@@ -64,3 +64,43 @@ export const tools: Record<string, ToolWithName> = Object.fromEntries(
     },
   ])
 );
+
+export function getPossibleTools(file: FileWithDetails): {
+  yes: ToolWithName[];
+  maybe: ToolWithName[];
+} {
+  const filename = getFilename(file);
+  const extension = filename.split('.').pop()!.toLowerCase();
+  const yes: ToolWithName[] = [];
+  const maybe: ToolWithName[] = [];
+  for (const tool of Object.values(tools)) {
+    if (tool.couldProcessFileByExtension) {
+      const result = tool.couldProcessFileByExtension(extension);
+      if (result === 'yes') {
+        yes.push(tool);
+      } else if (result === 'maybe') {
+        maybe.push(tool);
+      }
+    }
+  }
+
+  return { yes, maybe };
+}
+
+export async function findTool(
+  file: FileWithDetailsAndMaybeJson
+): Promise<ToolWithName[]> {
+  const { yes, maybe } = getPossibleTools(file.file);
+
+  for (const tool of maybe) {
+    if (tool.couldProcessFileByJson) {
+      const json = (file.json = await getJsonFromFile(file));
+      const result = tool.couldProcessFileByJson(json);
+      if (result === 'yes') {
+        yes.push(tool);
+      }
+    }
+  }
+
+  return yes;
+}

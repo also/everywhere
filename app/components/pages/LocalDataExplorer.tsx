@@ -25,13 +25,14 @@ import VectorTileView from '../VectorTileView';
 import { NavExtension } from '../Nav';
 import LoadingPage from './LoadingPage';
 import {
+  datasetToFiles,
   FileContentsWithDetails,
   FileHandleWithDetails,
   FileWithDetails,
-  peekFile,
+  getFilename,
   readToDataset,
 } from '../../file-data';
-import { tools } from '../../tools';
+import { getPossibleTools, tools } from '../../tools';
 import {
   create,
   toolFiles,
@@ -47,7 +48,7 @@ import { SeekableBlobBuffer } from '../../../tools/parse/buffers';
 import { bind, fileRoot } from '../../../tools/parse';
 import { parser as mp4Parser } from '../../../tools/parse/mp4';
 import { getMeta } from '../../../tools/parse/gpmf';
-import { DataSetProviderContext } from '../DataSetContext';
+import DataSetContext, { DataSetProviderContext } from '../DataSetContext';
 
 function Path({ feature }: { feature: Feature }) {
   const { path } = useContext(MapContext);
@@ -377,6 +378,51 @@ function useFiles() {
   return { files, handleFiles };
 }
 
+function FilesTable({ files }: { files: FileWithDetails[] }) {
+  const { url } = useRouteMatch();
+
+  return (
+    <>
+      <div>
+        {files ? (
+          <>
+            <Link to={`${url}/file/all`}>All Files</Link>
+          </>
+        ) : undefined}
+      </div>
+      <Table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Size</th>
+            <th>Last Modified</th>
+          </tr>
+        </thead>
+        <tbody>
+          {(files || []).slice(0, 100).map((f, i) => (
+            <tr key={i}>
+              <td>{f.id}</td>
+              <td>
+                <Link to={`${url}/file/${f.id}`}>{getFilename(f)}</Link>
+              </td>
+              <td>{f.file.size.toLocaleString()}</td>
+              <td>
+                {f.type === 'handle'
+                  ? new Date(f.file.lastModified).toLocaleString()
+                  : ''}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </Table>
+      {files && files.length > 100 && (
+        <div>{files.length - 100} files not shown</div>
+      )}
+    </>
+  );
+}
+
 function FileManager({
   files,
   handleFiles,
@@ -384,8 +430,6 @@ function FileManager({
   files: FileHandleWithDetails[] | undefined;
   handleFiles: HandleFiles;
 }) {
-  const { url } = useRouteMatch();
-
   const handleLoadClick = useCallback(
     async (e: React.MouseEvent) => {
       e.preventDefault();
@@ -430,38 +474,7 @@ function FileManager({
           </>
         ) : undefined}
       </div>
-      <div>
-        {files ? (
-          <>
-            <Link to={`${url}/file/all`}>All Files</Link>
-          </>
-        ) : undefined}
-      </div>
-      <Table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Size</th>
-            <th>Last Modified</th>
-          </tr>
-        </thead>
-        <tbody>
-          {(files || []).slice(0, 100).map((f, i) => (
-            <tr key={i}>
-              <td>{f.id}</td>
-              <td>
-                <Link to={`${url}/file/${f.id}`}>{f.file.name}</Link>
-              </td>
-              <td>{f.file.size.toLocaleString()}</td>
-              <td>{new Date(f.file.lastModified).toLocaleString()}</td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
-      {files && files.length > 100 && (
-        <div>{files.length - 100} files not shown</div>
-      )}
+      <FilesTable files={files ?? []} />
 
       <p>
         <strong>load:</strong> replace the current list of files with the
@@ -486,60 +499,106 @@ export default function LocalDataExplorer() {
       </Route>
       <Route
         path={`${path}/file/:id`}
-        render={(p) => <FileViewPage id={p.match.params.id} />}
+        render={(p) => <FileViewPage id={p.match.params.id} files={files} />}
+      />
+      <Route path={`${path}/dataset`} component={DataSetView} />
+    </Switch>
+  );
+}
+
+function DataSetView() {
+  const { path } = useRouteMatch();
+  const dataset = use(DataSetContext);
+  const files = useMemo(() => datasetToFiles(dataset), [dataset]);
+  return (
+    <Switch>
+      <Route exact path={path}>
+        <StandardPage>
+          <FilesTable files={files} />
+        </StandardPage>
+      </Route>
+      <Route
+        path={`${path}/file/:id`}
+        render={(p) => <FileViewPage id={p.match.params.id} files={files} />}
       />
     </Switch>
   );
 }
 
-export function FileViewPage({ id }: { id: string }) {
-  const { files } = useFiles();
+export function FileViewPage({
+  id,
+  files,
+}: {
+  id: string;
+  files: FileWithDetails[];
+}) {
   const selectedFiles = useMemo(
     () => (id === 'all' ? files : files?.filter((f) => f.id === id)) ?? [],
     [files, id]
   );
   const { path, url } = useRouteMatch();
-  if (!files) {
-    return <LoadingPage />;
-  }
+
+  const singleFile = id !== 'all' ? selectedFiles[0] : undefined;
+  const toolNames = useMemo(() => {
+    if (!singleFile) {
+      return Object.keys(tools);
+    }
+    const { yes, maybe } = getPossibleTools(singleFile);
+    return [...yes, ...maybe].map((t) => t.name);
+  }, [singleFile]);
+
   if (selectedFiles.length === 0) {
     return <div>No matching files</div>;
   }
-  const singleFile = id !== 'all' ? selectedFiles[0] : undefined;
+
   return (
     <Switch>
       <Route exact path={path}>
         <StandardPage>
           <PageTitle>
-            {singleFile ? singleFile.file.name : 'All Files'}
+            {singleFile ? getFilename(singleFile) : 'All Files'}
           </PageTitle>
           <div>
-            <Link to={`${url}/tool/anything/features/dataset`}>dataset</Link>{' '}
-            {singleFile != null && (
+            {singleFile != null ? (
               <>
-                <Link to={`${url}/view/json`}>json</Link>{' '}
-                <Link to={`${url}/view/mp4`}>mp4</Link>{' '}
+                <p>
+                  View: <Link to={`${url}/view/json`}>JSON</Link>{' '}
+                  <Link to={`${url}/view/mp4`}>MP4</Link>{' '}
+                </p>
               </>
+            ) : (
+              <p>{selectedFiles.length} files</p>
             )}
-            <Link to={`${url}/tool/anything/features/list`}>Features</Link>{' '}
-            <Link to={`${url}/tool/anything/features/map`}>Leaflet Map</Link>{' '}
-            <Link to={`${url}/tool/anything/features/stylized`}>
-              Stylized Map
-            </Link>{' '}
-            <Link to={`${url}/tool/anything/map`}>Vector Map</Link>{' '}
+            <p>
+              Features:{' '}
+              <Link to={`${url}/tool/anything/features/list`}>List</Link>{' '}
+              <Link to={`${url}/tool/anything/features/map`}>Leaflet Map</Link>{' '}
+              <Link to={`${url}/tool/anything/features/stylized`}>
+                Stylized Map
+              </Link>{' '}
+              <Link to={`${url}/tool/anything/map`}>Vector Map</Link>{' '}
+              <Link to={`${url}/tool/anything/features/dataset`}>
+                Load Dataset
+              </Link>
+            </p>
           </div>
-          {Object.keys(tools).map((tool) => (
-            <>
-              <Link to={`${url}/tool/${tool}`}>{tool}</Link>{' '}
-            </>
-          ))}
+          <p>
+            Apply tool:{' '}
+            {toolNames.map((tool) => (
+              <>
+                <Link to={`${url}/tool/${tool}/status`}>{tool}</Link>{' '}
+              </>
+            ))}
+          </p>
           {singleFile != null && (
             <>
               <p>Size: {singleFile.file.size.toLocaleString()}</p>
-              <p>
-                Last Modified:{' '}
-                {new Date(singleFile.file.lastModified).toLocaleString()}
-              </p>
+              {singleFile.type === 'handle' && (
+                <p>
+                  Last Modified:{' '}
+                  {new Date(singleFile.file.lastModified).toLocaleString()}
+                </p>
+              )}
             </>
           )}
           <div>

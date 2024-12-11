@@ -73,6 +73,28 @@ export async function readToDataset(features: Feature[]): Promise<DataSet> {
   return buildDataSet(trips, videoChapters);
 }
 
+export function datasetToFiles(dataset: DataSet): FileContentsWithDetails[] {
+  let i = 0;
+  const files: FileContentsWithDetails[] = [];
+  for (const trip of dataset.trips) {
+    const simpleTrip = {
+      ...trip,
+      properties: {
+        activity: trip.properties.activity,
+      },
+    };
+    files.push({
+      type: 'contents',
+      file: new Blob([JSON.stringify(simpleTrip)], {
+        type: 'application/json',
+      }),
+      name: `${trip.properties.activity.id}.geojson`,
+      id: i++ + '',
+    });
+  }
+  return files;
+}
+
 export async function peekFile(file: FileWithHandle) {
   const extension = file.name.split('.').pop()!.toLowerCase();
   if (extension === 'gpx') {

@@ -1,42 +1,4 @@
-import { getFilename } from '../file-data';
-import {
-  FileWithDetailsAndMaybeJson,
-  getJsonFromFile,
-  StatefulTool,
-  tools,
-  ToolWithName,
-} from '.';
-
-async function findTool(
-  file: FileWithDetailsAndMaybeJson
-): Promise<ToolWithName[]> {
-  const filename = getFilename(file.file);
-  const extension = filename.split('.').pop()!.toLowerCase();
-  const yes: ToolWithName[] = [];
-  const maybe: ToolWithName[] = [];
-  for (const tool of Object.values(tools)) {
-    if (tool.couldProcessFileByExtension) {
-      const result = tool.couldProcessFileByExtension(extension);
-      if (result === 'yes') {
-        yes.push(tool);
-      } else if (result === 'maybe') {
-        maybe.push(tool);
-      }
-    }
-  }
-
-  for (const tool of maybe) {
-    if (tool.couldProcessFileByJson) {
-      const json = (file.json = await getJsonFromFile(file));
-      const result = tool.couldProcessFileByJson(json);
-      if (result === 'yes') {
-        yes.push(tool);
-      }
-    }
-  }
-
-  return yes;
-}
+import { findTool, StatefulTool, ToolWithName } from '.';
 
 const anythingTool: StatefulTool<Map<ToolWithName, any>> = {
   createState() {
