@@ -1,5 +1,5 @@
-import { Link } from 'react-router-dom';
-import { useHistory } from 'react-router-dom';
+import { Link } from '@tanstack/react-router';
+import { useNavigate } from '@tanstack/react-router';
 
 import * as format from '../../format';
 import { CoverageTree, findNearbyVideos } from '../../videos';
@@ -26,10 +26,10 @@ export default function LocationDetails({
   tripTree: TripTree;
   videoTree: CoverageTree;
 }) {
-  const history = useHistory();
+  const navigate = useNavigate();
 
   function onClick({ geo }: { geo: [number, number] }) {
-    history.push(`/locations/${geo.join(',')}`);
+    navigate({ to: '/locations/$coords', params: { coords: geo.join(',') } });
   }
 
   const maxDistance = 40;
@@ -61,7 +61,10 @@ export default function LocationDetails({
         {nearbyVideos.map(
           ({ video: { name, duration, start, thumbnail }, time }) => (
             <Thumbnail key={name}>
-              <Link to={`/videos/${name}/${time}`}>
+              <Link
+                to="/videos/$name/$seek"
+                params={{ name, seek: time.toString() }}
+              >
                 <div>
                   <img src={thumbnail.small} width="160" height="90" />
                 </div>
@@ -83,7 +86,7 @@ export default function LocationDetails({
       <Thumbnails>
         {nearbyGroupedWays.map((way) => (
           <Thumbnail key={way.displayName}>
-            <Link to={`/ways/${way.displayName}`}>
+            <Link to="/ways/$name" params={{ name: way.displayName }}>
               <MapComponent
                 width={160}
                 height={160}

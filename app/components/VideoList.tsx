@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link } from '@tanstack/react-router';
 
 import Thumbnails from './Thumbnails';
 import Thumbnail from './Thumbnail';
@@ -10,7 +10,7 @@ export default function VideoList({ videos }: { videos: Video[] }) {
     <Thumbnails>
       {videos.map(({ name, duration, start, thumbnail }) => (
         <Thumbnail key={name}>
-          <Link to={`/videos/${name}`}>
+          <Link to="/videos/$name" params={{ name }}>
             <div>
               <img src={thumbnail.small} width="160" height="90" />
             </div>

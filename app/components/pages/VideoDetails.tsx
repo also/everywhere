@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useHistory } from 'react-router';
+import { useNavigate } from '@tanstack/react-router';
 import { useInView } from 'react-intersection-observer';
 
 import * as format from '../../format';
@@ -18,12 +18,18 @@ import moment from 'moment';
 import StandardPage from '../StandardPage';
 
 function VideoAndMap({ video, seek }: { video: Video; seek: number }) {
-  const history = useHistory();
+  const navigate = useNavigate();
   const [location, setLocation] = useState<[number, number] | undefined>();
   const [time, setTime] = useState<moment.Moment | undefined>();
 
   function onClick({ geo }: { geo: [number, number] }) {
-    history.push(`/videos/${video.name}/${findSeekPosition(video, geo)}`);
+    navigate({
+      to: '/videos/$name/$seek',
+      params: {
+        name: video.name,
+        seek: findSeekPosition(video, geo).toString(),
+      },
+    });
   }
 
   return (

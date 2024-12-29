@@ -1,4 +1,4 @@
-import { useHistory } from 'react-router';
+import { useNavigate } from '@tanstack/react-router';
 import { useCallback, useState } from 'react';
 
 import PageTitle from '../PageTitle';
@@ -20,7 +20,6 @@ export default function VideoListPage({
   videoCoverage: CoverageFeature[];
   videoTree: CoverageTree;
 }) {
-  const history = useHistory();
   const [nearest, setNearest] =
     useState<RTreeItem<CoverageFeature> | undefined>(undefined);
 
@@ -28,6 +27,8 @@ export default function VideoListPage({
     ({ geo }) => setNearest(nearestLine(videoTree, geo)?.item),
     [videoTree]
   );
+
+  const navigate = useNavigate();
 
   const onClick: MapMouseHandler = useCallback(
     ({ geo }) => {
@@ -42,7 +43,11 @@ export default function VideoListPage({
       const [, , , timeOffsetSecs] = coord;
 
       const time = +start.clone().add(timeOffsetSecs, 's');
-      history.push(`/videos/${video.name}/${time}`);
+
+      navigate({
+        to: '/videos/$name/$seek',
+        params: { name: video.name, seek: time.toString() },
+      });
     },
     [videoTree]
   );

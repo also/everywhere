@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useHistory } from 'react-router';
+import { Link } from '@tanstack/react-router';
+import { useNavigate } from '@tanstack/react-router';
 import styled from 'styled-components';
 
 import PageTitle from '../PageTitle';
@@ -29,7 +29,7 @@ const WayHoverInfo = styled.div`
 `;
 
 const HoverStreetMap = function WayList({ wayTree }: { wayTree: WayTree }) {
-  const history = useHistory();
+  const navigate = useNavigate();
   const [hoveredStreet, setHoveredStreet] = useState<WayFeature>();
   const onMouseMove: MapMouseHandler = useCallback(
     ({ geo }) => setHoveredStreet(nearestLine(wayTree, geo)!.item.data),
@@ -38,7 +38,10 @@ const HoverStreetMap = function WayList({ wayTree }: { wayTree: WayTree }) {
   const onClick: MapMouseHandler = useCallback(
     ({ geo }) => {
       const way = nearestLine(wayTree, geo)!.item.data;
-      history.push(`/ways/${way.properties.displayName}`);
+      navigate({
+        to: '/ways/$name',
+        params: { name: way.properties.displayName },
+      });
     },
     [wayTree]
   );
@@ -78,7 +81,9 @@ export default function WayList({
       <WayListColumns>
         {groupedWays.map((way) => (
           <li key={way.displayName}>
-            <Link to={`/ways/${way.displayName}`}>{way.displayName}</Link>
+            <Link to="/ways/$name" params={{ name: way.displayName }}>
+              {way.displayName}
+            </Link>
           </li>
         ))}
       </WayListColumns>

@@ -1,4 +1,4 @@
-import { useHistory } from 'react-router';
+import { useNavigate } from '@tanstack/react-router';
 
 import Position from '../Position';
 import Trips from '../Trips';
@@ -14,10 +14,9 @@ export default function CityMap({
   tripsLength: number;
   waysLength: number;
 }) {
-  const history = useHistory();
-
+  const navigate = useNavigate();
   function onClick({ geo }: MapMouseEvent) {
-    history.push(`/locations/${geo.join(',')}`);
+    navigate({ to: '/locations/$coords', params: { coords: geo.join(',') } });
   }
 
   return (

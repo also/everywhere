@@ -1,14 +1,17 @@
 import d3 from 'd3';
 import { createRoot } from 'react-dom/client';
 import styled, { createGlobalStyle } from 'styled-components';
+import { TanStackRouterDevtools } from '@tanstack/router-devtools';
 
 import {
-  HashRouter as Router,
-  Switch,
-  Route,
+  Outlet,
+  RouterProvider,
   Link,
-  RouteComponentProps,
-} from 'react-router-dom';
+  createRouter,
+  createRoute,
+  createRootRouteWithContext,
+} from '@tanstack/react-router';
+import { createHashHistory } from '@tanstack/history';
 
 import { geometryLength } from './distance';
 
@@ -172,7 +175,8 @@ function WayListRoute() {
   return <WayList groupedWays={groupedWays} wayTree={wayTree} />;
 }
 
-function WayDetailsRoute({ match: { params } }: RouteComponentProps<[string]>) {
+function WayDetailsRoute() {
+  const params = useParams<[string]>();
   const way = groupedWays.find(({ displayName }) => displayName === params[0]);
   return way ? <WayDetails way={way} /> : null;
 }
@@ -185,9 +189,8 @@ function NotFoundRoute() {
   );
 }
 
-function VideoDetailsRoute({
-  match: { params },
-}: RouteComponentProps<{ seek: string; name: string }>) {
+function VideoDetailsRoute() {
+  const params = useParams<{ seek: string; name: string }>();
   const { videos } = useContext(DataSetContext);
   const video = videos.get(params.name);
   return video ? (
@@ -197,11 +200,8 @@ function VideoDetailsRoute({
   );
 }
 
-function LocationDetailsRoute({
-  match: {
-    params: { coords },
-  },
-}: RouteComponentProps<{ coords: string }>) {
+function LocationDetailsRoute() {
+  const { coords } = useParams<{ coords: string }>();
   const { tripTree, videoTree } = useContext(DataSetContext);
   return (
     <LocationDetails
@@ -210,16 +210,6 @@ function LocationDetailsRoute({
       videoTree={videoTree}
     />
   );
-}
-
-function TripDetailsRoute({
-  match: {
-    params: { id },
-  },
-}: RouteComponentProps<{ id: string }>) {
-  const { tripsById } = useContext(DataSetContext);
-  const trip = tripsById.get(id);
-  return trip ? <TripDetails trip={trip} /> : <NotFoundRoute />;
 }
 
 function VideosRoute() {
@@ -231,11 +221,6 @@ function VideosRoute() {
       videoTree={videoTree}
     />
   );
-}
-
-function TripsRoute() {
-  const { trips } = useContext(DataSetContext);
-  return <TripListPage trips={trips} />;
 }
 
 function DataSetSelector({
@@ -273,37 +258,225 @@ const datasetPromise = loadDataset();
 
 const root = createRoot(div);
 
+// root.render(
+//   <>
+//     <GlobalStyle />
+//     <NavExtensionContext.Provider>
+//       <DataContext.Provider value={{ boundary, contours, ways }}>
+//         <DataSetSelector initialDataSet={buildDataSet([], [])}>
+//           <Router>
+//             <App>
+//               <Switch>
+//                 <Route path="/local">
+//                   <LocalDataExplorer />
+//                 </Route>
+//                 <Route path="/data">
+//                   <DataPage />
+//                 </Route>
+//                 <Route path="/map">
+//                   <MapRoute />
+//                 </Route>
+//                 <Route path="/ways/*">
+//                   <WayDetailsRoute />
+//                 </Route>
+//                 <Route path="/ways">
+//                   <WayListRoute />
+//                 </Route>
+//                 <Route path="/locations/:coords">
+//                   <LocationDetailsRoute />
+//                 </Route>
+//                 <Route path="/docs">
+//                   <DocsPage />
+//                 </Route>
+//                 <Route path="/">
+//                   <CityMapRoute />
+//                 </Route>
+//               </Switch>
+//             </App>
+//           </Router>
+//         </DataSetSelector>
+//       </DataContext.Provider>
+//     </NavExtensionContext.Provider>
+//   </>
+// );
+
+const rootRoute = createRootRouteWithContext<{ dataSet: DataSet }>()({
+  component: function RootRoute() {
+    return (
+      <>
+        <TanStackRouterDevtools />
+        <App>
+          <Outlet />
+        </App>
+      </>
+    );
+  },
+});
+
+const indexRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/',
+  component: function Index() {
+    return <CityMapRoute />;
+  },
+});
+
+const tripsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: 'trips',
+});
+
+const tripsIndexRoute = createRoute({
+  getParentRoute: () => tripsRoute,
+  path: '/',
+  loader: ({ context: { dataSet } }) => {
+    return dataSet.trips;
+  },
+  component: function TripsRoute() {
+    const trips = tripsIndexRoute.useLoaderData();
+    return <TripListPage trips={trips} />;
+  },
+});
+
+const tripDetailsRoute = createRoute({
+  getParentRoute: () => tripsRoute,
+  path: '$id',
+  loader: ({ params: { id }, context: { dataSet } }) => {
+    return dataSet.tripsById.get(id);
+  },
+  component: function TripDetailsRoute() {
+    const trip = tripDetailsRoute.useLoaderData();
+    return trip ? <TripDetails trip={trip} /> : <NotFoundRoute />;
+  },
+});
+
+tripsRoute.addChildren([tripsIndexRoute, tripDetailsRoute]);
+
+const videosRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: 'videos',
+});
+
+const videosIndexRoute = createRoute({
+  getParentRoute: () => videosRoute,
+  path: '/',
+  loader: ({ context: { dataSet } }) => {
+    return dataSet;
+  },
+  component: function VideosIndexRoute() {
+    const { videos, videoCoverage, videoTree } =
+      videosIndexRoute.useLoaderData();
+    return (
+      <VideoListPage
+        videos={Array.from(videos.values())}
+        videoCoverage={videoCoverage}
+        videoTree={videoTree}
+      />
+    );
+  },
+});
+
+const videosDetailsRootRoute = createRoute({
+  getParentRoute: () => videosRoute,
+  path: '$name',
+  loader: ({ params: { name }, context: { dataSet } }) => {
+    return dataSet.videos.get(name);
+  },
+});
+
+const videosDetailsRoute = createRoute({
+  getParentRoute: () => videosDetailsRootRoute,
+  path: '/',
+  component: function VideosDetailsRoute() {
+    const video = videosDetailsRootRoute.useLoaderData();
+    return video ? <VideoDetails video={video} seek={0} /> : <NotFoundRoute />;
+  },
+});
+
+const videosDetailsSeekedRoute = createRoute({
+  getParentRoute: () => videosDetailsRootRoute,
+  path: '$seek',
+  loader: ({ params: { seek } }) => {
+    return parseInt(seek, 10);
+  },
+  component: function VideosDetailsSeekedRoute() {
+    const video = videosDetailsRootRoute.useLoaderData();
+    const seek = videosDetailsSeekedRoute.useLoaderData();
+    return video ? (
+      <VideoDetails video={video} seek={seek} />
+    ) : (
+      <NotFoundRoute />
+    );
+  },
+});
+
+videosDetailsRootRoute.addChildren([
+  videosDetailsRoute,
+  videosDetailsSeekedRoute,
+]);
+
+videosRoute.addChildren([videosIndexRoute, videosDetailsRootRoute]);
+
+const locationDetailsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: 'locations/$coords',
+  loader: ({ params: { coords }, context: { dataSet } }) => {
+    const location = coords.split(',').map(parseFloat);
+    return { location, dataSet };
+  },
+  component: function LocationDetailsRoute() {
+    const { location, dataSet } = locationDetailsRoute.useLoaderData();
+    return (
+      <LocationDetails
+        location={location}
+        tripTree={dataSet.tripTree}
+        videoTree={dataSet.videoTree}
+      />
+    );
+  },
+});
+
+const routeTree = rootRoute.addChildren([
+  indexRoute,
+  tripsRoute,
+  videosRoute,
+  locationDetailsRoute,
+]);
+
+// Set up a Router instance
+const router = createRouter({
+  routeTree,
+  defaultPreload: 'intent',
+  defaultStaleTime: 5000,
+  history: createHashHistory(),
+  context: {
+    // FIXME ???
+    dataSet: undefined as any,
+  },
+});
+
+// Register things for typesafety
+declare module '@tanstack/react-router' {
+  interface Register {
+    router: typeof router;
+  }
+}
+
+function RouterWithContext() {
+  const dataSet = useContext(DataSetContext);
+  // FIXME haven't figured out how to establish that the loaders have a dependency on the dataset from context
+  return dataSet.trips.length > 0 ? (
+    <RouterProvider router={router} context={{ dataSet }} />
+  ) : null;
+}
+
 root.render(
   <>
     <GlobalStyle />
     <NavExtensionContext.Provider>
       <DataContext.Provider value={{ boundary, contours, ways }}>
         <DataSetSelector initialDataSet={buildDataSet([], [])}>
-          <Router>
-            <App>
-              <Switch>
-                <Route path="/local" component={LocalDataExplorer} />
-                <Route path="/data" component={DataPage} />
-                <Route path="/map" component={MapRoute} />
-                <Route path="/ways/*" component={WayDetailsRoute} />
-                <Route path="/ways" component={WayListRoute} />
-                <Route
-                  path="/videos/:name/:seek"
-                  component={VideoDetailsRoute}
-                />
-                <Route path="/videos/:name" component={VideoDetailsRoute} />
-                <Route path="/videos" component={VideosRoute} />
-                <Route path="/trips/:id" component={TripDetailsRoute} />
-                <Route path="/trips" component={TripsRoute} />
-                <Route
-                  path="/locations/:coords"
-                  component={LocationDetailsRoute}
-                />
-                <Route path="/docs" component={DocsPage} />
-                <Route path="/" component={CityMapRoute} />
-              </Switch>
-            </App>
-          </Router>
+          <RouterWithContext />
         </DataSetSelector>
       </DataContext.Provider>
     </NavExtensionContext.Provider>

@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link } from '@tanstack/react-router';
 
 import { featureCollection } from '../../geo';
 
@@ -44,7 +44,9 @@ export default function WayDetails({ way }: { way: GroupedWays }) {
           .sort()
           .map((int) => (
             <li key={int}>
-              <Link to={`/ways/${int}`}>{int}</Link>
+              <Link to="/ways/$name" params={{ name: int }}>
+                {int}
+              </Link>
             </li>
           ))}
       </WayListColumns>

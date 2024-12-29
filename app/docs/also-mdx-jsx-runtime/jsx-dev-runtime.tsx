@@ -11,7 +11,7 @@ import {
   useContext,
 } from 'react';
 
-import { Link } from 'react-router-dom';
+import { Link } from '@tanstack/react-router';
 
 export { Fragment };
 
@@ -134,10 +134,9 @@ function MdxComponentWrapper({
             <Fragment key={k}>
               <Link
                 key={k}
-                to={(location) => {
-                  const params = new URLSearchParams(location.search);
-                  params.set('focus', k);
-                  return { search: params.toString() };
+                from="/docs"
+                search={(prev) => {
+                  return { ...prev, focus: [k] };
                 }}
               >
                 {k}

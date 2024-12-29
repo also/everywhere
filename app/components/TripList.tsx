@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link } from '@tanstack/react-router';
 
 import Thumbnails from './Thumbnails';
 import Thumbnail from './Thumbnail';
@@ -15,7 +15,7 @@ export default function TripList({ trips }: { trips: StravaTripFeature[] }) {
         } = trip;
         return (
           <Thumbnail key={id}>
-            <Link to={`/trips/${id}`}>
+            <Link to="/trips/$id" params={{ id }}>
               <MapComponent width={160} height={160} showWays={false}>
                 <Trips trips={[trip]} />
               </MapComponent>
