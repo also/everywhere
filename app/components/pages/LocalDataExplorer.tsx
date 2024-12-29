@@ -501,7 +501,9 @@ export default function LocalDataExplorer() {
         path={`${path}/file/:id`}
         render={(p) => <FileViewPage id={p.match.params.id} files={files} />}
       />
-      <Route path={`${path}/dataset`} component={DataSetView} />
+      <Route path={`${path}/dataset`}>
+        <DataSetView />
+      </Route>
     </Switch>
   );
 }
@@ -616,22 +618,16 @@ export function FileViewPage({
           </div>
         </StandardPage>
       </Route>
-      <Route
-        path={`${path}/view/mp4`}
-        render={() => (
-          <StandardPage>
-            <Mp4View file={singleFile} />
-          </StandardPage>
-        )}
-      />
-      <Route
-        path={`${path}/view/json`}
-        render={() => (
-          <StandardPage>
-            <JsonView file={singleFile} />
-          </StandardPage>
-        )}
-      />
+      <Route path={`${path}/view/mp4`}>
+        <StandardPage>
+          <Mp4View file={singleFile} />
+        </StandardPage>
+      </Route>
+      <Route path={`${path}/view/json`}>
+        <StandardPage>
+          <JsonView file={singleFile} />
+        </StandardPage>
+      </Route>
       <Route path={`${path}/dataset`}>
         <StandardPage>
           <DataSetLoader files={selectedFiles} />

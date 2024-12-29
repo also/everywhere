@@ -171,55 +171,11 @@ function CityMapRoute() {
   );
 }
 
-function WayListRoute() {
-  return <WayList groupedWays={groupedWays} wayTree={wayTree} />;
-}
-
-function WayDetailsRoute() {
-  const params = useParams<[string]>();
-  const way = groupedWays.find(({ displayName }) => displayName === params[0]);
-  return way ? <WayDetails way={way} /> : null;
-}
-
 function NotFoundRoute() {
   return (
     <StandardPage>
       <PageTitle>Not Found</PageTitle>
     </StandardPage>
-  );
-}
-
-function VideoDetailsRoute() {
-  const params = useParams<{ seek: string; name: string }>();
-  const { videos } = useContext(DataSetContext);
-  const video = videos.get(params.name);
-  return video ? (
-    <VideoDetails video={video} seek={parseInt(params.seek, 10)} />
-  ) : (
-    <NotFoundRoute />
-  );
-}
-
-function LocationDetailsRoute() {
-  const { coords } = useParams<{ coords: string }>();
-  const { tripTree, videoTree } = useContext(DataSetContext);
-  return (
-    <LocationDetails
-      location={coords.split(',').map(parseFloat)}
-      tripTree={tripTree}
-      videoTree={videoTree}
-    />
-  );
-}
-
-function VideosRoute() {
-  const { videos, videoCoverage, videoTree } = useContext(DataSetContext);
-  return (
-    <VideoListPage
-      videos={Array.from(videos.values())}
-      videoCoverage={videoCoverage}
-      videoTree={videoTree}
-    />
   );
 }
 
@@ -276,20 +232,6 @@ const root = createRoot(div);
 //                 <Route path="/map">
 //                   <MapRoute />
 //                 </Route>
-//                 <Route path="/ways/*">
-//                   <WayDetailsRoute />
-//                 </Route>
-//                 <Route path="/ways">
-//                   <WayListRoute />
-//                 </Route>
-//                 <Route path="/locations/:coords">
-//                   <LocationDetailsRoute />
-//                 </Route>
-//                 <Route path="/docs">
-//                   <DocsPage />
-//                 </Route>
-//                 <Route path="/">
-//                   <CityMapRoute />
 //                 </Route>
 //               </Switch>
 //             </App>
@@ -300,25 +242,29 @@ const root = createRoot(div);
 //   </>
 // );
 
+function RootComponent() {
+  return (
+    <>
+      <TanStackRouterDevtools />
+      <App>
+        <Outlet />
+      </App>
+    </>
+  );
+}
+
+function IndexComponent() {
+  return <CityMapRoute />;
+}
+
 const rootRoute = createRootRouteWithContext<{ dataSet: DataSet }>()({
-  component: function RootRoute() {
-    return (
-      <>
-        <TanStackRouterDevtools />
-        <App>
-          <Outlet />
-        </App>
-      </>
-    );
-  },
+  component: RootComponent,
 });
 
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
-  component: function Index() {
-    return <CityMapRoute />;
-  },
+  component: IndexComponent,
 });
 
 const tripsRoute = createRoute({
@@ -350,11 +296,10 @@ const tripDetailsRoute = createRoute({
   },
 });
 
-tripsRoute.addChildren([tripsIndexRoute, tripDetailsRoute]);
-
 const videosRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: 'videos',
+  loader: () => false,
 });
 
 const videosIndexRoute = createRoute({
@@ -410,13 +355,6 @@ const videosDetailsSeekedRoute = createRoute({
   },
 });
 
-videosDetailsRootRoute.addChildren([
-  videosDetailsRoute,
-  videosDetailsSeekedRoute,
-]);
-
-videosRoute.addChildren([videosIndexRoute, videosDetailsRootRoute]);
-
 const locationDetailsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: 'locations/$coords',
@@ -436,11 +374,71 @@ const locationDetailsRoute = createRoute({
   },
 });
 
+const waysRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: 'ways',
+});
+
+const waysIndexRoute = createRoute({
+  getParentRoute: () => waysRoute,
+  path: '/',
+  component: function WaysIndexRoute() {
+    return <WayList groupedWays={groupedWays} wayTree={wayTree} />;
+  },
+});
+
+const wayDetailsRoute = createRoute({
+  getParentRoute: () => waysRoute,
+  path: '$name',
+  loader: ({ params: { name } }) => {
+    return groupedWays.find(({ displayName }) => displayName === name);
+  },
+  component: function WayDetailsRoute() {
+    const way = wayDetailsRoute.useLoaderData();
+    return way ? <WayDetails way={way} /> : <NotFoundRoute />;
+  },
+});
+
+const docsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: 'docs',
+  validateSearch: (search) => {
+    return {
+      ui: search.ui === true,
+      // TODO validate
+      focus: (Array.isArray(search.focus)
+        ? search.focus
+        : search.focus
+        ? [search.focus]
+        : []) as string[],
+      showSimpleTags: search.showSimpleTags === true,
+    };
+  },
+  component: function DocsRoute() {
+    return <DocsPage />;
+  },
+});
+
+const localDataRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: 'local',
+});
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
-  tripsRoute,
+  tripsRoute.addChildren([tripsIndexRoute, tripDetailsRoute]),
   videosRoute,
+  // videosRoute.addChildren([
+  //   videosIndexRoute,
+  //   videosDetailsRootRoute.addChildren([
+  //     videosDetailsRoute,
+  //     videosDetailsSeekedRoute,
+  //   ]),
+  // ]),
   locationDetailsRoute,
+  // waysRoute.addChildren([waysIndexRoute, wayDetailsRoute]),
+  // waysRoute,
+  docsRoute,
 ]);
 
 // Set up a Router instance
