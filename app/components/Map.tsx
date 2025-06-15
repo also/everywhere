@@ -215,7 +215,7 @@ export default function Map({
         ref={svgNode}
       >
         <BaseMap showWays={showWays} showContours={showContours} />
-        {typeof children === 'function' ? children() : children}
+        {children}
       </MapSvg>
     </MapContext.Provider>
   );

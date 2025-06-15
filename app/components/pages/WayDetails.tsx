@@ -34,7 +34,7 @@ export default function WayDetails({ way }: { way: GroupedWays }) {
           zoomFeature={featureCollection(way.features)}
           zoom={0.7}
         >
-          {() => <Ways features={way.features} selected={true} />}
+          <Ways features={way.features} selected={true} />
         </MapComponent>
       </MapBox>
 

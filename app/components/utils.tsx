@@ -1,4 +1,4 @@
-import { createContext, useState } from 'react';
+import React, { createContext, useState } from 'react';
 
 interface StateContext<T> {
   value: T | undefined;
@@ -8,7 +8,7 @@ interface StateContext<T> {
 export function createStateContext<T>() {
   const Context = createContext<StateContext<T>>(undefined as any);
 
-  function Provider({ children }: { children: JSX.Element }) {
+  function Provider({ children }: { children: React.ReactNode }) {
     const [value, setValue] = useState<T>();
     return (
       <Context.Provider value={{ value, setValue }}>

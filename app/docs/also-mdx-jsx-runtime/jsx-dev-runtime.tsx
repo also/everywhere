@@ -1,6 +1,4 @@
-// @ts-expect-error untyped
 import { Fragment } from 'react/jsx-dev-runtime';
-// @ts-expect-error untyped
 import { jsxDEV as _original } from 'react/jsx-dev-runtime';
 
 import {
@@ -21,7 +19,7 @@ interface Source {
   columnNumber: string;
 }
 
-const original = _original as typeof jsxDEV;
+const original = _original as unknown as typeof jsxDEV;
 
 // https://mdxjs.com/packages/mdx/#parameters-8
 // https://github.com/facebook/react/blob/3e09c27b880e1fecdb1eca5db510ecce37ea6be2/packages/react/src/jsx/ReactJSXElementValidator.js#L305

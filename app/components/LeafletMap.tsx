@@ -79,7 +79,7 @@ const LeafletMap = React.memo(function LeafletMap({
       map: L.Map;
       defaultLayers: Set<L.Layer>;
       control: L.Control.Layers;
-    }>();
+    }>(undefined);
 
   useEffect(() => {
     if (!mapRef.current) {

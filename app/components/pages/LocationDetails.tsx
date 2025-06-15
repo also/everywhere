@@ -89,7 +89,7 @@ export default function LocationDetails({
                 height={160}
                 zoomFeature={featureCollection(way.features)}
               >
-                {() => <Ways features={way.features} selected={true} />}
+                <Ways features={way.features} selected={true} />
               </MapComponent>
               <div>
                 <strong>{way.displayName}</strong>
