@@ -6,9 +6,14 @@ import { buildDataSet, RawStravaTripFeature } from './trips';
 import { RawVideoFeature, toChapter, VideoChapter } from './videos';
 import { CompleteActivity } from '../tools/strava-api';
 
-export type FileWithDetails = FileHandleWithDetails | FileContentsWithDetails | FileUrlWithDetails;
+export type FileWithDetails =
+  | FileHandleWithDetails
+  | FileContentsWithDetails
+  | FileUrlWithDetails;
 
-export type LocalFileWithDetails = FileHandleWithDetails | FileContentsWithDetails;
+export type LocalFileWithDetails =
+  | FileHandleWithDetails
+  | FileContentsWithDetails;
 
 export interface BaseFileDetails {
   id: string;

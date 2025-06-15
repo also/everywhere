@@ -573,7 +573,9 @@ export default function LocalDataExplorer() {
       </Route>
       <Route
         path={`${path}/file/:id`}
-        render={(p) => <FileViewPage id={p.match.params.id} files={files ?? []} />}
+        render={(p) => (
+          <FileViewPage id={p.match.params.id} files={files ?? []} />
+        )}
       />
       <Route path={`${path}/dataset`} component={DataSetView} />
     </Switch>
