@@ -46,15 +46,15 @@
       }
     };
     
-    // Send location update to server
-    const sendLocationUpdate = (map) => {
+    // Send map data to server
+    const sendMapData = (map, extraProps = {}) => {
       if (!ws || ws.readyState !== WebSocket.OPEN) return;
       
       const center = map.getCenter();
       const zoom = map.getZoom();
       const bounds = map.getBounds();
       
-      const locationData = {
+      const mapData = {
         center: {
           lat: center.lat(),
           lng: center.lng()
@@ -66,20 +66,24 @@
           east: bounds.getNorthEast().lng(),
           west: bounds.getSouthWest().lng()
         },
-        timestamp: Date.now()
+        timestamp: Date.now(),
+        ...extraProps
       };
       
-      // Avoid sending duplicate locations
-      if (lastSentLocation && 
-          Math.abs(lastSentLocation.center.lat - locationData.center.lat) < 0.0001 &&
-          Math.abs(lastSentLocation.center.lng - locationData.center.lng) < 0.0001 &&
-          lastSentLocation.zoom === locationData.zoom) {
+      // Avoid sending duplicate locations for non-mousemove events
+      if (!extraProps.type && lastSentLocation && 
+          Math.abs(lastSentLocation.center.lat - mapData.center.lat) < 0.0001 &&
+          Math.abs(lastSentLocation.center.lng - mapData.center.lng) < 0.0001 &&
+          lastSentLocation.zoom === mapData.zoom) {
         return;
       }
       
-      lastSentLocation = locationData;
-      ws.send(JSON.stringify(locationData));
-      console.log('[Map Sync] Sent location update:', locationData);
+      if (!extraProps.type) {
+        lastSentLocation = mapData;
+      }
+      
+      ws.send(JSON.stringify(mapData));
+      console.log('[Map Sync] Sent map data:', mapData);
     };
     
     const exposeMap = (map) => {
@@ -89,38 +93,21 @@
       
       // Add event listeners for map changes
       map.addListener('center_changed', () => {
-        sendLocationUpdate(map);
+        sendMapData(map);
       });
       
       map.addListener('zoom_changed', () => {
-        sendLocationUpdate(map);
+        sendMapData(map);
       });
 
       map.addListener('mousemove', (event) => {
-        const bounds = map.getBounds();
-        const locationData = {
+        sendMapData(map, {
           type: 'mousemove',
-          center: {
-            lat: map.getCenter().lat(),
-            lng: map.getCenter().lng()
-          },
-          zoom: map.getZoom(),
-          bounds: {
-            north: bounds.getNorthEast().lat(),
-            south: bounds.getSouthWest().lat(),
-            east: bounds.getNorthEast().lng(),
-            west: bounds.getSouthWest().lng()
-          },
           mousePosition: {
             lat: event.latLng.lat(),
             lng: event.latLng.lng()
-          },
-          timestamp: Date.now()
-        };
-        
-        if (ws && ws.readyState === WebSocket.OPEN) {
-          ws.send(JSON.stringify(locationData));
-        }
+          }
+        });
       });
     };
     
