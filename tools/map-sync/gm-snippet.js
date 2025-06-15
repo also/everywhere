@@ -88,6 +88,33 @@
       map.addListener('zoom_changed', () => {
         sendLocationUpdate(map);
       });
+
+      map.addListener('mousemove', (event) => {
+        const bounds = map.getBounds();
+        const locationData = {
+          type: 'mousemove',
+          center: {
+            lat: map.getCenter().lat(),
+            lng: map.getCenter().lng()
+          },
+          zoom: map.getZoom(),
+          bounds: {
+            north: bounds.getNorthEast().lat(),
+            south: bounds.getSouthWest().lat(),
+            east: bounds.getNorthEast().lng(),
+            west: bounds.getSouthWest().lng()
+          },
+          mousePosition: {
+            lat: event.latLng.lat(),
+            lng: event.latLng.lng()
+          },
+          timestamp: Date.now()
+        };
+        
+        if (ws && ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify(locationData));
+        }
+      });
     };
     
     // Initialize WebSocket connection
