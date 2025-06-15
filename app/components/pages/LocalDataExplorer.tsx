@@ -722,11 +722,6 @@ export function FileViewPage({
             />,
           ]
         : []}
-      <Route path={`${path}/dataset`}>
-        <StandardPage>
-          <DataSetLoader files={selectedFiles} />
-        </StandardPage>
-      </Route>
       <Route
         path={`${path}/tool/:tool`}
         render={(p) => {
