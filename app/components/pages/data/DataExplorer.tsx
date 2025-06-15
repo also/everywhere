@@ -11,19 +11,19 @@ import { get, set, update } from 'idb-keyval';
 import { fileOpen, FileWithHandle } from 'browser-fs-access';
 import { Feature } from 'geojson';
 import { ObjectInspector } from 'react-inspector';
-import PageTitle from '../PageTitle';
-import MapComponent from '../stylized/Map';
-import MapContext from '../stylized/MapContext';
-import MapBox from '../MapBox';
-import { LeafletFeatureMap } from '../LeafletMap';
-import Table from '../Table';
-import TraverserView, { GpmfSamples } from '../data/TraverserView';
-import { useMemoAsync } from '../../hooks';
-import FullScreenPage from '../FullScreenPage';
-import StandardPage from '../StandardPage';
-import VectorTileView from '../VectorTileView';
-import { NavExtension } from '../Nav';
-import LoadingPage from './LoadingPage';
+import PageTitle from '../../PageTitle';
+import MapComponent from '../../stylized/Map';
+import MapContext from '../../stylized/MapContext';
+import MapBox from '../../MapBox';
+import { LeafletFeatureMap } from '../../LeafletMap';
+import Table from '../../Table';
+import TraverserView, { GpmfSamples } from '../../data/TraverserView';
+import { useMemoAsync } from '../../../hooks';
+import FullScreenPage from '../../FullScreenPage';
+import StandardPage from '../../StandardPage';
+import VectorTileView from '../../VectorTileView';
+import { NavExtension } from '../../Nav';
+import LoadingPage from '../LoadingPage';
 import {
   datasetToFiles,
   FileContentsWithDetails,
@@ -32,24 +32,25 @@ import {
   FileWithDetails,
   getFilename,
   readToDataset,
-} from '../../file-data';
-import { getFileBlob, getTools, tools } from '../../tools';
+} from '../../../file-data';
+import { getFileBlob, getTools, tools } from '../../../tools';
 import {
   create,
   toolFiles,
   toolFileStatus,
   toolReady,
   features as getFeatures,
-} from '../../worker-stuff';
-import { WorkerRemote } from '../../WorkerChannel';
-import FeatureDetails from '../FeatureDetails';
+  getFeature,
+} from '../../../worker-stuff';
+import { WorkerRemote } from '../../../WorkerChannel';
+import FeatureDetails from '../../FeatureDetails';
 import { Route, Switch, useRouteMatch } from 'react-router';
 import { Link } from 'react-router-dom';
-import { SeekableBlobBuffer } from '../../../tools/parse/buffers';
-import { bind, fileRoot } from '../../../tools/parse';
-import { parser as mp4Parser } from '../../../tools/parse/mp4';
-import { getMeta } from '../../../tools/parse/gpmf';
-import DataSetContext, { DataSetProviderContext } from '../DataSetContext';
+import { SeekableBlobBuffer } from '../../../../tools/parse/buffers';
+import { bind, fileRoot } from '../../../../tools/parse';
+import { parser as mp4Parser } from '../../../../tools/parse/mp4';
+import { getMeta } from '../../../../tools/parse/gpmf';
+import DataSetContext, { DataSetProviderContext } from '../../DataSetContext';
 
 function Path({ feature }: { feature: Feature }) {
   const { path } = useContext(MapContext);
@@ -76,11 +77,11 @@ function withChannel(Component: React.ComponentType<{ features: Feature[] }>) {
 }
 
 function DirectFeaturesRoute({ features }: { features: Feature[] }) {
-  const { path } = useRouteMatch();
+  const { path, url } = useRouteMatch();
   return (
     <Switch>
       <Route path={`${path}/list`}>
-        <FeatureList features={features} />
+        <FeatureList features={features} featuresUrl={`${url}`} />
       </Route>
       <Route path={`${path}/map`}>
         <FullScreenPage>
@@ -101,13 +102,20 @@ function DirectFeaturesRoute({ features }: { features: Feature[] }) {
   );
 }
 
-function FeatureList({ features }: { features: Feature[] }) {
+function FeatureList({
+  features,
+  featuresUrl,
+}: {
+  features: Feature[];
+  featuresUrl: string;
+}) {
   return (
     <StandardPage>
       <div>{features.length} features</div>
       <Table>
         <thead>
           <tr>
+            <th></th>
             <th>File ID</th>
             <th>Filename</th>
             <th>Tool</th>
@@ -118,6 +126,13 @@ function FeatureList({ features }: { features: Feature[] }) {
         <tbody>
           {features.map((f, i) => (
             <tr key={i}>
+              <td>
+                <Link
+                  to={`${featuresUrl}/feature/${f.properties?.everywhereFeatureIndex}`}
+                >
+                  {i}
+                </Link>
+              </td>
               <td>{f.properties?.everywhereFileId ?? 'unknown'}</td>
               <td>{f.properties?.everywhereFilename ?? 'unknown'}</td>
               <td>{f.properties?.everywhereTool ?? 'unknown'}</td>
@@ -129,6 +144,20 @@ function FeatureList({ features }: { features: Feature[] }) {
           ))}
         </tbody>
       </Table>
+    </StandardPage>
+  );
+}
+
+function FeatureDetailsPage({ channel }: { channel: WorkerRemote }) {
+  const { idx } = useRouteMatch<{ idx: string }>().params;
+  const feature = useMemoAsync(
+    () => channel.sendRequest(getFeature, { index: parseInt(idx) }),
+    [channel]
+  );
+  return (
+    <StandardPage>
+      <FeatureDetails feature={feature} />
+      {feature?.properties && <ObjectInspector data={feature.properties} />}
     </StandardPage>
   );
 }
@@ -249,6 +278,9 @@ function ToolView({
       </NavExtension>
       {channel ? (
         <Switch>
+          <Route path={`${path}/features/feature/:idx`}>
+            <FeatureDetailsPage channel={channel} />
+          </Route>
           <Route path={`${path}/features`}>
             <ChannelFeaturesView channel={channel} />
           </Route>

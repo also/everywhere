@@ -1,5 +1,5 @@
 import { Feature } from 'geojson';
-import { features, featureSummary } from '../worker-messages';
+import { features, featureSummary, getFeature } from '../worker-messages';
 import { WorkerLocal } from '../WorkerChannel';
 
 export function createFeatureHandlers(channel: WorkerLocal, feats: Feature[]) {
@@ -12,4 +12,8 @@ export function createFeatureHandlers(channel: WorkerLocal, feats: Feature[]) {
   );
 
   channel.handle(features, () => feats);
+
+  channel.handle(getFeature, ({ index }) =>
+    feats.find((f) => f.properties?.everywhereFeatureIndex === index)
+  );
 }

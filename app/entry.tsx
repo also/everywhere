@@ -39,7 +39,7 @@ import {
 } from './data';
 import DataContext from './components/DataContext';
 import { ReactNode, useContext, useEffect, useState } from 'react';
-import DataExplorer from './components/pages/DataExplorer';
+import DataExplorer from './components/pages/data/DataExplorer';
 import DataSetContext, {
   DataSetProviderContext,
 } from './components/DataSetContext';
