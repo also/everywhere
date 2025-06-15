@@ -34,7 +34,7 @@ import {
   LocalFileWithDetails,
   readToDataset,
 } from '../../file-data';
-import { getPossibleTools, tools } from '../../tools';
+import { getFileBlob, getPossibleTools, tools } from '../../tools';
 import {
   create,
   toolFiles,
@@ -218,6 +218,17 @@ function ToolStatus({ fileStatus }: { fileStatus: FileStatus }) {
   );
 }
 
+function CommonToolLinks({ url }: { url: string }) {
+  return (
+    <>
+      <Link to={`${url}/map`}>Map</Link>{' '}
+      <Link to={`${url}/features/list`}>Features</Link>{' '}
+      <Link to={`${url}/features/map`}>Leaflet Map</Link>{' '}
+      <Link to={`${url}/features/stylized`}>Stylized Map</Link>{' '}
+    </>
+  );
+}
+
 function ToolView({
   files,
   tool,
@@ -234,11 +245,8 @@ function ToolView({
   return (
     <>
       <NavExtension>
-        <Link to={`${url}/map`}>Map</Link>{' '}
-        <Link to={`${url}/features/list`}>Features</Link>{' '}
-        <Link to={`${url}/features/map`}>Leaflet Map</Link>{' '}
-        <Link to={`${url}/features/stylized`}>Stylized Map</Link>{' '}
-        <Link to={`${url}/status`}>Status</Link> {NavComponent}
+        <CommonToolLinks url={url} /> <Link to={`${url}/status`}>Status</Link>{' '}
+        {NavComponent}
       </NavExtension>
       {channel ? (
         <Switch>
@@ -270,14 +278,20 @@ function ToolView({
   );
 }
 
-function Mp4View({ file }: { file: LocalFileWithDetails }) {
-  const mp4 = useMemo(() => {
-    const data = new SeekableBlobBuffer(file.file, 1024000);
+function Mp4View({ file }: { file: FileWithDetails }) {
+  const mp4 = useMemoAsync(async () => {
+    const data = new SeekableBlobBuffer(await getFileBlob(file), 1024000);
     return bind(mp4Parser, data, fileRoot(data));
   }, [file]);
 
-  const track = useMemoAsync(() => getMeta(mp4), [mp4]);
+  const track = useMemoAsync(
+    () => (mp4 ? getMeta(mp4) : Promise.resolve(undefined)),
+    [mp4]
+  );
 
+  if (!mp4) {
+    return <div>Loading...</div>;
+  }
   return (
     <>
       <h2>MP4</h2>
@@ -647,13 +661,7 @@ export function FileViewPage({
               <p>{selectedFiles.length} files</p>
             )}
             <p>
-              Features:{' '}
-              <Link to={`${url}/tool/anything/features/list`}>List</Link>{' '}
-              <Link to={`${url}/tool/anything/features/map`}>Leaflet Map</Link>{' '}
-              <Link to={`${url}/tool/anything/features/stylized`}>
-                Stylized Map
-              </Link>{' '}
-              <Link to={`${url}/tool/anything/map`}>Vector Map</Link>{' '}
+              Features: <CommonToolLinks url={`${url}/tool/anything`} />
               <Link to={`${url}/tool/anything/features/dataset`}>
                 Load Dataset
               </Link>
@@ -686,15 +694,18 @@ export function FileViewPage({
           )}
           <div>
             <p>
-              <strong>data:</strong> Show data about a video file.
+              <strong>Map:</strong> Show a map with tiles rendered in a worker.
             </p>
             <p>
-              <strong>simple map:</strong> Show a video file as a map, or
-              geojson file using a pure leaflet map
+              <strong>Features:</strong> Show a list of features,.
             </p>
             <p>
-              <strong>stylized map:</strong> Same as "load as map", but using
-              the everywhere.bike style
+              <strong>Leaflet Map:</strong> Show a map using simple Leaflet
+              GoeJSON rendering.
+            </p>
+            <p>
+              <strong>Stylized Map:</strong> Show a map in the everywhere.bike
+              style.
             </p>
           </div>
         </StandardPage>
@@ -705,12 +716,7 @@ export function FileViewPage({
               path={`${path}/view/mp4`}
               render={() => (
                 <StandardPage>
-                  {singleFile.type === 'handle' ||
-                  singleFile.type === 'contents' ? (
-                    <Mp4View file={singleFile} />
-                  ) : (
-                    <div>MP4 view only supports local files</div>
-                  )}
+                  <Mp4View file={singleFile} />
                 </StandardPage>
               )}
             />,
