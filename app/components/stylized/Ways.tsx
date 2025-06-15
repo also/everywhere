@@ -1,6 +1,6 @@
 import { useContext } from 'react';
 
-import { WayFeature } from '../ways';
+import { WayFeature } from '../../ways';
 import MapContext from './MapContext';
 
 function Way({

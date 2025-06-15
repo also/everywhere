@@ -14,7 +14,7 @@ import styled from 'styled-components';
 import MapContext from './MapContext';
 import Contours from './Contours';
 import Ways from './Ways';
-import DataContext from './DataContext';
+import DataContext from '../DataContext';
 
 const BaseMap = memo(function BaseMap({
   showWays,

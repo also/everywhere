@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom';
 import { featureCollection } from '../../geo';
 
 import PageTitle from '../PageTitle';
-import MapComponent from '../Map';
-import Ways from '../Ways';
+import MapComponent from '../stylized/Map';
+import Ways from '../stylized/Ways';
 import WayListColumns from '../WayListColumns';
 import MapBox from '../MapBox';
 import Table from '../Table';

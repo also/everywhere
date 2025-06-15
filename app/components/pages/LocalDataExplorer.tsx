@@ -12,8 +12,8 @@ import { fileOpen, FileWithHandle } from 'browser-fs-access';
 import { Feature } from 'geojson';
 import { ObjectInspector } from 'react-inspector';
 import PageTitle from '../PageTitle';
-import MapComponent from '../Map';
-import MapContext from '../MapContext';
+import MapComponent from '../stylized/Map';
+import MapContext from '../stylized/MapContext';
 import MapBox from '../MapBox';
 import { LeafletFeatureMap } from '../LeafletMap';
 import Table from '../Table';
@@ -31,10 +31,9 @@ import {
   FileUrlWithDetails,
   FileWithDetails,
   getFilename,
-  LocalFileWithDetails,
   readToDataset,
 } from '../../file-data';
-import { getFileBlob, getPossibleTools, getTools, tools } from '../../tools';
+import { getFileBlob, getTools, tools } from '../../tools';
 import {
   create,
   toolFiles,
@@ -596,6 +595,7 @@ export default function LocalDataExplorer() {
   );
 }
 
+/** Render the dataset as if it were files. */
 function DataSetView() {
   const { path } = useRouteMatch();
   const dataset = use(DataSetContext);

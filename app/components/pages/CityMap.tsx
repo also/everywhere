@@ -1,8 +1,8 @@
 import { useHistory } from 'react-router';
 
-import Position from '../Position';
+import Position from '../stylized/Position';
 import Trips from '../Trips';
-import MapComponent, { MapMouseEvent } from '../Map';
+import MapComponent, { MapMouseEvent } from '../stylized/Map';
 import { StravaTripFeature } from '../../trips';
 
 export default function CityMap({

@@ -4,8 +4,8 @@ import { useHistory } from 'react-router';
 import styled from 'styled-components';
 
 import PageTitle from '../PageTitle';
-import MapComponent, { MapMouseHandler } from '../Map';
-import Ways from '../Ways';
+import MapComponent, { MapMouseHandler } from '../stylized/Map';
+import Ways from '../stylized/Ways';
 import WayListColumns from '../WayListColumns';
 import { GroupedWays, WayFeature, WayTree } from '../../ways';
 import StandardPage from '../StandardPage';

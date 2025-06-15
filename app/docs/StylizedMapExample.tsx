@@ -1,6 +1,6 @@
 import { useContext } from 'react';
 import DataSetContext from '../components/DataSetContext';
-import MapComponent from '../components/Map';
+import MapComponent from '../components/stylized/Map';
 import Trips from '../components/Trips';
 import { StravaTripFeature } from '../trips';
 import {
