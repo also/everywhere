@@ -15,13 +15,25 @@ export interface FileWithDetailsAndMaybeJson {
   json?: any;
 }
 
+async function getFileText(file: FileWithDetails): Promise<string> {
+  switch (file.type) {
+    case 'handle':
+      return file.file.text();
+    case 'contents':
+      return file.file.text();
+    case 'url':
+      const response = await fetch(file.url);
+      return response.text();
+  }
+}
+
 export async function getJsonFromFile(
   file: FileWithDetailsAndMaybeJson
 ): Promise<any> {
   if (file.json) {
     return file.json;
   }
-  return JSON.parse(await file.file.file.text());
+  return JSON.parse(await getFileText(file.file));
 }
 
 interface BaseTool<T> {

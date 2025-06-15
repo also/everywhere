@@ -28,8 +28,10 @@ import {
   datasetToFiles,
   FileContentsWithDetails,
   FileHandleWithDetails,
+  FileUrlWithDetails,
   FileWithDetails,
   getFilename,
+  LocalFileWithDetails,
   readToDataset,
 } from '../../file-data';
 import { getPossibleTools, tools } from '../../tools';
@@ -268,7 +270,7 @@ function ToolView({
   );
 }
 
-function Mp4View({ file }: { file: FileHandleWithDetails }) {
+function Mp4View({ file }: { file: LocalFileWithDetails }) {
   const mp4 = useMemo(() => {
     const data = new SeekableBlobBuffer(file.file, 1024000);
     return bind(mp4Parser, data, fileRoot(data));
@@ -290,9 +292,20 @@ function Mp4View({ file }: { file: FileHandleWithDetails }) {
   );
 }
 
-function JsonView({ file }: { file: FileHandleWithDetails }) {
+async function getFileText(file: FileWithDetails): Promise<string> {
+  switch (file.type) {
+    case 'handle':
+    case 'contents':
+      return file.file.text();
+    case 'url':
+      const response = await fetch(file.url);
+      return response.text();
+  }
+}
+
+function JsonView({ file }: { file: FileWithDetails }) {
   const json = useMemoAsync(
-    async () => JSON.parse(await file.file.text()),
+    async () => JSON.parse(await getFileText(file)),
     [file]
   );
 
@@ -333,17 +346,21 @@ function DataSetLoader({ features }: { features: Feature[] }) {
 
 type HandleFiles = (
   result: FileWithHandle[],
-  existingFiles?: FileHandleWithDetails[]
+  existingFiles?: FileWithDetails[]
+) => Promise<void>;
+
+type HandleUrls = (
+  urls: string[],
+  existingFiles?: FileWithDetails[]
 ) => Promise<void>;
 
 function useFiles() {
-  const [files, setFiles] =
-    useState<FileHandleWithDetails[] | undefined>(undefined);
+  const [files, setFiles] = useState<FileWithDetails[] | undefined>(undefined);
 
   const handleFiles = useMemo(() => {
     return async function handleFiles(
       result: FileWithHandle[],
-      existingFiles: FileHandleWithDetails[] = []
+      existingFiles: FileWithDetails[] = []
     ) {
       let maxId: number;
       await update('maxId', (current = 0) => {
@@ -371,11 +388,33 @@ function useFiles() {
     };
   }, []);
 
+  const handleUrls = useMemo(() => {
+    return async function handleUrls(
+      urls: string[],
+      existingFiles: FileWithDetails[] = []
+    ) {
+      let maxId: number;
+      await update('maxId', (current = 0) => {
+        maxId = current + urls.length;
+        return maxId;
+      });
+      const newFiles: FileUrlWithDetails[] = urls.map((url, i) => ({
+        id: `${maxId + i + 1}`,
+        type: 'url' as const,
+        url,
+        name: new URL(url).pathname.split('/').pop() || url,
+      }));
+      const allFiles = [...newFiles, ...existingFiles];
+      await set('files', allFiles);
+      setFiles(allFiles);
+    };
+  }, []);
+
   useEffect(() => {
     (async () => setFiles((await get('files')) ?? []))();
   }, []);
 
-  return { files, handleFiles };
+  return { files, handleFiles, handleUrls };
 }
 
 function FilesTable({ files }: { files: FileWithDetails[] }) {
@@ -406,10 +445,16 @@ function FilesTable({ files }: { files: FileWithDetails[] }) {
               <td>
                 <Link to={`${url}/file/${f.id}`}>{getFilename(f)}</Link>
               </td>
-              <td>{f.file.size.toLocaleString()}</td>
+              <td>
+                {f.type === 'handle' || f.type === 'contents'
+                  ? f.file.size.toLocaleString()
+                  : 'N/A'}
+              </td>
               <td>
                 {f.type === 'handle'
                   ? new Date(f.file.lastModified).toLocaleString()
+                  : f.type === 'url'
+                  ? 'N/A'
                   : ''}
               </td>
             </tr>
@@ -426,9 +471,11 @@ function FilesTable({ files }: { files: FileWithDetails[] }) {
 function FileManager({
   files,
   handleFiles,
+  handleUrls,
 }: {
-  files: FileHandleWithDetails[] | undefined;
+  files: FileWithDetails[] | undefined;
   handleFiles: HandleFiles;
+  handleUrls: HandleUrls;
 }) {
   const handleLoadClick = useCallback(
     async (e: React.MouseEvent) => {
@@ -462,6 +509,19 @@ function FileManager({
     [handleFiles]
   );
 
+  const [urlInput, setUrlInput] = useState('');
+
+  const handleAddUrlClick = useCallback(
+    async (e: React.MouseEvent) => {
+      e.preventDefault();
+      if (urlInput.trim()) {
+        await handleUrls([urlInput.trim()], files);
+        setUrlInput('');
+      }
+    },
+    [handleUrls, urlInput, files]
+  );
+
   return (
     <StandardPage>
       <PageTitle>Local Data</PageTitle>
@@ -473,6 +533,16 @@ function FileManager({
             <button onClick={handleResetClick}>reset</button>
           </>
         ) : undefined}
+      </div>
+      <div>
+        <input
+          type="url"
+          placeholder="Enter URL..."
+          value={urlInput}
+          onChange={(e) => setUrlInput(e.target.value)}
+          style={{ width: '400px', marginRight: '8px' }}
+        />
+        <button onClick={handleAddUrlClick}>add url</button>
       </div>
       <FilesTable files={files ?? []} />
 
@@ -490,12 +560,16 @@ function FileManager({
 
 export default function LocalDataExplorer() {
   const { path } = useRouteMatch();
-  const { files, handleFiles } = useFiles();
+  const { files, handleFiles, handleUrls } = useFiles();
 
   return (
     <Switch>
       <Route exact path={path}>
-        <FileManager files={files} handleFiles={handleFiles} />
+        <FileManager
+          files={files}
+          handleFiles={handleFiles}
+          handleUrls={handleUrls}
+        />
       </Route>
       <Route
         path={`${path}/file/:id`}
@@ -541,6 +615,7 @@ export function FileViewPage({
   const { path, url } = useRouteMatch();
 
   const singleFile = id !== 'all' ? selectedFiles[0] : undefined;
+
   const toolNames = useMemo(() => {
     if (!singleFile) {
       return Object.keys(tools);
@@ -594,13 +669,19 @@ export function FileViewPage({
           </p>
           {singleFile != null && (
             <>
-              <p>Size: {singleFile.file.size.toLocaleString()}</p>
+              <p>
+                Size:{' '}
+                {singleFile.type === 'handle' || singleFile.type === 'contents'
+                  ? singleFile.file.size.toLocaleString()
+                  : 'N/A'}
+              </p>
               {singleFile.type === 'handle' && (
                 <p>
                   Last Modified:{' '}
                   {new Date(singleFile.file.lastModified).toLocaleString()}
                 </p>
               )}
+              {singleFile.type === 'url' && <p>URL: {singleFile.url}</p>}
             </>
           )}
           <div>

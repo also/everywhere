@@ -6,7 +6,9 @@ import { buildDataSet, RawStravaTripFeature } from './trips';
 import { RawVideoFeature, toChapter, VideoChapter } from './videos';
 import { CompleteActivity } from '../tools/strava-api';
 
-export type FileWithDetails = FileHandleWithDetails | FileContentsWithDetails;
+export type FileWithDetails = FileHandleWithDetails | FileContentsWithDetails | FileUrlWithDetails;
+
+export type LocalFileWithDetails = FileHandleWithDetails | FileContentsWithDetails;
 
 export interface BaseFileDetails {
   id: string;
@@ -23,8 +25,21 @@ export interface FileContentsWithDetails extends BaseFileDetails {
   name: string;
 }
 
+export interface FileUrlWithDetails extends BaseFileDetails {
+  type: 'url';
+  url: string;
+  name: string;
+}
+
 export function getFilename(file: FileWithDetails) {
-  return file.type === 'handle' ? file.file.name : file.name;
+  switch (file.type) {
+    case 'handle':
+      return file.file.name;
+    case 'contents':
+      return file.name;
+    case 'url':
+      return file.name;
+  }
 }
 
 export function isProbablyStravaCompleteActivity(
