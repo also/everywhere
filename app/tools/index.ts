@@ -15,7 +15,7 @@ export interface FileWithDetailsAndMaybeJson {
   json?: any;
 }
 
-async function getFileText(file: FileWithDetails): Promise<string> {
+export async function getFileText(file: FileWithDetails): Promise<string> {
   switch (file.type) {
     case 'handle':
       return file.file.text();
@@ -24,6 +24,17 @@ async function getFileText(file: FileWithDetails): Promise<string> {
     case 'url':
       const response = await fetch(file.url);
       return response.text();
+  }
+}
+
+export async function getFileBlob(file: FileWithDetails): Promise<Blob> {
+  switch (file.type) {
+    case 'handle':
+    case 'contents':
+      return file.file;
+    case 'url':
+      const response = await fetch(file.url);
+      return response.blob();
   }
 }
 

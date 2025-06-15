@@ -24,7 +24,7 @@ export function useMemoAsync<T>(
           setState(value);
         }
       } catch (e) {
-        if (e?.name !== 'AbortError') {
+        if (!(e instanceof Error) || e.name !== 'AbortError') {
           throw e;
         }
       }

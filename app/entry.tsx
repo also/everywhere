@@ -279,6 +279,7 @@ root.render(
     <NavExtensionContext.Provider>
       <DataContext.Provider value={{ boundary, contours, ways }}>
         <DataSetSelector initialDataSet={buildDataSet([], [])}>
+          {/* @ts-expect-error old react router :( */}
           <Router>
             <App>
               <Switch>

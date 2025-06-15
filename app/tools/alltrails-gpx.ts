@@ -4,15 +4,15 @@ import { DOMParser } from 'xmldom';
 
 import { gpx } from '@tmcw/togeojson';
 
-import { Tool } from '.';
+import { getFileText, Tool } from '.';
 
 const alltrailsGpxTool: Tool = {
   couldProcessFileByExtension(extension) {
     return extension === 'gpx' ? 'yes' : 'no';
   },
 
-  async processFile({ file: { file } }) {
-    const doc = new DOMParser().parseFromString(await file.text(), 'text/xml');
+  async processFile({ file }) {
+    const doc = new DOMParser().parseFromString(await getFileText(file), 'text/xml');
     return gpx(doc);
   },
 };

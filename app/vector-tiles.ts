@@ -21,10 +21,10 @@ export async function drawDistanceTile(
   coords: { x: number; y: number; z: number },
   opts: TileRenderOpts | undefined
 ) {
+  // TODO opts are not used
   const bitmap = await channel.sendRequest(renderDistanceTileInWorker, {
     size: canvas.width,
     coords,
-    opts,
   });
   canvas.getContext('bitmaprenderer')!.transferFromImageBitmap(bitmap);
 }
