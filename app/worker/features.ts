@@ -1,5 +1,5 @@
 import { Feature } from 'geojson';
-import { features, featureSummary } from '../worker-stuff';
+import { features, featureSummary } from '../worker-messages';
 import { WorkerLocal } from '../WorkerChannel';
 
 export function createFeatureHandlers(channel: WorkerLocal, feats: Feature[]) {

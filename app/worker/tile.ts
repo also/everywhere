@@ -7,7 +7,7 @@ import {
   toolFiles,
   toolFileStatus,
   toolReady,
-} from '../worker-stuff';
+} from '../worker-messages';
 import { filteredNearestLine, LineRTree, tree } from '../geo';
 import { drawDebugInfo, drawDistanceTile, drawTile2 } from '../tile-drawing';
 import { shouldShowHighwayAtZoom } from '../osm';
