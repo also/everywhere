@@ -52,6 +52,7 @@
       
       const center = map.getCenter();
       const zoom = map.getZoom();
+      const bounds = map.getBounds();
       
       const locationData = {
         center: {
@@ -59,6 +60,12 @@
           lng: center.lng()
         },
         zoom: zoom,
+        bounds: {
+          north: bounds.getNorthEast().lat(),
+          south: bounds.getSouthWest().lat(),
+          east: bounds.getNorthEast().lng(),
+          west: bounds.getSouthWest().lng()
+        },
         timestamp: Date.now()
       };
       
