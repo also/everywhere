@@ -2,6 +2,7 @@ import axios from 'axios';
 import fs from 'fs';
 import path from 'path';
 import readline from 'readline';
+import { isErrno } from './utils/fs';
 
 function prompt(message: string): Promise<string> {
   const rl = readline.createInterface({
@@ -34,7 +35,7 @@ export async function getAppConfig(allowPrompt = true): Promise<AppConfig> {
   try {
     appConfig = JSON.parse(fs.readFileSync(appConfigFile, 'utf8'));
   } catch (e) {
-    if (!allowPrompt || e.code !== 'ENOENT') {
+    if (!allowPrompt || !isErrno(e) || e.code !== 'ENOENT') {
       throw e;
     }
     console.log(

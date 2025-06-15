@@ -411,6 +411,6 @@ function parseDate(s: string) {
   }
   args.push(parseInt(s.slice(13)));
   args[0] += 2000;
-  args[1] -= 1;
+  args[1]! -= 1;
   return Date.UTC(...args);
 }
