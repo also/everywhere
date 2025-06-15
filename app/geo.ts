@@ -92,12 +92,12 @@ function coordses(geometry: Geometry): Position[][] {
   return geometry.geometries.flatMap(coordses);
 }
 
-export function tree<T>(
-  feat: Feature<Geometry, T> | FeatureCollection<Geometry, T>
-): LineRTree<Feature<Geometry, T>> {
+export function tree<G extends Geometry, T>(
+  feat: Feature<G, T> | FeatureCollection<G, T>
+): LineRTree<Feature<G, T>> {
   const arcs: {
     arc: Position[];
-    data: Feature<Geometry, T>;
+    data: Feature<G, T>;
   }[] = [];
 
   (feat.type === 'FeatureCollection' ? feat.features : [feat]).forEach(
