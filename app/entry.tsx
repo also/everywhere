@@ -39,7 +39,7 @@ import {
 } from './data';
 import DataContext from './components/DataContext';
 import { ReactNode, useContext, useEffect, useState } from 'react';
-import LocalDataExplorer from './components/pages/LocalDataExplorer';
+import DataExplorer from './components/pages/DataExplorer';
 import DataSetContext, {
   DataSetProviderContext,
 } from './components/DataSetContext';
@@ -283,7 +283,7 @@ root.render(
           <Router>
             <App>
               <Switch>
-                <Route path="/local" component={LocalDataExplorer} />
+                <Route path="/local" component={DataExplorer} />
                 <Route path="/data" component={DataPage} />
                 <Route path="/map" component={MapRoute} />
                 <Route path="/ways/*" component={WayDetailsRoute} />

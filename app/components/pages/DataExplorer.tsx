@@ -537,7 +537,7 @@ function FileManager({
 
   return (
     <StandardPage>
-      <PageTitle>Local Data</PageTitle>
+      <PageTitle>Files</PageTitle>
       <div>
         {files ? (
           <>

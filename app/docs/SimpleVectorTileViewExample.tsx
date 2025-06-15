@@ -5,7 +5,7 @@ import {
   DataSetFeatureExtractor,
   extractFeaturesFromDataSet,
 } from './dataset-utils';
-import { SimpleVectorTileView } from '../components/pages/LocalDataExplorer';
+import { SimpleVectorTileView } from '../components/pages/DataExplorer';
 
 export default function SimpleVectorTileViewExample({
   data,
