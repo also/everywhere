@@ -88,22 +88,31 @@ export const tools: Record<string, ToolWithName> = Object.fromEntries(
   ])
 );
 
+export function getTools(file: FileWithDetails): {
+  tool: ToolWithName;
+  status: 'yes' | 'no' | 'maybe' | 'unknown';
+}[] {
+  const filename = getFilename(file);
+  const extension = filename.split('.').pop()!.toLowerCase();
+  return Object.values(tools).map((tool) => ({
+    tool,
+    status: tool.couldProcessFileByExtension
+      ? tool.couldProcessFileByExtension(extension)
+      : 'unknown',
+  }));
+}
+
 export function getPossibleTools(file: FileWithDetails): {
   yes: ToolWithName[];
   maybe: ToolWithName[];
 } {
-  const filename = getFilename(file);
-  const extension = filename.split('.').pop()!.toLowerCase();
   const yes: ToolWithName[] = [];
   const maybe: ToolWithName[] = [];
-  for (const tool of Object.values(tools)) {
-    if (tool.couldProcessFileByExtension) {
-      const result = tool.couldProcessFileByExtension(extension);
-      if (result === 'yes') {
-        yes.push(tool);
-      } else if (result === 'maybe') {
-        maybe.push(tool);
-      }
+  for (const { tool, status } of getTools(file)) {
+    if (status === 'yes') {
+      yes.push(tool);
+    } else if (status === 'maybe') {
+      maybe.push(tool);
     }
   }
 

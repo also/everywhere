@@ -34,7 +34,7 @@ import {
   LocalFileWithDetails,
   readToDataset,
 } from '../../file-data';
-import { getFileBlob, getPossibleTools, tools } from '../../tools';
+import { getFileBlob, getPossibleTools, getTools, tools } from '../../tools';
 import {
   create,
   toolFiles,
@@ -630,12 +630,11 @@ export function FileViewPage({
 
   const singleFile = id !== 'all' ? selectedFiles[0] : undefined;
 
-  const toolNames = useMemo(() => {
+  const fileTools = useMemo(() => {
     if (!singleFile) {
-      return Object.keys(tools);
+      return undefined;
     }
-    const { yes, maybe } = getPossibleTools(singleFile);
-    return [...yes, ...maybe].map((t) => t.name);
+    return getTools(singleFile);
   }, [singleFile]);
 
   if (selectedFiles.length === 0) {
@@ -667,14 +666,38 @@ export function FileViewPage({
               </Link>
             </p>
           </div>
-          <p>
-            Apply tool:{' '}
-            {toolNames.map((tool) => (
-              <>
-                <Link to={`${url}/tool/${tool}/status`}>{tool}</Link>{' '}
-              </>
-            ))}
-          </p>
+          {!singleFile && (
+            <p>
+              Apply tool:{' '}
+              {Object.keys(tools).map((tool) => (
+                <>
+                  <Link to={`${url}/tool/${tool}/status`}>{tool}</Link>{' '}
+                </>
+              ))}
+            </p>
+          )}
+          {fileTools && (
+            <Table>
+              <thead>
+                <tr>
+                  <th>Tool</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {fileTools.map((t) => (
+                  <tr key={t.tool.name}>
+                    <td>
+                      <Link to={`${url}/tool/${t.tool.name}/status`}>
+                        {t.tool.name}
+                      </Link>
+                    </td>
+                    <td>{t.status}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          )}
           {singleFile != null && (
             <>
               <p>
