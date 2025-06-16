@@ -120,8 +120,6 @@ function App({
   if (localStorage.getItem('enableExtras') === 'true') {
     extras = (
       <>
-        <HeaderLink to="/map">Map</HeaderLink>{' '}
-        <HeaderLink to="/data">Data</HeaderLink>
         <HeaderLink to="/local">Files</HeaderLink>
         <HeaderLink to="/docs">Docs</HeaderLink>
       </>
@@ -258,15 +256,6 @@ function DataSetSelector({
   );
 }
 
-function MapRoute() {
-  const { trips } = useContext(DataSetContext);
-  return (
-    <FullScreenPage>
-      <LeafletFeatureMap features={trips} />
-    </FullScreenPage>
-  );
-}
-
 const div = document.createElement('div');
 document.body.appendChild(div);
 const datasetPromise = loadDataset();
@@ -284,8 +273,6 @@ root.render(
             <App>
               <Switch>
                 <Route path="/local" component={DataExplorer} />
-                <Route path="/data" component={DataPage} />
-                <Route path="/map" component={MapRoute} />
                 <Route path="/ways/*" component={WayDetailsRoute} />
                 <Route path="/ways" component={WayListRoute} />
                 <Route
