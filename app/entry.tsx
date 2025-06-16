@@ -44,10 +44,7 @@ import DataSetContext, {
   DataSetProviderContext,
 } from './components/DataSetContext';
 import { loadDataset } from './default-data-set';
-import { LeafletFeatureMap } from './components/LeafletMap';
-import DataPage from './components/pages/DataPage';
 import StandardPage from './components/StandardPage';
-import FullScreenPage from './components/FullScreenPage';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { buildDataSet } from './trips';
 import PageTitle from './components/PageTitle';

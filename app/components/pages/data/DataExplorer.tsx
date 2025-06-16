@@ -522,6 +522,8 @@ function FileManager({
   handleFiles: HandleFiles;
   handleUrls: HandleUrls;
 }) {
+  const { url } = useRouteMatch();
+
   const handleLoadClick = useCallback(
     async (e: React.MouseEvent) => {
       e.preventDefault();
@@ -570,6 +572,9 @@ function FileManager({
   return (
     <StandardPage>
       <PageTitle>Files</PageTitle>
+      <p>
+        <Link to={`${url}/dataset`}>Open Dataset</Link>
+      </p>
       <div>
         {files ? (
           <>
@@ -636,6 +641,7 @@ function DataSetView() {
     <Switch>
       <Route exact path={path}>
         <StandardPage>
+          <PageTitle>Dataset</PageTitle>
           <FilesTable files={files} />
         </StandardPage>
       </Route>
