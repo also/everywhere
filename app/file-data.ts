@@ -105,6 +105,7 @@ export function datasetToFiles(dataset: DataSet): FileContentsWithDetails[] {
     const simpleTrip = {
       ...trip,
       properties: {
+        type: 'strava-trip',
         activity: trip.properties.activity,
       },
     };
