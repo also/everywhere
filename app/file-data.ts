@@ -1,9 +1,14 @@
-import { Feature } from 'geojson';
+import { Feature, LineString } from 'geojson';
 import { FileWithHandle } from 'browser-fs-access';
 import { FeatureOrCollection } from './geo';
 import { DataSet } from './data';
 import { buildDataSet, RawStravaTripFeature } from './trips';
-import { RawVideoFeature, toChapter, VideoChapter } from './videos';
+import {
+  RawVideoFeature,
+  RawVideoProperties,
+  toChapter,
+  VideoChapter,
+} from './videos';
 import { CompleteActivity } from '../tools/strava-api';
 
 export type FileWithDetails =
@@ -111,6 +116,29 @@ export function datasetToFiles(dataset: DataSet): FileContentsWithDetails[] {
       name: `${trip.properties.activity.id}.geojson`,
       id: i++ + '',
     });
+  }
+  for (const video of dataset.videos.values()) {
+    for (const chapter of video.chapters) {
+      const simpleVideo: Feature<LineString, RawVideoProperties> = {
+        type: 'Feature',
+        geometry: {
+          type: 'LineString',
+          coordinates: [],
+        },
+        properties: {
+          creationTime: chapter.start.valueOf() / 1000,
+          duration: chapter.duration / 1000 / 1000 / 90,
+        },
+      };
+      files.push({
+        type: 'contents',
+        file: new Blob([JSON.stringify(simpleVideo)], {
+          type: 'application/json',
+        }),
+        name: chapter.name + '.MP4.geojson',
+        id: i++ + '',
+      });
+    }
   }
   return files;
 }
