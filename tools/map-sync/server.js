@@ -1,6 +1,8 @@
 const WebSocket = require('ws');
 
-const port = 8081;
+const portArg = process.argv[2];
+
+const port = portArg ? parseInt(portArg) : 8081;
 const wss = new WebSocket.Server({ port });
 
 console.log(`WebSocket server listening on port ${port}`);
@@ -15,12 +17,14 @@ wss.on('connection', (ws) => {
   ws.on('message', (data) => {
     try {
       const message = JSON.parse(data);
-      console.log('Received message:', message);
-      
+
+      // Convert back to string to ensure it's sent as text, not blob
+      const messageString = JSON.stringify(message);
+
       // Broadcast the location to all other connected clients
       clients.forEach((client) => {
         if (client !== ws && client.readyState === WebSocket.OPEN) {
-          client.send(data);
+          client.send(messageString);
         }
       });
     } catch (error) {
