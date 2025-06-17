@@ -156,8 +156,11 @@ function FeatureDetailsPage({ channel }: { channel: WorkerRemote }) {
   );
   return (
     <StandardPage>
+      <PageTitle>Feature Details</PageTitle>
       <FeatureDetails feature={feature} />
-      {feature?.properties && <ObjectInspector data={feature.properties} />}
+      {feature?.properties && (
+        <ObjectInspector data={feature.properties} expandPaths={['$']} />
+      )}
     </StandardPage>
   );
 }
