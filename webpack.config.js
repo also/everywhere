@@ -45,10 +45,6 @@ module.exports = (env) => ({
         type: 'json',
       },
       {
-        test: /\.s[ac]ss$/,
-        loader: 'sass-loader',
-      },
-      {
         test: /\.mdx?$/,
         use: [
           {
