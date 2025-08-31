@@ -7,7 +7,7 @@
   // WebSocket connection
   const connectWebSocket = () => {
     try {
-      ws = new WebSocket('ws://localhost:8081');
+      ws = new WebSocket('ws://localhost:8081/map-sync');
 
       ws.onopen = () => {
         console.log('[Map Sync] Connected to WebSocket server');
