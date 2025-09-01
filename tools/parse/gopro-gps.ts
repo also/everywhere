@@ -29,7 +29,7 @@ export async function extractGps(
     longitude: number,
     latitude: number,
     altitude: number,
-    timestamp: number
+    timestamp: number,
   ][] = [];
 
   let dropped;

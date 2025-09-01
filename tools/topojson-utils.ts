@@ -35,7 +35,7 @@ export function addArcOffset(n: number, offset: number): number {
 type PropsOf<T> = T extends GeometryObject<infer P> ? P : never;
 
 export function createMutableSimpleCombinedTopology<
-  P extends GeoJsonProperties
+  P extends GeoJsonProperties,
 >() {
   return {
     type: 'Topology',
@@ -47,7 +47,7 @@ export function createMutableSimpleCombinedTopology<
 export function combineTopologies<
   PropsOut extends Properties,
   T extends GeometryObject<any>,
-  P extends PropsOf<T>
+  P extends PropsOf<T>,
 >(
   topologies: Iterable<SimpleTopology<T>>,
   transformProps: (input: P) => PropsOut

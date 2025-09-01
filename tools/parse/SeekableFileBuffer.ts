@@ -11,7 +11,10 @@ export default class SeekableFileBuffer
 
   private fd: number;
 
-  constructor(fd: number, private backingBuffer: Buffer) {
+  constructor(
+    fd: number,
+    private backingBuffer: Buffer
+  ) {
     super();
     this.fd = fd;
     this.size = fs.fstatSync(this.fd).size;
