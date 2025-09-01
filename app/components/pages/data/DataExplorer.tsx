@@ -422,7 +422,7 @@ function useFiles() {
               id: `${maxId + i + 1}`,
               type: 'handle',
               file,
-            } as const)
+            }) as const
         )
       );
       const allFiles = [...newFiles, ...existingFiles];
@@ -502,8 +502,8 @@ function FilesTable({ files }: { files: FileWithDetails[] }) {
                 {f.type === 'handle'
                   ? new Date(f.file.lastModified).toLocaleString()
                   : f.type === 'url'
-                  ? 'N/A'
-                  : ''}
+                    ? 'N/A'
+                    : ''}
               </td>
             </tr>
           ))}
