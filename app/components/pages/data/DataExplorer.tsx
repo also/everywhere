@@ -70,6 +70,8 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { ColumnDef } from '@tanstack/react-table';
+import { DataTable } from './DataTable';
 
 function Path({ feature }: { feature: Feature }) {
   const { path } = useContext(MapContext);
@@ -488,6 +490,37 @@ function useFiles() {
   return { files, handleFiles, handleUrls };
 }
 
+const columns: ColumnDef<FileWithDetails>[] = [
+  {
+    header: 'ID',
+    accessorKey: 'id',
+  },
+  {
+    header: 'Name',
+    accessorFn: (f) => getFilename(f),
+    cell: ({ row: { original: f } }) => {
+      const { url } = useRouteMatch();
+      return <Link to={`${url}/file/${f.id}`}>{getFilename(f)}</Link>;
+    },
+  },
+  {
+    header: 'Size',
+    accessorFn: (f) =>
+      f.type === 'handle' || f.type === 'contents'
+        ? f.file.size.toLocaleString()
+        : 'N/A',
+  },
+  {
+    header: 'Last Modified',
+    accessorFn: (f) =>
+      f.type === 'handle'
+        ? new Date(f.file.lastModified).toLocaleString()
+        : f.type === 'url'
+          ? 'N/A'
+          : '',
+  },
+];
+
 function FilesTable({ files }: { files: FileWithDetails[] }) {
   const { url } = useRouteMatch();
 
@@ -500,41 +533,7 @@ function FilesTable({ files }: { files: FileWithDetails[] }) {
           </>
         ) : undefined}
       </div>
-      <Table className="max-w-4xl">
-        <TableHeader>
-          <TableRow>
-            <TableHead>ID</TableHead>
-            <TableHead>Name</TableHead>
-            <TableHead>Size</TableHead>
-            <TableHead>Last Modified</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {(files || []).slice(0, 100).map((f, i) => (
-            <TableRow key={i}>
-              <TableCell>{f.id}</TableCell>
-              <TableCell>
-                <Link to={`${url}/file/${f.id}`}>{getFilename(f)}</Link>
-              </TableCell>
-              <TableCell>
-                {f.type === 'handle' || f.type === 'contents'
-                  ? f.file.size.toLocaleString()
-                  : 'N/A'}
-              </TableCell>
-              <TableCell>
-                {f.type === 'handle'
-                  ? new Date(f.file.lastModified).toLocaleString()
-                  : f.type === 'url'
-                    ? 'N/A'
-                    : ''}
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-      {files && files.length > 100 && (
-        <div>{files.length - 100} files not shown</div>
-      )}
+      <DataTable columns={columns} data={files} />
     </>
   );
 }
