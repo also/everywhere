@@ -586,9 +586,7 @@ function FileManager({
   return (
     <StandardPage>
       <PageTitle>Files</PageTitle>
-      <p>
-        <Link to={`${url}/dataset`}>Open Dataset</Link>
-      </p>
+
       <div className="flex gap-2">
         {files ? (
           <>
@@ -601,7 +599,7 @@ function FileManager({
         <div className="flex-1">
           <FilesTable files={files ?? []} />
         </div>
-        <div className="w-80">
+        <div className="w-80 space-y-4">
           <Card>
             <CardHeader>
               <CardTitle>Add files</CardTitle>
@@ -620,6 +618,19 @@ function FileManager({
                 />
                 <Button onClick={handleAddUrlClick}>add url</Button>
               </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Dataset</CardTitle>
+              <CardDescription>
+                The dataset is the trips and videos shown on the site.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button asChild>
+                <Link to={`${url}/dataset`}>Open dataset as files</Link>
+              </Button>
             </CardContent>
           </Card>
         </div>
