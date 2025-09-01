@@ -527,18 +527,6 @@ function FileManager({
 }) {
   const { url } = useRouteMatch();
 
-  const handleLoadClick = useCallback(
-    async (e: React.MouseEvent) => {
-      e.preventDefault();
-      const result = await fileOpen({
-        multiple: true,
-        // mimeTypes: ['video/mp4'],
-      });
-
-      await handleFiles(result);
-    },
-    [handleFiles]
-  );
   const handleAddClick = useCallback(
     async (e: React.MouseEvent) => {
       e.preventDefault();
@@ -581,7 +569,6 @@ function FileManager({
       <div>
         {files ? (
           <>
-            <button onClick={handleLoadClick}>load</button>
             <button onClick={handleAddClick}>add</button>
             <button onClick={handleResetClick}>reset</button>
           </>
@@ -598,15 +585,6 @@ function FileManager({
         <button onClick={handleAddUrlClick}>add url</button>
       </div>
       <FilesTable files={files ?? []} />
-
-      <p>
-        <strong>load:</strong> replace the current list of files with the
-        selected files
-      </p>
-      <p>
-        <strong>add:</strong> add the selected files to the current list of
-        files
-      </p>
     </StandardPage>
   );
 }
