@@ -18,8 +18,8 @@ const geojsonTool: Tool = {
     return extension === 'geojson'
       ? 'yes'
       : extension === 'json'
-      ? 'maybe'
-      : 'no';
+        ? 'maybe'
+        : 'no';
   },
   couldProcessFileByJson(json) {
     // TODO more precise check?

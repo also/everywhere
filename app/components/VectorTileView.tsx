@@ -21,15 +21,14 @@ export default function VectorTileView({
 }: {
   channel: WorkerChannel;
 }) {
-  const [selected, setSelected] =
-    useState<{
-      feature:
-        | Feature<MultiLineString | LineString, GeoJsonProperties>
-        | undefined;
-      distance: number | undefined;
-      lng: number;
-      lat: number;
-    }>();
+  const [selected, setSelected] = useState<{
+    feature:
+      | Feature<MultiLineString | LineString, GeoJsonProperties>
+      | undefined;
+    distance: number | undefined;
+    lng: number;
+    lat: number;
+  }>();
   const popupDiv = useMemo(() => document.createElement('div'), []);
 
   const customize = useMemo(() => {

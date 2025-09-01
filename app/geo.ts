@@ -19,7 +19,7 @@ import { positionDistance } from './distance';
 
 export type FeatureOrCollection<
   G extends Geometry,
-  P extends GeoJsonProperties
+  P extends GeoJsonProperties,
 > = Feature<G, P> | FeatureCollection<G, P>;
 
 export function features<G extends Geometry, T extends TopoJSON.Properties>(

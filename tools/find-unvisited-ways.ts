@@ -31,8 +31,8 @@ export default function ({
       geometry.type === 'LineString'
         ? geometry.coordinates
         : geometry.type === 'MultiLineString'
-        ? geometry.coordinates.flat()
-        : [];
+          ? geometry.coordinates.flat()
+          : [];
     let visitedSome = false;
     let visitedAll = true;
     // TODO check every n meters along a street, rather than each point

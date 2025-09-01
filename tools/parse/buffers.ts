@@ -70,7 +70,10 @@ export class SeekableBlobBuffer
   protected arrayBuffer: ArrayBuffer;
   size: number;
 
-  constructor(private blob: Blob, private bufferSize: number) {
+  constructor(
+    private blob: Blob,
+    private bufferSize: number
+  ) {
     super();
     this.size = blob.size;
 

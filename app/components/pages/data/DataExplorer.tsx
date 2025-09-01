@@ -540,18 +540,6 @@ function FileManager({
 }) {
   const { url } = useRouteMatch();
 
-  const handleLoadClick = useCallback(
-    async (e: React.MouseEvent) => {
-      e.preventDefault();
-      const result = await fileOpen({
-        multiple: true,
-        // mimeTypes: ['video/mp4'],
-      });
-
-      await handleFiles(result);
-    },
-    [handleFiles]
-  );
   const handleAddClick = useCallback(
     async (e: React.MouseEvent) => {
       e.preventDefault();
@@ -594,7 +582,6 @@ function FileManager({
       <div className="flex gap-2">
         {files ? (
           <>
-            <Button onClick={handleLoadClick}>load</Button>
             <Button onClick={handleAddClick}>add</Button>
             <Button onClick={handleResetClick}>reset</Button>
           </>
@@ -611,15 +598,6 @@ function FileManager({
         <Button onClick={handleAddUrlClick}>add url</Button>
       </div>
       <FilesTable files={files ?? []} />
-
-      <p>
-        <strong>load:</strong> replace the current list of files with the
-        selected files
-      </p>
-      <p>
-        <strong>add:</strong> add the selected files to the current list of
-        files
-      </p>
     </StandardPage>
   );
 }

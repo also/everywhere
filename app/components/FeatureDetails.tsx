@@ -2,7 +2,7 @@ import { Feature, GeoJsonProperties } from 'geojson';
 import { VideoProperties } from '../../tools/parse/gopro-gps';
 
 export interface LimitedFeature<
-  P extends GeoJsonProperties | null = GeoJsonProperties
+  P extends GeoJsonProperties | null = GeoJsonProperties,
 > {
   id?: Feature['id'];
   properties: P;
