@@ -62,16 +62,19 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
   Card,
-  CardAction,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { ColumnDef } from '@tanstack/react-table';
+import {
+  ColumnDef,
+  getCoreRowModel,
+  useReactTable,
+} from '@tanstack/react-table';
 import { DataTable } from './DataTable';
+import { Checkbox } from '@/components/ui/checkbox';
 
 function Path({ feature }: { feature: Feature }) {
   const { path } = useContext(MapContext);
@@ -492,6 +495,28 @@ function useFiles() {
 
 const columns: ColumnDef<FileWithDetails>[] = [
   {
+    id: 'select',
+    header: ({ table }) => (
+      <Checkbox
+        checked={
+          table.getIsAllRowsSelected() ||
+          (table.getIsSomeRowsSelected() && 'indeterminate')
+        }
+        onCheckedChange={(value) => table.toggleAllRowsSelected(!!value)}
+        aria-label="Select all"
+      />
+    ),
+    cell: ({ row }) => (
+      <Checkbox
+        checked={row.getIsSelected()}
+        onCheckedChange={(value) => row.toggleSelected(!!value)}
+        aria-label="Select row"
+      />
+    ),
+    enableSorting: false,
+    enableHiding: false,
+  },
+  {
     header: 'ID',
     accessorKey: 'id',
   },
@@ -524,16 +549,33 @@ const columns: ColumnDef<FileWithDetails>[] = [
 function FilesTable({ files }: { files: FileWithDetails[] }) {
   const { url } = useRouteMatch();
 
+  const table = useReactTable({
+    data: files,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+  });
+
+  const selected = table.getIsAllRowsSelected()
+    ? 'all'
+    : table.getIsSomeRowsSelected()
+      ? table
+          .getSelectedRowModel()
+          .rows.map((row) => row.original.id)
+          .join(',')
+      : undefined;
+
   return (
     <>
       <div>
-        {files ? (
-          <>
-            <Link to={`${url}/file/all`}>All Files</Link>
-          </>
-        ) : undefined}
+        {selected ? (
+          <Button asChild>
+            <Link to={`${url}/file/${selected}`}>Selected Files</Link>
+          </Button>
+        ) : (
+          <Button disabled>Selected Files</Button>
+        )}
       </div>
-      <DataTable columns={columns} data={files} />
+      <DataTable table={table} />
     </>
   );
 }
@@ -690,13 +732,14 @@ export function FileViewPage({
   id: string;
   files: FileWithDetails[];
 }) {
+  const ids = new Set(id.split(','));
   const selectedFiles = useMemo(
-    () => (id === 'all' ? files : files?.filter((f) => f.id === id)) ?? [],
+    () => (id === 'all' ? files : files?.filter((f) => ids.has(f.id))) ?? [],
     [files, id]
   );
   const { path, url } = useRouteMatch();
 
-  const singleFile = id !== 'all' ? selectedFiles[0] : undefined;
+  const singleFile = ids.size === 1 ? selectedFiles[0] : undefined;
 
   const fileTools = useMemo(() => {
     if (!singleFile) {
@@ -714,7 +757,9 @@ export function FileViewPage({
       <Route exact path={path}>
         <StandardPage>
           <PageTitle>
-            {singleFile ? getFilename(singleFile) : 'All Files'}
+            {singleFile
+              ? getFilename(singleFile)
+              : `${selectedFiles.length} Files`}
           </PageTitle>
           <div>
             {singleFile != null ? (

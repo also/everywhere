@@ -1,11 +1,6 @@
 'use client';
 
-import {
-  ColumnDef,
-  flexRender,
-  getCoreRowModel,
-  useReactTable,
-} from '@tanstack/react-table';
+import { flexRender, Table as TanstackTable } from '@tanstack/react-table';
 
 import {
   Table,
@@ -17,20 +12,12 @@ import {
 } from '@/components/ui/table';
 
 interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[];
-  data: TData[];
+  table: TanstackTable<TData>;
 }
 
 export function DataTable<TData, TValue>({
-  columns,
-  data,
+  table,
 }: DataTableProps<TData, TValue>) {
-  const table = useReactTable({
-    data,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-  });
-
   return (
     <div className="overflow-hidden rounded-md border">
       <Table>
@@ -68,7 +55,10 @@ export function DataTable<TData, TValue>({
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center">
+              <TableCell
+                colSpan={table.getVisibleFlatColumns().length}
+                className="h-24 text-center"
+              >
                 No files.
               </TableCell>
             </TableRow>
