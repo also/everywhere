@@ -1,32 +1,25 @@
 import { ReactNode } from 'react';
-import styled from 'styled-components';
+import { cn } from '@/lib/utils';
 
-const StyledDiv = styled.div`
-  padding: 3em;
-`;
+interface StandardPageProps {
+  children: ReactNode;
+  className?: string;
+}
 
-const Footer = styled.footer`
-  margin: 1em;
-  text-align: center;
-  font-size: 0.8em;
-  color: #cecece;
-
-  & a {
-    color: inherit;
-  }
-`;
-
-export default function StandardPage({ children }: { children: ReactNode }) {
+export default function StandardPage({
+  children,
+  className,
+}: StandardPageProps) {
   return (
-    <StyledDiv>
+    <div className={cn('p-12', className)}>
       {children}
-      <Footer>
+      <footer className="m-3 text-center text-xs text-gray-300">
         <p>
           Map data ©{' '}
           <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>{' '}
           contributors
         </p>
-      </Footer>
-    </StyledDiv>
+      </footer>
+    </div>
   );
 }
