@@ -5,11 +5,9 @@ const path = require('path');
 
 module.exports = (env) => ({
   context: __dirname + '/app',
-  entry: './entry',
+  entry: { app: './entry' },
   output: {
     path: __dirname + '/site/build',
-    filename: 'app.js',
-    chunkFilename: 'app-[name].js',
   },
   module: {
     rules: [
@@ -43,6 +41,14 @@ module.exports = (env) => ({
       {
         test: /\.json$/,
         type: 'json',
+      },
+      {
+        test: /\.css$/,
+        use: ['postcss-loader'],
+        type: 'asset/resource',
+        generator: {
+          filename: '[name].css', // entry name → output CSS file
+        },
       },
       {
         test: /\.mdx?$/,

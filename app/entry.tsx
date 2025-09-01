@@ -1,3 +1,4 @@
+import './index.css';
 import d3 from 'd3';
 import { createRoot } from 'react-dom/client';
 import styled, { createGlobalStyle } from 'styled-components';
