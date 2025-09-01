@@ -69,6 +69,7 @@ module.exports = (env) => ({
         __dirname,
         'app/docs/also-mdx-jsx-runtime'
       ),
+      '@': path.resolve(__dirname, 'app'),
     },
   },
   resolveLoader: {

@@ -51,6 +51,7 @@ import { bind, fileRoot } from '../../../../tools/parse';
 import { parser as mp4Parser } from '../../../../tools/parse/mp4';
 import { getMeta } from '../../../../tools/parse/gpmf';
 import DataSetContext, { DataSetProviderContext } from '../../DataSetContext';
+import { Button } from '@/components/ui/button';
 
 function Path({ feature }: { feature: Feature }) {
   const { path } = useContext(MapContext);
@@ -385,7 +386,7 @@ function DataSetLoader({ features }: { features: Feature[] }) {
       <div>
         Trips: {dataset.trips.length}, Videos: {dataset.videos.size}
       </div>
-      <button onClick={() => setDataSet(dataset)}>Set Dataset</button>
+      <Button onClick={() => setDataSet(dataset)}>Set Dataset</Button>
     </>
   ) : (
     <LoadingPage />
@@ -581,9 +582,9 @@ function FileManager({
       <div>
         {files ? (
           <>
-            <button onClick={handleLoadClick}>load</button>
-            <button onClick={handleAddClick}>add</button>
-            <button onClick={handleResetClick}>reset</button>
+            <Button onClick={handleLoadClick}>load</Button>
+            <Button onClick={handleAddClick}>add</Button>
+            <Button onClick={handleResetClick}>reset</Button>
           </>
         ) : undefined}
       </div>
@@ -765,7 +766,7 @@ export function FileViewPage({
             </p>
             <p>
               <strong>Leaflet Map:</strong> Show a map using simple Leaflet
-              GoeJSON rendering.
+              GeoJSON rendering.
             </p>
             <p>
               <strong>Stylized Map:</strong> Show a map in the everywhere.bike
