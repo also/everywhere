@@ -16,7 +16,14 @@ import MapComponent from '../../stylized/Map';
 import MapContext from '../../stylized/MapContext';
 import MapBox from '../../MapBox';
 import { LeafletFeatureMap } from '../../LeafletMap';
-import Table from '../../Table';
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableHead,
+  TableRow,
+  TableCell,
+} from '@/components/ui/table';
 import TraverserView, { GpmfSamples } from '../../data/TraverserView';
 import { useMemoAsync } from '../../../hooks';
 import FullScreenPage from '../../FullScreenPage';
@@ -114,36 +121,40 @@ function FeatureList({
     <StandardPage>
       <div>{features.length} features</div>
       <Table>
-        <thead>
-          <tr>
-            <th></th>
-            <th>File ID</th>
-            <th>Filename</th>
-            <th>Tool</th>
-            <th>Type</th>
-            <th>Details</th>
-          </tr>
-        </thead>
-        <tbody>
+        <TableHeader>
+          <TableRow>
+            <TableHead></TableHead>
+            <TableHead>File ID</TableHead>
+            <TableHead>Filename</TableHead>
+            <TableHead>Tool</TableHead>
+            <TableHead>Type</TableHead>
+            <TableHead>Details</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
           {features.map((f, i) => (
-            <tr key={i}>
-              <td>
+            <TableRow key={i}>
+              <TableCell>
                 <Link
                   to={`${featuresUrl}/feature/${f.properties?.everywhereFeatureIndex}`}
                 >
                   {i}
                 </Link>
-              </td>
-              <td>{f.properties?.everywhereFileId ?? 'unknown'}</td>
-              <td>{f.properties?.everywhereFilename ?? 'unknown'}</td>
-              <td>{f.properties?.everywhereTool ?? 'unknown'}</td>
-              <td>{f.geometry.type}</td>
-              <td>
+              </TableCell>
+              <TableCell>
+                {f.properties?.everywhereFileId ?? 'unknown'}
+              </TableCell>
+              <TableCell>
+                {f.properties?.everywhereFilename ?? 'unknown'}
+              </TableCell>
+              <TableCell>{f.properties?.everywhereTool ?? 'unknown'}</TableCell>
+              <TableCell>{f.geometry.type}</TableCell>
+              <TableCell>
                 <FeatureDetails feature={f} />
-              </td>
-            </tr>
+              </TableCell>
+            </TableRow>
           ))}
-        </tbody>
+        </TableBody>
       </Table>
     </StandardPage>
   );
@@ -423,7 +434,7 @@ function useFiles() {
               id: `${maxId + i + 1}`,
               type: 'handle',
               file,
-            } as const)
+            }) as const
         )
       );
       const allFiles = [...newFiles, ...existingFiles];
@@ -478,37 +489,37 @@ function FilesTable({ files }: { files: FileWithDetails[] }) {
           </>
         ) : undefined}
       </div>
-      <Table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Size</th>
-            <th>Last Modified</th>
-          </tr>
-        </thead>
-        <tbody>
+      <Table className="max-w-4xl">
+        <TableHeader>
+          <TableRow>
+            <TableHead>ID</TableHead>
+            <TableHead>Name</TableHead>
+            <TableHead>Size</TableHead>
+            <TableHead>Last Modified</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
           {(files || []).slice(0, 100).map((f, i) => (
-            <tr key={i}>
-              <td>{f.id}</td>
-              <td>
+            <TableRow key={i}>
+              <TableCell>{f.id}</TableCell>
+              <TableCell>
                 <Link to={`${url}/file/${f.id}`}>{getFilename(f)}</Link>
-              </td>
-              <td>
+              </TableCell>
+              <TableCell>
                 {f.type === 'handle' || f.type === 'contents'
                   ? f.file.size.toLocaleString()
                   : 'N/A'}
-              </td>
-              <td>
+              </TableCell>
+              <TableCell>
                 {f.type === 'handle'
                   ? new Date(f.file.lastModified).toLocaleString()
                   : f.type === 'url'
-                  ? 'N/A'
-                  : ''}
-              </td>
-            </tr>
+                    ? 'N/A'
+                    : ''}
+              </TableCell>
+            </TableRow>
           ))}
-        </tbody>
+        </TableBody>
       </Table>
       {files && files.length > 100 && (
         <div>{files.length - 100} files not shown</div>
@@ -719,25 +730,25 @@ export function FileViewPage({
             </p>
           )}
           {fileTools && (
-            <Table>
-              <thead>
-                <tr>
-                  <th>Tool</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
+            <Table className="max-w-xs">
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Tool</TableHead>
+                  <TableHead>Status</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {fileTools.map((t) => (
-                  <tr key={t.tool.name}>
-                    <td>
+                  <TableRow key={t.tool.name}>
+                    <TableCell>
                       <Link to={`${url}/tool/${t.tool.name}/status`}>
                         {t.tool.name}
                       </Link>
-                    </td>
-                    <td>{t.status}</td>
-                  </tr>
+                    </TableCell>
+                    <TableCell>{t.status}</TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
+              </TableBody>
             </Table>
           )}
           {singleFile != null && (
