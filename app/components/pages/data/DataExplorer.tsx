@@ -60,6 +60,16 @@ import { getMeta } from '../../../../tools/parse/gpmf';
 import DataSetContext, { DataSetProviderContext } from '../../DataSetContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
 
 function Path({ feature }: { feature: Feature }) {
   const { path } = useContext(MapContext);
@@ -582,21 +592,31 @@ function FileManager({
       <div className="flex gap-2">
         {files ? (
           <>
-            <Button onClick={handleAddClick}>add</Button>
             <Button onClick={handleResetClick}>reset</Button>
           </>
         ) : undefined}
       </div>
-      <div className="flex gap-2">
-        <Input
-          type="url"
-          placeholder="Enter URL..."
-          value={urlInput}
-          onChange={(e) => setUrlInput(e.target.value)}
-          className="max-w-sm"
-        />
-        <Button onClick={handleAddUrlClick}>add url</Button>
-      </div>
+
+      <Card className="w-full max-w-sm">
+        <CardHeader>
+          <CardTitle>Add files</CardTitle>
+          <CardDescription>Add files to the collection.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button onClick={handleAddClick}>add</Button>
+          <Separator className="my-4" />
+          <div className="flex gap-2">
+            <Input
+              type="url"
+              placeholder="Enter URL..."
+              value={urlInput}
+              onChange={(e) => setUrlInput(e.target.value)}
+              className="w-full"
+            />
+            <Button onClick={handleAddUrlClick}>add url</Button>
+          </div>
+        </CardContent>
+      </Card>
       <FilesTable files={files ?? []} />
     </StandardPage>
   );
