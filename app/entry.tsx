@@ -52,6 +52,7 @@ import PageTitle from './components/PageTitle';
 import { NavExtensionContext } from './components/Nav';
 
 const GlobalStyle = createGlobalStyle`
+@layer base {
 body {
   font-family: 'helvetica neue';
   font-size: 13px;
@@ -65,10 +66,11 @@ table {
 }
 
 a {
-    color: #116aa9;
-    // https://crbug.com/439820
-    outline: none;
-  }
+  color: #116aa9;
+  // https://crbug.com/439820
+  outline: none;
+}
+}
 `;
 
 const Header = styled.header`
