@@ -597,27 +597,33 @@ function FileManager({
         ) : undefined}
       </div>
 
-      <Card className="w-full max-w-sm">
-        <CardHeader>
-          <CardTitle>Add files</CardTitle>
-          <CardDescription>Add files to the collection.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Button onClick={handleAddClick}>add</Button>
-          <Separator className="my-4" />
-          <div className="flex gap-2">
-            <Input
-              type="url"
-              placeholder="Enter URL..."
-              value={urlInput}
-              onChange={(e) => setUrlInput(e.target.value)}
-              className="w-full"
-            />
-            <Button onClick={handleAddUrlClick}>add url</Button>
-          </div>
-        </CardContent>
-      </Card>
-      <FilesTable files={files ?? []} />
+      <div className="flex gap-6">
+        <div className="flex-1">
+          <FilesTable files={files ?? []} />
+        </div>
+        <div className="w-80">
+          <Card>
+            <CardHeader>
+              <CardTitle>Add files</CardTitle>
+              <CardDescription>Add files to the collection.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button onClick={handleAddClick}>add</Button>
+              <Separator className="my-4" />
+              <div className="flex gap-2">
+                <Input
+                  type="url"
+                  placeholder="Enter URL..."
+                  value={urlInput}
+                  onChange={(e) => setUrlInput(e.target.value)}
+                  className="w-full"
+                />
+                <Button onClick={handleAddUrlClick}>add url</Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </StandardPage>
   );
 }
