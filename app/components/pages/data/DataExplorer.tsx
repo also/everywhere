@@ -59,6 +59,7 @@ import { parser as mp4Parser } from '../../../../tools/parse/mp4';
 import { getMeta } from '../../../../tools/parse/gpmf';
 import DataSetContext, { DataSetProviderContext } from '../../DataSetContext';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 function Path({ feature }: { feature: Feature }) {
   const { path } = useContext(MapContext);
@@ -599,15 +600,15 @@ function FileManager({
           </>
         ) : undefined}
       </div>
-      <div>
-        <input
+      <div className="flex gap-2">
+        <Input
           type="url"
           placeholder="Enter URL..."
           value={urlInput}
           onChange={(e) => setUrlInput(e.target.value)}
-          style={{ width: '400px', marginRight: '8px' }}
+          className="max-w-sm"
         />
-        <button onClick={handleAddUrlClick}>add url</button>
+        <Button onClick={handleAddUrlClick}>add url</Button>
       </div>
       <FilesTable files={files ?? []} />
 
