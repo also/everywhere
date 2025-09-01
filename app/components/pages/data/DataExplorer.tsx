@@ -590,7 +590,7 @@ function FileManager({
       <p>
         <Link to={`${url}/dataset`}>Open Dataset</Link>
       </p>
-      <div>
+      <div className="flex gap-2">
         {files ? (
           <>
             <Button onClick={handleLoadClick}>load</Button>
