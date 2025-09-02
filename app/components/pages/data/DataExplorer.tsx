@@ -435,16 +435,16 @@ function useFiles() {
 
   const handleFiles = useMemo(() => {
     return async function handleFiles(
-      result: FileWithHandle[],
+      incomingNewfiles: FileWithHandle[],
       existingFiles: FileWithDetails[] = []
     ) {
       let maxId: number;
       await update('maxId', (current = 0) => {
-        maxId = current + result.length;
+        maxId = current + incomingNewfiles.length;
         return maxId;
       });
       const newFiles: FileHandleWithDetails[] = await Promise.all(
-        result.map(
+        incomingNewfiles.map(
           async (file, i) =>
             ({
               id: `${maxId + i + 1}`,
@@ -546,13 +546,20 @@ const columns: ColumnDef<FileWithDetails>[] = [
   },
 ];
 
-function FilesTable({ files }: { files: FileWithDetails[] }) {
+function FilesTable({
+  files,
+  handleFiles,
+}: {
+  files: FileWithDetails[];
+  handleFiles?: HandleFiles;
+}) {
   const { url } = useRouteMatch();
 
   const table = useReactTable({
     data: files,
     columns,
     getCoreRowModel: getCoreRowModel(),
+    getRowId: (row) => row.id,
   });
 
   const selected = table.getIsAllRowsSelected()
@@ -564,15 +571,32 @@ function FilesTable({ files }: { files: FileWithDetails[] }) {
           .join(',')
       : undefined;
 
+  const handleRemoveSelected = useCallback(() => {
+    handleFiles?.(
+      [],
+      table
+        .getCoreRowModel()
+        .rows.filter((r) => !r.getIsSelected())
+        .map((row) => row.original)
+    );
+  }, [handleFiles, table]);
   return (
     <>
-      <div>
+      <div className="flex gap-2">
         {selected ? (
-          <Button asChild>
-            <Link to={`${url}/file/${selected}`}>Selected Files</Link>
-          </Button>
+          <>
+            <Button asChild>
+              <Link to={`${url}/file/${selected}`}>Open</Link>
+            </Button>
+            {handleFiles ? (
+              <Button onClick={handleRemoveSelected}>Remove</Button>
+            ) : null}
+          </>
         ) : (
-          <Button disabled>Selected Files</Button>
+          <>
+            <Button disabled>Open</Button>
+            {handleFiles ? <Button disabled>Remove</Button> : null}
+          </>
         )}
       </div>
       <DataTable table={table} />
@@ -603,14 +627,6 @@ function FileManager({
     [files, handleFiles]
   );
 
-  const handleResetClick = useCallback(
-    async (e: React.MouseEvent) => {
-      e.preventDefault();
-      handleFiles([]);
-    },
-    [handleFiles]
-  );
-
   const [urlInput, setUrlInput] = useState('');
 
   const handleAddUrlClick = useCallback(
@@ -628,17 +644,9 @@ function FileManager({
     <StandardPage>
       <PageTitle>Files</PageTitle>
 
-      <div className="flex gap-2">
-        {files ? (
-          <>
-            <Button onClick={handleResetClick}>reset</Button>
-          </>
-        ) : undefined}
-      </div>
-
       <div className="flex gap-6">
         <div className="flex-1">
-          <FilesTable files={files ?? []} />
+          <FilesTable files={files ?? []} handleFiles={handleFiles} />
         </div>
         <div className="w-80 space-y-4">
           <Card>
