@@ -146,15 +146,8 @@ function App({
 }
 
 function CityMapRoute() {
-  const { trips } = useContext(DataSetContext);
-  const tripsLength =
-    trips.length === 0
-      ? 0
-      : d3.sum(
-          trips.map(geoLines).reduce((a, b) => a.concat(b)),
-          // @ts-expect-error the d3.sum type is wrong. d3.sum ignores null
-          geometryLength
-        );
+  const { trips, tripsLength } = useContext(DataSetContext);
+
   return (
     <StandardPage>
       <CityMap
@@ -267,7 +260,7 @@ root.render(
     <GlobalStyle />
     <NavExtensionContext.Provider>
       <DataContext.Provider value={{ boundary, contours, ways }}>
-        <DataSetSelector initialDataSet={buildDataSet([], [])}>
+        <DataSetSelector initialDataSet={buildDataSet([], [], true)}>
           {/* @ts-expect-error old react router :( */}
           <Router>
             <App>

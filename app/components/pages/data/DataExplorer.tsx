@@ -58,7 +58,7 @@ import { bind, fileRoot } from '../../../../tools/parse';
 import { parser as mp4Parser } from '../../../../tools/parse/mp4';
 import { getMeta } from '../../../../tools/parse/gpmf';
 import DataSetContext, { DataSetProviderContext } from '../../DataSetContext';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
   Card,
@@ -75,6 +75,8 @@ import {
 } from '@tanstack/react-table';
 import { DataTable } from './DataTable';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Badge } from '@/components/ui/badge';
+import { DataSet } from '@/data';
 
 function Path({ feature }: { feature: Feature }) {
   const { path } = useContext(MapContext);
@@ -406,14 +408,15 @@ function StylizedFeatureMap({ features }: { features: Feature[] }) {
 
 function DataSetLoader({ features }: { features: Feature[] }) {
   const dataset = useMemoAsync(async () => readToDataset(features), [features]);
+  const currentDataSet = use(DataSetContext);
   const setDataSet = use(DataSetProviderContext);
 
   return dataset ? (
     <>
-      <div>
-        Trips: {dataset.trips.length}, Videos: {dataset.videos.size}
-      </div>
-      <Button onClick={() => setDataSet(dataset)}>Set Dataset</Button>
+      <DataSetSummaryCard dataset={dataset} />
+      {currentDataSet !== dataset ? (
+        <Button onClick={() => setDataSet(dataset)}>Set Dataset</Button>
+      ) : null}
     </>
   ) : (
     <LoadingPage />
@@ -525,7 +528,14 @@ const columns: ColumnDef<FileWithDetails>[] = [
     accessorFn: (f) => getFilename(f),
     cell: ({ row: { original: f } }) => {
       const { url } = useRouteMatch();
-      return <Link to={`${url}/file/${f.id}`}>{getFilename(f)}</Link>;
+      return (
+        <Link
+          to={`${url}/file/${f.id}`}
+          className={buttonVariants({ variant: 'link' })}
+        >
+          {getFilename(f)}
+        </Link>
+      );
     },
   },
   {
@@ -595,7 +605,7 @@ function FilesTable({
     );
   }, [handleFiles, table]);
   return (
-    <>
+    <div>
       <div className="flex gap-2">
         {selected ? (
           <>
@@ -614,7 +624,7 @@ function FilesTable({
         )}
       </div>
       <DataTable table={table} />
-    </>
+    </div>
   );
 }
 
@@ -726,17 +736,66 @@ export default function LocalDataExplorer() {
   );
 }
 
+function DataSetSummaryCard({ dataset }: { dataset: DataSet }) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Summary</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="mb-4">
+          {dataset.isDefault ? (
+            <Badge variant="outline">Default dataset</Badge>
+          ) : (
+            <Badge variant="outline">Custom dataset</Badge>
+          )}
+        </div>
+        <dl className="grid gap-2">
+          <div className="flex items-baseline justify-between">
+            <dt className="text-sm text-muted-foreground">Trips</dt>
+            <dd className="text-xl font-semibold tabular-nums">
+              {dataset.trips.length}
+            </dd>
+          </div>
+
+          <div className="flex items-baseline justify-between border-t pt-3">
+            <dt className="text-sm text-muted-foreground">Videos</dt>
+            <dd className="text-xl font-semibold tabular-nums">
+              {dataset.videos.size}
+            </dd>
+          </div>
+          <div className="flex items-baseline justify-between border-t pt-3">
+            <dt className="text-sm text-muted-foreground">Distance</dt>
+            <dd className="text-xl font-semibold tabular-nums">
+              {Math.round(dataset.tripsLength / 1000).toLocaleString()} km
+            </dd>
+          </div>
+        </dl>
+      </CardContent>
+    </Card>
+  );
+}
+
 /** Render the dataset as if it were files. */
 function DataSetView() {
   const { path } = useRouteMatch();
   const dataset = use(DataSetContext);
+  const { trips } = dataset;
+
   const files = useMemo(() => datasetToFiles(dataset), [dataset]);
   return (
     <Switch>
       <Route exact path={path}>
         <StandardPage>
           <PageTitle>Dataset</PageTitle>
-          <FilesTable files={files} />
+          <div className="flex gap-6">
+            <div className="flex-1">
+              <FilesTable files={files} />
+            </div>
+            <div className="w-80 space-y-4">
+              <DataSetSummaryCard dataset={dataset} />
+            </div>
+          </div>
         </StandardPage>
       </Route>
       <Route
@@ -761,7 +820,8 @@ export function FileViewPage({
   );
   const { path, url } = useRouteMatch();
 
-  const singleFile = ids.size === 1 ? selectedFiles[0] : undefined;
+  const singleFile =
+    id !== 'all' && ids.size === 1 ? selectedFiles[0] : undefined;
 
   const fileTools = useMemo(() => {
     if (!singleFile) {

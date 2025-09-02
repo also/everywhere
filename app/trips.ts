@@ -1,11 +1,13 @@
 /* eslint-disable camelcase */
-import { group, LineRTree, tree } from './geo';
+import { geoLines, group, LineRTree, tree } from './geo';
 import moment from 'moment';
+import d3 from 'd3';
 
 import { CoverageTree, groupChapters, Video, VideoChapter } from './videos';
 import { Feature, LineString, MultiLineString } from 'geojson';
 import { Activity } from '../tools/strava-api';
 import { DataSet } from './data';
+import { geometryLength } from './distance';
 
 export type RawStravaTripProperties = {
   activity: Activity;
@@ -125,7 +127,8 @@ export type TripTree = LineRTree<StravaTripFeature>;
 
 export function buildDataSet(
   rawTrips: RawStravaTripFeature[],
-  videoChapters: VideoChapter[]
+  videoChapters: VideoChapter[],
+  isDefault: boolean
 ): DataSet {
   const videos = groupChapters(videoChapters);
   const trips = rawTrips.map(load);
@@ -147,6 +150,15 @@ export function buildDataSet(
       .filter((n) => n)
   );
 
+  const tripsLength =
+    trips.length === 0
+      ? 0
+      : d3.sum(
+          trips.map(geoLines).reduce((a, b) => a.concat(b)),
+          // @ts-expect-error the d3.sum type is wrong. d3.sum ignores null
+          geometryLength
+        );
+
   return {
     trips,
     videoCoverage,
@@ -154,5 +166,7 @@ export function buildDataSet(
     videoTree,
     videos,
     tripsById: new Map(trips.map((t) => [`${t.id}`, t])),
+    tripsLength,
+    isDefault,
   };
 }
