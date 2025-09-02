@@ -555,9 +555,23 @@ function FilesTable({
 }) {
   const { url } = useRouteMatch();
 
+  // tanstack table doesn't do row pruning, so we have to do it manually
+  const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({});
+
+  const validIds = useMemo(() => new Set(files.map((f) => f.id)), [files]);
+  const prunedRowSelection = useMemo(
+    () =>
+      Object.fromEntries(
+        Object.entries(rowSelection).filter(([id]) => validIds.has(id))
+      ),
+    [rowSelection, validIds]
+  );
+
   const table = useReactTable({
     data: files,
     columns,
+    state: { rowSelection: prunedRowSelection },
+    onRowSelectionChange: setRowSelection,
     getCoreRowModel: getCoreRowModel(),
     getRowId: (row) => row.id,
   });
