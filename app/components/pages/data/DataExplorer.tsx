@@ -78,6 +78,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { DataSet } from '@/data';
 
+const linkClassName = 'text-primary underline-offset-4 hover:underline';
+
 function Path({ feature }: { feature: Feature }) {
   const { path } = useContext(MapContext);
 
@@ -155,6 +157,7 @@ function FeatureList({
               <TableCell>
                 <Link
                   to={`${featuresUrl}/feature/${f.properties?.everywhereFeatureIndex}`}
+                  className={linkClassName}
                 >
                   {i}
                 </Link>
@@ -529,10 +532,7 @@ const columns: ColumnDef<FileWithDetails>[] = [
     cell: ({ row: { original: f } }) => {
       const { url } = useRouteMatch();
       return (
-        <Link
-          to={`${url}/file/${f.id}`}
-          className={buttonVariants({ variant: 'link' })}
-        >
+        <Link to={`${url}/file/${f.id}`} className={linkClassName}>
           {getFilename(f)}
         </Link>
       );
@@ -883,7 +883,10 @@ export function FileViewPage({
                 {fileTools.map((t) => (
                   <TableRow key={t.tool.name}>
                     <TableCell>
-                      <Link to={`${url}/tool/${t.tool.name}/status`}>
+                      <Link
+                        to={`${url}/tool/${t.tool.name}/status`}
+                        className={linkClassName}
+                      >
                         {t.tool.name}
                       </Link>
                     </TableCell>
