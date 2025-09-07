@@ -41,6 +41,12 @@
     shape-rendering: crispEdges;
   }
 
+  path.contour {
+    fill: none;
+    stroke-width: 1px;
+    stroke: #55b7a6;
+  }
+
   &.loading-animation {
     opacity: 0.3;
 
