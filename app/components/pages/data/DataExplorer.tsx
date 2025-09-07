@@ -1,4 +1,9 @@
 import {
+  Children,
+  Fragment,
+  cloneElement,
+  isValidElement,
+  ReactElement,
   use,
   useCallback,
   useContext,
@@ -290,15 +295,12 @@ function CommonToolLinks({
   separator?: React.ReactNode;
 }) {
   return (
-    <>
+    <Separated separator={separator ?? null}>
       <Link to={`${url}/map`}>Map</Link>
-      {separator}
       <Link to={`${url}/features/list`}>Features</Link>
-      {separator}
       <Link to={`${url}/features/map`}>Leaflet Map</Link>
-      {separator}
       <Link to={`${url}/features/stylized`}>Stylized Map</Link>
-    </>
+    </Separated>
   );
 }
 
@@ -827,6 +829,33 @@ const verticalFlexySeparator = (
   />
 );
 
+function Separated({
+  children,
+  separator,
+}: {
+  children: React.ReactNode;
+  separator: React.ReactNode;
+}) {
+  const kids = Children.toArray(children);
+  const sepIsElement = isValidElement(separator);
+  const makeSeparator = (key: string) =>
+    sepIsElement
+      ? cloneElement(separator as ReactElement, { key })
+      : (
+          <Fragment key={key}>{separator}</Fragment>
+        );
+
+  return kids.flatMap((child, i) => {
+    const parts: React.ReactNode[] = [];
+    if (i > 0) {
+      parts.push(makeSeparator(`sep-${i}`));
+    }
+    // Preserve the original child and its key without wrapping
+    parts.push(child);
+    return parts;
+  });
+}
+
 export function FileViewPage({
   id,
   files,
@@ -887,14 +916,16 @@ export function FileViewPage({
             </div>
           </div>
           {!singleFile && (
-            <p>
+            <div className="flex gap-2">
               Apply tool:{' '}
-              {Object.keys(tools).map((tool) => (
-                <>
-                  <Link to={`${url}/tool/${tool}/status`}>{tool}</Link>{' '}
-                </>
-              ))}
-            </p>
+              <Separated separator={verticalFlexySeparator}>
+                {Object.keys(tools).map((tool) => (
+                  <Link key={tool} to={`${url}/tool/${tool}/status`}>
+                    {tool}
+                  </Link>
+                ))}
+              </Separated>
+            </div>
           )}
           {fileTools && (
             <Table className="max-w-xs">
