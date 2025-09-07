@@ -72,7 +72,7 @@ export default function WayList({
   groupedWays: GroupedWays[];
 }) {
   return (
-    <StandardPage>
+    <StandardPage className="classic-page">
       <PageTitle>Streets</PageTitle>
       <HoverStreetMap wayTree={wayTree} />
       <WayListColumns>

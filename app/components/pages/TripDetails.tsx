@@ -34,7 +34,7 @@ export default function TripDetails({ trip }: { trip: StravaTripFeature }) {
   }
 
   return (
-    <StandardPage>
+    <StandardPage className="classic-page">
       <PageTitle>{id}</PageTitle>
       <p>
         Started <strong>{start.format('LLL')}</strong>,{' '}

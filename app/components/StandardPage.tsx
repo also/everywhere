@@ -13,7 +13,7 @@ export default function StandardPage({
   return (
     <div className={cn('p-12', className)}>
       {children}
-      <footer className="m-3 text-center text-xs text-gray-300">
+      <footer className="m-3 text-center text-xs opacity-25">
         <p>
           Map data ©{' '}
           <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>{' '}

@@ -25,7 +25,7 @@ export default function WayDetails({ way }: { way: GroupedWays }) {
   intersections.delete(way.displayName);
 
   return (
-    <StandardPage>
+    <StandardPage className="classic-page">
       <PageTitle>{way.displayName}</PageTitle>
       <MapBox>
         <MapComponent

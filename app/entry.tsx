@@ -64,12 +64,22 @@ body {
 table {
   font-size: inherit;
 }
-
-a {
-  color: #116aa9;
-  // https://crbug.com/439820
-  outline: none;
 }
+
+.classic-page {
+  a {
+    color: #116aa9;
+    // https://crbug.com/439820
+    outline: none;
+    text-decoration: underline;
+  }
+
+  h2 {
+    font-size: 1.5em;
+    font-weight: bold;
+    margin-top: 1em;
+    margin-bottom: 0.5em;
+  }
 }
 `;
 
