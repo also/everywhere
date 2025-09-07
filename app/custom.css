@@ -20,8 +20,22 @@
     text-decoration: underline;
   }
 
+  h1 {
+    font-size: 2em;
+    font-weight: bold;
+    margin-top: 1em;
+    margin-bottom: 0.5em;
+  }
+
   h2 {
     font-size: 1.5em;
+    font-weight: bold;
+    margin-top: 1em;
+    margin-bottom: 0.5em;
+  }
+
+  h3 {
+    font-size: 1.25em;
     font-weight: bold;
     margin-top: 1em;
     margin-bottom: 0.5em;

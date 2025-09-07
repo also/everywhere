@@ -15,7 +15,7 @@ export default function DocsPage() {
   };
 
   return (
-    <StandardPage>
+    <StandardPage className="classic-page">
       <PageTitle>Docs</PageTitle>
       {mdxOptions.showUI && (
         <div>
