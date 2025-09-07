@@ -622,25 +622,41 @@ function FilesTable({
   }, [handleFiles, table]);
   return (
     <div>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 pb-4">
         {selected ? (
           <>
-            <Button asChild>
+            <Button asChild variant="outline" size="sm">
               <Link to={`${url}/file/${selected.join(',')}`}>Open</Link>
             </Button>
             {handleFiles ? (
-              <Button onClick={handleRemoveSelected}>Remove</Button>
+              <Button
+                onClick={handleRemoveSelected}
+                variant="outline"
+                size="sm"
+              >
+                Remove
+              </Button>
             ) : null}
           </>
         ) : (
           <>
-            <Button disabled>Open</Button>
-            {handleFiles ? <Button disabled>Remove</Button> : null}
+            <Button disabled variant="outline" size="sm">
+              Open
+            </Button>
+            {handleFiles ? (
+              <Button disabled variant="outline" size="sm">
+                Remove
+              </Button>
+            ) : null}
           </>
         )}
         <span className="text-sm text-muted-foreground">
-          {rowCount} files,{' '}
-          {allRowsSelected ? rowCount : (selected?.length ?? 0)} selected
+          {rowCount.toLocaleString()} files,{' '}
+          {(allRowsSelected
+            ? rowCount
+            : (selected?.length ?? 0)
+          ).toLocaleString()}{' '}
+          selected
         </span>
       </div>
       <DataTable table={table} />
