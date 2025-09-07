@@ -1,19 +1,19 @@
-import styled from 'styled-components';
+import { HTMLAttributes } from 'react';
+import { cn } from '@/lib/utils';
 
-export default styled.table`
-  border: 1px solid #ccc;
-  box-shadow: 3px 3px 0 0 #dfdfdf;
+type TableProps = HTMLAttributes<HTMLTableElement>;
 
-  & thead {
-    background-color: #eee;
-  }
-
-  & th {
-    text-align: left;
-  }
-
-  & td,
-  & th {
-    padding: 0.3em;
-  }
-`;
+export default function Table({ className, ...props }: TableProps) {
+  return (
+    <table
+      className={cn(
+        // border and box shadow
+        'border-separate border border-[#ccc] shadow-[3px_3px_0_0_#dfdfdf]',
+        // nested element styling
+        '[&_td]:p-1 [&_th]:p-1 [&_th]:text-left [&_thead]:bg-[#eee]',
+        className
+      )}
+      {...props}
+    />
+  );
+}

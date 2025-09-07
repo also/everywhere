@@ -5,11 +5,9 @@ const path = require('path');
 
 module.exports = (env) => ({
   context: __dirname + '/app',
-  entry: './entry',
+  entry: { app: './entry' },
   output: {
     path: __dirname + '/site/build',
-    filename: 'app.js',
-    chunkFilename: 'app-[name].js',
   },
   module: {
     rules: [
@@ -45,6 +43,14 @@ module.exports = (env) => ({
         type: 'json',
       },
       {
+        test: /\.css$/,
+        use: ['postcss-loader'],
+        type: 'asset/resource',
+        generator: {
+          filename: '[name].css',
+        },
+      },
+      {
         test: /\.mdx?$/,
         use: [
           {
@@ -63,6 +69,7 @@ module.exports = (env) => ({
         __dirname,
         'app/docs/also-mdx-jsx-runtime'
       ),
+      '@': path.resolve(__dirname, 'app'),
     },
   },
   resolveLoader: {

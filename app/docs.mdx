@@ -4,6 +4,8 @@ import StylizedMapExample from './docs/StylizedMapExample';
 import VideoExample from './docs/VideoExample';
 import SimpleVectorTileViewExample from './docs/SimpleVectorTileViewExample';
 import Table from './components/Table';
+import MapComponent from './components/stylized/Map';
+
 import { interpolateViridis } from 'd3-scale-chromatic';
 
 ## Heatmap Scale
@@ -93,3 +95,7 @@ The browser will populate `type` on `File`, somehow.
     </tr>
   </tbody>
 </Table>
+
+# Contours
+
+<MapComponent width={500} height={500} showContours showWays={false} />
