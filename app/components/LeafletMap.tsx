@@ -74,12 +74,11 @@ const LeafletMap = React.memo(function LeafletMap({
   zoom?: number;
 }) {
   const mapComponent = useRef<HTMLDivElement>(null);
-  const mapRef =
-    useRef<{
-      map: L.Map;
-      defaultLayers: Set<L.Layer>;
-      control: L.Control.Layers;
-    }>();
+  const mapRef = useRef<{
+    map: L.Map;
+    defaultLayers: Set<L.Layer>;
+    control: L.Control.Layers;
+  }>(undefined);
 
   useEffect(() => {
     if (!mapRef.current) {

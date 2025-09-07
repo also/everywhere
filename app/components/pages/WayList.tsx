@@ -1,32 +1,32 @@
-import { useCallback, useState } from 'react';
+import { HTMLAttributes, useCallback, useState } from 'react';
 import { Link } from '@tanstack/react-router';
 import { useNavigate } from '@tanstack/react-router';
-import styled from 'styled-components';
+import { cn } from '@/lib/utils';
 
 import PageTitle from '../PageTitle';
-import MapComponent, { MapMouseHandler } from '../Map';
-import Ways from '../Ways';
+import MapComponent, { MapMouseHandler } from '../stylized/Map';
+import Ways from '../stylized/Ways';
 import WayListColumns from '../WayListColumns';
 import { GroupedWays, WayFeature, WayTree } from '../../ways';
 import StandardPage from '../StandardPage';
 import { nearestLine } from '../../geo';
 
-const WayMap = styled.div`
-  position: relative;
-  display: inline-block;
-`;
+function WayMap({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
+  return <div className={cn('relative inline-block', className)} {...props} />;
+}
 
-const WayHoverInfo = styled.div`
-  position: absolute;
-  // just kinda inside somerville
-  top: 350px;
-  left: 400px;
-
-  padding: 0.4em;
-  background: #eee;
-  box-shadow: 3px 3px 0 0 #dfdfdf;
-  font-weight: bold;
-`;
+function WayHoverInfo({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div
+      className={cn(
+        // position kind of inside somerville
+        'absolute top-[350px] left-[400px] bg-[#eee] p-[0.4em] font-bold shadow-[3px_3px_0_0_#dfdfdf]',
+        className
+      )}
+      {...props}
+    />
+  );
+}
 
 const HoverStreetMap = function WayList({ wayTree }: { wayTree: WayTree }) {
   const navigate = useNavigate();
@@ -75,7 +75,7 @@ export default function WayList({
   groupedWays: GroupedWays[];
 }) {
   return (
-    <StandardPage>
+    <StandardPage className="classic-page">
       <PageTitle>Streets</PageTitle>
       <HoverStreetMap wayTree={wayTree} />
       <WayListColumns>

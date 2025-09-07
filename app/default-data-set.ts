@@ -1,7 +1,11 @@
 import moment from 'moment';
 import { DataSet } from './data';
 import { feature } from './geo';
-import { buildDataSet, StravaTripTopology } from './trips';
+import {
+  buildDataSet,
+  RawStravaTripFeature,
+  StravaTripTopology,
+} from './trips';
 import { toChapter } from './videos';
 
 export type SimpleMetadata = { duration: string; start: string; name: string };
@@ -21,6 +25,10 @@ export async function loadDataset(): Promise<DataSet> {
     });
   });
 
-  // @ts-expect-error FIXME
-  return buildDataSet(trips.map(feature), videoChapters);
+  return buildDataSet(
+    // FIXME
+    trips.map(feature) as RawStravaTripFeature[],
+    videoChapters,
+    true
+  );
 }

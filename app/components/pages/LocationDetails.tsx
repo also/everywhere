@@ -10,9 +10,9 @@ import StandardPage from '../StandardPage';
 import PageTitle from '../PageTitle';
 import Thumbnails from '../Thumbnails';
 import Thumbnail from '../Thumbnail';
-import MapComponent from '../Map';
-import Dot from '../Dot';
-import Ways from '../Ways';
+import MapComponent from '../stylized/Map';
+import Dot from '../stylized/Dot';
+import Ways from '../stylized/Ways';
 import TripList from '../TripList';
 import { StravaTripFeature, TripTree } from '../../trips';
 import { Position } from 'geojson';
@@ -92,7 +92,7 @@ export default function LocationDetails({
                 height={160}
                 zoomFeature={featureCollection(way.features)}
               >
-                {() => <Ways features={way.features} selected={true} />}
+                <Ways features={way.features} selected={true} />
               </MapComponent>
               <div>
                 <strong>{way.displayName}</strong>

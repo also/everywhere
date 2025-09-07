@@ -1,0 +1,2 @@
+# Keep shadcn/ui components vendor-like to simplify diffs with upstream
+app/components/ui/**

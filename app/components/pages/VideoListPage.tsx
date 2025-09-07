@@ -4,8 +4,8 @@ import { useCallback, useState } from 'react';
 import PageTitle from '../PageTitle';
 import VideoList from '../VideoList';
 import Trips from '../Trips';
-import MapComponent, { MapMouseHandler } from '../Map';
-import Dot from '../Dot';
+import MapComponent, { MapMouseHandler } from '../stylized/Map';
+import Dot from '../stylized/Dot';
 import { CoverageTree, Video } from '../../videos';
 import { CoverageFeature } from '../../trips';
 import StandardPage from '../StandardPage';
@@ -20,8 +20,9 @@ export default function VideoListPage({
   videoCoverage: CoverageFeature[];
   videoTree: CoverageTree;
 }) {
-  const [nearest, setNearest] =
-    useState<RTreeItem<CoverageFeature> | undefined>(undefined);
+  const [nearest, setNearest] = useState<
+    RTreeItem<CoverageFeature> | undefined
+  >(undefined);
 
   const onMouseMove: MapMouseHandler = useCallback(
     ({ geo }) => setNearest(nearestLine(videoTree, geo)?.item),

@@ -9,12 +9,12 @@ import {
 } from 'react';
 import d3 from 'd3';
 import { Feature, FeatureCollection } from 'geojson';
-import styled from 'styled-components';
+import { cn } from '@/lib/utils';
 
 import MapContext from './MapContext';
 import Contours from './Contours';
 import Ways from './Ways';
-import DataContext from './DataContext';
+import DataContext from '../DataContext';
 
 const BaseMap = memo(function BaseMap({
   showWays,
@@ -45,68 +45,6 @@ function mouse(e: MouseEvent<SVGElement>, node: Element) {
     d3.event = previousEvent;
   }
 }
-
-const MapSvg = styled.svg`
-  & {
-    .roads {
-      path {
-        fill: none;
-        stroke-width: 1px;
-        stroke: #fff;
-
-        &.selected {
-          stroke-width: 5px;
-          stroke: #116aa9;
-        }
-      }
-
-      [data-highway='secondary'],
-      [data-highway='trunk'] {
-        stroke-width: 2px;
-      }
-    }
-
-    path.boundary {
-      fill: #00dcc2;
-    }
-
-    path.trip {
-      fill: none;
-      stroke-width: 1.5px;
-      stroke: #888;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }
-
-    circle.position {
-      fill: #fff;
-      stroke-width: 1px;
-      stroke: #116aa9;
-    }
-
-    path.extent {
-      fill: none;
-      stroke: #333;
-      shape-rendering: crispEdges;
-    }
-
-    &.loading-animation {
-      opacity: 0.3;
-
-      path {
-        stroke-dashoffset: 1000;
-        stroke-dasharray: 100;
-        animation: dash 10s linear;
-      }
-
-      @keyframes dash {
-        to {
-          stroke-dashoffset: 0;
-        }
-      }
-    }
-  }
-`;
 
 function compute({
   width,
@@ -190,8 +128,11 @@ export default function Map({
 
   return (
     <MapContext.Provider value={mapContext}>
-      <MapSvg
-        className={asLoadingAnimation ? 'loading-animation' : undefined}
+      <svg
+        className={cn(
+          'stylized-map',
+          asLoadingAnimation ? 'loading-animation' : undefined
+        )}
         width={width}
         height={height}
         onMouseMove={
@@ -215,8 +156,8 @@ export default function Map({
         ref={svgNode}
       >
         <BaseMap showWays={showWays} showContours={showContours} />
-        {typeof children === 'function' ? children() : children}
-      </MapSvg>
+        {children}
+      </svg>
     </MapContext.Provider>
   );
 }

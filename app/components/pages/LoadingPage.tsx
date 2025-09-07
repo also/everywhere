@@ -1,4 +1,4 @@
-import Map from '../Map';
+import Map from '../stylized/Map';
 import PageTitle from '../PageTitle';
 import StandardPage from '../StandardPage';
 

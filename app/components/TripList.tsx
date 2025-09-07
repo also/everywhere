@@ -2,7 +2,7 @@ import { Link } from '@tanstack/react-router';
 
 import Thumbnails from './Thumbnails';
 import Thumbnail from './Thumbnail';
-import MapComponent from './Map';
+import MapComponent from './stylized/Map';
 import Trips from './Trips';
 import { StravaTripFeature } from '../trips';
 

@@ -3,8 +3,8 @@ import { Link } from '@tanstack/react-router';
 import { featureCollection } from '../../geo';
 
 import PageTitle from '../PageTitle';
-import MapComponent from '../Map';
-import Ways from '../Ways';
+import MapComponent from '../stylized/Map';
+import Ways from '../stylized/Ways';
 import WayListColumns from '../WayListColumns';
 import MapBox from '../MapBox';
 import Table from '../Table';
@@ -25,7 +25,7 @@ export default function WayDetails({ way }: { way: GroupedWays }) {
   intersections.delete(way.displayName);
 
   return (
-    <StandardPage>
+    <StandardPage className="classic-page">
       <PageTitle>{way.displayName}</PageTitle>
       <MapBox>
         <MapComponent
@@ -34,7 +34,7 @@ export default function WayDetails({ way }: { way: GroupedWays }) {
           zoomFeature={featureCollection(way.features)}
           zoom={0.7}
         >
-          {() => <Ways features={way.features} selected={true} />}
+          <Ways features={way.features} selected={true} />
         </MapComponent>
       </MapBox>
 

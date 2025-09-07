@@ -1,6 +1,6 @@
+import './index.css';
 import d3 from 'd3';
 import { createRoot } from 'react-dom/client';
-import styled, { createGlobalStyle } from 'styled-components';
 import { TanStackRouterDevtools } from '@tanstack/router-devtools';
 
 import {
@@ -42,64 +42,36 @@ import {
 } from './data';
 import DataContext from './components/DataContext';
 import { ReactNode, useContext, useEffect, useState } from 'react';
-import LocalDataExplorer from './components/pages/LocalDataExplorer';
+import DataExplorer from './components/pages/data/DataExplorer';
 import DataSetContext, {
   DataSetProviderContext,
 } from './components/DataSetContext';
 import { loadDataset } from './default-data-set';
-import { LeafletFeatureMap } from './components/LeafletMap';
-import DataPage from './components/pages/DataPage';
 import StandardPage from './components/StandardPage';
-import FullScreenPage from './components/FullScreenPage';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { buildDataSet } from './trips';
 import PageTitle from './components/PageTitle';
 import { NavExtensionContext } from './components/Nav';
+import { cn } from './lib/utils';
 
-const GlobalStyle = createGlobalStyle`
-body {
-  font-family: 'helvetica neue';
-  font-size: 13px;
-  margin: 0;
-  padding: 0;
-  color: #444;
+function HeaderLink({
+  to,
+  className,
+  children,
+}: {
+  to: string;
+  className?: string;
+  children: ReactNode;
+}) {
+  return (
+    <Link
+      to={to}
+      className={cn('mr-8 font-bold text-[#444] no-underline', className)}
+    >
+      {children}
+    </Link>
+  );
 }
-
-table {
-  font-size: inherit;
-}
-
-a {
-    color: #116aa9;
-    // https://crbug.com/439820
-    outline: none;
-  }
-`;
-
-const Header = styled.header`
-  background-color: #eee;
-  border-bottom: 1px solid #ccc;
-
-  padding: 1em 2em;
-
-  font-size: 1.2em;
-
-  display: flex;
-  justify-content: space-between;
-`;
-
-const HeaderLink = styled(Link)`
-  color: #444;
-  text-decoration: none;
-  font-weight: bold;
-  margin-right: 2em;
-`;
-
-const Layout = styled.div`
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-`;
 
 document.title = 'not quite everywhere';
 
@@ -123,8 +95,6 @@ function App({
   if (localStorage.getItem('enableExtras') === 'true') {
     extras = (
       <>
-        <HeaderLink to="/map">Map</HeaderLink>{' '}
-        <HeaderLink to="/data">Data</HeaderLink>
         <HeaderLink to="/local">Files</HeaderLink>
         <HeaderLink to="/docs">Docs</HeaderLink>
       </>
@@ -132,10 +102,10 @@ function App({
   }
   return (
     <>
-      <Layout>
-        <Header>
+      <div className="flex h-screen flex-col">
+        <header className="flex justify-between border-b border-[#ccc] bg-[#eee] px-8 py-3 text-[1.2em]">
           <div>
-            <HeaderLink to="/" style={{ color: '#E05338' }}>
+            <HeaderLink to="/" className="text-[#E05338]">
               Everywhere
             </HeaderLink>{' '}
             <HeaderLink to="/trips">Trips</HeaderLink>{' '}
@@ -143,23 +113,16 @@ function App({
             <HeaderLink to="/ways">Streets</HeaderLink> {extras}
           </div>
           <div ref={setNavExtensionDiv} />
-        </Header>
+        </header>
         <ErrorBoundary>{children}</ErrorBoundary>
-      </Layout>
+      </div>
     </>
   );
 }
 
 function CityMapRoute() {
-  const { trips } = useContext(DataSetContext);
-  const tripsLength =
-    trips.length === 0
-      ? 0
-      : d3.sum(
-          trips.map(geoLines).reduce((a, b) => a.concat(b)),
-          // @ts-expect-error the d3.sum type is wrong. d3.sum ignores null
-          geometryLength
-        );
+  const { trips, tripsLength } = useContext(DataSetContext);
+
   return (
     <StandardPage>
       <CityMap
@@ -196,15 +159,6 @@ function DataSetSelector({
         {children}
       </DataSetProviderContext.Provider>
     </DataSetContext.Provider>
-  );
-}
-
-function MapRoute() {
-  const { trips } = useContext(DataSetContext);
-  return (
-    <FullScreenPage>
-      <LeafletFeatureMap features={trips} />
-    </FullScreenPage>
   );
 }
 
@@ -409,8 +363,8 @@ const docsRoute = createRoute({
       focus: (Array.isArray(search.focus)
         ? search.focus
         : search.focus
-        ? [search.focus]
-        : []) as string[],
+          ? [search.focus]
+          : []) as string[],
       showSimpleTags: search.showSimpleTags === true,
     };
   },
@@ -469,14 +423,11 @@ function RouterWithContext() {
 }
 
 root.render(
-  <>
-    <GlobalStyle />
-    <NavExtensionContext.Provider>
-      <DataContext.Provider value={{ boundary, contours, ways }}>
-        <DataSetSelector initialDataSet={buildDataSet([], [])}>
-          <RouterWithContext />
-        </DataSetSelector>
-      </DataContext.Provider>
-    </NavExtensionContext.Provider>
-  </>
+  <NavExtensionContext.Provider>
+    <DataContext.Provider value={{ boundary, contours, ways }}>
+      <DataSetSelector initialDataSet={buildDataSet([], [], true)}>
+        <RouterWithContext />
+      </DataSetSelector>
+    </DataContext.Provider>
+  </NavExtensionContext.Provider>
 );

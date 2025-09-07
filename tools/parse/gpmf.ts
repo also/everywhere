@@ -369,7 +369,7 @@ type GPS5 = [
   longitude: number,
   altitude: number,
   groundSpeed: number,
-  speed: number
+  speed: number,
 ];
 
 export function extractGpsSample(
@@ -405,12 +405,12 @@ export function extractGpsSample(
 
 function parseDate(s: string) {
   // yymmddhhmmss.sss
-  const args: Parameters<typeof Date['UTC']> = [] as any;
+  const args: Parameters<(typeof Date)['UTC']> = [] as any;
   for (let i = 0; i < 12; i += 2) {
     args.push(parseInt(s.slice(i, i + 2), 10));
   }
   args.push(parseInt(s.slice(13)));
   args[0] += 2000;
-  args[1] -= 1;
+  args[1]! -= 1;
   return Date.UTC(...args);
 }

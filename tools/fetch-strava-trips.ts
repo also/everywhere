@@ -51,7 +51,7 @@ async function getStreams(id: string): Promise<Stream[] | undefined> {
   try {
     return await get(`activities/${id}/streams/${streamNames.join(',')}`);
   } catch (e) {
-    if (e?.response?.status === 404) {
+    if (axios.isAxiosError(e) && e.response?.status === 404) {
       return;
     }
     throw e;

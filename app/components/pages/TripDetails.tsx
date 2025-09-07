@@ -3,16 +3,17 @@ import * as format from '../../format';
 import PageTitle from '../PageTitle';
 import VideoList from '../VideoList';
 import Trips from '../Trips';
-import MapComponent, { MapMouseHandler } from '../Map';
-import Dot from '../Dot';
+import MapComponent, { MapMouseHandler } from '../stylized/Map';
+import Dot from '../stylized/Dot';
 import { useCallback, useMemo, useState } from 'react';
 import { StravaTripFeature } from '../../trips';
 import StandardPage from '../StandardPage';
 import { RTreeItem, nearestLine } from '../../geo';
 
 export default function TripDetails({ trip }: { trip: StravaTripFeature }) {
-  const [nearest, setNearest] =
-    useState<RTreeItem<unknown> | undefined>(undefined);
+  const [nearest, setNearest] = useState<RTreeItem<unknown> | undefined>(
+    undefined
+  );
 
   const {
     properties: { tree, id, start, movingTime, videos },
@@ -33,7 +34,7 @@ export default function TripDetails({ trip }: { trip: StravaTripFeature }) {
   }
 
   return (
-    <StandardPage>
+    <StandardPage className="classic-page">
       <PageTitle>{id}</PageTitle>
       <p>
         Started <strong>{start.format('LLL')}</strong>,{' '}

@@ -1,7 +1,7 @@
 import { useRef, useEffect, useContext, memo } from 'react';
 import d3 from 'd3';
 
-import MapContext from './MapContext';
+import MapContext from './stylized/MapContext';
 import { StravaTripFeature } from '../trips';
 
 function AnimTrip({ trip }: { trip: StravaTripFeature }) {

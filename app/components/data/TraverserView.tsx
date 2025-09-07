@@ -19,7 +19,7 @@ async function asyncArray<T>(i: AsyncIterable<T>): Promise<T[]> {
 }
 
 function DataViewView({ value }: { value: DataView }) {
-  return <div>{utf8decoder.decode(value).slice(0, 100)}</div>;
+  return <pre>{utf8decoder.decode(value).slice(0, 100)}</pre>;
 }
 
 function TraverserValueView<T extends Entry>({
@@ -45,33 +45,55 @@ function TraverserValueView<T extends Entry>({
     const { children, value } = state;
 
     return (
-      <>
+      <div style={{ paddingLeft: `20px` }}>
         {value ? (
-          <pre>
-            {value instanceof DataView ? (
-              <DataViewView value={value} />
-            ) : (
-              <ObjectInspector data={value} expandPaths={['$']} />
-              // JSON.stringify(value, null, 2)
-            )}
-          </pre>
+          value instanceof DataView ? (
+            <DataViewView value={value} />
+          ) : (
+            <ObjectInspector data={value} expandPaths={['$']} />
+            // JSON.stringify(value, null, 2)
+          )
         ) : null}
-        <ul>
-          {children.map((e) => (
-            <li key={e.fileOffset}>
-              <TraverserView
-                traverser={traverser.clone()}
-                entry={e}
-                depth={depth + 1}
-              />
-            </li>
-          ))}
-        </ul>
-      </>
+        {children.map((e) => (
+          <div key={e.fileOffset}>
+            <TraverserView
+              traverser={traverser.clone()}
+              entry={e}
+              depth={depth + 1}
+            />
+          </div>
+        ))}
+      </div>
     );
   } else {
     return <div>loading...</div>;
   }
+}
+
+// approximate style of the react-inspector arrow
+function Arrow({
+  expanded,
+  onClick,
+}: {
+  expanded: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <span
+      style={{
+        color: 'rgb(110, 110, 110)',
+        display: 'inline-block',
+        fontSize: '12px',
+        fontFamily: 'menlo, monospace',
+        marginRight: '3px',
+        userSelect: 'none',
+        transform: expanded ? 'rotateZ(90deg)' : 'rotateZ(0deg)',
+      }}
+      onClick={onClick}
+    >
+      ▶
+    </span>
+  );
 }
 
 export default function TraverserView<T extends Entry>({
@@ -91,7 +113,8 @@ export default function TraverserView<T extends Entry>({
 
   return (
     <>
-      <div onClick={() => setExpanded(!expanded)}>
+      <div>
+        <Arrow expanded={expanded} onClick={() => setExpanded(!expanded)} />
         {entry ? (
           <>
             <code>{entry.fourcc}</code> (file offset: {entry.fileOffset},

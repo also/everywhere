@@ -9,4 +9,5 @@ module.exports = {
   // TODO: Change to `all` once supported
   trailingComma: 'es5',
   useTabs: false,
+  plugins: ['prettier-plugin-tailwindcss'],
 };

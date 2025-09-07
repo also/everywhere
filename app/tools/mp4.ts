@@ -1,4 +1,4 @@
-import { Tool } from '.';
+import { getFileBlob, Tool } from '.';
 import { SeekableBlobBuffer } from '../../tools/parse/buffers';
 import { extractGps } from '../../tools/parse/gopro-gps';
 import { bind, fileRoot } from '../../tools/parse';
@@ -10,7 +10,7 @@ const mp4Tool: Tool = {
     return extension === 'mp4' ? 'yes' : 'no';
   },
   async processFile(file) {
-    const data = new SeekableBlobBuffer(file.file.file, 1024000);
+    const data = new SeekableBlobBuffer(await getFileBlob(file.file), 1024000);
     const mp4 = bind(mp4Parser, data, fileRoot(data));
     const track = await getMeta(mp4);
     return await extractGps(track, mp4);
