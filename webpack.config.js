@@ -47,7 +47,7 @@ module.exports = (env) => ({
         use: ['postcss-loader'],
         type: 'asset/resource',
         generator: {
-          filename: '[name].css', // entry name → output CSS file
+          filename: '[name].css',
         },
       },
       {
