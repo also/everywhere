@@ -1,0 +1,29 @@
+@layer base {
+  body {
+    font-family: 'helvetica neue';
+    font-size: 13px;
+    margin: 0;
+    padding: 0;
+    color: #444;
+  }
+
+  table {
+    font-size: inherit;
+  }
+}
+
+.classic-page {
+  a {
+    color: #116aa9;
+    /* https://crbug.com/439820 */
+    outline: none;
+    text-decoration: underline;
+  }
+
+  h2 {
+    font-size: 1.5em;
+    font-weight: bold;
+    margin-top: 1em;
+    margin-bottom: 0.5em;
+  }
+}

@@ -1,7 +1,7 @@
 import './index.css';
 import d3 from 'd3';
 import { createRoot } from 'react-dom/client';
-import styled, { createGlobalStyle } from 'styled-components';
+import styled from 'styled-components';
 
 import {
   HashRouter as Router,
@@ -50,38 +50,6 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { buildDataSet } from './trips';
 import PageTitle from './components/PageTitle';
 import { NavExtensionContext } from './components/Nav';
-
-const GlobalStyle = createGlobalStyle`
-@layer base {
-body {
-  font-family: 'helvetica neue';
-  font-size: 13px;
-  margin: 0;
-  padding: 0;
-  color: #444;
-}
-
-table {
-  font-size: inherit;
-}
-}
-
-.classic-page {
-  a {
-    color: #116aa9;
-    // https://crbug.com/439820
-    outline: none;
-    text-decoration: underline;
-  }
-
-  h2 {
-    font-size: 1.5em;
-    font-weight: bold;
-    margin-top: 1em;
-    margin-bottom: 0.5em;
-  }
-}
-`;
 
 const Header = styled.header`
   background-color: #eee;
@@ -266,37 +234,31 @@ const datasetPromise = loadDataset();
 const root = createRoot(div);
 
 root.render(
-  <>
-    <GlobalStyle />
-    <NavExtensionContext.Provider>
-      <DataContext.Provider value={{ boundary, contours, ways }}>
-        <DataSetSelector initialDataSet={buildDataSet([], [], true)}>
-          {/* @ts-expect-error old react router :( */}
-          <Router>
-            <App>
-              <Switch>
-                <Route path="/local" component={DataExplorer} />
-                <Route path="/ways/*" component={WayDetailsRoute} />
-                <Route path="/ways" component={WayListRoute} />
-                <Route
-                  path="/videos/:name/:seek"
-                  component={VideoDetailsRoute}
-                />
-                <Route path="/videos/:name" component={VideoDetailsRoute} />
-                <Route path="/videos" component={VideosRoute} />
-                <Route path="/trips/:id" component={TripDetailsRoute} />
-                <Route path="/trips" component={TripsRoute} />
-                <Route
-                  path="/locations/:coords"
-                  component={LocationDetailsRoute}
-                />
-                <Route path="/docs" component={DocsPage} />
-                <Route path="/" component={CityMapRoute} />
-              </Switch>
-            </App>
-          </Router>
-        </DataSetSelector>
-      </DataContext.Provider>
-    </NavExtensionContext.Provider>
-  </>
+  <NavExtensionContext.Provider>
+    <DataContext.Provider value={{ boundary, contours, ways }}>
+      <DataSetSelector initialDataSet={buildDataSet([], [], true)}>
+        {/* @ts-expect-error old react router :( */}
+        <Router>
+          <App>
+            <Switch>
+              <Route path="/local" component={DataExplorer} />
+              <Route path="/ways/*" component={WayDetailsRoute} />
+              <Route path="/ways" component={WayListRoute} />
+              <Route path="/videos/:name/:seek" component={VideoDetailsRoute} />
+              <Route path="/videos/:name" component={VideoDetailsRoute} />
+              <Route path="/videos" component={VideosRoute} />
+              <Route path="/trips/:id" component={TripDetailsRoute} />
+              <Route path="/trips" component={TripsRoute} />
+              <Route
+                path="/locations/:coords"
+                component={LocationDetailsRoute}
+              />
+              <Route path="/docs" component={DocsPage} />
+              <Route path="/" component={CityMapRoute} />
+            </Switch>
+          </App>
+        </Router>
+      </DataSetSelector>
+    </DataContext.Provider>
+  </NavExtensionContext.Provider>
 );

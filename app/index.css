@@ -4,6 +4,8 @@ source('.') means just relative to this file. */
 
 @import 'tw-animate-css';
 
+@import './custom.css';
+
 @custom-variant dark (&:is(.dark *));
 
 :root {
