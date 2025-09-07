@@ -1,7 +1,6 @@
 import './index.css';
 import d3 from 'd3';
 import { createRoot } from 'react-dom/client';
-import styled from 'styled-components';
 
 import {
   HashRouter as Router,
@@ -50,31 +49,26 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { buildDataSet } from './trips';
 import PageTitle from './components/PageTitle';
 import { NavExtensionContext } from './components/Nav';
+import { cn } from './lib/utils';
 
-const Header = styled.header`
-  background-color: #eee;
-  border-bottom: 1px solid #ccc;
-
-  padding: 1em 2em;
-
-  font-size: 1.2em;
-
-  display: flex;
-  justify-content: space-between;
-`;
-
-const HeaderLink = styled(Link)`
-  color: #444;
-  text-decoration: none;
-  font-weight: bold;
-  margin-right: 2em;
-`;
-
-const Layout = styled.div`
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-`;
+function HeaderLink({
+  to,
+  className,
+  children,
+}: {
+  to: string;
+  className?: string;
+  children: ReactNode;
+}) {
+  return (
+    <Link
+      to={to}
+      className={cn('no-underline font-bold mr-8 text-[#444]', className)}
+    >
+      {children}
+    </Link>
+  );
+}
 
 document.title = 'not quite everywhere';
 
@@ -105,10 +99,10 @@ function App({
   }
   return (
     <>
-      <Layout>
-        <Header>
+      <div className="flex flex-col h-screen">
+        <header className="bg-[#eee] border-b border-[#ccc] py-4 px-8 text-[1.2em] flex justify-between">
           <div>
-            <HeaderLink to="/" style={{ color: '#E05338' }}>
+            <HeaderLink to="/" className="text-[#E05338]">
               Everywhere
             </HeaderLink>{' '}
             <HeaderLink to="/trips">Trips</HeaderLink>{' '}
@@ -116,9 +110,9 @@ function App({
             <HeaderLink to="/ways">Streets</HeaderLink> {extras}
           </div>
           <div ref={setNavExtensionDiv} />
-        </Header>
+        </header>
         <ErrorBoundary>{children}</ErrorBoundary>
-      </Layout>
+      </div>
     </>
   );
 }

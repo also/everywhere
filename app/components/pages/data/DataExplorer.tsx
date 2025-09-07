@@ -650,7 +650,7 @@ function FilesTable({
             ) : null}
           </>
         )}
-        <span className="text-sm text-muted-foreground">
+        <span className="text-muted-foreground text-sm">
           {rowCount.toLocaleString()} files,{' '}
           {(allRowsSelected
             ? rowCount
