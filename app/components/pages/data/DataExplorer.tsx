@@ -282,13 +282,22 @@ function ToolStatus({ fileStatus }: { fileStatus: FileStatus }) {
   );
 }
 
-function CommonToolLinks({ url }: { url: string }) {
+function CommonToolLinks({
+  url,
+  separator,
+}: {
+  url: string;
+  separator?: React.ReactNode;
+}) {
   return (
     <>
-      <Link to={`${url}/map`}>Map</Link>{' '}
-      <Link to={`${url}/features/list`}>Features</Link>{' '}
-      <Link to={`${url}/features/map`}>Leaflet Map</Link>{' '}
-      <Link to={`${url}/features/stylized`}>Stylized Map</Link>{' '}
+      <Link to={`${url}/map`}>Map</Link>
+      {separator}
+      <Link to={`${url}/features/list`}>Features</Link>
+      {separator}
+      <Link to={`${url}/features/map`}>Leaflet Map</Link>
+      {separator}
+      <Link to={`${url}/features/stylized`}>Stylized Map</Link>
     </>
   );
 }
@@ -309,8 +318,10 @@ function ToolView({
   return (
     <>
       <NavExtension>
-        <CommonToolLinks url={url} /> <Link to={`${url}/status`}>Status</Link>{' '}
-        {NavComponent}
+        <div className="flex gap-2">
+          <CommonToolLinks url={url} /> <Link to={`${url}/status`}>Status</Link>{' '}
+          {NavComponent}
+        </div>
       </NavExtension>
       {channel ? (
         <Switch>
@@ -806,6 +817,16 @@ function DataSetView() {
   );
 }
 
+// by default, Separator has h-full which doesn't work with a container without an explicit height or something
+// we need this specific class name so the precendence is as high as the existing one
+// TODO make a variant in Separator?
+const verticalFlexySeparator = (
+  <Separator
+    orientation="vertical"
+    className="data-[orientation=vertical]:h-auto"
+  />
+);
+
 export function FileViewPage({
   id,
   files,
@@ -845,21 +866,25 @@ export function FileViewPage({
           </PageTitle>
           <div>
             {singleFile != null ? (
-              <>
-                <p>
-                  View: <Link to={`${url}/view/json`}>JSON</Link>{' '}
-                  <Link to={`${url}/view/mp4`}>MP4</Link>{' '}
-                </p>
-              </>
+              <div className="flex gap-2">
+                View: <Link to={`${url}/view/json`}>JSON</Link>
+                {verticalFlexySeparator}
+                <Link to={`${url}/view/mp4`}>MP4</Link>
+              </div>
             ) : (
               <p>{selectedFiles.length} files</p>
             )}
-            <p>
-              Features: <CommonToolLinks url={`${url}/tool/anything`} />
+            <div className="flex gap-2">
+              Features:{' '}
+              <CommonToolLinks
+                url={`${url}/tool/anything`}
+                separator={verticalFlexySeparator}
+              />
+              {verticalFlexySeparator}
               <Link to={`${url}/tool/anything/features/dataset`}>
                 Load Dataset
               </Link>
-            </p>
+            </div>
           </div>
           {!singleFile && (
             <p>
