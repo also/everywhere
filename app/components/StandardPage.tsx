@@ -11,9 +11,9 @@ export default function StandardPage({
   className,
 }: StandardPageProps) {
   return (
-    <div className={cn('p-12', className)}>
+    <div className={cn('p-10', className)}>
       {children}
-      <footer className="m-3 text-center text-xs opacity-25">
+      <footer className="m-3 text-center text-[0.8em] opacity-25">
         <p>
           Map data ©{' '}
           <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>{' '}

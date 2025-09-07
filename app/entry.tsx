@@ -100,7 +100,7 @@ function App({
   return (
     <>
       <div className="flex h-screen flex-col">
-        <header className="flex justify-between border-b border-[#ccc] bg-[#eee] px-8 py-4 text-[1.2em]">
+        <header className="flex justify-between border-b border-[#ccc] bg-[#eee] px-8 py-3 text-[1.2em]">
           <div>
             <HeaderLink to="/" className="text-[#E05338]">
               Everywhere
