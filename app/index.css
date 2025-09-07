@@ -1,10 +1,8 @@
 /* tailwind scans everything in the CWD, which includes all the data files and takes forever.
 source('.') means just relative to this file. */
-@import "tailwindcss" source('.');
+@import 'tailwindcss' source('.');
 
-@import "tw-animate-css";
-
-
+@import 'tw-animate-css';
 
 @custom-variant dark (&:is(.dark *));
 

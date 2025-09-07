@@ -765,20 +765,20 @@ function DataSetSummaryCard({ dataset }: { dataset: DataSet }) {
         </div>
         <dl className="grid gap-2">
           <div className="flex items-baseline justify-between">
-            <dt className="text-sm text-muted-foreground">Trips</dt>
+            <dt className="text-muted-foreground text-sm">Trips</dt>
             <dd className="text-xl font-semibold tabular-nums">
               {dataset.trips.length}
             </dd>
           </div>
 
           <div className="flex items-baseline justify-between border-t pt-3">
-            <dt className="text-sm text-muted-foreground">Videos</dt>
+            <dt className="text-muted-foreground text-sm">Videos</dt>
             <dd className="text-xl font-semibold tabular-nums">
               {dataset.videos.size}
             </dd>
           </div>
           <div className="flex items-baseline justify-between border-t pt-3">
-            <dt className="text-sm text-muted-foreground">Distance</dt>
+            <dt className="text-muted-foreground text-sm">Distance</dt>
             <dd className="text-xl font-semibold tabular-nums">
               {Math.round(dataset.tripsLength / 1000).toLocaleString()} km
             </dd>
@@ -839,11 +839,11 @@ function Separated({
   const kids = Children.toArray(children);
   const sepIsElement = isValidElement(separator);
   const makeSeparator = (key: string) =>
-    sepIsElement
-      ? cloneElement(separator as ReactElement, { key })
-      : (
-          <Fragment key={key}>{separator}</Fragment>
-        );
+    sepIsElement ? (
+      cloneElement(separator as ReactElement, { key })
+    ) : (
+      <Fragment key={key}>{separator}</Fragment>
+    );
 
   return kids.flatMap((child, i) => {
     const parts: React.ReactNode[] = [];
