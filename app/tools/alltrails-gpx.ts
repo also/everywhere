@@ -12,7 +12,10 @@ const alltrailsGpxTool: Tool = {
   },
 
   async processFile({ file }) {
-    const doc = new DOMParser().parseFromString(await getFileText(file), 'text/xml');
+    const doc = new DOMParser().parseFromString(
+      await getFileText(file),
+      'text/xml'
+    );
     return gpx(doc);
   },
 };

@@ -95,7 +95,7 @@ export async function readToDataset(features: Feature[]): Promise<DataSet> {
     }
   }
 
-  return buildDataSet(trips, videoChapters);
+  return buildDataSet(trips, videoChapters, false);
 }
 
 export function datasetToFiles(dataset: DataSet): FileContentsWithDetails[] {

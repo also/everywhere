@@ -21,7 +21,7 @@ export const parser: Parser<Box> = {
 const hfsTimestampOffst = 2082844800;
 
 export type BoxTypes = {
-  [K in keyof typeof boxParsers]: ReturnType<typeof boxParsers[K]>;
+  [K in keyof typeof boxParsers]: ReturnType<(typeof boxParsers)[K]>;
 };
 
 export const boxParsers = {

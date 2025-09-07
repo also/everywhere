@@ -19,7 +19,9 @@ export type DataSet = {
   videos: Map<string, Video>;
   trips: StravaTripFeature[];
   tripsById: Map<string, StravaTripFeature>;
+  tripsLength: number;
   videoCoverage: CoverageFeature[];
   tripTree: TripTree;
   videoTree: CoverageTree;
+  isDefault: boolean;
 };

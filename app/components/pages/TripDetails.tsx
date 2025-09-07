@@ -11,8 +11,9 @@ import StandardPage from '../StandardPage';
 import { RTreeItem, nearestLine } from '../../geo';
 
 export default function TripDetails({ trip }: { trip: StravaTripFeature }) {
-  const [nearest, setNearest] =
-    useState<RTreeItem<unknown> | undefined>(undefined);
+  const [nearest, setNearest] = useState<RTreeItem<unknown> | undefined>(
+    undefined
+  );
 
   const {
     properties: { tree, id, start, movingTime, videos },
@@ -33,7 +34,7 @@ export default function TripDetails({ trip }: { trip: StravaTripFeature }) {
   }
 
   return (
-    <StandardPage>
+    <StandardPage className="classic-page">
       <PageTitle>{id}</PageTitle>
       <p>
         Started <strong>{start.format('LLL')}</strong>,{' '}

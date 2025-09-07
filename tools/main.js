@@ -11,15 +11,18 @@ export default function () {
     console.log('Available tools:');
     const toolsDir = __dirname;
     const files = fs.readdirSync(toolsDir);
-    
+
     files
-      .filter(file => (file.endsWith('.ts') || file.endsWith('.js')) && 
-                     file !== 'main.js' && 
-                     file !== 'index.js')
-      .map(file => path.basename(file, path.extname(file)))
+      .filter(
+        (file) =>
+          (file.endsWith('.ts') || file.endsWith('.js')) &&
+          file !== 'main.js' &&
+          file !== 'index.js'
+      )
+      .map((file) => path.basename(file, path.extname(file)))
       .sort()
-      .forEach(tool => console.log(`  ${tool}`));
-    
+      .forEach((tool) => console.log(`  ${tool}`));
+
     return;
   }
 
