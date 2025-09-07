@@ -76,6 +76,7 @@ import { Separator } from '@/components/ui/separator';
 import {
   ColumnDef,
   getCoreRowModel,
+  getPaginationRowModel,
   useReactTable,
 } from '@tanstack/react-table';
 import { DataTable } from './DataTable';
@@ -596,16 +597,18 @@ function FilesTable({
     state: { rowSelection: prunedRowSelection },
     onRowSelectionChange: setRowSelection,
     getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
     getRowId: (row) => row.id,
   });
 
-  const selected = table.getIsAllRowsSelected()
-    ? 'all'
+  const rowCount = table.getRowCount();
+
+  const allRowsSelected = table.getIsAllRowsSelected();
+
+  const selected = allRowsSelected
+    ? ['all']
     : table.getIsSomeRowsSelected()
-      ? table
-          .getSelectedRowModel()
-          .rows.map((row) => row.original.id)
-          .join(',')
+      ? table.getSelectedRowModel().rows.map((row) => row.original.id)
       : undefined;
 
   const handleRemoveSelected = useCallback(() => {
@@ -623,7 +626,7 @@ function FilesTable({
         {selected ? (
           <>
             <Button asChild>
-              <Link to={`${url}/file/${selected}`}>Open</Link>
+              <Link to={`${url}/file/${selected.join(',')}`}>Open</Link>
             </Button>
             {handleFiles ? (
               <Button onClick={handleRemoveSelected}>Remove</Button>
@@ -635,8 +638,30 @@ function FilesTable({
             {handleFiles ? <Button disabled>Remove</Button> : null}
           </>
         )}
+        <span className="text-sm text-muted-foreground">
+          {rowCount} files,{' '}
+          {allRowsSelected ? rowCount : (selected?.length ?? 0)} selected
+        </span>
       </div>
       <DataTable table={table} />
+      <div className="flex items-center justify-end space-x-2 py-4">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => table.previousPage()}
+          disabled={!table.getCanPreviousPage()}
+        >
+          Previous
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => table.nextPage()}
+          disabled={!table.getCanNextPage()}
+        >
+          Next
+        </Button>
+      </div>
     </div>
   );
 }
