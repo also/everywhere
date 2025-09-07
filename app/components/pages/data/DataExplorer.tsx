@@ -622,7 +622,7 @@ function FilesTable({
   }, [handleFiles, table]);
   return (
     <div>
-      <div className="flex gap-2">
+      <div className="flex items-center gap-2">
         {selected ? (
           <>
             <Button asChild>
