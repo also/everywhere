@@ -6,6 +6,8 @@ source('.') means just relative to this file. */
 
 @import './custom.css';
 
+@import './svg-map.css';
+
 @custom-variant dark (&:is(.dark *));
 
 :root {
