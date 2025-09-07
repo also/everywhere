@@ -63,7 +63,7 @@ function HeaderLink({
   return (
     <Link
       to={to}
-      className={cn('no-underline font-bold mr-8 text-[#444]', className)}
+      className={cn('mr-8 font-bold text-[#444] no-underline', className)}
     >
       {children}
     </Link>
@@ -99,8 +99,8 @@ function App({
   }
   return (
     <>
-      <div className="flex flex-col h-screen">
-        <header className="bg-[#eee] border-b border-[#ccc] py-4 px-8 text-[1.2em] flex justify-between">
+      <div className="flex h-screen flex-col">
+        <header className="flex justify-between border-b border-[#ccc] bg-[#eee] px-8 py-4 text-[1.2em]">
           <div>
             <HeaderLink to="/" className="text-[#E05338]">
               Everywhere
