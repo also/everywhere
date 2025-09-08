@@ -232,7 +232,7 @@ const tripsIndexRoute = createRoute({
   loader: ({ context: { dataSet } }) => {
     return dataSet.trips;
   },
-  component: function TripsRoute() {
+  component: function TripsRoute(): ReactNode {
     const trips = tripsIndexRoute.useLoaderData();
     return <TripListPage trips={trips} />;
   },
@@ -244,7 +244,7 @@ const tripDetailsRoute = createRoute({
   loader: ({ params: { id }, context: { dataSet } }) => {
     return dataSet.tripsById.get(id);
   },
-  component: function TripDetailsRoute() {
+  component: function TripDetailsRoute(): ReactNode {
     const trip = tripDetailsRoute.useLoaderData();
     return trip ? <TripDetails trip={trip} /> : <NotFoundRoute />;
   },
@@ -262,7 +262,7 @@ const videosIndexRoute = createRoute({
   loader: ({ context: { dataSet } }) => {
     return dataSet;
   },
-  component: function VideosIndexRoute() {
+  component: function VideosIndexRoute(): ReactNode {
     const { videos, videoCoverage, videoTree } =
       videosIndexRoute.useLoaderData();
     return (
@@ -286,7 +286,7 @@ const videosDetailsRootRoute = createRoute({
 const videosDetailsRoute = createRoute({
   getParentRoute: () => videosDetailsRootRoute,
   path: '/',
-  component: function VideosDetailsRoute() {
+  component: function VideosDetailsRoute(): ReactNode {
     const video = videosDetailsRootRoute.useLoaderData();
     return video ? <VideoDetails video={video} seek={0} /> : <NotFoundRoute />;
   },
@@ -298,7 +298,7 @@ const videosDetailsSeekedRoute = createRoute({
   loader: ({ params: { seek } }) => {
     return parseInt(seek, 10);
   },
-  component: function VideosDetailsSeekedRoute() {
+  component: function VideosDetailsSeekedRoute(): ReactNode {
     const video = videosDetailsRootRoute.useLoaderData();
     const seek = videosDetailsSeekedRoute.useLoaderData();
     return video ? (
@@ -336,7 +336,7 @@ const waysRoute = createRoute({
 const waysIndexRoute = createRoute({
   getParentRoute: () => waysRoute,
   path: '/',
-  component: function WaysIndexRoute() {
+  component: function WaysIndexRoute(): ReactNode {
     return <WayList groupedWays={groupedWays} wayTree={wayTree} />;
   },
 });
@@ -347,7 +347,7 @@ const wayDetailsRoute = createRoute({
   loader: ({ params: { name } }) => {
     return groupedWays.find(({ displayName }) => displayName === name);
   },
-  component: function WayDetailsRoute() {
+  component: function WayDetailsRoute(): ReactNode {
     const way = wayDetailsRoute.useLoaderData();
     return way ? <WayDetails way={way} /> : <NotFoundRoute />;
   },
@@ -381,17 +381,17 @@ const localDataRoute = createRoute({
 const routeTree = rootRoute.addChildren([
   indexRoute,
   tripsRoute.addChildren([tripsIndexRoute, tripDetailsRoute]),
-  videosRoute,
-  // videosRoute.addChildren([
-  //   videosIndexRoute,
-  //   videosDetailsRootRoute.addChildren([
-  //     videosDetailsRoute,
-  //     videosDetailsSeekedRoute,
-  //   ]),
-  // ]),
+
+  videosRoute.addChildren([
+    videosIndexRoute,
+    videosDetailsRootRoute.addChildren([
+      videosDetailsRoute,
+      videosDetailsSeekedRoute,
+    ]),
+  ]),
   locationDetailsRoute,
-  // waysRoute.addChildren([waysIndexRoute, wayDetailsRoute]),
-  // waysRoute,
+  waysRoute.addChildren([waysIndexRoute, wayDetailsRoute]),
+
   docsRoute,
 ]);
 
