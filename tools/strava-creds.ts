@@ -4,7 +4,7 @@ import path from 'path';
 import readline from 'readline';
 import { isErrno } from './utils/fs';
 
-function prompt(message: string): Promise<string> {
+export function prompt(message: string): Promise<string> {
   const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
