@@ -41,7 +41,7 @@ export async function getAppConfig(allowPrompt = true): Promise<AppConfig> {
     console.log(
       'Look up your Strava app API information at https://www.strava.com/settings/api'
     );
-    const clientId = parseInt(await prompt('Enter your Strava app id: '));
+    const clientId = parseInt(await prompt('Enter your Strava client ID: '));
     const clientSecret = await prompt('Enter client secret: ');
     appConfig = {
       clientId,
