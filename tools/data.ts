@@ -1,18 +1,20 @@
 import { readdirSync, readFileSync } from 'fs';
 import * as path from 'path';
 
-const dataPath = path.join(__dirname, '..', 'data');
+import { getConfig } from './config';
+
+export function dataPath(...segments: string[]) {
+  return path.join(getConfig().dataDir, ...segments);
+}
 
 export function* readAllJson<T>(
   dir: string,
   filter = /.+\..*json$/
 ): Generator<T> {
-  const filenames = readdirSync(path.join(dataPath, dir));
+  const filenames = readdirSync(dataPath(dir));
   for (const filename of filenames) {
     if (filter.test(filename)) {
-      yield JSON.parse(
-        readFileSync(path.join(dataPath, dir, filename), 'utf8')
-      );
+      yield JSON.parse(readFileSync(dataPath(dir, filename), 'utf8'));
     }
   }
 }

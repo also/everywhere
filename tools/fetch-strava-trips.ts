@@ -3,6 +3,7 @@ import path from 'path';
 
 import axios from 'axios';
 
+import { dataPath } from './data';
 import { getAccessToken } from './strava-creds';
 import {
   CompleteActivity,
@@ -83,7 +84,7 @@ function readCachedTripList() {
 }
 
 function getTripFilename(id: string) {
-  return path.join('data', 'strava-activities', `${id}.json`);
+  return dataPath('strava-activities', `${id}.json`);
 }
 
 async function fetchAllTrips(breakOnExisting = false) {

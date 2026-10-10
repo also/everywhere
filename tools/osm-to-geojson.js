@@ -3,6 +3,8 @@ import fs from 'fs';
 import osmtogeojson from 'osmtogeojson';
 import osmxmlParser from 'osmtogeojson/parse_osmxml';
 
+import { dataPath } from './data';
+
 function writeHead() {
   process.stdout.write('{\n  "type": "FeatureCollection",\n  "features": [');
 }
@@ -46,7 +48,7 @@ function isBikeable(way) {
 function loadCachedJson() {
   return Promise.resolve(
     JSON.parse(
-      fs.readFileSync('data/scratch/map-osmjson', { encoding: 'utf8' })
+      fs.readFileSync(dataPath('scratch', 'map-osmjson'), { encoding: 'utf8' })
     )
   );
 }

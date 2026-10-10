@@ -2,15 +2,16 @@ import * as fs from 'fs';
 import { DOMParser } from 'xmldom';
 import { gpx } from '@tmcw/togeojson';
 import { topology } from 'topojson-server';
+import { dataPath } from './data';
 import { combineTopologies, SimpleTopology } from './topojson-utils';
 
 export default function () {
   const files = fs
-    .readdirSync('data/alltrails-recordings')
+    .readdirSync(dataPath('alltrails-recordings'))
     .filter((f) => f.endsWith('.gpx'));
   const topologies: SimpleTopology[] = [];
   for (const file of files) {
-    const xml = fs.readFileSync(`data/alltrails-recordings/${file}`, 'utf8');
+    const xml = fs.readFileSync(dataPath('alltrails-recordings', file), 'utf8');
     const doc = new DOMParser().parseFromString(xml);
     const geoJson = gpx(doc);
     const topo = topology({ geoJson }) as SimpleTopology;

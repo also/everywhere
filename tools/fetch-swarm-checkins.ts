@@ -1,7 +1,7 @@
 import { writeFileSync, readFileSync, existsSync } from 'fs';
 import axios from 'axios';
 import { Checkin, Root } from './swarm';
-import { mapGen, readAllJson } from './data';
+import { dataPath, mapGen, readAllJson } from './data';
 
 function readCreds() {
   return JSON.parse(readFileSync('creds/swarm.json', 'utf8'));
@@ -42,7 +42,7 @@ export default async function ({ _: [direction = 'new'] }: { _: string[] }) {
 
     lastTs = undefined;
     for (const checkin of response.response.checkins.items) {
-      const filename = `data/swarm/${checkin.id}.json`;
+      const filename = dataPath('swarm', `${checkin.id}.json`);
       if (existsSync(filename)) {
         lastTs = undefined;
         break;

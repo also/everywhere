@@ -9,3 +9,4 @@ app-data/strava-trips
 cert.pem
 key.pem
 scratch/
+/config
