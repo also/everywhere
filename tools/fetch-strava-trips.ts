@@ -87,6 +87,12 @@ function getTripFilename(id: string) {
   return dataPath('strava-activities', `${id}.json`);
 }
 
+export async function fetchAndSaveTrip(id: string): Promise<CompleteActivity> {
+  const trip = await fetchTrip(id);
+  fs.writeFileSync(getTripFilename(id), JSON.stringify(trip));
+  return trip;
+}
+
 async function fetchAllTrips(breakOnExisting = false) {
   for await (const trip of getTripSummaries()) {
     const { id, name, type } = trip;
@@ -133,12 +139,7 @@ export default async function ({ _: [id] }: { _: string[] }) {
   if (id === 'new') {
     await fetchAllTrips(true);
   } else if (id) {
-    const topojson = await fetchTrip(id);
-    if (topojson) {
-      fs.writeFileSync(getTripFilename(id), JSON.stringify(topojson));
-    } else {
-      console.error(`no geo info in "${name}" ${id}`);
-    }
+    await fetchAndSaveTrip(id);
   } else {
     await fetchAllTrips();
   }
