@@ -3,7 +3,13 @@ import axios from 'axios';
 
 import { fetchAndSaveTrip } from './fetch-strava-trips';
 
-export default async function ({ port = 3001 }: { port?: number }) {
+export default async function ({
+  port = 3001,
+  host = process.env.HOST ?? '127.0.0.1',
+}: {
+  port?: number;
+  host?: string;
+}) {
   const app = Fastify({ logger: true });
 
   app.post<{ Params: { id: string } }>(
@@ -32,6 +38,7 @@ export default async function ({ port = 3001 }: { port?: number }) {
   );
 
   // these actions use local credentials and write to the data directory, so
-  // only listen on localhost
-  await app.listen({ port, host: '127.0.0.1' });
+  // default to localhost. in docker, pass --host 0.0.0.0 (or set HOST) and
+  // publish the port to the host's loopback: -p 127.0.0.1:3001:3001
+  await app.listen({ port, host });
 }
