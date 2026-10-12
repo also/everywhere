@@ -54,7 +54,7 @@ import {
   features as getFeatures,
   getFeature,
 } from '../../../worker-stuff';
-import { WorkerRemote } from '../../../WorkerChannel';
+import { WorkerChannel, WorkerRemote } from '../../../WorkerChannel';
 import FeatureDetails from '../../FeatureDetails';
 import { Route, Switch, useRouteMatch } from 'react-router';
 import { Link } from 'react-router-dom';
@@ -305,6 +305,17 @@ function CommonToolLinks({
   );
 }
 
+function MapPage({ channel }: { channel: WorkerChannel }) {
+  const urlParams = new URLSearchParams(window.location.hash.split('?')[1] || '');
+  const syncUrl = urlParams.get('sync');
+
+  return (
+    <FullScreenPage>
+      <VectorTileView channel={channel} syncUrl={syncUrl} />
+    </FullScreenPage>
+  );
+}
+
 function ToolView({
   files,
   tool,
@@ -335,9 +346,7 @@ function ToolView({
             <ChannelFeaturesView channel={channel} />
           </Route>
           <Route path={`${path}/map`}>
-            <FullScreenPage>
-              <VectorTileView channel={channel} />
-            </FullScreenPage>
+            <MapPage channel={channel} />
           </Route>
           <Route path={`${path}/status`}>
             <StandardPage>
@@ -345,9 +354,7 @@ function ToolView({
             </StandardPage>
           </Route>
           <Route path={path}>
-            <FullScreenPage>
-              <VectorTileView channel={channel} />
-            </FullScreenPage>
+            <MapPage channel={channel} />
           </Route>
         </Switch>
       ) : (
