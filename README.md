@@ -18,10 +18,11 @@ node tools fetch-strava-trips <id>  # fetch a single trip
 
 #### `build-combined-strava-dataset`
 
-Creates a single topojson file with all Strava trips.
+Creates a single topojson file with all Strava trips. Pass `--geojson` to output a GeoJSON `FeatureCollection` instead.
 
 ```shell
 node tools build-combined-strava-dataset > trips.json
+node tools build-combined-strava-dataset --geojson > trips.geojson
 ```
 
 #### `build-combined-video-dataset`
