@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 # Runs the tools in tools/ (api-server, build-* etc.). Mount your data
-# directory at /everywhere/data. The working directory is the app, as before.
+# directory at /everywhere/data. The working directory is the app.
 #
 #   docker run -v /path/to/data:/everywhere/data ghcr.io/also/everywhere api-server --host 0.0.0.0
 #   docker run -v /path/to/data:/everywhere/data ghcr.io/also/everywhere build-combined-strava-dataset
