@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import readline from 'readline';
 import { isErrno } from './utils/fs';
+import { getConfig } from './config';
 
 export function prompt(message: string): Promise<string> {
   const rl = readline.createInterface({
@@ -19,7 +20,7 @@ export function prompt(message: string): Promise<string> {
 
 export function writeCreds(body: any) {
   fs.writeFileSync(
-    path.join(__dirname, '..', 'creds', 'strava.json'),
+    path.join(getConfig().credsDir, 'strava.json'),
     JSON.stringify(body)
   );
 }
@@ -30,7 +31,7 @@ type AppConfig = {
 };
 
 export async function getAppConfig(allowPrompt = true): Promise<AppConfig> {
-  const appConfigFile = path.join(__dirname, '..', 'creds', 'strava-app.json');
+  const appConfigFile = path.join(getConfig().credsDir, 'strava-app.json');
   let appConfig: AppConfig;
   try {
     appConfig = JSON.parse(fs.readFileSync(appConfigFile, 'utf8'));
@@ -64,7 +65,7 @@ export async function login(
 
 function readCreds() {
   return JSON.parse(
-    fs.readFileSync(path.join(__dirname, '../creds/strava.json'), 'utf8')
+    fs.readFileSync(path.join(getConfig().credsDir, 'strava.json'), 'utf8')
   );
 }
 
