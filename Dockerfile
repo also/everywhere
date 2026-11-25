@@ -1,9 +1,10 @@
 # syntax=docker/dockerfile:1
-# Runs the tools in tools/ (api-server, build-* etc.). Mount your data
+# Runs the tools in tools/ (api-server, build-* etc.). Mount a directory
+# containing config.json and creds/ at /everywhere/config, and the data
 # directory at /everywhere/data. The working directory is the app.
 #
-#   docker run -v /path/to/data:/everywhere/data ghcr.io/also/everywhere api-server --host 0.0.0.0
-#   docker run -v /path/to/data:/everywhere/data ghcr.io/also/everywhere build-combined-strava-dataset
+#   docker run -v /path/to/config:/everywhere/config -v /path/to/data:/everywhere/data ghcr.io/also/everywhere api-server --host 0.0.0.0
+#   docker run -v /path/to/config:/everywhere/config -v /path/to/data:/everywhere/data ghcr.io/also/everywhere build-combined-strava-dataset
 
 ARG NODE_VERSION=22.11.0
 
@@ -18,8 +19,7 @@ COPY . .
 
 FROM node:${NODE_VERSION}-slim
 ENV NODE_ENV=production \
-    EVERYWHERE_DATA_DIR=/everywhere/data \
-    EVERYWHERE_CREDS_DIR=/everywhere/data/creds
+    EVERYWHERE_CONFIG_DIR=/everywhere/config
 COPY --from=build /everywhere/app /everywhere/app
 WORKDIR /everywhere/app
 EXPOSE 3001

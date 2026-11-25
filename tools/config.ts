@@ -9,7 +9,10 @@ export interface Config {
 }
 
 const rootPath = path.join(__dirname, '..');
-const configFile = path.join(rootPath, 'config', 'config.json');
+// the directory containing config.json
+const configDir =
+  process.env.EVERYWHERE_CONFIG_DIR ?? path.join(rootPath, 'config');
+const configFile = path.join(configDir, 'config.json');
 
 const defaults: Config = {
   dataDir: 'data',
@@ -23,15 +26,7 @@ export function getConfig(): Config {
     const overrides: Partial<Config> = fs.existsSync(configFile)
       ? JSON.parse(fs.readFileSync(configFile, 'utf8'))
       : {};
-    // environment variables take precedence over config.json
-    const env: Partial<Config> = {};
-    if (process.env.EVERYWHERE_DATA_DIR) {
-      env.dataDir = process.env.EVERYWHERE_DATA_DIR;
-    }
-    if (process.env.EVERYWHERE_CREDS_DIR) {
-      env.credsDir = process.env.EVERYWHERE_CREDS_DIR;
-    }
-    const merged = { ...defaults, ...overrides, ...env };
+    const merged = { ...defaults, ...overrides };
     config = {
       ...merged,
       dataDir: path.resolve(rootPath, merged.dataDir),
