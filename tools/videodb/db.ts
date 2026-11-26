@@ -89,7 +89,30 @@ export function openDb(path: string) {
   const db = new DatabaseSync(path);
   db.exec('PRAGMA foreign_keys = ON');
   db.exec(SCHEMA);
+  upgrade(db);
   return db;
+}
+
+// Columns added after a database may have been created. CREATE TABLE IF NOT
+// EXISTS leaves an older table alone, so add what's missing. Rows written
+// before a column existed have it null until `video-db-backfill` fills it.
+const ADDED_COLUMNS: [table: string, column: string, type: string][] = [
+  // extractor version 5
+  ['file', 'start_lat', 'REAL'],
+  ['file', 'start_lon', 'REAL'],
+  ['file', 'camera_local_start', 'TEXT'],
+];
+
+function upgrade(db: DatabaseSync) {
+  for (const [table, column, type] of ADDED_COLUMNS) {
+    const columns = db.prepare(`PRAGMA table_info(${table})`).all() as {
+      name: string;
+    }[];
+    if (!columns.some((c) => c.name === column)) {
+      db.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${type}`);
+      console.log(`db: added ${table}.${column}`);
+    }
+  }
 }
 
 export type MemberRow = {

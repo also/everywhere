@@ -38,11 +38,16 @@ import {
   parseCameraName,
 } from './videodb/profiles';
 import { garminInfo, isRecoveredClip } from './videodb/garmin';
-import { findSrtSidecar, parseDjiSrt, readSrtSummary } from './videodb/dji';
+import {
+  SrtSummary,
+  findSrtSidecar,
+  parseDjiSrt,
+  readSrtSummary,
+} from './videodb/dji';
 import { MemberRow, openDb, transaction } from './videodb/db';
 import { ACCEPTED } from './videodb/accepted';
 
-const EXTRACTOR_VERSION = 5;
+export const EXTRACTOR_VERSION = 5;
 const VIDEO_EXT = new Set([
   '.mp4',
   '.lrv',
@@ -62,6 +67,20 @@ const CONTIGUITY_S = 2;
 const GPS_CONTIGUITY_S = 3;
 // GPS9 and GPSU file start times should agree to within this many seconds
 const GPS_SOURCES_S = 2;
+
+// where the camera was at the start: a locked GoPro GPS fix, or the first
+// position in a DJI SRT
+export function startPosition(
+  scan: Scan,
+  srt: SrtSummary | null
+): { lat: number; lon: number } | null {
+  if (scan.gps?.gps9Lock?.lat != null)
+    return { lat: scan.gps.gps9Lock.lat, lon: scan.gps.gps9Lock.lon! };
+  if (scan.gps?.lockLat != null)
+    return { lat: scan.gps.lockLat, lon: scan.gps.lockLon! };
+  if (srt?.firstFix) return { lat: srt.firstFix.lat, lon: srt.firstFix.lon };
+  return null;
+}
 
 // GPS start of the file: GPS9 where the camera writes it (ms precision, a fix
 // per row), else the first locked GPSU
@@ -559,16 +578,7 @@ export default async function (argv: Args) {
             : null;
 
         const newCamera = cameraKey !== null && !q.camera.get(cameraKey);
-        // where the camera was at the start: a locked GoPro GPS fix, or the
-        // first position in a DJI SRT
-        const startPos =
-          scan.gps?.gps9Lock?.lat != null
-            ? { lat: scan.gps.gps9Lock.lat, lon: scan.gps.gps9Lock.lon }
-            : scan.gps?.lockLat != null
-              ? { lat: scan.gps.lockLat, lon: scan.gps.lockLon }
-              : hints.srt?.firstFix
-                ? { lat: hints.srt.firstFix.lat, lon: hints.srt.firstFix.lon }
-                : null;
+        const startPos = startPosition(scan, hints.srt ?? null);
         const newRecording = !rec;
         const evidence = profile.linkKey
           ? profile.linkKey.toLowerCase()
