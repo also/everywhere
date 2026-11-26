@@ -479,6 +479,9 @@ export type GpsTime = {
   row: number;
   // utc moved back to the start of the file, using the sample's position
   fileStartUtc: string;
+  // position at that row, degrees
+  lat: number | null;
+  lon: number | null;
 };
 
 export type GpsInfo = {
@@ -491,6 +494,9 @@ export type GpsInfo = {
   // first sample whose GPSF reports a 2D/3D fix, within the scanned window
   lockGpsu: string | null;
   lockSample: number | null;
+  // first GPS5 position in the locked sample, degrees
+  lockLat: number | null;
+  lockLon: number | null;
   // GPS9 (HERO11+): days since 2000 + seconds since midnight, with a fix per row
   gps9First: GpsTime | null;
   gps9Lock: GpsTime | null;
@@ -499,6 +505,11 @@ export type GpsInfo = {
 
 const GPS_SCAN_SAMPLES = 30;
 const GPS9_EPOCH = Date.UTC(2000, 0, 1);
+
+// a SCAL divisor: one per field, or one for all
+function scaleAt(scal: unknown, j: number) {
+  return Array.isArray(scal) ? Number(scal[j]) || 1 : Number(scal) || 1;
+}
 
 function gps9Time(
   row: number[],
@@ -527,6 +538,8 @@ function scanGps(
     firstGpsf: null,
     lockGpsu: null,
     lockSample: null,
+    lockLat: null,
+    lockLon: null,
     gps9First: null,
     gps9Lock: null,
     samplesScanned: 0,
@@ -538,7 +551,8 @@ function scanGps(
     fix: number | null,
     sample: number,
     row: number,
-    rows: number
+    rows: number,
+    pos: number[] | null = null
   ): GpsTime => {
     const offsetMs = sampleDurationS
       ? (sample + row / rows) * sampleDurationS * 1000
@@ -549,6 +563,8 @@ function scanGps(
       sample,
       row,
       fileStartUtc: new Date(ms - offsetMs).toISOString(),
+      lat: pos ? pos[0] : null,
+      lon: pos ? pos[1] : null,
     };
   };
 
@@ -581,6 +597,13 @@ function scanGps(
           if (info.lockGpsu === null && typeof gpsf === 'number' && gpsf >= 2) {
             info.lockGpsu = gpsu;
             info.lockSample = i;
+            // GPS5 rows (lat, lon, alt, 2D, 3D speed), flattened, scaled by SCAL
+            const gps5 = get('GPS5');
+            const scal = get('SCAL');
+            if (Array.isArray(gps5) && gps5.length >= 2) {
+              info.lockLat = gps5[0] / scaleAt(scal, 0);
+              info.lockLon = gps5[1] / scaleAt(scal, 1);
+            }
           }
         }
 
@@ -595,7 +618,10 @@ function scanGps(
             if (!info.gps9First)
               info.gps9First = gpsTime(t.ms, t.fix, i, j, gps9.repeat);
             if (!info.gps9Lock && t.fix >= 2) {
-              info.gps9Lock = gpsTime(t.ms, t.fix, i, j, gps9.repeat);
+              info.gps9Lock = gpsTime(t.ms, t.fix, i, j, gps9.repeat, [
+                rows[j][0] / scaleAt(scal, 0),
+                rows[j][1] / scaleAt(scal, 1),
+              ]);
               break;
             }
           }
@@ -627,6 +653,38 @@ export function gpsuToIso(s: string): string | null {
   const m = /^(\d\d)(\d\d)(\d\d)(\d\d)(\d\d)(\d\d)\.(\d+)/.exec(s);
   if (!m) return null;
   return `20${m[1]}-${m[2]}-${m[3]}T${m[4]}:${m[5]}:${m[6]}.${m[7].padEnd(3, '0').slice(0, 3)}Z`;
+}
+
+// ---- udta/meta ----
+
+// a full box: version/flags, then hdlr and ilst; each ilst item holds a 'data'
+// box (u32 type, u32 locale, value; type 1 = UTF-8)
+function ilstItems(m: Buffer, meta: BoxInfo): Record<string, string> {
+  const out: Record<string, string> = {};
+  const start = meta.offset + meta.headerSize + 4;
+  const ilst = children(m, start, meta.offset + meta.size).find(
+    (b) => b.type === 'ilst'
+  );
+  if (!ilst) return out;
+  for (const item of children(
+    m,
+    ilst.offset + ilst.headerSize,
+    ilst.offset + ilst.size
+  )) {
+    const data = children(
+      m,
+      item.offset + item.headerSize,
+      item.offset + item.size
+    ).find((b) => b.type === 'data');
+    if (!data) continue;
+    const d = body(m, data);
+    const value = d.subarray(8);
+    out[item.type] =
+      d.readUInt32BE(0) === 1
+        ? value.toString('utf8')
+        : `<${value.length} bytes>`;
+  }
+  return out;
 }
 
 // ---- uuid boxes ----
@@ -672,6 +730,8 @@ export type Scan = {
   udtaKeys: string[];
   udta: Record<string, string>;
   udtaGpmf: Record<string, unknown> | null;
+  // udta/meta ilst items (e.g. ©too, the writing app): text, or a byte count
+  udtaMeta: Record<string, string>;
   // other moov children that may carry camera metadata (e.g. Apple 'meta')
   moovKeys: string[];
   // every uuid box at the top level, in moov and in udta: vendors (Garmin) keep
@@ -698,6 +758,7 @@ export function scanFile(r: FileReader, { gps = true } = {}): Scan {
     udtaKeys: [],
     udta: {},
     udtaGpmf: null,
+    udtaMeta: {},
     moovKeys: [],
     uuids: [],
     gps: null,
@@ -793,6 +854,8 @@ export function scanFile(r: FileReader, { gps = true } = {}): Scan {
       const v = body(m, c);
       if (c.type === 'GPMF') {
         scan.udtaGpmf = flattenKlv(parseKlv(v));
+      } else if (c.type === 'meta') {
+        scan.udtaMeta = ilstItems(m, c);
       } else if (c.type.charCodeAt(0) === 0xa9 && !(c.type in scan.udta)) {
         scan.udta[c.type] = quickTimeStrings(v);
       } else if (!(c.type in scan.udta)) {

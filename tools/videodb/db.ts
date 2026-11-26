@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS file (
   id                TEXT PRIMARY KEY,   -- f1_…
   size              INTEGER NOT NULL,
   sha256            TEXT,               -- whole file; null until computed
-  kind              TEXT NOT NULL,      -- video | proxy | spherical | incomplete
+  kind              TEXT NOT NULL,      -- video | proxy | spherical | telemetry | incomplete
   first_name        TEXT NOT NULL,
   first_path        TEXT NOT NULL UNIQUE,
   first_seen_at     TEXT NOT NULL,
@@ -39,6 +39,9 @@ CREATE TABLE IF NOT EXISTS file (
   height            INTEGER,
   fps               REAL,
   has_gpmf          INTEGER NOT NULL,
+  start_lat         REAL,               -- where it started: GoPro GPS lock, DJI SRT first fix
+  start_lon         REAL,
+  camera_local_start TEXT,              -- local wall time the camera writes too (Garmin header, DJI SRT)
   meta              TEXT NOT NULL,      -- JSON: the full scan
   extractor_version INTEGER NOT NULL
 );
@@ -75,7 +78,7 @@ CREATE TABLE IF NOT EXISTS recording_member (
 CREATE TABLE IF NOT EXISTS file_relation (
   file_id    TEXT NOT NULL REFERENCES file(id),
   related_id TEXT NOT NULL REFERENCES file(id),
-  kind       TEXT NOT NULL,             -- proxy_of
+  kind       TEXT NOT NULL,             -- proxy_of | telemetry_of
   PRIMARY KEY (file_id, related_id, kind)
 );
 

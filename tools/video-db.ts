@@ -26,6 +26,8 @@ import { fileIdV1 } from './videodb/file-id';
 import {
   CameraName,
   FileRule,
+  Hints,
+  PROFILES,
   Profile,
   cameraKeyValue,
   checkFile,
@@ -36,18 +38,22 @@ import {
   parseCameraName,
 } from './videodb/profiles';
 import { garminInfo, isRecoveredClip } from './videodb/garmin';
+import { findSrtSidecar, parseDjiSrt, readSrtSummary } from './videodb/dji';
 import { MemberRow, openDb, transaction } from './videodb/db';
 import { ACCEPTED } from './videodb/accepted';
 
-const EXTRACTOR_VERSION = 4;
+const EXTRACTOR_VERSION = 5;
 const VIDEO_EXT = new Set([
   '.mp4',
   '.lrv',
   '.glv',
+  '.lrf',
   '.360',
   '.mov',
   '.insv',
   '.m4v',
+  // DJI telemetry sidecars
+  '.srt',
 ]);
 // chapters should follow each other to within this many seconds
 const CONTIGUITY_S = 2;
@@ -82,6 +88,8 @@ function gpsFirst(gps: GpsInfo | null): {
 }
 // a proxy should be as long as its chapter to within this many seconds
 const PROXY_DURATION_S = 0.5;
+// a sidecar (DJI SRT) should run as long as its chapter to within this
+const SIDECAR_DURATION_S = 1;
 // a camera clock within this many seconds of GPS (after its zone) counts as set
 const CLOCK_DRIFT_S = 15 * 60;
 
@@ -150,7 +158,7 @@ export default async function (argv: Args) {
     camera: db.prepare('SELECT key FROM camera WHERE key = ?'),
     // the other files sharing a pair key (a chapter and its proxy)
     pair: db.prepare(`
-      SELECT f.id, f.first_path, f.duration_s, m.role, m.recording_id,
+      SELECT f.id, f.kind, f.first_path, f.duration_s, m.role, m.recording_id,
         json_extract(f.meta, '$.recovered') AS recovered
       FROM file f LEFT JOIN recording_member m ON m.file_id = f.id
       WHERE f.pair_key = ?`),
@@ -161,11 +169,11 @@ export default async function (argv: Args) {
       INSERT INTO file (id, size, kind, first_name, first_path, first_seen_at, mtime, birthtime,
         camera_name, clip_type, profile, camera_key, pair_key, firmware, brand, camera_start, camera_clock, camera_start_utc, duration_s, start_utc, gps_first_utc, gps_first_fix,
         clock_offset_s, utc_offset_min, clock_drift_s, clock_valid, mtime_minus_end_s, muid, gumi, video_codec, width, height, fps, has_gpmf,
-        meta, extractor_version)
+        start_lat, start_lon, camera_local_start, meta, extractor_version)
       VALUES ($id, $size, $kind, $first_name, $first_path, $first_seen_at, $mtime, $birthtime,
         $camera_name, $clip_type, $profile, $camera_key, $pair_key, $firmware, $brand, $camera_start, $camera_clock, $camera_start_utc, $duration_s, $start_utc, $gps_first_utc, $gps_first_fix,
         $clock_offset_s, $utc_offset_min, $clock_drift_s, $clock_valid, $mtime_minus_end_s, $muid, $gumi, $video_codec, $width, $height, $fps, $has_gpmf,
-        $meta, $extractor_version)`),
+        $start_lat, $start_lon, $camera_local_start, $meta, $extractor_version)`),
     insertLocation: db.prepare(
       'INSERT INTO file_location (path, file_id, mtime, birthtime, seen_at) VALUES (?, ?, ?, ?, ?)'
     ),
@@ -245,6 +253,87 @@ export default async function (argv: Args) {
           continue;
         }
 
+        // a DJI telemetry sidecar: parsed as text, linked to its video
+        if (ext === '.srt') {
+          const srt = parseDjiSrt(fs.readFileSync(file, 'utf8'));
+          const profile = PROFILES.find(
+            (p) =>
+              !!srt.format && !!p.srt?.includes(srt.format) && !!p.files['.srt']
+          );
+          const problems: string[] = [];
+          if (!profile)
+            problems.push(`unknown SRT layout (${srt.format ?? 'none'})`);
+          if (!name)
+            problems.push(`filename doesn't match a known camera pattern`);
+          if (!srt.entries) problems.push('SRT has no entries');
+          const pairKey = `${path.dirname(file)}/${name?.cameraName ?? basename}`;
+          const paired = q.pair.all(pairKey) as PairRow[];
+          const chapter = paired.find((o) => o.role === 'chapter');
+          const sibling = paired.find((o) => o.kind === 'telemetry');
+          if (sibling) {
+            problems.push(
+              `already have a sidecar with this pair key: ${sibling.first_path}`
+            );
+          }
+          if (
+            chapter &&
+            Math.abs(chapter.duration_s - srt.durationS) > SIDECAR_DURATION_S
+          ) {
+            problems.push(
+              `SRT runs ${srt.durationS}s, video ${chapter.duration_s}s (${chapter.first_path})`
+            );
+          }
+          const accepted = acceptProblems(id, basename, problems);
+          if (problems.length || !profile) {
+            return stop(file, problems, {
+              id,
+              mtime,
+              profile: profile?.id,
+              name,
+              srt,
+            });
+          }
+          transaction(db, () => {
+            q.insertFile.run({
+              ...emptyRow,
+              id,
+              size: st.size,
+              kind: profile.files['.srt'].kind,
+              first_name: basename,
+              first_path: file,
+              first_seen_at: now,
+              mtime,
+              birthtime,
+              camera_name: name!.cameraName,
+              profile: profile.id,
+              pair_key: pairKey,
+              duration_s: srt.durationS,
+              camera_local_start: srt.firstLocal,
+              start_lat: srt.firstFix?.lat ?? null,
+              start_lon: srt.firstFix?.lon ?? null,
+              has_gpmf: 0,
+              meta: JSON.stringify({
+                name,
+                stat: { mtime, birthtime },
+                acceptedProblems: accepted,
+                srt,
+              }),
+              extractor_version: EXTRACTOR_VERSION,
+            });
+            q.insertLocation.run(file, id, mtime, birthtime, now);
+            if (chapter) q.insertRelation.run(id, chapter.id, 'telemetry_of');
+          });
+          counts.added++;
+          console.log(
+            `add   ${basename}  ${id}  ${profile.id}  sidecar  ${srt.entries} entries  ${srt.durationS.toFixed(1)}s  ${
+              srt.firstFix
+                ? `fix ${srt.firstFix.lat},${srt.firstFix.lon}`
+                : 'no fix'
+            }  ${chapter ? 'linked' : 'NO VIDEO'}`
+          );
+          continue;
+        }
+
         let scan: Scan;
         try {
           scan = scanFile(r);
@@ -253,10 +342,16 @@ export default async function (argv: Args) {
           return stop(file, [`scan failed: ${e.message}`], { id, mtime });
         }
 
+        // DJI drones are told apart partly by the SRT next to the video
+        const srtPath = name?.prefix === 'DJI_' ? findSrtSidecar(file) : null;
+        const hints: Hints = {
+          srt: srtPath ? readSrtSummary(srtPath) : null,
+        };
+
         // a recording that never finished (no moov) or never started (no
         // video): keep the file and its ID, link it to nothing
         if (isIncomplete(scan)) {
-          const { profile } = findProfile(scan);
+          const { profile } = findProfile(scan, hints);
           const cameraKey = profile ? cameraKeyValue(profile, scan) : null;
           transaction(db, () => {
             q.insertFile.run({
@@ -290,7 +385,8 @@ export default async function (argv: Args) {
           continue;
         }
 
-        const { profile, rule, problems } = checkFile(scan, ext, name);
+        const { profile, rule, problems } = checkFile(scan, ext, name, hints);
+        const sidecars: PairRow[] = [];
         let linkKey: string | null = null;
         let cameraKey: string | null = null;
         let pairKey: string | null = null;
@@ -335,12 +431,30 @@ export default async function (argv: Args) {
                 self
               )
             );
+          } else if (profile.pairBy === 'directory') {
+            // no serial or no mvhd time: pair by folder and name
+            pairKey = `${path.dirname(file)}/${name.cameraName}`;
           } else {
             // no shared ID: pair by camera, name and mvhd time
             pairKey = `${cameraKey}:${name.cameraName}:${self.camera_start}`;
           }
 
           for (const other of q.pair.all(pairKey) as PairRow[]) {
+            if (other.kind === 'telemetry') {
+              // a sidecar that arrived first: relate it to the chapter
+              if (rule.role === 'chapter') {
+                sidecars.push(other);
+                if (
+                  Math.abs(other.duration_s - self.duration_s) >
+                  SIDECAR_DURATION_S
+                ) {
+                  problems.push(
+                    `duration ${self.duration_s}s differs from sidecar ${other.duration_s}s (${other.first_path})`
+                  );
+                }
+              }
+              continue;
+            }
             if (other.role === rule.role) {
               problems.push(
                 `already have a ${rule.role} with this pair key, different content: ${other.first_path}`
@@ -377,17 +491,7 @@ export default async function (argv: Args) {
           }
         }
 
-        // problems already looked at and accepted for this file
-        const acceptedProblems = problems.filter((p) =>
-          ACCEPTED.some((a) => a.fileId === id && p.includes(a.match))
-        );
-        problems.splice(
-          0,
-          problems.length,
-          ...problems.filter((p) => !acceptedProblems.includes(p))
-        );
-        for (const p of acceptedProblems)
-          console.log(`  accepted for ${basename}: ${p}`);
+        const acceptedProblems = acceptProblems(id, basename, problems);
 
         if (problems.length || !profile || !rule) {
           return stop(file, problems, {
@@ -416,7 +520,10 @@ export default async function (argv: Args) {
         // up to 15 min of drift is unambiguous). UTC clocks: the udta GPMF TZON
         // (HERO11, HERO13), or the local time in the Garmin header (rounded).
         const tzon = udtaGpmfValue(scan, 'TZON');
+        // local wall time the camera writes beside mvhd: the Garmin header,
+        // or the first entry of a DJI SRT
         const garminLocal = garminInfo(scan)?.headerLocal;
+        const cameraLocalStart = garminLocal ?? hints.srt?.firstLocal ?? null;
         const utcOffsetMin =
           clock === 'local'
             ? clockOffsetS === null
@@ -424,9 +531,9 @@ export default async function (argv: Args) {
               : Math.round(clockOffsetS / 1800) * 30
             : typeof tzon === 'number'
               ? tzon
-              : garminLocal && cameraStart
+              : cameraLocalStart && cameraStart
                 ? Math.round(
-                    (localMs(garminLocal) - localMs(cameraStart)) / 1800e3
+                    (localMs(cameraLocalStart) - localMs(cameraStart)) / 1800e3
                   ) * 30
                 : null;
         const clockDriftS =
@@ -451,7 +558,17 @@ export default async function (argv: Args) {
             ? (st.mtime.getTime() - localMs(cameraStart)) / 1000 - durationS
             : null;
 
-        const newCamera = !q.camera.get(cameraKey!);
+        const newCamera = cameraKey !== null && !q.camera.get(cameraKey);
+        // where the camera was at the start: a locked GoPro GPS fix, or the
+        // first position in a DJI SRT
+        const startPos =
+          scan.gps?.gps9Lock?.lat != null
+            ? { lat: scan.gps.gps9Lock.lat, lon: scan.gps.gps9Lock.lon }
+            : scan.gps?.lockLat != null
+              ? { lat: scan.gps.lockLat, lon: scan.gps.lockLon }
+              : hints.srt?.firstFix
+                ? { lat: hints.srt.firstFix.lat, lon: hints.srt.firstFix.lon }
+                : null;
         const newRecording = !rec;
         const evidence = profile.linkKey
           ? profile.linkKey.toLowerCase()
@@ -496,6 +613,9 @@ export default async function (argv: Args) {
             height: video?.height ?? null,
             fps: video?.fps ?? null,
             has_gpmf: scan.tracks.some((t) => t.format === 'gpmd') ? 1 : 0,
+            start_lat: startPos?.lat ?? null,
+            start_lon: startPos?.lon ?? null,
+            camera_local_start: cameraLocalStart,
             meta: JSON.stringify({
               name,
               stat: { mtime, birthtime },
@@ -523,6 +643,9 @@ export default async function (argv: Args) {
                 ? [id, counterpart.id]
                 : [counterpart.id, id];
             q.insertRelation.run(proxy, chapter, 'proxy_of');
+          }
+          for (const sidecar of sidecars) {
+            q.insertRelation.run(sidecar.id, id, 'telemetry_of');
           }
         });
         counts.added++;
@@ -567,8 +690,24 @@ export default async function (argv: Args) {
   }
 }
 
+// problems already looked at and accepted for this file: removed from
+// `problems`, logged, and returned for the file's meta
+function acceptProblems(id: string, basename: string, problems: string[]) {
+  const accepted = problems.filter((p) =>
+    ACCEPTED.some((a) => a.fileId === id && p.includes(a.match))
+  );
+  problems.splice(
+    0,
+    problems.length,
+    ...problems.filter((p) => !accepted.includes(p))
+  );
+  for (const p of accepted) console.log(`  accepted for ${basename}: ${p}`);
+  return accepted;
+}
+
 type PairRow = {
   id: string;
+  kind: string;
   first_path: string;
   duration_s: number;
   role: string;
@@ -606,6 +745,9 @@ const emptyRow = Object.fromEntries(
     'utc_offset_min',
     'clock_drift_s',
     'clock_valid',
+    'start_lat',
+    'start_lon',
+    'camera_local_start',
     'mtime_minus_end_s',
     'muid',
     'gumi',
@@ -757,6 +899,9 @@ function stop(
     );
     console.log(`  gpmfKeys:  ${Object.keys(scan.udtaGpmf ?? {}).length}`);
     console.log(`  garmin:    ${JSON.stringify(garminInfo(scan))}`);
+    console.log(
+      `  writer:    ${JSON.stringify(scan.udtaMeta['©too'] ?? null)}`
+    );
     console.log('\nscan:');
     const { tracks, ...rest } = scan;
     console.log(JSON.stringify(rest, null, 1));

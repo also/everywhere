@@ -6,11 +6,13 @@
 // been checked against real files. Newest models first.
 import { Scan, trackSignature, udtaGpmfValue } from './mp4-scan';
 import { garminInfo } from './garmin';
+import { djiWriter, SrtSummary } from './dji';
 
 export type FileRule = {
-  // chapter: part of a recording; proxy: low-res copy of a chapter (LRV)
-  role: 'chapter' | 'proxy';
-  kind: 'video' | 'proxy' | 'spherical';
+  // chapter: part of a recording; proxy: low-res copy of a chapter (LRV);
+  // sidecar: data about a chapter in a file of its own (DJI .SRT)
+  role: 'chapter' | 'proxy' | 'sidecar';
+  kind: 'video' | 'proxy' | 'spherical' | 'telemetry';
   // camera_name prefixes allowed for this extension
   prefixes: string[];
   // where moov may sit (Varia loop clips: before their padding)
@@ -26,6 +28,11 @@ export type Profile = {
   firmware: string[];
   // Garmin: model name in the GarminModel uuid box
   garminModel?: string;
+  // DJI: the udta/meta ©too writer tag. 'Lavf…' (FFmpeg's muxer) is shared by
+  // several drones, which are told apart by udta keys and their SRT sidecar.
+  djiWriter?: string;
+  // DJI: the SRT sidecar layouts a video may have ('none': no SRT)
+  srt?: ('framecnt' | 'srtcnt' | 'none')[];
   // udta children in file order, 'free' excluded
   udtaKeys: string[];
   // udta children that may be missing (e.g. ©xyz needs a GPS fix at start)
@@ -36,7 +43,12 @@ export type Profile = {
   // udta GPMF key holding the 1-based chapter number, checked against the name
   chapterKey?: 'CPIN';
   // where the camera body's identity comes from
-  cameraKey: 'CAME' | 'MUID-prefix' | 'garmin-unit';
+  // ('none': the files carry no camera serial, e.g. DJI drones)
+  cameraKey: 'CAME' | 'MUID-prefix' | 'garmin-unit' | 'none';
+  // without a link key, how a chapter finds its proxy and sidecar: by camera,
+  // name and mvhd time (default), or by folder and name (cameras with no
+  // serial or no mvhd time)
+  pairBy?: 'name-time' | 'directory';
   // expects a GPMF telemetry (gpmd) track
   gpmf: boolean;
   // model name in the udta GPMF (DEVC/MINF), for cameras that write one
@@ -101,6 +113,98 @@ export const PROFILES: Profile[] = [
         prefixes: ['GRMN', 'GRME', 'GRMS'],
         moov: ['middle', 'end'],
         tracks: ['vide:avc1 soun:sowt', 'vide:avc1 soun:sowt text:text'],
+      },
+    },
+  },
+  {
+    id: 'dji-mini-3-pro',
+    model: 'DJI Mini 3 Pro',
+    firmware: [],
+    // FFmpeg's muxer, as on the Mavic Air; told apart by the Xtra box and the
+    // SRT layout. Photos say FC3582 "Mini 3 Pro" (2023); the 2024 and 2026
+    // footage matches only by SRT layout.
+    djiWriter: 'Lavf56.15.102',
+    srt: ['srtcnt'],
+    udtaKeys: ['meta', 'Xtra'],
+    cameraKey: 'none',
+    pairBy: 'directory',
+    gpmf: false,
+    files: {
+      '.mp4': {
+        role: 'chapter',
+        kind: 'video',
+        prefixes: ['DJI_'],
+        moov: ['end'],
+        tracks: ['vide:avc1'],
+      },
+      // per-frame position, altitude and camera settings; local time
+      '.srt': {
+        role: 'sidecar',
+        kind: 'telemetry',
+        prefixes: ['DJI_'],
+        moov: [],
+        tracks: [],
+      },
+    },
+  },
+  {
+    id: 'dji-mavic-3',
+    model: 'DJI Mavic 3',
+    firmware: [],
+    djiWriter: 'DJIMavic3',
+    // captions were off for a few videos
+    srt: ['framecnt', 'none'],
+    // ©dji: 4 bytes, different per file. meta holds ©too and JPEG thumbnails.
+    udtaKeys: ['©dji', 'meta', 'Xtra'],
+    cameraKey: 'none',
+    pairBy: 'directory',
+    gpmf: false,
+    files: {
+      // djmd: DJI protobuf (dvtm_wm260.proto) with camera settings per frame
+      // but no GPS; dbgi: ~5 KB of sensor debug data per frame
+      '.mp4': {
+        role: 'chapter',
+        kind: 'video',
+        prefixes: ['DJI_'],
+        moov: ['end'],
+        tracks: ['vide:avc1 meta:djmd meta:dbgi'],
+      },
+      '.lrf': {
+        role: 'proxy',
+        kind: 'proxy',
+        prefixes: ['DJI_'],
+        moov: ['end'],
+        // video only: no djmd/dbgi
+        tracks: ['vide:avc1'],
+      },
+      '.srt': {
+        role: 'sidecar',
+        kind: 'telemetry',
+        prefixes: ['DJI_'],
+        moov: [],
+        tracks: [],
+      },
+    },
+  },
+  {
+    id: 'dji-mavic-air',
+    model: 'DJI Mavic Air',
+    firmware: [],
+    // photos say FC2103. No SRT captions, and mvhd has no creation time: only
+    // mtime dates these. GPS is in the DJI GO flight records.
+    djiWriter: 'Lavf56.15.102',
+    srt: ['none'],
+    udtaKeys: ['meta'],
+    cameraKey: 'none',
+    pairBy: 'directory',
+    gpmf: false,
+    files: {
+      '.mp4': {
+        role: 'chapter',
+        kind: 'video',
+        prefixes: ['DJI_'],
+        moov: ['end'],
+        tracks: ['vide:avc1'],
       },
     },
   },
@@ -405,6 +509,10 @@ const GARMIN_CLIP: Record<string, string> = {
 // HERO6+:      G[HXLS]ccnnnn (chapter cc)
 export function parseCameraName(basename: string): CameraName | null {
   const stem = basename.replace(/\.[^.]*$/, '');
+  // DJI drones: DJI_nnnn
+  const d = /^DJI_(\d{4})$/.exec(stem);
+  if (d)
+    return { cameraName: stem, prefix: 'DJI_', chapter: 1, fileNumber: d[1] };
   // Garmin Varia: GRM[NES]nnnn
   const g = /^GRM([NES])(\d{4})$/.exec(stem);
   if (g)
@@ -437,7 +545,26 @@ export function parseCameraName(basename: string): CameraName | null {
   return null;
 }
 
-export function findProfile(scan: Scan) {
+// what we know about a file from outside it
+export type Hints = {
+  // the DJI SRT sidecar next to it, if any
+  srt?: SrtSummary | null;
+};
+
+export function findProfile(scan: Scan, hints: Hints = {}) {
+  const writer = djiWriter(scan);
+  if (writer && !scan.udta.FIRM && !garminInfo(scan)) {
+    const srt = hints.srt ? (hints.srt.format ?? 'unknown') : 'none';
+    return {
+      profile: PROFILES.find(
+        (p) =>
+          p.djiWriter === writer &&
+          p.udtaKeys.join(',') === scan.udtaKeys.join(',') &&
+          (p.srt ?? []).includes(srt as 'framecnt' | 'srtcnt' | 'none')
+      ),
+      family: undefined,
+    };
+  }
   const garmin = garminInfo(scan)?.model;
   if (garmin) {
     return {
@@ -474,6 +601,7 @@ export function linkKeyValue(profile: Profile, scan: Scan) {
 }
 
 export function cameraKeyValue(profile: Profile, scan: Scan) {
+  if (profile.cameraKey === 'none') return null;
   if (profile.cameraKey === 'garmin-unit') {
     const unit = garminInfo(scan)?.unitId;
     return unit ? `garmin:${unit}` : null;
@@ -489,23 +617,31 @@ export function cameraKeyValue(profile: Profile, scan: Scan) {
 export function checkFile(
   scan: Scan,
   ext: string,
-  name: CameraName | null
+  name: CameraName | null,
+  hints: Hints = {}
 ): { profile?: Profile; rule?: FileRule; problems: string[] } {
   const problems: string[] = [];
   const firmware = scan.udta.FIRM;
   const garmin = garminInfo(scan);
-  if (!firmware && !garmin?.model) {
+  const writer = djiWriter(scan);
+  if (!firmware && !garmin?.model && !writer) {
     problems.push(
-      `unknown camera: no udta FIRM or Garmin model (udta keys: ${scan.udtaKeys.join(',') || 'none'}; moov keys: ${scan.moovKeys.join(',')}; uuids: ${scan.uuids.map((u) => `${u.at}:${u.usertype}`).join(',') || 'none'})`
+      `unknown camera: no udta FIRM, Garmin model or writer tag (udta keys: ${scan.udtaKeys.join(',') || 'none'}; moov keys: ${scan.moovKeys.join(',')}; uuids: ${scan.uuids.map((u) => `${u.at}:${u.usertype}`).join(',') || 'none'})`
     );
     return { problems };
   }
-  const { profile, family } = findProfile(scan);
+  const { profile, family } = findProfile(scan, hints);
   if (!profile) {
     problems.push(
       family
         ? `new firmware ${firmware} for known model ${family.model} (${family.id})`
-        : `unknown camera: ${firmware ? `firmware ${firmware}` : `Garmin model ${garmin?.model}`}`
+        : `unknown camera: ${
+            firmware
+              ? `firmware ${firmware}`
+              : garmin?.model
+                ? `Garmin model ${garmin.model}`
+                : `writer ${JSON.stringify(writer)}, udta keys ${scan.udtaKeys.join(',')}, SRT ${hints.srt ? hints.srt.format : 'none'}`
+          }`
     );
     return { problems };
   }
@@ -582,7 +718,7 @@ export function checkFile(
       problems.push(`text track has ${t.samples} samples: look at them`);
     }
   }
-  if (!cameraKeyValue(profile, scan))
+  if (profile.cameraKey !== 'none' && !cameraKeyValue(profile, scan))
     problems.push(`camera key (${profile.cameraKey}) missing or zero`);
   if (!scan.mvhd || scan.mvhd.durationS <= 0)
     problems.push('no mvhd or zero duration');
