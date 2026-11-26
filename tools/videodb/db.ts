@@ -18,14 +18,18 @@ CREATE TABLE IF NOT EXISTS file (
   camera_key        TEXT NOT NULL,
   firmware          TEXT,
   brand             TEXT,
-  start_local       TEXT,               -- mvhd creation time, camera clock, no zone
+  camera_start      TEXT,               -- mvhd creation time as written, no zone
+  camera_clock      TEXT NOT NULL,      -- utc | local: which clock camera_start is in
+  camera_start_utc  TEXT,               -- camera_start as UTC, when camera_clock is utc
   duration_s        REAL,
   start_utc         TEXT,               -- GPS time at file start (GPS9, else locked GPSU)
   gps_first_utc     TEXT,               -- first GPS time (GPS9, else GPSU), locked or not
   gps_first_fix     INTEGER,            -- its fix: 0 none, 2 2D, 3 3D
-  clock_offset_s    REAL,               -- start_local − start_utc, as if local were UTC
-  clock_valid       INTEGER,            -- 0 known-bad, 1 agrees with GPS, null unknown
-  mtime_minus_end_s REAL,               -- mtime − (start_local + duration), as if local were UTC
+  clock_offset_s    REAL,               -- camera_start − start_utc, reading camera_start as UTC
+  utc_offset_min    INTEGER,            -- camera zone: from GPS (local clocks) or TZON (utc clocks)
+  clock_drift_s     REAL,               -- clock_offset_s less the zone
+  clock_valid       INTEGER,            -- 0 reset or off by > 15 min, 1 agrees with GPS, null unknown
+  mtime_minus_end_s REAL,               -- mtime − (camera_start + duration), reading camera_start as UTC
   muid              TEXT,
   gumi              TEXT,
   video_codec       TEXT,
@@ -80,7 +84,7 @@ export type MemberRow = {
   chapter_index: number;
   file_number: string;
   first_path: string;
-  start_local: string | null;
+  camera_start: string | null;
   duration_s: number;
   gps_first_utc: string | null;
   gps_first_fix: number | null;

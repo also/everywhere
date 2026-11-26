@@ -3,7 +3,7 @@
 // The exploration tool stops on any file that doesn't match a profile, so a
 // person can look at it and either extend a profile here or decide the file
 // breaks an assumption of the ID/database design. Only add values that have
-// been checked against real files.
+// been checked against real files. Newest models first.
 import { Scan, trackSignature, udtaGpmfValue } from './mp4-scan';
 
 export type FileRule = {
@@ -37,65 +37,145 @@ export type Profile = {
   gpmf: boolean;
   // model name in the udta GPMF (DEVC/MINF), for cameras that write one
   minf?: string;
-  // what mvhd creation time means: the chapter's own start (HERO3+, HERO5) or
-  // the whole recording's start, repeated in every chapter (HERO9)
-  mvhdTime: 'chapter' | 'recording';
+  // Newer cameras are the norm: these default to what they do, and older
+  // models declare the exception.
+  //
+  // What mvhd creation time means. Default 'recording': the whole recording's
+  // start, repeated in every chapter (HERO9 and later). 'chapter': each
+  // chapter's own start (HERO7 and earlier).
+  mvhdTime?: 'recording' | 'chapter';
+  // Which clock mvhd times are in. Default 'utc': the camera's idea of UTC
+  // (HERO11 and later). 'local': the camera's local time with no zone (HERO9
+  // and earlier).
+  mvhdClock?: 'utc' | 'local';
   files: Record<string, FileRule>;
 };
 
+export const mvhdTime = (p: Profile) => p.mvhdTime ?? 'recording';
+export const mvhdClock = (p: Profile) => p.mvhdClock ?? 'utc';
+
 export const PROFILES: Profile[] = [
   {
-    id: 'gopro-hero3plus',
-    model: 'GoPro HERO3+',
-    firmware: ['HD3.11.03.00'],
-    udtaKeys: ['FIRM', 'LENS', 'CAME', 'SETT', 'MUID', 'AMBA'],
-    linkKey: 'MUID',
-    cameraKey: 'MUID-prefix',
-    gpmf: false,
-    mvhdTime: 'chapter',
-    files: {
-      '.mp4': {
-        role: 'chapter',
-        kind: 'video',
-        prefixes: ['GOPR', 'GP'],
-        moov: 'start',
-        tracks: ['vide:avc1 soun:mp4a tmcd:tmcd'],
-      },
-    },
-  },
-  {
-    id: 'gopro-hero5-black',
-    model: 'GoPro HERO5 Black',
-    firmware: ['HD5.02.02.51.00', 'HD5.02.02.60.00'],
+    id: 'gopro-hero13-black',
+    model: 'GoPro HERO13 Black',
+    firmware: ['H24.01.02.10.00'],
     udtaKeys: [
       '©xyz',
       'FIRM',
       'LENS',
       'CAME',
       'SETT',
-      'AMBA',
       'MUID',
       'HMMT',
       'BCID',
       'GUMI',
+      'GPMF',
     ],
     udtaOptional: ['©xyz'],
-    linkKey: 'GUMI',
+    // udta MUID is CAME + zeros and GUMI is empty; the udta GPMF has CPID
+    // (shared by chapters) and CPIN (chapter number). LENS is a placeholder.
+    linkKey: 'CPID',
+    chapterKey: 'CPIN',
     cameraKey: 'CAME',
     gpmf: true,
-    mvhdTime: 'chapter',
+    minf: 'HERO13 Black',
     files: {
+      // telemetry has GPS9 only (no GPSU)
       '.mp4': {
         role: 'chapter',
         kind: 'video',
-        prefixes: ['GOPR', 'GP'],
+        prefixes: ['GX'],
         moov: 'end',
-        tracks: ['vide:avc1 soun:mp4a tmcd:tmcd meta:gpmd meta:fdsc'],
+        tracks: ['vide:hvc1 soun:mp4a tmcd:tmcd meta:gpmd'],
       },
       '.lrv': {
         role: 'proxy',
         kind: 'proxy',
-        prefixes: ['GOPR', 'GP'],
+        prefixes: ['GL'],
+        moov: 'end',
+        tracks: ['vide:hvc1 soun:mp4a tmcd:tmcd meta:gpmd'],
+      },
+    },
+  },
+  {
+    id: 'gopro-hero11-black',
+    model: 'GoPro HERO11 Black',
+    firmware: ['H22.01.02.10.00', 'H22.01.02.30.00'],
+    udtaKeys: [
+      '©xyz',
+      'FIRM',
+      'LENS',
+      'CAME',
+      'SETT',
+      'MUID',
+      'HMMT',
+      'BCID',
+      'GUMI',
+      'GPMF',
+    ],
+    udtaOptional: ['©xyz'],
+    // GUMI is present but empty
+    linkKey: 'MUID',
+    cameraKey: 'CAME',
+    gpmf: true,
+    minf: 'HERO11 Black',
+    files: {
+      // no fdsc track; telemetry has both GPS5 and GPS9
+      '.mp4': {
+        role: 'chapter',
+        kind: 'video',
+        prefixes: ['GX'],
+        moov: 'end',
+        tracks: ['vide:hvc1 soun:mp4a tmcd:tmcd meta:gpmd'],
+      },
+      '.lrv': {
+        role: 'proxy',
+        kind: 'proxy',
+        prefixes: ['GL'],
+        moov: 'end',
+        tracks: ['vide:avc1 soun:mp4a tmcd:tmcd meta:gpmd'],
+      },
+    },
+  },
+  {
+    id: 'gopro-max',
+    model: 'GoPro MAX',
+    firmware: ['H19.03.02.00.00'],
+    udtaKeys: [
+      '©xyz',
+      'FIRM',
+      'LENS',
+      'CAME',
+      'SETT',
+      'MUID',
+      'HMMT',
+      'BCID',
+      'GUMI',
+      'GPMF',
+    ],
+    udtaOptional: ['©xyz'],
+    // unverified guesses (HERO9-like); the neighbour check catches a wrong guess
+    linkKey: 'MUID',
+    cameraKey: 'CAME',
+    gpmf: true,
+    mvhdClock: 'local',
+    minf: 'GoPro Max',
+    files: {
+      // two HEVC tracks (one per lens) and a second audio track (ambisonic?)
+      '.360': {
+        role: 'chapter',
+        kind: 'spherical',
+        prefixes: ['GS'],
+        moov: 'end',
+        tracks: [
+          'vide:hvc1 soun:mp4a tmcd:tmcd meta:gpmd meta:fdsc vide:hvc1 soun:in32',
+        ],
+      },
+      // a single H.264 track
+      '.lrv': {
+        role: 'proxy',
+        kind: 'proxy',
+        prefixes: ['GS'],
         moov: 'end',
         tracks: ['vide:avc1 soun:mp4a tmcd:tmcd meta:gpmd meta:fdsc'],
       },
@@ -128,7 +208,7 @@ export const PROFILES: Profile[] = [
     linkKey: 'MUID',
     cameraKey: 'CAME',
     gpmf: true,
-    mvhdTime: 'recording',
+    mvhdClock: 'local',
     minf: 'HERO9 Black',
     files: {
       // GH = H.264, GX = HEVC
@@ -172,6 +252,7 @@ export const PROFILES: Profile[] = [
     cameraKey: 'CAME',
     gpmf: true,
     mvhdTime: 'chapter',
+    mvhdClock: 'local',
     minf: 'HERO7 Black',
     files: {
       '.mp4': {
@@ -191,131 +272,62 @@ export const PROFILES: Profile[] = [
     },
   },
   {
-    id: 'gopro-max',
-    model: 'GoPro MAX',
-    firmware: ['H19.03.02.00.00'],
+    id: 'gopro-hero5-black',
+    model: 'GoPro HERO5 Black',
+    firmware: ['HD5.02.02.51.00', 'HD5.02.02.60.00'],
     udtaKeys: [
       '©xyz',
       'FIRM',
       'LENS',
       'CAME',
       'SETT',
+      'AMBA',
       'MUID',
       'HMMT',
       'BCID',
       'GUMI',
-      'GPMF',
     ],
     udtaOptional: ['©xyz'],
-    // unverified guesses (HERO9-like); the neighbour check catches a wrong guess
-    linkKey: 'MUID',
+    linkKey: 'GUMI',
     cameraKey: 'CAME',
     gpmf: true,
-    mvhdTime: 'recording',
-    minf: 'GoPro Max',
+    mvhdTime: 'chapter',
+    mvhdClock: 'local',
     files: {
-      // two HEVC tracks (one per lens) and a second audio track (ambisonic?)
-      '.360': {
+      '.mp4': {
         role: 'chapter',
-        kind: 'spherical',
-        prefixes: ['GS'],
+        kind: 'video',
+        prefixes: ['GOPR', 'GP'],
         moov: 'end',
-        tracks: [
-          'vide:hvc1 soun:mp4a tmcd:tmcd meta:gpmd meta:fdsc vide:hvc1 soun:in32',
-        ],
+        tracks: ['vide:avc1 soun:mp4a tmcd:tmcd meta:gpmd meta:fdsc'],
       },
-      // a single H.264 track
       '.lrv': {
         role: 'proxy',
         kind: 'proxy',
-        prefixes: ['GS'],
+        prefixes: ['GOPR', 'GP'],
         moov: 'end',
         tracks: ['vide:avc1 soun:mp4a tmcd:tmcd meta:gpmd meta:fdsc'],
       },
     },
   },
   {
-    id: 'gopro-hero11-black',
-    model: 'GoPro HERO11 Black',
-    firmware: ['H22.01.02.10.00', 'H22.01.02.30.00'],
-    udtaKeys: [
-      '©xyz',
-      'FIRM',
-      'LENS',
-      'CAME',
-      'SETT',
-      'MUID',
-      'HMMT',
-      'BCID',
-      'GUMI',
-      'GPMF',
-    ],
-    udtaOptional: ['©xyz'],
-    // GUMI is present but empty
+    id: 'gopro-hero3plus',
+    model: 'GoPro HERO3+',
+    firmware: ['HD3.11.03.00'],
+    udtaKeys: ['FIRM', 'LENS', 'CAME', 'SETT', 'MUID', 'AMBA'],
     linkKey: 'MUID',
-    cameraKey: 'CAME',
-    gpmf: true,
-    // unverified guess; the recording checks catch a wrong guess
-    mvhdTime: 'recording',
-    minf: 'HERO11 Black',
+    cameraKey: 'MUID-prefix',
+    gpmf: false,
+    mvhdTime: 'chapter',
+    // no GPS to check against; mtime offsets match the other local-clock cameras
+    mvhdClock: 'local',
     files: {
-      // no fdsc track; telemetry has both GPS5 and GPS9
       '.mp4': {
         role: 'chapter',
         kind: 'video',
-        prefixes: ['GX'],
-        moov: 'end',
-        tracks: ['vide:hvc1 soun:mp4a tmcd:tmcd meta:gpmd'],
-      },
-      '.lrv': {
-        role: 'proxy',
-        kind: 'proxy',
-        prefixes: ['GL'],
-        moov: 'end',
-        tracks: ['vide:avc1 soun:mp4a tmcd:tmcd meta:gpmd'],
-      },
-    },
-  },
-  {
-    id: 'gopro-hero13-black',
-    model: 'GoPro HERO13 Black',
-    firmware: ['H24.01.02.10.00'],
-    udtaKeys: [
-      '©xyz',
-      'FIRM',
-      'LENS',
-      'CAME',
-      'SETT',
-      'MUID',
-      'HMMT',
-      'BCID',
-      'GUMI',
-      'GPMF',
-    ],
-    udtaOptional: ['©xyz'],
-    // udta MUID is CAME + zeros and GUMI is empty; the udta GPMF has CPID
-    // (shared by chapters) and CPIN (chapter number). LENS is a placeholder.
-    linkKey: 'CPID',
-    chapterKey: 'CPIN',
-    cameraKey: 'CAME',
-    gpmf: true,
-    mvhdTime: 'recording',
-    minf: 'HERO13 Black',
-    files: {
-      // telemetry has GPS9 only (no GPSU)
-      '.mp4': {
-        role: 'chapter',
-        kind: 'video',
-        prefixes: ['GX'],
-        moov: 'end',
-        tracks: ['vide:hvc1 soun:mp4a tmcd:tmcd meta:gpmd'],
-      },
-      '.lrv': {
-        role: 'proxy',
-        kind: 'proxy',
-        prefixes: ['GL'],
-        moov: 'end',
-        tracks: ['vide:hvc1 soun:mp4a tmcd:tmcd meta:gpmd'],
+        prefixes: ['GOPR', 'GP'],
+        moov: 'start',
+        tracks: ['vide:avc1 soun:mp4a tmcd:tmcd'],
       },
     },
   },

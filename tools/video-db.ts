@@ -30,12 +30,14 @@ import {
   cameraKeyValue,
   checkFile,
   linkKeyValue,
+  mvhdClock,
+  mvhdTime,
   parseGoProName,
 } from './videodb/profiles';
 import { MemberRow, openDb, transaction } from './videodb/db';
 import { ACCEPTED } from './videodb/accepted';
 
-const EXTRACTOR_VERSION = 2;
+const EXTRACTOR_VERSION = 3;
 const VIDEO_EXT = new Set(['.mp4', '.lrv', '.360', '.mov', '.insv', '.m4v']);
 // chapters should follow each other to within this many seconds
 const CONTIGUITY_S = 2;
@@ -72,6 +74,8 @@ function gpsFirst(gps: GpsInfo | null): {
 const PROXY_DURATION_S = 0.5;
 // camera clock defaults seen after a reset
 const DEFAULT_CLOCK = /^(2015|2016)-01-01T/;
+// a camera clock within this many seconds of GPS (after its zone) counts as set
+const CLOCK_DRIFT_S = 15 * 60;
 
 type Args = {
   _: (string | number)[];
@@ -127,23 +131,23 @@ export default async function (argv: Args) {
       'SELECT id, camera_key FROM recording WHERE link_key = ?'
     ),
     members: db.prepare(`
-      SELECT m.file_id, m.role, m.chapter_index, m.file_number, f.first_path, f.start_local, f.duration_s,
+      SELECT m.file_id, m.role, m.chapter_index, m.file_number, f.first_path, f.camera_start, f.duration_s,
         f.gps_first_utc, f.gps_first_fix
       FROM recording_member m JOIN file f ON f.id = m.file_id WHERE m.recording_id = ?`),
     // same camera, file number and role, adjacent chapter: should share a recording
     neighbours: db.prepare(`
-      SELECT m.recording_id, m.chapter_index, f.first_path, f.start_local, f.duration_s, f.gps_first_utc, f.gps_first_fix
+      SELECT m.recording_id, m.chapter_index, f.first_path, f.camera_start, f.duration_s, f.gps_first_utc, f.gps_first_fix
       FROM recording_member m JOIN file f ON f.id = m.file_id
       WHERE f.camera_key = ? AND m.file_number = ? AND m.role = ? AND m.chapter_index IN (?, ?)`),
     camera: db.prepare('SELECT key FROM camera WHERE key = ?'),
     insertFile: db.prepare(`
       INSERT INTO file (id, size, kind, first_name, first_path, first_seen_at, mtime, birthtime,
-        camera_name, profile, camera_key, firmware, brand, start_local, duration_s, start_utc, gps_first_utc, gps_first_fix,
-        clock_offset_s, clock_valid, mtime_minus_end_s, muid, gumi, video_codec, width, height, fps, has_gpmf,
+        camera_name, profile, camera_key, firmware, brand, camera_start, camera_clock, camera_start_utc, duration_s, start_utc, gps_first_utc, gps_first_fix,
+        clock_offset_s, utc_offset_min, clock_drift_s, clock_valid, mtime_minus_end_s, muid, gumi, video_codec, width, height, fps, has_gpmf,
         meta, extractor_version)
       VALUES ($id, $size, $kind, $first_name, $first_path, $first_seen_at, $mtime, $birthtime,
-        $camera_name, $profile, $camera_key, $firmware, $brand, $start_local, $duration_s, $start_utc, $gps_first_utc, $gps_first_fix,
-        $clock_offset_s, $clock_valid, $mtime_minus_end_s, $muid, $gumi, $video_codec, $width, $height, $fps, $has_gpmf,
+        $camera_name, $profile, $camera_key, $firmware, $brand, $camera_start, $camera_clock, $camera_start_utc, $duration_s, $start_utc, $gps_first_utc, $gps_first_fix,
+        $clock_offset_s, $utc_offset_min, $clock_drift_s, $clock_valid, $mtime_minus_end_s, $muid, $gumi, $video_codec, $width, $height, $fps, $has_gpmf,
         $meta, $extractor_version)`),
     insertLocation: db.prepare(
       'INSERT INTO file_location (path, file_id, mtime, birthtime, seen_at) VALUES (?, ?, ?, ?, ?)'
@@ -241,7 +245,7 @@ export default async function (argv: Args) {
           cameraKey = cameraKeyValue(profile, scan);
           rec = q.recording.get(linkKey) as typeof rec;
           const self: ChapterTimes = {
-            start_local: scan.mvhd?.created ?? null,
+            camera_start: scan.mvhd?.created ?? null,
             duration_s: scan.mvhd?.durationS ?? 0,
             ...gpsFirst(scan.gps),
           };
@@ -308,31 +312,47 @@ export default async function (argv: Args) {
         }
 
         const video = scan.tracks.find((t) => t.handler === 'vide');
-        const startLocal = scan.mvhd?.created ?? null;
+        const cameraStart = scan.mvhd?.created ?? null;
+        const clock = mvhdClock(profile);
         const durationS = scan.mvhd?.durationS ?? null;
         const startUtc = gpsStart(scan.gps);
-        // camera clock minus GPS, as if mvhd were UTC; chapter 1 or per-chapter mvhd only
+        // mvhd is this file's own start: per-chapter cameras, or chapter 1
+        const ownStart = mvhdTime(profile) === 'chapter' || name!.chapter === 1;
+        // camera clock minus GPS, reading the camera time as if it were UTC
         const clockOffsetS =
-          startUtc &&
-          startLocal &&
-          (profile.mvhdTime === 'chapter' || name!.chapter === 1)
-            ? (localMs(startLocal) - Date.parse(startUtc)) / 1000
+          startUtc && cameraStart && ownStart
+            ? (localMs(cameraStart) - Date.parse(startUtc)) / 1000
             : null;
-        const clockValid =
-          startLocal && DEFAULT_CLOCK.test(startLocal)
-            ? 0
-            : startUtc && startLocal
-              ? Math.abs(localMs(startLocal) - Date.parse(startUtc)) <=
-                15 * 3600e3
-                ? 1
-                : 0
+        // the camera's zone: from GPS for local clocks (nearest 30 min, so up to 15 min of drift is unambiguous), from
+        // the udta GPMF TZON for UTC clocks that write one (HERO13)
+        const tzon = udtaGpmfValue(scan, 'TZON');
+        const utcOffsetMin =
+          clock === 'local'
+            ? clockOffsetS === null
+              ? null
+              : Math.round(clockOffsetS / 1800) * 30
+            : typeof tzon === 'number'
+              ? tzon
               : null;
+        const clockDriftS =
+          clockOffsetS === null
+            ? null
+            : clock === 'local'
+              ? clockOffsetS - utcOffsetMin! * 60
+              : clockOffsetS;
+        const clockValid =
+          cameraStart && DEFAULT_CLOCK.test(cameraStart)
+            ? 0
+            : clockDriftS === null
+              ? null
+              : Math.abs(clockDriftS) <= CLOCK_DRIFT_S &&
+                  (clock === 'utc' || Math.abs(utcOffsetMin!) <= 14 * 60)
+                ? 1
+                : 0;
         // only meaningful when mvhd is this chapter's own start
         const mtimeMinusEnd =
-          startLocal &&
-          durationS !== null &&
-          (profile.mvhdTime === 'chapter' || name!.chapter === 1)
-            ? (st.mtime.getTime() - localMs(startLocal)) / 1000 - durationS
+          cameraStart && durationS !== null && ownStart
+            ? (st.mtime.getTime() - localMs(cameraStart)) / 1000 - durationS
             : null;
 
         const newCamera = !q.camera.get(cameraKey!);
@@ -354,11 +374,16 @@ export default async function (argv: Args) {
             camera_key: cameraKey,
             firmware: scan.udta.FIRM ?? null,
             brand: scan.ftyp?.major ?? null,
-            start_local: startLocal,
+            camera_start: cameraStart,
+            camera_clock: clock,
+            camera_start_utc:
+              clock === 'utc' && cameraStart ? `${cameraStart}Z` : null,
             duration_s: durationS,
             start_utc: startUtc,
             ...gpsFirst(scan.gps),
             clock_offset_s: clockOffsetS,
+            utc_offset_min: utcOffsetMin,
+            clock_drift_s: clockDriftS,
             clock_valid: clockValid,
             mtime_minus_end_s: mtimeMinusEnd,
             muid: scan.udta.MUID ?? null,
@@ -403,7 +428,7 @@ export default async function (argv: Args) {
             id,
             profile.id,
             `ch${name!.chapter}`,
-            startLocal,
+            cameraStart,
             `${durationS?.toFixed(1)}s`,
             gps,
             newRecording ? 'new recording' : '',
@@ -431,7 +456,7 @@ export default async function (argv: Args) {
 }
 
 type ChapterTimes = {
-  start_local: string | null;
+  camera_start: string | null;
   duration_s: number;
   gps_first_utc: string | null;
   gps_first_fix: number | null;
@@ -443,22 +468,24 @@ const locked = (c: ChapterTimes) =>
 
 // null when `next` follows `prev` with no gap, else what is wrong
 function adjacencyProblem(
-  mvhdTime: Profile['mvhdTime'],
+  mode: ReturnType<typeof mvhdTime>,
   prev: ChapterTimes,
   next: ChapterTimes
 ): string | null {
-  if (mvhdTime === 'chapter') {
+  if (mode === 'chapter') {
     const gap =
-      localMs(next.start_local) -
-      (localMs(prev.start_local) + prev.duration_s * 1000);
+      localMs(next.camera_start) -
+      (localMs(prev.camera_start) + prev.duration_s * 1000);
     return Math.abs(gap) <= CONTIGUITY_S * 1000
       ? null
       : `chapter starts ${gap / 1000}s after the previous one ends`;
   }
   // every chapter carries the recording's start time
   // to the second: HERO13 LRVs of one recording differ by 1s
-  if (Math.abs(localMs(next.start_local) - localMs(prev.start_local)) > 1000) {
-    return `recording start differs between chapters: ${prev.start_local} vs ${next.start_local}`;
+  if (
+    Math.abs(localMs(next.camera_start) - localMs(prev.camera_start)) > 1000
+  ) {
+    return `recording start differs between chapters: ${prev.camera_start} vs ${next.camera_start}`;
   }
   if (locked(prev) && locked(next)) {
     const gap =
@@ -499,11 +526,11 @@ function checkRecording(
       );
     }
     if (m.role === rule.role && m.chapter_index === name.chapter - 1) {
-      const p = adjacencyProblem(profile.mvhdTime, m, self);
+      const p = adjacencyProblem(mvhdTime(profile), m, self);
       if (p) problems.push(`${p} (previous: ${m.first_path})`);
     }
     if (m.role === rule.role && m.chapter_index === name.chapter + 1) {
-      const p = adjacencyProblem(profile.mvhdTime, self, m);
+      const p = adjacencyProblem(mvhdTime(profile), self, m);
       if (p) problems.push(`${p} (next: ${m.first_path})`);
     }
     if (m.role !== rule.role && m.chapter_index === name.chapter) {
@@ -548,8 +575,8 @@ function checkNeighbours(
     .map((n) => {
       const adjacency =
         n.chapter_index < name.chapter
-          ? adjacencyProblem(profile.mvhdTime, n, self)
-          : adjacencyProblem(profile.mvhdTime, self, n);
+          ? adjacencyProblem(mvhdTime(profile), n, self)
+          : adjacencyProblem(mvhdTime(profile), self, n);
       return (
         `${rule.role} ${n.chapter_index} of the same camera and file number is in another recording ` +
         `${n.recording_id} (${adjacency ?? 'contiguous'}): link key not shared across chapters? (${n.first_path})`
