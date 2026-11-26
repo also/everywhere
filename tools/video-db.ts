@@ -173,10 +173,23 @@ function* walk(
       );
     return;
   }
-  for (const name of fs.readdirSync(p).sort()) {
+  for (const name of fs.readdirSync(p).sort(byStemThenExt)) {
     if (name.startsWith('.')) continue;
     yield* walk(path.join(p, name), skipped, excludes, excluded);
   }
+}
+
+// Sort by name without its extension, then by extension, so an original comes
+// before a Finder copy of it ("GOPR0053.MP4" before "GOPR0053 1.MP4"). The
+// copy is then seen as a duplicate of the imported original rather than read
+// first and stopping on its name.
+export function byStemThenExt(a: string, b: string): number {
+  const ea = path.extname(a);
+  const eb = path.extname(b);
+  const sa = a.slice(0, a.length - ea.length);
+  const sb = b.slice(0, b.length - eb.length);
+  if (sa !== sb) return sa < sb ? -1 : 1;
+  return ea < eb ? -1 : ea > eb ? 1 : 0;
 }
 
 function uuidv7() {
