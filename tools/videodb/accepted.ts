@@ -70,18 +70,6 @@ export const ACCEPTED: Accepted[] = [
     match: 'track signature',
     reason: '1.1s recording without audio tracks',
   },
-  // HERO5 GOPR2928 (kate nz and panama) is an empty recording: MP4 and LRV
-  // are 1813 bytes each, with a zero-length mvhd and only an fdsc track.
-  {
-    fileId: 'f1_94b82ba7f8754e77bc71af88996f0969', // GOPR2928.MP4
-    match: '',
-    reason: 'empty recording: zero duration, no video track',
-  },
-  {
-    fileId: 'f1_6826e8dceec186b31201a6a1934543e6', // GOPR2928.LRV
-    match: '',
-    reason: 'empty recording: zero duration, no video track',
-  },
   ...SHORT_WITHOUT_GPMD.flatMap(([fileId]) =>
     ['track signature', 'gpmd track missing'].map((match) => ({
       fileId,
