@@ -15,6 +15,7 @@ node tools video-db --db /path/to/video.sqlite <dir-or-file>...
 - `--db`: defaults to `<dataDir>/video-explore.sqlite`.
 - `--limit n`: stop after n new files (useful for sampling a folder).
 - `--files-from list.txt`: one path per line, instead of or as well as dirs.
+- `--exclude-from list.txt`: paths to leave out, for footage that isn't from a camera the tool models (phones, other brands, screen recordings, edited or exported videos). One absolute path per line; a folder excludes everything under it. Entries match whole path components, so `.../oregon` doesn't exclude `.../oregon drone`. Blank lines and lines starting with `#` are ignored; put a comment above each entry saying what it is. Excluded video files are counted in the run summary. Keep the list next to the database, not in the repo, and exclude the narrowest path that covers the footage, usually a folder.
 
 Only video extensions are read (`.mp4 .lrv .glv .lrf .360 .mov .insv .m4v .srt`). Everything else is counted and skipped. Paths are stored as given (absolute), so mount the Synology `Media` share at `/Volumes/Media` on every machine that writes to the same database.
 
@@ -36,6 +37,7 @@ The exit code is 0 when the run finished and 2 when it stopped.
 
 A stop prints `STOP <path>`, the list of problems, an `observed (profile-ready)` block (firmware, udta keys, moov position, track signature, GPMF model name, serial, Garmin and DJI info), the full scan and the context. Work out which case it is:
 
+0. **Not camera footage the tool models** (a phone, another brand, a screen recording, an edited or exported video): don't model it. Add its folder (or the file) to the `--exclude-from` list and rerun.
 1. **A new camera model or firmware.** Add or extend a profile in `profiles.ts` (see below). The profile is the only place that knows about a camera.
 2. **A one-off broken file of a known camera**, such as an interrupted recording, a missing telemetry track or doubled values. Add an entry to `accepted.ts` keyed by file ID, with a `match` substring of the problem and a reason. Its problems are then stored in the file's `meta` instead of stopping the run. Use this for a single file, never for a pattern.
 3. **A wrong assumption in the design**, for example chapters of one recording not sharing the link key, or times that don't line up for a whole model. Don't paper over it. Look at several files, find out what the camera actually does, and change the profile semantics or the check. If the cause isn't clear, stop and ask a person.

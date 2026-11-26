@@ -1,6 +1,6 @@
 // Explore camera files into a SQLite database.
 //
-//   node tools video-db [--db path] [--limit n] [--files-from list] <file or directory>...
+//   node tools video-db [--db path] [--limit n] [--files-from list] [--exclude-from list] <file or directory>...
 //
 // Each new file gets a file ID, a metadata scan, and checks against the camera
 // profiles in tools/video/profiles.ts. The run stops at the first file that
@@ -117,9 +117,52 @@ type Args = {
   db?: string;
   limit?: number;
   'files-from'?: string;
+  'exclude-from'?: string;
 };
 
-function* walk(p: string, skipped: Map<string, number>): Generator<string> {
+// Absolute path prefixes to leave out, one per line; blank lines and lines
+// starting with # are ignored. An entry matches that path and, if it's a
+// folder, everything under it: whole path components only, so `.../oregon`
+// doesn't match `.../oregon drone`.
+export function readExcludes(file: string): string[] {
+  return fs
+    .readFileSync(file, 'utf8')
+    .split('\n')
+    .map((l) => l.trim())
+    .filter((l) => l && !l.startsWith('#'))
+    .map((l) => {
+      if (!path.isAbsolute(l))
+        throw new Error(`--exclude-from: not an absolute path: ${l}`);
+      return path.resolve(l);
+    });
+}
+
+export function isExcluded(p: string, excludes: string[]): boolean {
+  return excludes.some((e) => p === e || p.startsWith(e + path.sep));
+}
+
+// video files under p, for counting what an exclude leaves out
+function countVideos(p: string): number {
+  const st = fs.statSync(p);
+  if (!st.isDirectory())
+    return VIDEO_EXT.has(path.extname(p).toLowerCase()) ? 1 : 0;
+  let n = 0;
+  for (const name of fs.readdirSync(p)) {
+    if (!name.startsWith('.')) n += countVideos(path.join(p, name));
+  }
+  return n;
+}
+
+function* walk(
+  p: string,
+  skipped: Map<string, number>,
+  excludes: string[],
+  excluded: { files: number }
+): Generator<string> {
+  if (isExcluded(p, excludes)) {
+    excluded.files += countVideos(p);
+    return;
+  }
   const st = fs.statSync(p);
   if (!st.isDirectory()) {
     if (VIDEO_EXT.has(path.extname(p).toLowerCase())) yield p;
@@ -132,7 +175,7 @@ function* walk(p: string, skipped: Map<string, number>): Generator<string> {
   }
   for (const name of fs.readdirSync(p).sort()) {
     if (name.startsWith('.')) continue;
-    yield* walk(path.join(p, name), skipped);
+    yield* walk(path.join(p, name), skipped, excludes, excluded);
   }
 }
 
@@ -211,6 +254,10 @@ export default async function (argv: Args) {
   };
 
   const skipped = new Map<string, number>();
+  const excludes = argv['exclude-from']
+    ? readExcludes(argv['exclude-from'])
+    : [];
+  const excluded = { files: 0 };
   const counts = { added: 0, duplicate: 0, incomplete: 0, known: 0 };
   const started = Date.now();
 
@@ -222,12 +269,12 @@ export default async function (argv: Args) {
   }
   if (!inputs.length) {
     throw new Error(
-      'usage: video-db [--db path] [--limit n] [--files-from list] <file or directory>...'
+      'usage: video-db [--db path] [--limit n] [--files-from list] [--exclude-from list] <file or directory>...'
     );
   }
 
   for (const p of inputs) {
-    for (const file of walk(path.resolve(p), skipped)) {
+    for (const file of walk(path.resolve(p), skipped, excludes, excluded)) {
       if (counts.added + counts.duplicate >= limit) break;
       if (q.location.get(file)) {
         counts.known++;
@@ -690,7 +737,7 @@ export default async function (argv: Args) {
 
   console.log(
     `\n${counts.added} added, ${counts.incomplete} incomplete, ${counts.duplicate} duplicate content, ` +
-      `${counts.known} already in db, ` +
+      `${counts.known} already in db, ${excluded.files} excluded, ` +
       `${((Date.now() - started) / 1000).toFixed(1)}s`
   );
   if (skipped.size) {
