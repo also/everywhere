@@ -350,7 +350,8 @@ export default async function (argv: Args) {
               if (
                 !recovered &&
                 !other.recovered &&
-                Math.abs(other.duration_s - self.duration_s) > PROXY_DURATION_S
+                Math.abs(other.duration_s - self.duration_s) >
+                  (profile.proxyDurationS ?? PROXY_DURATION_S)
               ) {
                 problems.push(
                   `duration ${self.duration_s}s differs from ${other.role} ${other.duration_s}s (${other.first_path})`

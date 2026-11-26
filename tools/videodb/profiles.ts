@@ -58,6 +58,8 @@ export type Profile = {
   // by an empty text track (a few RCT715 clips). None has had data so far;
   // records or text samples would need a decoder and a look.
   garminGps?: 'empty';
+  // how far a proxy's duration may differ from its chapter's (default 0.5s)
+  proxyDurationS?: number;
   files: Record<string, FileRule>;
 };
 
@@ -78,6 +80,9 @@ export const PROFILES: Profile[] = [
     gpmf: false,
     resetDates: ['2021-02-02'],
     garminGps: 'empty',
+    // a clip cut short when recording stops (e.g. 7.3s) can end 0.5s earlier
+    // in its GLV
+    proxyDurationS: 1,
     files: {
       // GRMN = loop (103UNSVD), GRME = incident (100EVENT), GRMS = saved
       // (102SAVED). Loop clips are preallocated (80 MiB) with moov before the
