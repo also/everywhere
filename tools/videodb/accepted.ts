@@ -37,4 +37,17 @@ export const ACCEPTED: Accepted[] = [
     match: 'gpmd track missing',
     reason: '1.9s recording without a telemetry track',
   },
+  // MAX recording 0035 (florida 2021) is 1.1s: 33 frames per lens and 34 GPMF
+  // samples, but no audio tracks in the .360 or the LRV. The other 31 MAX
+  // recordings all have audio; probably stopped before audio started.
+  {
+    fileId: 'f1_f69f13665e39968c67a8222ba4248d98', // GS010035.360
+    match: 'track signature',
+    reason: '1.1s recording without audio tracks',
+  },
+  {
+    fileId: 'f1_caf7ede2c79d09e33f4073b8d92a0361', // GS010035.LRV
+    match: 'track signature',
+    reason: '1.1s recording without audio tracks',
+  },
 ];
