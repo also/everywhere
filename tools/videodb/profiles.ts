@@ -484,7 +484,9 @@ export const PROFILES: Profile[] = [
         kind: 'video',
         prefixes: ['GOPR', 'GP'],
         moov: ['start'],
-        tracks: ['vide:avc1 soun:mp4a tmcd:tmcd'],
+        // no timecode track in 4K15 and 720p120 (all 8 such files); every
+        // 240p, 1080p and 2.7K file has one
+        tracks: ['vide:avc1 soun:mp4a tmcd:tmcd', 'vide:avc1 soun:mp4a'],
       },
     },
   },
