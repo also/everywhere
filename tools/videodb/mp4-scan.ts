@@ -629,6 +629,29 @@ export function gpsuToIso(s: string): string | null {
   return `20${m[1]}-${m[2]}-${m[3]}T${m[4]}:${m[5]}:${m[6]}.${m[7].padEnd(3, '0').slice(0, 3)}Z`;
 }
 
+// ---- uuid boxes ----
+
+export type UuidBox = {
+  at: 'top' | 'moov' | 'udta';
+  // the 16-byte extended type, hex
+  usertype: string;
+  // whole box size, header included
+  size: number;
+  // the body after the usertype, hex (up to MAX_UUID bytes)
+  data: string;
+};
+
+const MAX_UUID = 4096;
+
+function uuidBox(at: UuidBox['at'], b: Buffer, size: number): UuidBox {
+  return {
+    at,
+    usertype: b.subarray(0, 16).toString('hex'),
+    size,
+    data: b.subarray(16, MAX_UUID).toString('hex'),
+  };
+}
+
 // ---- the scan ----
 
 export type Scan = {
@@ -651,6 +674,9 @@ export type Scan = {
   udtaGpmf: Record<string, unknown> | null;
   // other moov children that may carry camera metadata (e.g. Apple 'meta')
   moovKeys: string[];
+  // every uuid box at the top level, in moov and in udta: vendors (Garmin) keep
+  // their metadata in these
+  uuids: UuidBox[];
   gps: GpsInfo | null;
   reads: number;
   bytesRead: number;
@@ -673,10 +699,24 @@ export function scanFile(r: FileReader, { gps = true } = {}): Scan {
     udta: {},
     udtaGpmf: null,
     moovKeys: [],
+    uuids: [],
     gps: null,
     reads: 0,
     bytesRead: 0,
   };
+
+  for (const b of boxes.filter((b) => b.type === 'uuid')) {
+    scan.uuids.push(
+      uuidBox(
+        'top',
+        r.read(
+          b.offset + b.headerSize,
+          Math.min(b.size - b.headerSize, MAX_UUID)
+        ),
+        b.size
+      )
+    );
+  }
 
   const ftyp = boxes.find((b) => b.type === 'ftyp');
   if (ftyp) {
@@ -713,6 +753,9 @@ export function scanFile(r: FileReader, { gps = true } = {}): Scan {
   const root: BoxInfo = { ...moov, offset: 0 };
   const kids = children(m, root.headerSize, root.size);
   scan.moovKeys = kids.map((k) => k.type);
+  for (const k of kids.filter((k) => k.type === 'uuid')) {
+    scan.uuids.push(uuidBox('moov', body(m, k), k.size));
+  }
 
   const mvhd = kids.find((k) => k.type === 'mvhd');
   if (mvhd) {
@@ -744,6 +787,8 @@ export function scanFile(r: FileReader, { gps = true } = {}): Scan {
       udta.offset + udta.size
     )) {
       if (c.type === 'free') continue;
+      if (c.type === 'uuid')
+        scan.uuids.push(uuidBox('udta', body(m, c), c.size));
       scan.udtaKeys.push(c.type);
       const v = body(m, c);
       if (c.type === 'GPMF') {

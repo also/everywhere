@@ -24,21 +24,31 @@ import {
 } from './videodb/mp4-scan';
 import { fileIdV1 } from './videodb/file-id';
 import {
+  CameraName,
   FileRule,
-  GoProName,
   Profile,
   cameraKeyValue,
   checkFile,
+  findProfile,
   linkKeyValue,
   mvhdClock,
   mvhdTime,
-  parseGoProName,
+  parseCameraName,
 } from './videodb/profiles';
+import { garminInfo, isRecoveredClip } from './videodb/garmin';
 import { MemberRow, openDb, transaction } from './videodb/db';
 import { ACCEPTED } from './videodb/accepted';
 
-const EXTRACTOR_VERSION = 3;
-const VIDEO_EXT = new Set(['.mp4', '.lrv', '.360', '.mov', '.insv', '.m4v']);
+const EXTRACTOR_VERSION = 4;
+const VIDEO_EXT = new Set([
+  '.mp4',
+  '.lrv',
+  '.glv',
+  '.360',
+  '.mov',
+  '.insv',
+  '.m4v',
+]);
 // chapters should follow each other to within this many seconds
 const CONTIGUITY_S = 2;
 // first GPS times of adjacent chapters should differ by the chapter's duration
@@ -72,8 +82,6 @@ function gpsFirst(gps: GpsInfo | null): {
 }
 // a proxy should be as long as its chapter to within this many seconds
 const PROXY_DURATION_S = 0.5;
-// camera clock defaults seen after a reset
-const DEFAULT_CLOCK = /^(2015|2016)-01-01T/;
 // a camera clock within this many seconds of GPS (after its zone) counts as set
 const CLOCK_DRIFT_S = 15 * 60;
 
@@ -132,21 +140,30 @@ export default async function (argv: Args) {
     ),
     members: db.prepare(`
       SELECT m.file_id, m.role, m.chapter_index, m.file_number, f.first_path, f.camera_start, f.duration_s,
-        f.gps_first_utc, f.gps_first_fix
+        f.start_utc
       FROM recording_member m JOIN file f ON f.id = m.file_id WHERE m.recording_id = ?`),
     // same camera, file number and role, adjacent chapter: should share a recording
     neighbours: db.prepare(`
-      SELECT m.recording_id, m.chapter_index, f.first_path, f.camera_start, f.duration_s, f.gps_first_utc, f.gps_first_fix
+      SELECT m.recording_id, m.chapter_index, f.first_path, f.camera_start, f.duration_s, f.start_utc
       FROM recording_member m JOIN file f ON f.id = m.file_id
       WHERE f.camera_key = ? AND m.file_number = ? AND m.role = ? AND m.chapter_index IN (?, ?)`),
     camera: db.prepare('SELECT key FROM camera WHERE key = ?'),
+    // the other files sharing a pair key (a chapter and its proxy)
+    pair: db.prepare(`
+      SELECT f.id, f.first_path, f.duration_s, m.role, m.recording_id,
+        json_extract(f.meta, '$.recovered') AS recovered
+      FROM file f LEFT JOIN recording_member m ON m.file_id = f.id
+      WHERE f.pair_key = ?`),
+    insertRelation: db.prepare(
+      'INSERT INTO file_relation (file_id, related_id, kind) VALUES (?, ?, ?)'
+    ),
     insertFile: db.prepare(`
       INSERT INTO file (id, size, kind, first_name, first_path, first_seen_at, mtime, birthtime,
-        camera_name, profile, camera_key, firmware, brand, camera_start, camera_clock, camera_start_utc, duration_s, start_utc, gps_first_utc, gps_first_fix,
+        camera_name, clip_type, profile, camera_key, pair_key, firmware, brand, camera_start, camera_clock, camera_start_utc, duration_s, start_utc, gps_first_utc, gps_first_fix,
         clock_offset_s, utc_offset_min, clock_drift_s, clock_valid, mtime_minus_end_s, muid, gumi, video_codec, width, height, fps, has_gpmf,
         meta, extractor_version)
       VALUES ($id, $size, $kind, $first_name, $first_path, $first_seen_at, $mtime, $birthtime,
-        $camera_name, $profile, $camera_key, $firmware, $brand, $camera_start, $camera_clock, $camera_start_utc, $duration_s, $start_utc, $gps_first_utc, $gps_first_fix,
+        $camera_name, $clip_type, $profile, $camera_key, $pair_key, $firmware, $brand, $camera_start, $camera_clock, $camera_start_utc, $duration_s, $start_utc, $gps_first_utc, $gps_first_fix,
         $clock_offset_s, $utc_offset_min, $clock_drift_s, $clock_valid, $mtime_minus_end_s, $muid, $gumi, $video_codec, $width, $height, $fps, $has_gpmf,
         $meta, $extractor_version)`),
     insertLocation: db.prepare(
@@ -167,7 +184,7 @@ export default async function (argv: Args) {
   };
 
   const skipped = new Map<string, number>();
-  const counts = { added: 0, duplicate: 0, known: 0 };
+  const counts = { added: 0, duplicate: 0, incomplete: 0, known: 0 };
   const started = Date.now();
 
   const inputs = argv._.map(String).filter(Boolean);
@@ -193,7 +210,7 @@ export default async function (argv: Args) {
       const t0 = Date.now();
       const basename = path.basename(file);
       const ext = path.extname(file).toLowerCase();
-      const name = parseGoProName(basename);
+      const name = parseCameraName(basename);
       const fd = fs.openSync(file, 'r');
       try {
         const st = fs.fstatSync(fd);
@@ -236,25 +253,81 @@ export default async function (argv: Args) {
           return stop(file, [`scan failed: ${e.message}`], { id, mtime });
         }
 
+        // a recording that never finished (no moov) or never started (no
+        // video): keep the file and its ID, link it to nothing
+        if (isIncomplete(scan)) {
+          const { profile } = findProfile(scan);
+          const cameraKey = profile ? cameraKeyValue(profile, scan) : null;
+          transaction(db, () => {
+            q.insertFile.run({
+              ...emptyRow,
+              id,
+              size: scan.size,
+              kind: 'incomplete',
+              first_name: basename,
+              first_path: file,
+              first_seen_at: now,
+              mtime,
+              birthtime,
+              camera_name: name?.cameraName ?? null,
+              clip_type: name?.clipType ?? null,
+              profile: profile?.id ?? null,
+              camera_key: cameraKey,
+              firmware: scan.udta.FIRM ?? null,
+              brand: scan.ftyp?.major ?? null,
+              camera_start: scan.mvhd?.created ?? null,
+              duration_s: scan.mvhd?.durationS ?? null,
+              has_gpmf: 0,
+              meta: JSON.stringify({ name, stat: { mtime, birthtime }, scan }),
+              extractor_version: EXTRACTOR_VERSION,
+            });
+            q.insertLocation.run(file, id, mtime, birthtime, now);
+          });
+          counts.incomplete++;
+          console.log(
+            `incomplete  ${basename}  ${id}  ${profile?.id ?? 'unknown camera'}  layout ${scan.layout.join(' ')}`
+          );
+          continue;
+        }
+
         const { profile, rule, problems } = checkFile(scan, ext, name);
         let linkKey: string | null = null;
         let cameraKey: string | null = null;
+        let pairKey: string | null = null;
         let rec: { id: string; camera_key: string } | undefined;
+        let counterpart: PairRow | undefined;
+        // Garmin clips cut off and recovered: MP4 and GLV end at different times
+        const recovered = isRecoveredClip(scan);
         if (profile && rule && name) {
-          linkKey = `gopro-${profile.linkKey.toLowerCase()}:${linkKeyValue(profile, scan)}`;
           cameraKey = cameraKeyValue(profile, scan);
-          rec = q.recording.get(linkKey) as typeof rec;
           const self: ChapterTimes = {
             camera_start: scan.mvhd?.created ?? null,
             duration_s: scan.mvhd?.durationS ?? 0,
-            ...gpsFirst(scan.gps),
+            start_utc: gpsStart(scan.gps),
           };
-          if (rec) {
-            const members = q.members.all(rec.id) as MemberRow[];
+          if (profile.linkKey) {
+            linkKey = `gopro-${profile.linkKey.toLowerCase()}:${linkKeyValue(profile, scan)}`;
+            // a chapter and its proxy share the link key and chapter number
+            pairKey = `${linkKey}#${name.chapter}`;
+            rec = q.recording.get(linkKey) as typeof rec;
+            if (rec) {
+              const members = q.members.all(rec.id) as MemberRow[];
+              problems.push(
+                ...checkRecording(
+                  rec,
+                  members,
+                  cameraKey,
+                  profile,
+                  rule,
+                  name,
+                  self
+                )
+              );
+            }
             problems.push(
-              ...checkRecording(
-                rec,
-                members,
+              ...checkNeighbours(
+                q.neighbours,
+                rec?.id,
                 cameraKey,
                 profile,
                 rule,
@@ -262,18 +335,33 @@ export default async function (argv: Args) {
                 self
               )
             );
+          } else {
+            // no shared ID: pair by camera, name and mvhd time
+            pairKey = `${cameraKey}:${name.cameraName}:${self.camera_start}`;
           }
-          problems.push(
-            ...checkNeighbours(
-              q.neighbours,
-              rec?.id,
-              cameraKey,
-              profile,
-              rule,
-              name,
-              self
-            )
-          );
+
+          for (const other of q.pair.all(pairKey) as PairRow[]) {
+            if (other.role === rule.role) {
+              problems.push(
+                `already have a ${rule.role} with this pair key, different content: ${other.first_path}`
+              );
+            } else {
+              counterpart = other;
+              if (
+                !recovered &&
+                !other.recovered &&
+                Math.abs(other.duration_s - self.duration_s) > PROXY_DURATION_S
+              ) {
+                problems.push(
+                  `duration ${self.duration_s}s differs from ${other.role} ${other.duration_s}s (${other.first_path})`
+                );
+              }
+            }
+          }
+          // without a link key, a file joins its counterpart's recording
+          if (!profile.linkKey && counterpart) {
+            rec = { id: counterpart.recording_id, camera_key: cameraKey! };
+          }
         }
 
         // GPS9 and GPSU should agree where a camera writes both
@@ -323,9 +411,11 @@ export default async function (argv: Args) {
           startUtc && cameraStart && ownStart
             ? (localMs(cameraStart) - Date.parse(startUtc)) / 1000
             : null;
-        // the camera's zone: from GPS for local clocks (nearest 30 min, so up to 15 min of drift is unambiguous), from
-        // the udta GPMF TZON for UTC clocks that write one (HERO13)
+        // the camera's zone. Local clocks: from GPS, to the nearest 30 min (so
+        // up to 15 min of drift is unambiguous). UTC clocks: the udta GPMF TZON
+        // (HERO11, HERO13), or the local time in the Garmin header (rounded).
         const tzon = udtaGpmfValue(scan, 'TZON');
+        const garminLocal = garminInfo(scan)?.headerLocal;
         const utcOffsetMin =
           clock === 'local'
             ? clockOffsetS === null
@@ -333,7 +423,11 @@ export default async function (argv: Args) {
               : Math.round(clockOffsetS / 1800) * 30
             : typeof tzon === 'number'
               ? tzon
-              : null;
+              : garminLocal && cameraStart
+                ? Math.round(
+                    (localMs(garminLocal) - localMs(cameraStart)) / 1800e3
+                  ) * 30
+                : null;
         const clockDriftS =
           clockOffsetS === null
             ? null
@@ -341,7 +435,8 @@ export default async function (argv: Args) {
               ? clockOffsetS - utcOffsetMin! * 60
               : clockOffsetS;
         const clockValid =
-          cameraStart && DEFAULT_CLOCK.test(cameraStart)
+          cameraStart &&
+          (profile.resetDates ?? []).some((d) => cameraStart.startsWith(d))
             ? 0
             : clockDriftS === null
               ? null
@@ -357,6 +452,11 @@ export default async function (argv: Args) {
 
         const newCamera = !q.camera.get(cameraKey!);
         const newRecording = !rec;
+        const evidence = profile.linkKey
+          ? profile.linkKey.toLowerCase()
+          : counterpart
+            ? 'pair'
+            : 'none';
         const recordingId = rec?.id ?? `r_${uuidv7()}`;
 
         transaction(db, () => {
@@ -370,8 +470,10 @@ export default async function (argv: Args) {
             mtime,
             birthtime,
             camera_name: name!.cameraName,
+            clip_type: name!.clipType ?? null,
             profile: profile.id,
             camera_key: cameraKey,
+            pair_key: pairKey,
             firmware: scan.udta.FIRM ?? null,
             brand: scan.ftyp?.major ?? null,
             camera_start: cameraStart,
@@ -397,6 +499,7 @@ export default async function (argv: Args) {
               name,
               stat: { mtime, birthtime },
               acceptedProblems,
+              recovered,
               scan,
             }),
             extractor_version: EXTRACTOR_VERSION,
@@ -411,8 +514,15 @@ export default async function (argv: Args) {
             rule.role,
             name!.chapter,
             name!.fileNumber,
-            profile.linkKey.toLowerCase()
+            evidence
           );
+          if (counterpart) {
+            const [proxy, chapter] =
+              rule.role === 'proxy'
+                ? [id, counterpart.id]
+                : [counterpart.id, id];
+            q.insertRelation.run(proxy, chapter, 'proxy_of');
+          }
         });
         counts.added++;
 
@@ -445,7 +555,8 @@ export default async function (argv: Args) {
   }
 
   console.log(
-    `\n${counts.added} added, ${counts.duplicate} duplicate content, ${counts.known} already in db, ` +
+    `\n${counts.added} added, ${counts.incomplete} incomplete, ${counts.duplicate} duplicate content, ` +
+      `${counts.known} already in db, ` +
       `${((Date.now() - started) / 1000).toFixed(1)}s`
   );
   if (skipped.size) {
@@ -455,16 +566,62 @@ export default async function (argv: Args) {
   }
 }
 
+type PairRow = {
+  id: string;
+  first_path: string;
+  duration_s: number;
+  role: string;
+  recording_id: string;
+  recovered: number | null;
+};
+
+// a recording that never finished (no moov) or never started (no video)
+function isIncomplete(scan: Scan) {
+  return (
+    !scan.mvhd ||
+    scan.mvhd.durationS <= 0 ||
+    !scan.tracks.some((t) => t.handler === 'vide')
+  );
+}
+
+// every insertFile parameter, for rows that fill only some of them
+const emptyRow = Object.fromEntries(
+  [
+    'camera_name',
+    'clip_type',
+    'profile',
+    'camera_key',
+    'pair_key',
+    'firmware',
+    'brand',
+    'camera_start',
+    'camera_clock',
+    'camera_start_utc',
+    'duration_s',
+    'start_utc',
+    'gps_first_utc',
+    'gps_first_fix',
+    'clock_offset_s',
+    'utc_offset_min',
+    'clock_drift_s',
+    'clock_valid',
+    'mtime_minus_end_s',
+    'muid',
+    'gumi',
+    'video_codec',
+    'width',
+    'height',
+    'fps',
+  ].map((k) => [k, null])
+) as Record<string, null>;
+
 type ChapterTimes = {
   camera_start: string | null;
   duration_s: number;
-  gps_first_utc: string | null;
-  gps_first_fix: number | null;
+  // locked GPS time moved back to the file's start; GPS time before a fix can
+  // be minutes stale, and the GPS stream may only appear once locked
+  start_utc: string | null;
 };
-
-// GPS time before a fix can be minutes stale, so only trust locked samples
-const locked = (c: ChapterTimes) =>
-  c.gps_first_utc && (c.gps_first_fix ?? 0) >= 2;
 
 // null when `next` follows `prev` with no gap, else what is wrong
 function adjacencyProblem(
@@ -487,10 +644,10 @@ function adjacencyProblem(
   ) {
     return `recording start differs between chapters: ${prev.camera_start} vs ${next.camera_start}`;
   }
-  if (locked(prev) && locked(next)) {
+  if (prev.start_utc && next.start_utc) {
     const gap =
-      Date.parse(next.gps_first_utc!) -
-      Date.parse(prev.gps_first_utc!) -
+      Date.parse(next.start_utc) -
+      Date.parse(prev.start_utc) -
       prev.duration_s * 1000;
     if (Math.abs(gap) > GPS_CONTIGUITY_S * 1000) {
       return `GPS time says the chapter starts ${gap / 1000}s after the previous one ends`;
@@ -505,7 +662,7 @@ function checkRecording(
   cameraKey: string | null,
   profile: Profile,
   rule: FileRule,
-  name: GoProName,
+  name: CameraName,
   self: ChapterTimes
 ): string[] {
   const problems: string[] = [];
@@ -533,13 +690,6 @@ function checkRecording(
       const p = adjacencyProblem(mvhdTime(profile), self, m);
       if (p) problems.push(`${p} (next: ${m.first_path})`);
     }
-    if (m.role !== rule.role && m.chapter_index === name.chapter) {
-      if (Math.abs(m.duration_s - self.duration_s) > PROXY_DURATION_S) {
-        problems.push(
-          `duration ${self.duration_s}s differs from ${m.role} ${m.duration_s}s (${m.first_path})`
-        );
-      }
-    }
   }
   return problems;
 }
@@ -552,7 +702,7 @@ function checkNeighbours(
   cameraKey: string | null,
   profile: Profile,
   rule: FileRule,
-  name: GoProName,
+  name: CameraName,
   self: ChapterTimes
 ): string[] {
   const rows = stmt.all(
@@ -605,6 +755,7 @@ function stop(
       `  serial:    ${JSON.stringify(udtaGpmfValue(scan, 'CASN') ?? null)}`
     );
     console.log(`  gpmfKeys:  ${Object.keys(scan.udtaGpmf ?? {}).length}`);
+    console.log(`  garmin:    ${JSON.stringify(garminInfo(scan))}`);
     console.log('\nscan:');
     const { tracks, ...rest } = scan;
     console.log(JSON.stringify(rest, null, 1));

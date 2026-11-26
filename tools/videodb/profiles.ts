@@ -5,6 +5,7 @@
 // breaks an assumption of the ID/database design. Only add values that have
 // been checked against real files. Newest models first.
 import { Scan, trackSignature, udtaGpmfValue } from './mp4-scan';
+import { garminInfo } from './garmin';
 
 export type FileRule = {
   // chapter: part of a recording; proxy: low-res copy of a chapter (LRV)
@@ -12,7 +13,8 @@ export type FileRule = {
   kind: 'video' | 'proxy' | 'spherical';
   // camera_name prefixes allowed for this extension
   prefixes: string[];
-  moov: 'start' | 'end';
+  // where moov may sit (Varia loop clips: before their padding)
+  moov: ('start' | 'end' | 'middle')[];
   // accepted track signatures (see trackSignature)
   tracks: string[];
 };
@@ -20,19 +22,21 @@ export type FileRule = {
 export type Profile = {
   id: string;
   model: string;
-  // exact udta FIRM values seen and accepted
+  // GoPro: exact udta FIRM values seen and accepted
   firmware: string[];
+  // Garmin: model name in the GarminModel uuid box
+  garminModel?: string;
   // udta children in file order, 'free' excluded
   udtaKeys: string[];
   // udta children that may be missing (e.g. ©xyz needs a GPS fix at start)
   udtaOptional?: string[];
   // the value shared by every chapter of a recording: a udta child (GUMI,
   // MUID) or a udta GPMF key (CPID)
-  linkKey: 'GUMI' | 'MUID' | 'CPID';
+  linkKey?: 'GUMI' | 'MUID' | 'CPID';
   // udta GPMF key holding the 1-based chapter number, checked against the name
   chapterKey?: 'CPIN';
   // where the camera body's identity comes from
-  cameraKey: 'CAME' | 'MUID-prefix';
+  cameraKey: 'CAME' | 'MUID-prefix' | 'garmin-unit';
   // expects a GPMF telemetry (gpmd) track
   gpmf: boolean;
   // model name in the udta GPMF (DEVC/MINF), for cameras that write one
@@ -48,6 +52,12 @@ export type Profile = {
   // (HERO11 and later). 'local': the camera's local time with no zone (HERO9
   // and earlier).
   mvhdClock?: 'utc' | 'local';
+  // camera_start prefixes the clock falls back to after a reset
+  resetDates?: string[];
+  // Garmin: the GarminGPS box must be present with no records, or be replaced
+  // by an empty text track (a few RCT715 clips). None has had data so far;
+  // records or text samples would need a decoder and a look.
+  garminGps?: 'empty';
   files: Record<string, FileRule>;
 };
 
@@ -55,6 +65,40 @@ export const mvhdTime = (p: Profile) => p.mvhdTime ?? 'recording';
 export const mvhdClock = (p: Profile) => p.mvhdClock ?? 'utc';
 
 export const PROFILES: Profile[] = [
+  {
+    id: 'garmin-varia-rct715',
+    model: 'Garmin Varia RCT715',
+    firmware: [],
+    garminModel: 'RCT715',
+    // ExifTool's GarminModel uuid (model + unit ID)
+    udtaKeys: ['AMBA', 'uuid'],
+    // no chapters and no shared ID: each clip is its own recording, and its
+    // GLV pairs with it by camera, name and mvhd time
+    cameraKey: 'garmin-unit',
+    gpmf: false,
+    resetDates: ['2021-02-02'],
+    garminGps: 'empty',
+    files: {
+      // GRMN = loop (103UNSVD), GRME = incident (100EVENT), GRMS = saved
+      // (102SAVED). Loop clips are preallocated (80 MiB) with moov before the
+      // padding.
+      '.mp4': {
+        role: 'chapter',
+        kind: 'video',
+        prefixes: ['GRMN', 'GRME', 'GRMS'],
+        moov: ['middle', 'end'],
+        tracks: ['vide:avc1 soun:sowt', 'vide:avc1 soun:sowt text:text'],
+      },
+      // 640x368 copy, like a GoPro LRV
+      '.glv': {
+        role: 'proxy',
+        kind: 'proxy',
+        prefixes: ['GRMN', 'GRME', 'GRMS'],
+        moov: ['middle', 'end'],
+        tracks: ['vide:avc1 soun:sowt', 'vide:avc1 soun:sowt text:text'],
+      },
+    },
+  },
   {
     id: 'gopro-hero13-black',
     model: 'GoPro HERO13 Black',
@@ -85,14 +129,14 @@ export const PROFILES: Profile[] = [
         role: 'chapter',
         kind: 'video',
         prefixes: ['GX'],
-        moov: 'end',
+        moov: ['end'],
         tracks: ['vide:hvc1 soun:mp4a tmcd:tmcd meta:gpmd'],
       },
       '.lrv': {
         role: 'proxy',
         kind: 'proxy',
         prefixes: ['GL'],
-        moov: 'end',
+        moov: ['end'],
         tracks: ['vide:hvc1 soun:mp4a tmcd:tmcd meta:gpmd'],
       },
     },
@@ -117,6 +161,7 @@ export const PROFILES: Profile[] = [
     // GUMI is present but empty
     linkKey: 'MUID',
     cameraKey: 'CAME',
+    resetDates: ['2016-01-01'],
     gpmf: true,
     minf: 'HERO11 Black',
     files: {
@@ -125,14 +170,14 @@ export const PROFILES: Profile[] = [
         role: 'chapter',
         kind: 'video',
         prefixes: ['GX'],
-        moov: 'end',
+        moov: ['end'],
         tracks: ['vide:hvc1 soun:mp4a tmcd:tmcd meta:gpmd'],
       },
       '.lrv': {
         role: 'proxy',
         kind: 'proxy',
         prefixes: ['GL'],
-        moov: 'end',
+        moov: ['end'],
         tracks: ['vide:avc1 soun:mp4a tmcd:tmcd meta:gpmd'],
       },
     },
@@ -166,7 +211,7 @@ export const PROFILES: Profile[] = [
         role: 'chapter',
         kind: 'spherical',
         prefixes: ['GS'],
-        moov: 'end',
+        moov: ['end'],
         tracks: [
           'vide:hvc1 soun:mp4a tmcd:tmcd meta:gpmd meta:fdsc vide:hvc1 soun:in32',
         ],
@@ -176,7 +221,7 @@ export const PROFILES: Profile[] = [
         role: 'proxy',
         kind: 'proxy',
         prefixes: ['GS'],
-        moov: 'end',
+        moov: ['end'],
         tracks: ['vide:avc1 soun:mp4a tmcd:tmcd meta:gpmd meta:fdsc'],
       },
     },
@@ -207,6 +252,7 @@ export const PROFILES: Profile[] = [
     // shared on both
     linkKey: 'MUID',
     cameraKey: 'CAME',
+    resetDates: ['2016-01-01'],
     gpmf: true,
     mvhdClock: 'local',
     minf: 'HERO9 Black',
@@ -216,7 +262,7 @@ export const PROFILES: Profile[] = [
         role: 'chapter',
         kind: 'video',
         prefixes: ['GH', 'GX'],
-        moov: 'end',
+        moov: ['end'],
         tracks: [
           'vide:avc1 soun:mp4a tmcd:tmcd meta:gpmd meta:fdsc',
           'vide:hvc1 soun:mp4a tmcd:tmcd meta:gpmd meta:fdsc',
@@ -226,7 +272,7 @@ export const PROFILES: Profile[] = [
         role: 'proxy',
         kind: 'proxy',
         prefixes: ['GL'],
-        moov: 'end',
+        moov: ['end'],
         tracks: ['vide:avc1 soun:mp4a tmcd:tmcd meta:gpmd meta:fdsc'],
       },
     },
@@ -259,14 +305,14 @@ export const PROFILES: Profile[] = [
         role: 'chapter',
         kind: 'video',
         prefixes: ['GH'],
-        moov: 'end',
+        moov: ['end'],
         tracks: ['vide:avc1 soun:mp4a tmcd:tmcd meta:gpmd meta:fdsc'],
       },
       '.lrv': {
         role: 'proxy',
         kind: 'proxy',
         prefixes: ['GL'],
-        moov: 'end',
+        moov: ['end'],
         tracks: ['vide:avc1 soun:mp4a tmcd:tmcd meta:gpmd meta:fdsc'],
       },
     },
@@ -290,6 +336,7 @@ export const PROFILES: Profile[] = [
     udtaOptional: ['©xyz'],
     linkKey: 'GUMI',
     cameraKey: 'CAME',
+    resetDates: ['2015-01-01'],
     gpmf: true,
     mvhdTime: 'chapter',
     mvhdClock: 'local',
@@ -298,14 +345,14 @@ export const PROFILES: Profile[] = [
         role: 'chapter',
         kind: 'video',
         prefixes: ['GOPR', 'GP'],
-        moov: 'end',
+        moov: ['end'],
         tracks: ['vide:avc1 soun:mp4a tmcd:tmcd meta:gpmd meta:fdsc'],
       },
       '.lrv': {
         role: 'proxy',
         kind: 'proxy',
         prefixes: ['GOPR', 'GP'],
-        moov: 'end',
+        moov: ['end'],
         tracks: ['vide:avc1 soun:mp4a tmcd:tmcd meta:gpmd meta:fdsc'],
       },
     },
@@ -326,25 +373,43 @@ export const PROFILES: Profile[] = [
         role: 'chapter',
         kind: 'video',
         prefixes: ['GOPR', 'GP'],
-        moov: 'start',
+        moov: ['start'],
         tracks: ['vide:avc1 soun:mp4a tmcd:tmcd'],
       },
     },
   },
 ];
 
-export type GoProName = {
+export type CameraName = {
   cameraName: string;
   prefix: string;
   // 1-based chapter
   chapter: number;
   fileNumber: string;
+  // Garmin: loop | event | saved
+  clipType?: string;
+};
+
+const GARMIN_CLIP: Record<string, string> = {
+  N: 'loop',
+  E: 'event',
+  S: 'saved',
 };
 
 // HERO3–HERO5: GOPRnnnn (chapter 1), GPccnnnn (chapter cc + 1)
 // HERO6+:      G[HXLS]ccnnnn (chapter cc)
-export function parseGoProName(basename: string): GoProName | null {
+export function parseCameraName(basename: string): CameraName | null {
   const stem = basename.replace(/\.[^.]*$/, '');
+  // Garmin Varia: GRM[NES]nnnn
+  const g = /^GRM([NES])(\d{4})$/.exec(stem);
+  if (g)
+    return {
+      cameraName: stem,
+      prefix: stem.slice(0, 4),
+      chapter: 1,
+      fileNumber: g[2],
+      clipType: GARMIN_CLIP[g[1]],
+    };
   let m = /^GOPR(\d{4})$/.exec(stem);
   if (m)
     return { cameraName: stem, prefix: 'GOPR', chapter: 1, fileNumber: m[1] };
@@ -367,7 +432,15 @@ export function parseGoProName(basename: string): GoProName | null {
   return null;
 }
 
-export function findProfile(firmware: string | undefined) {
+export function findProfile(scan: Scan) {
+  const garmin = garminInfo(scan)?.model;
+  if (garmin) {
+    return {
+      profile: PROFILES.find((p) => p.garminModel === garmin),
+      family: undefined,
+    };
+  }
+  const firmware = scan.udta.FIRM;
   if (!firmware) return { profile: undefined, family: undefined };
   const profile = PROFILES.find((p) => p.firmware.includes(firmware));
   // same model, different firmware version: e.g. HD5.02.x
@@ -382,6 +455,7 @@ export function findProfile(firmware: string | undefined) {
 const isZero = (hex: string | undefined) => !hex || /^0*$/.test(hex);
 
 export function linkKeyValue(profile: Profile, scan: Scan) {
+  if (!profile.linkKey) return null;
   if (profile.linkKey === 'CPID') {
     const v = udtaGpmfValue(scan, 'CPID');
     if (!Array.isArray(v)) return null;
@@ -395,6 +469,10 @@ export function linkKeyValue(profile: Profile, scan: Scan) {
 }
 
 export function cameraKeyValue(profile: Profile, scan: Scan) {
+  if (profile.cameraKey === 'garmin-unit') {
+    const unit = garminInfo(scan)?.unitId;
+    return unit ? `garmin:${unit}` : null;
+  }
   const v =
     profile.cameraKey === 'CAME'
       ? scan.udta.CAME
@@ -406,22 +484,23 @@ export function cameraKeyValue(profile: Profile, scan: Scan) {
 export function checkFile(
   scan: Scan,
   ext: string,
-  name: GoProName | null
+  name: CameraName | null
 ): { profile?: Profile; rule?: FileRule; problems: string[] } {
   const problems: string[] = [];
   const firmware = scan.udta.FIRM;
-  if (!firmware) {
+  const garmin = garminInfo(scan);
+  if (!firmware && !garmin?.model) {
     problems.push(
-      `unknown camera: no udta FIRM (udta keys: ${scan.udtaKeys.join(',') || 'none'}; moov keys: ${scan.moovKeys.join(',')})`
+      `unknown camera: no udta FIRM or Garmin model (udta keys: ${scan.udtaKeys.join(',') || 'none'}; moov keys: ${scan.moovKeys.join(',')}; uuids: ${scan.uuids.map((u) => `${u.at}:${u.usertype}`).join(',') || 'none'})`
     );
     return { problems };
   }
-  const { profile, family } = findProfile(firmware);
+  const { profile, family } = findProfile(scan);
   if (!profile) {
     problems.push(
       family
         ? `new firmware ${firmware} for known model ${family.model} (${family.id})`
-        : `unknown camera: firmware ${firmware}`
+        : `unknown camera: ${firmware ? `firmware ${firmware}` : `Garmin model ${garmin?.model}`}`
     );
     return { problems };
   }
@@ -432,7 +511,7 @@ export function checkFile(
     return { profile, problems };
   }
 
-  if (!name) problems.push(`filename doesn't match a GoPro pattern`);
+  if (!name) problems.push(`filename doesn't match a known camera pattern`);
   else if (!rule.prefixes.includes(name.prefix)) {
     problems.push(
       `name prefix ${name.prefix} not expected for ${ext} (${rule.prefixes.join(',')})`
@@ -452,8 +531,10 @@ export function checkFile(
       `udta keys ${scan.udtaKeys.join(',')} != expected ${profile.udtaKeys.join(',')}`
     );
   }
-  if (scan.moovPosition !== rule.moov) {
-    problems.push(`moov at ${scan.moovPosition}, expected ${rule.moov}`);
+  if (!rule.moov.includes(scan.moovPosition as FileRule['moov'][number])) {
+    problems.push(
+      `moov at ${scan.moovPosition}, expected ${rule.moov.join(' or ')}`
+    );
   }
   const sig = trackSignature(scan);
   if (!rule.tracks.includes(sig)) {
@@ -481,8 +562,21 @@ export function checkFile(
       );
     }
   }
-  if (!linkKeyValue(profile, scan))
+  if (profile.linkKey && !linkKeyValue(profile, scan))
     problems.push(`link key ${profile.linkKey} missing or zero`);
+  if (profile.garminGps === 'empty') {
+    const text = scan.tracks.filter((t) => t.handler === 'text');
+    if (garmin?.gpsRecords) {
+      problems.push(
+        `GarminGPS box has ${garmin.gpsRecords} records: decode and check them`
+      );
+    } else if (garmin?.gpsRecords === null && !text.length) {
+      problems.push('no GarminGPS box and no text track');
+    }
+    for (const t of text.filter((t) => t.samples > 0)) {
+      problems.push(`text track has ${t.samples} samples: look at them`);
+    }
+  }
   if (!cameraKeyValue(profile, scan))
     problems.push(`camera key (${profile.cameraKey}) missing or zero`);
   if (!scan.mvhd || scan.mvhd.durationS <= 0)

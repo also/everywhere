@@ -7,19 +7,21 @@ CREATE TABLE IF NOT EXISTS file (
   id                TEXT PRIMARY KEY,   -- f1_…
   size              INTEGER NOT NULL,
   sha256            TEXT,               -- whole file; null until computed
-  kind              TEXT NOT NULL,      -- video | proxy | spherical
+  kind              TEXT NOT NULL,      -- video | proxy | spherical | incomplete
   first_name        TEXT NOT NULL,
   first_path        TEXT NOT NULL UNIQUE,
   first_seen_at     TEXT NOT NULL,
   mtime             TEXT,               -- earliest seen
   birthtime         TEXT,               -- earliest seen
   camera_name       TEXT,               -- e.g. GOPR0005
-  profile           TEXT NOT NULL,
-  camera_key        TEXT NOT NULL,
+  clip_type         TEXT,               -- Garmin: loop | event | saved
+  profile           TEXT,               -- null when the camera can't be told (no moov)
+  camera_key        TEXT,
+  pair_key          TEXT,               -- shared by a chapter and its proxy
   firmware          TEXT,
   brand             TEXT,
   camera_start      TEXT,               -- mvhd creation time as written, no zone
-  camera_clock      TEXT NOT NULL,      -- utc | local: which clock camera_start is in
+  camera_clock      TEXT,               -- utc | local: which clock camera_start is in
   camera_start_utc  TEXT,               -- camera_start as UTC, when camera_clock is utc
   duration_s        REAL,
   start_utc         TEXT,               -- GPS time at file start (GPS9, else locked GPSU)
@@ -57,8 +59,8 @@ CREATE TABLE IF NOT EXISTS camera (
 
 CREATE TABLE IF NOT EXISTS recording (
   id         TEXT PRIMARY KEY,          -- r_<uuidv7>
-  link_key   TEXT UNIQUE,               -- gopro-gumi:… | gopro-muid:…
-  camera_key TEXT NOT NULL
+  link_key   TEXT UNIQUE,               -- gopro-gumi:… | gopro-muid:… | gopro-cpid:…; null without one
+  camera_key TEXT
 );
 
 CREATE TABLE IF NOT EXISTS recording_member (
@@ -67,8 +69,17 @@ CREATE TABLE IF NOT EXISTS recording_member (
   role          TEXT NOT NULL,          -- chapter | proxy
   chapter_index INTEGER,
   file_number   TEXT,
-  evidence      TEXT NOT NULL           -- gumi | muid
+  evidence      TEXT NOT NULL           -- gumi | muid | cpid | pair | none
 );
+
+CREATE TABLE IF NOT EXISTS file_relation (
+  file_id    TEXT NOT NULL REFERENCES file(id),
+  related_id TEXT NOT NULL REFERENCES file(id),
+  kind       TEXT NOT NULL,             -- proxy_of
+  PRIMARY KEY (file_id, related_id, kind)
+);
+
+CREATE INDEX IF NOT EXISTS file_pair_key ON file (pair_key);
 `;
 
 export function openDb(path: string) {
@@ -86,8 +97,7 @@ export type MemberRow = {
   first_path: string;
   camera_start: string | null;
   duration_s: number;
-  gps_first_utc: string | null;
-  gps_first_fix: number | null;
+  start_utc: string | null;
 };
 
 export function transaction<T>(db: DatabaseSync, fn: () => T): T {
