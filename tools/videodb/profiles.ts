@@ -325,11 +325,19 @@ export const PROFILES: Profile[] = [
           'vide:hvc1 soun:mp4a tmcd:tmcd meta:gpmd meta:fdsc vide:hvc1 soun:in32',
         ],
       },
-      // a single H.264 track
+      // HERO (flat) mode: GH chapter, GL proxy
+      '.mp4': {
+        role: 'chapter',
+        kind: 'video',
+        prefixes: ['GH'],
+        moov: ['end'],
+        tracks: ['vide:avc1 soun:mp4a tmcd:tmcd meta:gpmd meta:fdsc'],
+      },
+      // a single H.264 track: GS for a 360 chapter, GL for a HERO-mode one
       '.lrv': {
         role: 'proxy',
         kind: 'proxy',
-        prefixes: ['GS'],
+        prefixes: ['GS', 'GL'],
         moov: ['end'],
         tracks: ['vide:avc1 soun:mp4a tmcd:tmcd meta:gpmd meta:fdsc'],
       },
