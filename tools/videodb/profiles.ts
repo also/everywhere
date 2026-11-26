@@ -416,6 +416,7 @@ export const PROFILES: Profile[] = [
     gpmf: true,
     mvhdTime: 'chapter',
     mvhdClock: 'local',
+    resetDates: ['2016-01-01'],
     minf: 'HERO7 Black',
     files: {
       '.mp4': {
