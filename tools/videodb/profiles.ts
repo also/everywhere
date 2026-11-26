@@ -469,7 +469,8 @@ export const PROFILES: Profile[] = [
   {
     id: 'gopro-hero3plus',
     model: 'GoPro HERO3+',
-    firmware: ['HD3.11.03.00'],
+    // HD3.11.03.03: a second body (CAME "H3B+603150b7669"), same layout
+    firmware: ['HD3.11.03.00', 'HD3.11.03.03'],
     udtaKeys: ['FIRM', 'LENS', 'CAME', 'SETT', 'MUID', 'AMBA'],
     linkKey: 'MUID',
     cameraKey: 'MUID-prefix',
