@@ -7,6 +7,26 @@ export type Accepted = {
   reason: string;
 };
 
+// HERO5 and HERO7 recordings of 0.2 to 1.8s (MP4 and LRV) with no gpmd
+// track. Others of 1.2s and up do have one, so there's no clean cut-off;
+// each was looked at. Same as the HERO7 GL010619.LRV case below.
+const SHORT_WITHOUT_GPMD: [string, string][] = [
+  ['f1_60de8befd3da58ac4dacfa8ff265c3cc', 'GOPR0680.MP4'], // greece/DCIM/100GOPRO
+  ['f1_7a5335329acffa356d3d226a7f6c3414', 'GOPR0680.LRV'], // greece/DCIM/100GOPRO
+  ['f1_cebbf1bd3785a8824ca45f65355646fb', 'GOPR2852.MP4'], // kate nz and panama/DCIM/101GOPRO
+  ['f1_1c96d1accb6d723f5b4e45caa9b028ea', 'GOPR2852.LRV'], // kate nz and panama/DCIM/101GOPRO
+  ['f1_9187f1e0762655e2e6809222e488d51d', 'GOPR2911.MP4'], // kate nz and panama/DCIM/101GOPRO
+  ['f1_9bfd5b81b3d1622f1483daebcf5ff760', 'GOPR2911.LRV'], // kate nz and panama/DCIM/101GOPRO
+  ['f1_d3c972bc0ac3d9f091a824acec3feeb3', 'GH010003.MP4'], // nz trip/snorkel
+  ['f1_27bac2fe0d4a7ea4510205fc872fa259', 'GH010013.MP4'], // nz trip/gopro seal vids
+  ['f1_2a75507e7a6e804ed91450927121d4fa', 'GH010232.MP4'], // panama/gopro/DCIM/100GOPRO
+  ['f1_681f050361966bf8bf49cc0f93044023', 'GL010232.LRV'], // panama/gopro/DCIM/100GOPRO
+  ['f1_8444416469cf6a189cdc6122d19c46a3', 'GH010262.MP4'], // panama/gopro/DCIM/100GOPRO
+  ['f1_6aaa076c809887e91465fad288e94afe', 'GL010262.LRV'], // panama/gopro/DCIM/100GOPRO
+  ['f1_acebe158e4a1df67ab817e23692244bc', 'GH010282.MP4'], // panama/gopro/DCIM/100GOPRO
+  ['f1_749518400414e40668257d2caa15f0ed', 'GL010282.LRV'], // panama/gopro/DCIM/100GOPRO
+];
+
 export const ACCEPTED: Accepted[] = [
   {
     // HERO13 recording 2370, last chapter: every track is ~12s shorter than
@@ -50,4 +70,23 @@ export const ACCEPTED: Accepted[] = [
     match: 'track signature',
     reason: '1.1s recording without audio tracks',
   },
+  // HERO5 GOPR2928 (kate nz and panama) is an empty recording: MP4 and LRV
+  // are 1813 bytes each, with a zero-length mvhd and only an fdsc track.
+  {
+    fileId: 'f1_94b82ba7f8754e77bc71af88996f0969', // GOPR2928.MP4
+    match: '',
+    reason: 'empty recording: zero duration, no video track',
+  },
+  {
+    fileId: 'f1_6826e8dceec186b31201a6a1934543e6', // GOPR2928.LRV
+    match: '',
+    reason: 'empty recording: zero duration, no video track',
+  },
+  ...SHORT_WITHOUT_GPMD.flatMap(([fileId]) =>
+    ['track signature', 'gpmd track missing'].map((match) => ({
+      fileId,
+      match,
+      reason: 'recording under 2s without a telemetry track',
+    }))
+  ),
 ];
