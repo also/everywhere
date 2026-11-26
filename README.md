@@ -16,6 +16,28 @@ node tools fetch-strava-trips new   # stops fetching after the first trip that a
 node tools fetch-strava-trips <id>  # fetch a single trip
 ```
 
+#### `garmin-login`
+
+Uses the [Garmin Connect Personal API](https://developer.garmin.com/gc-developer-program/personal/personal-api/). Create a key at https://connect.garmin.com/app/settings/personalApiToken and save it to `creds/garmin-api-key` (or run `garmin-login`, which prompts for it, or set `GARMIN_PERSONAL_API_KEY`). The key is exchanged for a 24 hour access token, cached in `creds/garmin.json`. Keys expire after the period you choose when creating them.
+
+#### `fetch-garmin-activities`
+
+```shell
+node tools fetch-garmin-activities       # fetch all activities
+node tools fetch-garmin-activities new   # stops fetching after the first activity that already exists
+node tools fetch-garmin-activities <id>  # fetch a single activity
+```
+
+Saves `data/garmin-activities/<id>.json` (summary and details) and `<id>.zip` (the original file from the device).
+
+#### `garmin-fit-info`
+
+Summarizes a downloaded original file: connected sensors, Varia radar events, Connect IQ developer fields, and messages not in the public FIT profile. Pass `--json` to dump every decoded message. See [docs/garmin.md](docs/garmin.md) for what's in the files, especially the radar data.
+
+```shell
+node tools garmin-fit-info <id or .zip/.fit path>
+```
+
 #### `build-combined-strava-dataset`
 
 Creates a single topojson file with all Strava trips. Pass `--geojson` to output a GeoJSON `FeatureCollection` instead.
