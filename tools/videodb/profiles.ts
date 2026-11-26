@@ -421,9 +421,13 @@ export const PROFILES: Profile[] = [
       '.mp4': {
         role: 'chapter',
         kind: 'video',
-        prefixes: ['GH'],
+        // GX: HEVC (4000x3000 4:3 video)
+        prefixes: ['GH', 'GX'],
         moov: ['end'],
-        tracks: ['vide:avc1 soun:mp4a tmcd:tmcd meta:gpmd meta:fdsc'],
+        tracks: [
+          'vide:avc1 soun:mp4a tmcd:tmcd meta:gpmd meta:fdsc',
+          'vide:hvc1 soun:mp4a tmcd:tmcd meta:gpmd meta:fdsc',
+        ],
       },
       '.lrv': {
         role: 'proxy',
