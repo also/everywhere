@@ -428,6 +428,8 @@ export const PROFILES: Profile[] = [
         tracks: [
           'vide:avc1 soun:mp4a tmcd:tmcd meta:gpmd meta:fdsc',
           'vide:hvc1 soun:mp4a tmcd:tmcd meta:gpmd meta:fdsc',
+          // TimeWarp: no audio
+          'vide:avc1 tmcd:tmcd meta:gpmd meta:fdsc',
         ],
       },
       '.lrv': {
