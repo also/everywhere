@@ -597,7 +597,16 @@ function scanGps(
           if (info.lockGpsu === null && typeof gpsf === 'number' && gpsf >= 2) {
             info.lockGpsu = gpsu;
             info.lockSample = i;
-            // GPS5 rows (lat, lon, alt, 2D, 3D speed), flattened, scaled by SCAL
+          }
+          // the position at the lock: GPS5 rows (lat, lon, alt, 2D, 3D speed),
+          // flattened, scaled by SCAL. The HERO9 sometimes reports a fix with
+          // no rows (EMPT), so take the first locked sample that has some.
+          if (
+            info.lockGpsu !== null &&
+            info.lockLat === null &&
+            typeof gpsf === 'number' &&
+            gpsf >= 2
+          ) {
             const gps5 = get('GPS5');
             const scal = get('SCAL');
             if (Array.isArray(gps5) && gps5.length >= 2) {
@@ -629,7 +638,7 @@ function scanGps(
       }
     }
     if (
-      (info.lockGpsu !== null || !hasGpsu) &&
+      ((info.lockGpsu !== null && info.lockLat !== null) || !hasGpsu) &&
       (info.gps9Lock !== null || !hasGps9) &&
       (hasGpsu || hasGps9)
     ) {
