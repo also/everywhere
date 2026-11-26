@@ -180,7 +180,59 @@ const NUMERIC: Record<string, [number, (b: Buffer, o: number) => number]> = {
   d: [8, (b, o) => b.readDoubleBE(o)],
   j: [8, (b, o) => Number(b.readBigInt64BE(o))],
   J: [8, (b, o) => Number(b.readBigUInt64BE(o))],
+  // fixed point: Q15.16 and Q31.32
+  q: [4, (b, o) => b.readInt32BE(o) / 65536],
+  Q: [8, (b, o) => Number(b.readBigInt64BE(o)) / 2 ** 32],
 };
+
+// keep big sample arrays out of the database
+const MAX_VALUES = 64;
+
+// "lllllllSS" or "f[8]L" -> one type character per field
+function expandComplexType(t: string): string[] | null {
+  const out: string[] = [];
+  const re = /([a-zA-Z])(?:\[(\d+)\])?/g;
+  let m;
+  let consumed = 0;
+  while ((m = re.exec(t))) {
+    if (m.index !== consumed) return null;
+    consumed = re.lastIndex;
+    for (let i = 0; i < Number(m[2] ?? 1); i++) out.push(m[1]);
+  }
+  return consumed === t.length ? out : null;
+}
+
+// a '?' value laid out by the preceding TYPE: one array of fields per sample
+function decodeComplex(
+  data: Buffer,
+  typeString: string | undefined,
+  structSize: number
+) {
+  const fields = typeString ? expandComplexType(typeString) : null;
+  const readers = fields?.map((f) => NUMERIC[f]);
+  if (
+    !readers ||
+    readers.some((r) => !r) ||
+    readers.reduce((n, r) => n + r[0], 0) !== structSize
+  ) {
+    return renderBytes(data, 64);
+  }
+  const rows = [];
+  for (
+    let o = 0;
+    o + structSize <= data.length && rows.length < MAX_VALUES;
+    o += structSize
+  ) {
+    const row = [];
+    let p = o;
+    for (const [size, read] of readers) {
+      row.push(read(data, p));
+      p += size;
+    }
+    rows.push(row);
+  }
+  return rows;
+}
 
 function decodeKlv(data: Buffer, type: string, structSize: number) {
   if (type === 'c' || type === 'U' || type === 'F') {
@@ -198,8 +250,7 @@ function decodeKlv(data: Buffer, type: string, structSize: number) {
   const num = NUMERIC[type];
   if (num && structSize % num[0] === 0) {
     const values = [];
-    // keep big sample arrays out of the database
-    const limit = Math.min(data.length, 64 * num[0]);
+    const limit = Math.min(data.length, MAX_VALUES * num[0]);
     for (let o = 0; o + num[0] <= limit; o += num[0]) {
       values.push(num[1](data, o));
     }
@@ -210,6 +261,8 @@ function decodeKlv(data: Buffer, type: string, structSize: number) {
 
 export function parseKlv(buf: Buffer, start = 0, end = buf.length): Klv[] {
   const out: Klv[] = [];
+  // a TYPE applies to the following '?' values at the same level
+  let complexType: string | undefined;
   let o = start;
   while (o + 8 <= end) {
     const key = buf.toString('latin1', o, o + 4);
@@ -231,12 +284,20 @@ export function parseKlv(buf: Buffer, start = 0, end = buf.length): Klv[] {
     };
     if (typeByte === 0) {
       item.children = parseKlv(buf, dataStart, dataEnd);
+    } else if (item.type === '?') {
+      item.value = decodeComplex(
+        buf.subarray(dataStart, dataEnd),
+        complexType,
+        structSize
+      );
     } else {
       item.value = decodeKlv(
         buf.subarray(dataStart, dataEnd),
         item.type,
         structSize
       );
+      if (key === 'TYPE' && typeof item.value === 'string')
+        complexType = item.value;
     }
     out.push(item);
     o = dataStart + Math.ceil(len / 4) * 4;
@@ -409,28 +470,88 @@ function sampleLocations(t: SampleTables, limit: number) {
 
 // ---- GPS from the GPMF telemetry track ----
 
+export type GpsTime = {
+  // UTC, ms precision for GPS9
+  utc: string;
+  fix: number | null;
+  // telemetry sample it came from, and the row within it (GPS9 has ~10 a sample)
+  sample: number;
+  row: number;
+  // utc moved back to the start of the file, using the sample's position
+  fileStartUtc: string;
+};
+
 export type GpsInfo = {
-  // streams (STNM names, or the data key) seen in the first sample
+  // streams (data key:STNM name) seen in the first sample
   streams: string[];
+  // seconds per telemetry sample
+  sampleDurationS: number | null;
   firstGpsu: string | null;
   firstGpsf: number | null;
   // first sample whose GPSF reports a 2D/3D fix, within the scanned window
   lockGpsu: string | null;
   lockSample: number | null;
+  // GPS9 (HERO11+): days since 2000 + seconds since midnight, with a fix per row
+  gps9First: GpsTime | null;
+  gps9Lock: GpsTime | null;
   samplesScanned: number;
 };
 
 const GPS_SCAN_SAMPLES = 30;
+const GPS9_EPOCH = Date.UTC(2000, 0, 1);
 
-function scanGps(r: FileReader, tables: SampleTables): GpsInfo {
+function gps9Time(
+  row: number[],
+  scal: unknown
+): { ms: number; fix: number } | null {
+  if (row.length < 9) return null;
+  const div = (j: number) =>
+    Array.isArray(scal) ? Number(scal[j]) || 1 : Number(scal) || 1;
+  const days = row[5] / div(5);
+  const secs = row[6] / div(6);
+  return {
+    ms: GPS9_EPOCH + days * 86400e3 + secs * 1000,
+    fix: row[8] / div(8),
+  };
+}
+
+function scanGps(
+  r: FileReader,
+  tables: SampleTables,
+  sampleDurationS: number | null
+): GpsInfo {
   const info: GpsInfo = {
     streams: [],
+    sampleDurationS,
     firstGpsu: null,
     firstGpsf: null,
     lockGpsu: null,
     lockSample: null,
+    gps9First: null,
+    gps9Lock: null,
     samplesScanned: 0,
   };
+  let hasGpsu = false;
+  let hasGps9 = false;
+  const gpsTime = (
+    ms: number,
+    fix: number | null,
+    sample: number,
+    row: number,
+    rows: number
+  ): GpsTime => {
+    const offsetMs = sampleDurationS
+      ? (sample + row / rows) * sampleDurationS * 1000
+      : 0;
+    return {
+      utc: new Date(ms).toISOString(),
+      fix,
+      sample,
+      row,
+      fileStartUtc: new Date(ms - offsetMs).toISOString(),
+    };
+  };
+
   const locs = sampleLocations(tables, GPS_SCAN_SAMPLES);
   for (let i = 0; i < locs.length; i++) {
     const klv = parseKlv(r.read(locs[i].offset, locs[i].size));
@@ -448,9 +569,11 @@ function scanGps(r: FileReader, tables: SampleTables): GpsInfo {
             typeof name === 'string' ? `${data}:${name}` : String(data)
           );
         }
+
         const gpsu = get('GPSU');
         const gpsf = get('GPSF');
         if (typeof gpsu === 'string') {
+          hasGpsu = true;
           if (info.firstGpsu === null) {
             info.firstGpsu = gpsu;
             info.firstGpsf = typeof gpsf === 'number' ? gpsf : null;
@@ -460,18 +583,50 @@ function scanGps(r: FileReader, tables: SampleTables): GpsInfo {
             info.lockSample = i;
           }
         }
+
+        const gps9 = kids.find((k) => k.key === 'GPS9');
+        if (gps9 && Array.isArray(gps9.value) && Array.isArray(gps9.value[0])) {
+          hasGps9 = true;
+          const rows = gps9.value as number[][];
+          const scal = get('SCAL');
+          for (let j = 0; j < rows.length; j++) {
+            const t = gps9Time(rows[j], scal);
+            if (!t) continue;
+            if (!info.gps9First)
+              info.gps9First = gpsTime(t.ms, t.fix, i, j, gps9.repeat);
+            if (!info.gps9Lock && t.fix >= 2) {
+              info.gps9Lock = gpsTime(t.ms, t.fix, i, j, gps9.repeat);
+              break;
+            }
+          }
+        }
       }
     }
-    if (info.lockGpsu !== null) break;
+    if (
+      (info.lockGpsu !== null || !hasGpsu) &&
+      (info.gps9Lock !== null || !hasGps9) &&
+      (hasGpsu || hasGps9)
+    ) {
+      break;
+    }
   }
   return info;
+}
+
+// a locked GPSU moved back to the start of the file
+export function gpsuFileStart(gps: GpsInfo): string | null {
+  const iso = gps.lockGpsu && gpsuToIso(gps.lockGpsu);
+  if (!iso || gps.lockSample === null) return null;
+  return new Date(
+    Date.parse(iso) - gps.lockSample * (gps.sampleDurationS ?? 0) * 1000
+  ).toISOString();
 }
 
 // GPSU is "yymmddhhmmss.sss" in UTC
 export function gpsuToIso(s: string): string | null {
   const m = /^(\d\d)(\d\d)(\d\d)(\d\d)(\d\d)(\d\d)\.(\d+)/.exec(s);
   if (!m) return null;
-  return `20${m[1]}-${m[2]}-${m[3]}T${m[4]}:${m[5]}:${m[6]}Z`;
+  return `20${m[1]}-${m[2]}-${m[3]}T${m[4]}:${m[5]}:${m[6]}.${m[7].padEnd(3, '0').slice(0, 3)}Z`;
 }
 
 // ---- the scan ----
@@ -571,10 +726,14 @@ export function scanFile(r: FileReader, { gps = true } = {}): Scan {
   }
 
   let metaTables: SampleTables | undefined;
+  let metaSampleS: number | null = null;
   for (const trak of kids.filter((k) => k.type === 'trak')) {
     const { track, tables } = readTrack(m, trak);
     scan.tracks.push(track);
-    if (track.format === 'gpmd' && tables && !metaTables) metaTables = tables;
+    if (track.format === 'gpmd' && tables && !metaTables) {
+      metaTables = tables;
+      metaSampleS = track.samples ? track.durationS / track.samples : null;
+    }
   }
 
   const udta = kids.find((k) => k.type === 'udta');
@@ -598,7 +757,7 @@ export function scanFile(r: FileReader, { gps = true } = {}): Scan {
   }
 
   if (gps && metaTables) {
-    scan.gps = scanGps(r, metaTables);
+    scan.gps = scanGps(r, metaTables, metaSampleS);
   }
 
   return finish(scan, r);

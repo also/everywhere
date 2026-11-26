@@ -20,9 +20,10 @@ CREATE TABLE IF NOT EXISTS file (
   brand             TEXT,
   start_local       TEXT,               -- mvhd creation time, camera clock, no zone
   duration_s        REAL,
-  start_utc         TEXT,               -- first GPS-locked GPSU
-  gps_first_utc     TEXT,               -- first GPSU, locked or not
-  gps_first_fix     INTEGER,            -- GPSF of that sample: 0 none, 2 2D, 3 3D
+  start_utc         TEXT,               -- GPS time at file start (GPS9, else locked GPSU)
+  gps_first_utc     TEXT,               -- first GPS time (GPS9, else GPSU), locked or not
+  gps_first_fix     INTEGER,            -- its fix: 0 none, 2 2D, 3 3D
+  clock_offset_s    REAL,               -- start_local − start_utc, as if local were UTC
   clock_valid       INTEGER,            -- 0 known-bad, 1 agrees with GPS, null unknown
   mtime_minus_end_s REAL,               -- mtime − (start_local + duration), as if local were UTC
   muid              TEXT,

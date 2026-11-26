@@ -15,6 +15,8 @@ import {
   FileReader,
   Scan,
   ScanError,
+  GpsInfo,
+  gpsuFileStart,
   gpsuToIso,
   scanFile,
   trackSignature,
@@ -33,13 +35,39 @@ import {
 import { MemberRow, openDb, transaction } from './videodb/db';
 import { ACCEPTED } from './videodb/accepted';
 
-const EXTRACTOR_VERSION = 1;
+const EXTRACTOR_VERSION = 2;
 const VIDEO_EXT = new Set(['.mp4', '.lrv', '.360', '.mov', '.insv', '.m4v']);
 // chapters should follow each other to within this many seconds
 const CONTIGUITY_S = 2;
 // first GPS times of adjacent chapters should differ by the chapter's duration
 // to within this many seconds
 const GPS_CONTIGUITY_S = 3;
+// GPS9 and GPSU file start times should agree to within this many seconds
+const GPS_SOURCES_S = 2;
+
+// GPS start of the file: GPS9 where the camera writes it (ms precision, a fix
+// per row), else the first locked GPSU
+function gpsStart(gps: GpsInfo | null): string | null {
+  if (!gps) return null;
+  return gps.gps9Lock?.fileStartUtc ?? gpsuFileStart(gps);
+}
+
+// the first GPS time and its fix, locked or not
+function gpsFirst(gps: GpsInfo | null): {
+  gps_first_utc: string | null;
+  gps_first_fix: number | null;
+} {
+  if (gps?.gps9First) {
+    return {
+      gps_first_utc: gps.gps9First.utc,
+      gps_first_fix: gps.gps9First.fix,
+    };
+  }
+  return {
+    gps_first_utc: gps?.firstGpsu ? gpsuToIso(gps.firstGpsu) : null,
+    gps_first_fix: gps?.firstGpsf ?? null,
+  };
+}
 // a proxy should be as long as its chapter to within this many seconds
 const PROXY_DURATION_S = 0.5;
 // camera clock defaults seen after a reset
@@ -111,11 +139,11 @@ export default async function (argv: Args) {
     insertFile: db.prepare(`
       INSERT INTO file (id, size, kind, first_name, first_path, first_seen_at, mtime, birthtime,
         camera_name, profile, camera_key, firmware, brand, start_local, duration_s, start_utc, gps_first_utc, gps_first_fix,
-        clock_valid, mtime_minus_end_s, muid, gumi, video_codec, width, height, fps, has_gpmf,
+        clock_offset_s, clock_valid, mtime_minus_end_s, muid, gumi, video_codec, width, height, fps, has_gpmf,
         meta, extractor_version)
       VALUES ($id, $size, $kind, $first_name, $first_path, $first_seen_at, $mtime, $birthtime,
         $camera_name, $profile, $camera_key, $firmware, $brand, $start_local, $duration_s, $start_utc, $gps_first_utc, $gps_first_fix,
-        $clock_valid, $mtime_minus_end_s, $muid, $gumi, $video_codec, $width, $height, $fps, $has_gpmf,
+        $clock_offset_s, $clock_valid, $mtime_minus_end_s, $muid, $gumi, $video_codec, $width, $height, $fps, $has_gpmf,
         $meta, $extractor_version)`),
     insertLocation: db.prepare(
       'INSERT INTO file_location (path, file_id, mtime, birthtime, seen_at) VALUES (?, ?, ?, ?, ?)'
@@ -215,10 +243,7 @@ export default async function (argv: Args) {
           const self: ChapterTimes = {
             start_local: scan.mvhd?.created ?? null,
             duration_s: scan.mvhd?.durationS ?? 0,
-            gps_first_utc: scan.gps?.firstGpsu
-              ? gpsuToIso(scan.gps.firstGpsu)
-              : null,
-            gps_first_fix: scan.gps?.firstGpsf ?? null,
+            ...gpsFirst(scan.gps),
           };
           if (rec) {
             const members = q.members.all(rec.id) as MemberRow[];
@@ -247,6 +272,18 @@ export default async function (argv: Args) {
           );
         }
 
+        // GPS9 and GPSU should agree where a camera writes both
+        const gps9Start = scan.gps?.gps9Lock?.fileStartUtc;
+        const gpsuStart = scan.gps && gpsuFileStart(scan.gps);
+        if (gps9Start && gpsuStart) {
+          const diff = (Date.parse(gps9Start) - Date.parse(gpsuStart)) / 1000;
+          if (Math.abs(diff) > GPS_SOURCES_S) {
+            problems.push(
+              `GPS9 start ${gps9Start} and GPSU start ${gpsuStart} differ by ${diff}s`
+            );
+          }
+        }
+
         // problems already looked at and accepted for this file
         const acceptedProblems = problems.filter((p) =>
           ACCEPTED.some((a) => a.fileId === id && p.includes(a.match))
@@ -273,9 +310,14 @@ export default async function (argv: Args) {
         const video = scan.tracks.find((t) => t.handler === 'vide');
         const startLocal = scan.mvhd?.created ?? null;
         const durationS = scan.mvhd?.durationS ?? null;
-        const startUtc = scan.gps?.lockGpsu
-          ? gpsuToIso(scan.gps.lockGpsu)
-          : null;
+        const startUtc = gpsStart(scan.gps);
+        // camera clock minus GPS, as if mvhd were UTC; chapter 1 or per-chapter mvhd only
+        const clockOffsetS =
+          startUtc &&
+          startLocal &&
+          (profile.mvhdTime === 'chapter' || name!.chapter === 1)
+            ? (localMs(startLocal) - Date.parse(startUtc)) / 1000
+            : null;
         const clockValid =
           startLocal && DEFAULT_CLOCK.test(startLocal)
             ? 0
@@ -315,10 +357,8 @@ export default async function (argv: Args) {
             start_local: startLocal,
             duration_s: durationS,
             start_utc: startUtc,
-            gps_first_utc: scan.gps?.firstGpsu
-              ? gpsuToIso(scan.gps.firstGpsu)
-              : null,
-            gps_first_fix: scan.gps?.firstGpsf ?? null,
+            ...gpsFirst(scan.gps),
+            clock_offset_s: clockOffsetS,
             clock_valid: clockValid,
             mtime_minus_end_s: mtimeMinusEnd,
             muid: scan.udta.MUID ?? null,
