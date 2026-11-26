@@ -490,6 +490,39 @@ export const PROFILES: Profile[] = [
       },
     },
   },
+  {
+    // Early HERO3+ firmware writes no MUID and an empty CAME: there's no link
+    // key and no camera serial. Each file is its own recording and an LRV
+    // pairs with its MP4 by name and mvhd time. Only first chapters (GOPR)
+    // have been seen; a GPnn chapter would need a way to link it, so it stops.
+    id: 'gopro-hero3plus-no-muid',
+    model: 'GoPro HERO3+',
+    firmware: ['HD3.11.01.04'],
+    udtaKeys: ['FIRM', 'LENS', 'CAME', 'SETT', 'AMBA'],
+    cameraKey: 'none',
+    pairBy: 'name-time',
+    gpmf: false,
+    mvhdTime: 'chapter',
+    // mtime is mvhd + duration + 5 h in every file (Feb/Mar and May 2014)
+    mvhdClock: 'local',
+    files: {
+      '.mp4': {
+        role: 'chapter',
+        kind: 'video',
+        prefixes: ['GOPR'],
+        moov: ['start'],
+        tracks: ['vide:avc1 soun:mp4a tmcd:tmcd'],
+      },
+      // same mvhd time and duration as the MP4
+      '.lrv': {
+        role: 'proxy',
+        kind: 'proxy',
+        prefixes: ['GOPR'],
+        moov: ['start'],
+        tracks: ['vide:avc1 soun:mp4a tmcd:tmcd'],
+      },
+    },
+  },
 ];
 
 export type CameraName = {
