@@ -1,10 +1,6 @@
-"""A self-contained Leaflet page showing done / partial / unridden blocks."""
+// A self-contained Leaflet page showing done / partial / unridden blocks.
 
-from __future__ import annotations
-
-import json
-
-TEMPLATE = """<!doctype html>
+const TEMPLATE = `<!doctype html>
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Streets ridden</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -34,10 +30,10 @@ for (const k of Object.keys(colors)) {
     style: f => ({ color: colors[k], weight: k === 'done' ? 2 + Math.min(4, Math.log2(1 + f.properties.rides)) : 3, opacity: 0.85 }),
     onEachFeature: (f, l) => {
       const p = f.properties;
-      l.bindPopup(`<b>${p.street}</b>, ${p.town}<br>${p.highway}, ${p.length_m} m<br>` +
-        `covered ${Math.round(p.covered * 100)}% by ${p.rides} ride(s)<br>` +
-        (p.first ? `first ${p.first}<br>` : '') + (p.done_date ? `done ${p.done_date}<br>` : '') +
-        (p.last ? `last ${p.last}` : ''));
+      l.bindPopup(\`<b>\${p.street}</b>, \${p.town}<br>\${p.highway}, \${p.length_m} m<br>\` +
+        \`covered \${Math.round(p.covered * 100)}% by \${p.rides} ride(s)<br>\` +
+        (p.first ? \`first \${p.first}<br>\` : '') + (p.done_date ? \`done \${p.done_date}<br>\` : '') +
+        (p.last ? \`last \${p.last}\` : ''));
     },
   }).addTo(map);
 }
@@ -46,20 +42,19 @@ const panel = L.control({ position: 'topright' });
 panel.onAdd = () => {
   const d = L.DomUtil.create('div', 'panel');
   d.innerHTML = Object.keys(colors).map(k =>
-    `<label><input type=checkbox checked data-k=${k}> <span class=sw style="background:${colors[k]}"></span>${k} ${len(k).toFixed(1)} km</label>`
-  ).join('') + `<div style="max-width:220px;color:#666">${data.towns.join(', ')}</div>`;
+    \`<label><input type=checkbox checked data-k=\${k}> <span class=sw style="background:\${colors[k]}"></span>\${k} \${len(k).toFixed(1)} km</label>\`
+  ).join('') + \`<div style="max-width:220px;color:#666">\${data.towns.join(', ')}</div>\`;
   d.querySelectorAll('input').forEach(i => i.onchange = () => i.checked ? layers[i.dataset.k].addTo(map) : map.removeLayer(layers[i.dataset.k]));
   L.DomEvent.disableClickPropagation(d);
   return d;
 };
 panel.addTo(map);
 </script></body></html>
-"""
+`;
 
-
-def write_map(geojson: dict, path: str, home: tuple[float, float]) -> None:
-    html = TEMPLATE.replace("__DATA__", json.dumps(geojson, separators=(",", ":"))).replace(
-        "__HOME__", json.dumps(list(home))
-    )
-    with open(path, "w") as fh:
-        fh.write(html)
+export function mapHtml(geojson: unknown, home: [number, number]): string {
+  return TEMPLATE.replace('__DATA__', () => JSON.stringify(geojson)).replace(
+    '__HOME__',
+    () => JSON.stringify(home)
+  );
+}
