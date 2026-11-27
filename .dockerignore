@@ -11,3 +11,5 @@ app-data/strava-trips
 app-data/video-metadata
 cert.pem
 key.pem
+streets/build
+streets/.venv
