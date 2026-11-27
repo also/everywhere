@@ -6,7 +6,7 @@
 #   docker run -v /path/to/config:/everywhere/config -v /path/to/data:/everywhere/data ghcr.io/also/everywhere api-server --host 0.0.0.0
 #   docker run -v /path/to/config:/everywhere/config -v /path/to/data:/everywhere/data ghcr.io/also/everywhere build-combined-strava-dataset
 
-ARG NODE_VERSION=22.11.0
+ARG NODE_VERSION=24.21.0
 
 FROM node:${NODE_VERSION} AS build
 # corepack in node 22.11 has an outdated signing key, so install pnpm directly

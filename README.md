@@ -81,6 +81,10 @@ Using the Brightcove Zencoder API, encode videos that have been uploaded to S3 b
 
 Logs every trip object available from Strava.
 
+## Streets
+
+[`node tools streets`](tools/streets/README.md) matches rides to OpenStreetMap streets: what's been ridden, what's left nearby, per-town progress, and a map.
+
 ## Datasets
 
 `everywhere-2015-v1`
